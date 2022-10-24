@@ -81,7 +81,16 @@ public class Main : MonoBehaviour
         UpdatePrimeNumberTheorem();
     }
 
-    IEnumerator DrawRiemann(double iter)
+    IEnumerator AnimateRiemann(double iter)
+    {
+        DrawRiemann(iter);
+
+        yield return null;
+        iter += AnimStep;
+        animator = StartCoroutine(AnimateRiemann(iter));
+    }
+
+    void DrawRiemann(double iter)
     {
         currentIter = iter;
 
@@ -89,10 +98,6 @@ public class Main : MonoBehaviour
         RiemannZeta(iter);
         UpdateZetaCurves(iter);
         UpdatePrimeNumberTheorem();
-
-        yield return null;
-        iter += AnimStep;
-        animator = StartCoroutine(DrawRiemann(iter));
     }
 
     void RiemannZeta(double iter)
@@ -334,13 +339,41 @@ public class Main : MonoBehaviour
         isPlaying = !isPlaying;
         if (isPlaying)
         {
-            animator = StartCoroutine(DrawRiemann(currentIter));
+            animator = StartCoroutine(AnimateRiemann(currentIter));
         }
         else
         {
             StopCoroutine(animator);
             animator = null;
+            UpdateZetaCurves(0);
         }
+    }
+
+    void Reset()
+    {
+        isPlaying = false;
+        if (animator != null)
+        {
+            StopCoroutine(animator);
+            animator = null;
+        }
+
+        foreach (GameObject zetaPoint in zetaPoints)
+        {
+            Destroy(zetaPoint);
+        }
+        zetaPoints.Clear();
+        zetaCurvePoints.Clear();
+        foreach (LineRenderer lineRenderer in daggerLines)
+        {
+            Destroy(lineRenderer.gameObject);
+        }
+        daggerLines.Clear();
+        zetaCurvesByZero.Clear();
+        
+        limitCurve.Reset();
+        
+        DrawRiemann(0);
     }
 
     void Update()
@@ -348,6 +381,17 @@ public class Main : MonoBehaviour
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             Toggle();
+        }
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            Reset();
+        }
+
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            limitCurve.ShowSpirals = !limitCurve.ShowSpirals;
+            limitCurve.GenerateSpirals();
         }
     }
 }

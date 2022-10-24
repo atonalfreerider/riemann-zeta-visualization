@@ -20,6 +20,14 @@ The Zeta function is a composite of line segments whose segment lengths are dete
 
 There are other tools built into this animation to help break down and visualize how these mysterious functions work.
 
+Keyboard Commands:  
+- WASD QE: navigation  
+- Spacebar: play/pause animation  
+- Escape: reset animation  
+- R key:  toggle additional limit curves  
+
+Hold right mouse button for freelook  
+
 References:  
 https://medium.com/cantors-paradise/the-riemann-hypothesis-explained-fa01c1f75d3f  
 https://en.wikipedia.org/wiki/Explicit_formulae_for_L-functions  

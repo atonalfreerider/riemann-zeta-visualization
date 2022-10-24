@@ -17,6 +17,8 @@ public class LimitCurve : MonoBehaviour
     public bool ShowInflectionCurves = false;
     public bool ShowFlattenedHoles = false;
 
+    GameObject limitCurveSpiralContainer;
+
     void Start()
     {
         MovingLimitCurve = Factory.NewLine("limitCurve", .05f, Factory.Viridis.ViridisColor(1));
@@ -24,18 +26,12 @@ public class LimitCurve : MonoBehaviour
         MovingLimitCurve.transform.SetParent(transform, false);
         MovingLimitCurve.positionCount = NumLimitCurvePoints;
 
-        GameObject limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
+        limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
         limitCurveSpiralContainer.transform.SetParent(transform, false);
 
         if (ShowSpirals)
         {
-            for (int i = 1; i < NumLimitCurvePoints; i++)
-            {
-                LimitCurveSpiral limitCurveSpiral = new GameObject(i.ToString()).AddComponent<LimitCurveSpiral>();
-                limitCurveSpiral.transform.SetParent(limitCurveSpiralContainer.transform, false);
-                limitCurveSpiral.Init(i.ToString(), Factory.Viridis.ViridisColor(1f - (float)i / NumLimitCurvePoints));
-                limitCurveSpirals.Add(limitCurveSpiral);
-            }
+            GenerateSpirals();
         }
 
         for (int ii = 0; ii < PreRenderedZeroCurveCount; ii++)
@@ -54,6 +50,29 @@ public class LimitCurve : MonoBehaviour
             }
 
             RenderLimitCurve(Main.Instance.zetaZeroValues[ii], curve, inflectionCurve);
+        }
+    }
+
+    public void GenerateSpirals()
+    {
+        for (int i = 1; i < NumLimitCurvePoints; i++)
+        {
+            LimitCurveSpiral limitCurveSpiral = new GameObject(i.ToString()).AddComponent<LimitCurveSpiral>();
+            limitCurveSpiral.transform.SetParent(limitCurveSpiralContainer.transform, false);
+            limitCurveSpiral.Init(i.ToString(), Factory.Viridis.ViridisColor(1f - (float)i / NumLimitCurvePoints));
+            limitCurveSpirals.Add(limitCurveSpiral);
+        } 
+    }
+
+    public void Reset()
+    {
+        Destroy(limitCurveSpiralContainer);
+        limitCurveSpirals.Clear();
+        limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
+        limitCurveSpiralContainer.transform.SetParent(transform, false);
+        if (ShowSpirals)
+        {
+            GenerateSpirals();
         }
     }
     
