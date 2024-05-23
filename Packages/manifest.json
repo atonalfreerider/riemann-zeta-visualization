@@ -7,6 +7,9 @@
     "com.unity.test-framework": "1.4.4",
     "com.unity.timeline": "1.8.6",
     "com.unity.ugui": "2.0.0",
+    "com.unity.xr.management": "4.4.1",
+    "com.unity.xr.oculus": "4.2.0",
+    "com.unity.xr.openxr": "1.10.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -33,5 +36,14 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "VIVE",
+      "url": "https://npm-registry.vive.com",
+      "scopes": [
+        "com.htc.upm"
+      ]
+    }
+  ]
 }

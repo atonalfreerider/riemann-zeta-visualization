@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/zeta.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+  m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: d576551ab8530fb4d9a84573163b3a02, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: a31b65cdf49eae748bbe83b32794483f, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 707d6415d91523545aa09fd3bdde237a, type: 2}
