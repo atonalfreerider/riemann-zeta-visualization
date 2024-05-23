@@ -20,11 +20,11 @@ public class Main : MonoBehaviour
     const float PrimeFilterHeight = 1.5f;
     const double AnimStep = .03d;
 
-    [Header("Settings")]
-    public bool ShowZetaCurveComponents = false;
+    [Header("Settings")] public bool ShowZetaCurveComponents = false;
 
     LineRenderer zetaCurve;
     LineRenderer primeCurve;
+    LineRenderer cosineWaveCurve;
 
     readonly List<LineRenderer> daggerLines = new();
     readonly List<TextBox> primeLabels = new();
@@ -69,6 +69,10 @@ public class Main : MonoBehaviour
         primeCurve.transform.SetParent(transform, false);
         primeCurve.positionCount = NumPrimeCurvePoints;
 
+        cosineWaveCurve = Factory.NewLine("cosineWaveCurve", .05f, Color.white);
+        cosineWaveCurve.transform.SetParent(transform, false);
+        cosineWaveCurve.positionCount = NumPrimeCurvePoints;
+
         zetaPointContainer = new("Zeta Point Container");
         zetaPointContainer.transform.SetParent(transform, false);
         daggerContainer = new("Dagger Container");
@@ -79,6 +83,7 @@ public class Main : MonoBehaviour
         RenderedEquations.DrawPrimeEquation();
         RenderedEquations.DrawZetaEquation();
         UpdatePrimeNumberTheorem();
+        DrawCosineWave(0);
     }
 
     IEnumerator AnimateRiemann(double iter)
@@ -98,6 +103,7 @@ public class Main : MonoBehaviour
         RiemannZeta(iter);
         UpdateZetaCurves(iter);
         UpdatePrimeNumberTheorem();
+        DrawCosineWave(iter);
     }
 
     void RiemannZeta(double iter)
@@ -119,7 +125,7 @@ public class Main : MonoBehaviour
 
     void UpdateZetaCurves(double iter)
     {
-        double[] zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToArray();
+        List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
         foreach (double zetaZero in zetaZeros)
         {
             if (zetaCurvesByZero.ContainsKey(zetaZero)) continue;
@@ -297,14 +303,14 @@ public class Main : MonoBehaviour
     static double PeriodicEstimate(double x, double zetaZero)
     {
         if (x <= double.Epsilon) return 0d;
-        
+
         double term1 = Math.Cos(zetaZero * Math.Log(x));
         double term2 = 2 * zetaZero * Math.Sin(zetaZero * Math.Log(x));
         double term3 = 1 + 4 * zetaZero * zetaZero;
         return (term1 + term2) / term3;
     }
 
-    void DrawZetaZeroPoints(IEnumerable<double> zetaZeros)
+    void DrawZetaZeroPoints(List<double> zetaZeros)
     {
         int count = 0;
         foreach (double zetaZero in zetaZeros)
@@ -332,6 +338,28 @@ public class Main : MonoBehaviour
         {
             RenderedEquations.zetaZeroCounter.Text = count.ToString();
         }
+    }
+
+    void DrawCosineWave(double iter)
+    {
+        List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
+        Vector3[] cosineWavePoints = new Vector3[NumPrimeCurvePoints];
+        const double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
+        float x = (float)curveResolution;
+
+        for (int i = 0; i < NumPrimeCurvePoints; i++)
+        {
+            float y = 0;
+            foreach (double zetaZero in zetaZeros)
+            {
+                y -= Mathf.Cos((float)zetaZero * Mathf.Log(x));
+            }
+
+            cosineWavePoints[i] = new Vector3(x, y, 0);
+            x += (float)curveResolution;
+        }
+
+        cosineWaveCurve.SetPositions(cosineWavePoints);
     }
 
     void Toggle()
@@ -362,17 +390,19 @@ public class Main : MonoBehaviour
         {
             Destroy(zetaPoint);
         }
+
         zetaPoints.Clear();
         zetaCurvePoints.Clear();
         foreach (LineRenderer lineRenderer in daggerLines)
         {
             Destroy(lineRenderer.gameObject);
         }
+
         daggerLines.Clear();
         zetaCurvesByZero.Clear();
-        
+
         limitCurve.Reset();
-        
+
         DrawRiemann(0);
     }
 
