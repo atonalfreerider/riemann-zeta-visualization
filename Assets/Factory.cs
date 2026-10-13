@@ -26,8 +26,8 @@ public class Factory : MonoBehaviour
     static readonly int ColorId = Shader.PropertyToID("_Color");
 
     /// <summary>HDR multiplier for "hero" elements so they bloom (threshold is ~1.0).</summary>
-    public const float GlowIntensity = 2.6f;
-    public const float SoftGlowIntensity = 1.6f;
+    public const float GlowIntensity = 1.55f;
+    public const float SoftGlowIntensity = 1.12f;
     public const float NoGlow = 1f;
 
     void Awake()

@@ -10,9 +10,9 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class BloomEffect : MonoBehaviour
 {
-    [Range(0f, 4f)] public float Threshold = 1.0f;
-    [Range(0f, 1f)] public float SoftKnee = 0.6f;
-    [Range(0f, 4f)] public float Intensity = 1.1f;
+    [Range(0f, 4f)] public float Threshold = 1.05f;
+    [Range(0f, 1f)] public float SoftKnee = 0.5f;
+    [Range(0f, 4f)] public float Intensity = 0.55f;
     [Range(1, 8)] public int Iterations = 6;
     [Range(0.5f, 2f)] public float Diffusion = 1.0f;
 

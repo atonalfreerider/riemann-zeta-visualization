@@ -26,6 +26,16 @@ public class LimitCurve : MonoBehaviour
     public bool ShowTail = true;
     public int PreRenderedZeroCurveCount = 0;
     public bool ShowInflectionCurves = false;
+    [Tooltip("Fixed number of arrows (0 = automatic, grows with t). The tour uses this to build the chain one arrow at a time.")]
+    public int TermOverride = 0;
+    public bool ShowArrowheads = true;
+    public bool ShowLengthLabels = false;
+    const int MaxArrowheads = 12;
+    const int MaxLengthLabels = 10;
+    readonly List<LineRenderer> arrowheads = new();
+    readonly List<TextBox> lengthLabels = new();
+    GameObject arrowheadContainer;
+    GameObject lengthLabelContainer;
 
     /// <summary>The decomposition drawn on the last frame (spiral joints, tail, total).</summary>
     public ZetaMath.SpiralDecomposition LastDecomposition { get; private set; }
@@ -67,8 +77,8 @@ public class LimitCurve : MonoBehaviour
         if (initialized) return;
         initialized = true;
 
-        MovingLimitCurve = Factory.NewLine("limitCurve", .05f, Factory.Viridis.ViridisColor(1), Factory.SoftGlowIntensity);
-        MovingLimitCurve.endColor = Factory.Viridis.ViridisColor(0);
+        MovingLimitCurve = Factory.NewLine("limitCurve", .05f, ChainColor(0f), Factory.SoftGlowIntensity);
+        MovingLimitCurve.endColor = ChainColor(1f);
         MovingLimitCurve.transform.SetParent(transform, false);
         MovingLimitCurve.positionCount = NumLimitCurvePoints;
 
@@ -76,6 +86,12 @@ public class LimitCurve : MonoBehaviour
         TailCurve.transform.SetParent(transform, false);
         TailCurve.positionCount = 3;
         TailCurve.enabled = ShowTail;
+
+        arrowheadContainer = new GameObject("Arrowheads");
+        arrowheadContainer.transform.SetParent(transform, false);
+        lengthLabelContainer = new GameObject("LengthLabels");
+        lengthLabelContainer.transform.SetParent(transform, false);
+        lengthLabelContainer.SetActive(false);
 
         limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
         limitCurveSpiralContainer.transform.SetParent(transform, false);
@@ -110,7 +126,26 @@ public class LimitCurve : MonoBehaviour
         EnsureInitialized();
         if (MovingLimitCurve != null) MovingLimitCurve.enabled = visible;
         if (TailCurve != null) TailCurve.enabled = visible && ShowTail;
+        arrowheadContainer.SetActive(visible && ShowArrowheads);
+        lengthLabelContainer.SetActive(visible && ShowLengthLabels);
     }
+
+    public void SetArrowheadsVisible(bool visible)
+    {
+        EnsureInitialized();
+        ShowArrowheads = visible;
+        arrowheadContainer.SetActive(visible);
+    }
+
+    public void SetLengthLabelsVisible(bool visible)
+    {
+        EnsureInitialized();
+        ShowLengthLabels = visible;
+        lengthLabelContainer.SetActive(visible);
+    }
+
+    /// <summary>The spiral's joints in world space from the last draw (index 0 = origin).</summary>
+    public Vector3[] LastJoints { get; private set; } = System.Array.Empty<Vector3>();
 
     public void Reset()
     {
@@ -135,8 +170,9 @@ public class LimitCurve : MonoBehaviour
     public void RenderLimitCurve(double t, LineRenderer limitCurve, LineRenderer inflectionCurve, LineRenderer tailCurve)
     {
         float yIntercept = (float)t * Graph.yScale;
-        Complex s = new(.5d, t);
-        int N = ZetaMath.TermCount(t, NumLimitCurvePoints);
+        double sigma = Main.Instance != null ? Main.Instance.Sigma : .5d;
+        Complex s = new(sigma, t);
+        int N = TermOverride > 0 ? Math.Max(2, TermOverride + 1) : ZetaMath.TermCount(t, NumLimitCurvePoints);
 
         // Each segment n^-s gets shorter (length n^-1/2) and rotates by -t·ln n.
         // see: https://youtu.be/sD0NjbwqlYw?t=418
@@ -166,6 +202,9 @@ public class LimitCurve : MonoBehaviour
         {
             LastDecomposition = d;
             LastT = t;
+            LastJoints = joints;
+            UpdateArrowheads(joints);
+            UpdateLengthLabels(joints, s);
 
             if (ShowSpirals)
             {
@@ -207,6 +246,76 @@ public class LimitCurve : MonoBehaviour
     public static Vector3 ToWorld(Complex value, float y)
     {
         return new Vector3((float)value.Re, y, (float)value.Im);
+    }
+
+    /// <summary>Chain colour from the first arrow (blue) to the tip (yellow); stays bright on a black background.</summary>
+    public static Color ChainColor(float fraction)
+    {
+        return Factory.Viridis.ViridisColor(1f - Mathf.Lerp(0.6f, 0f, Mathf.Clamp01(fraction)));
+    }
+
+    void UpdateArrowheads(Vector3[] joints)
+    {
+        if (!ShowArrowheads) return;
+        int count = Math.Min(joints.Length - 1, MaxArrowheads);
+        while (arrowheads.Count < count)
+        {
+            LineRenderer head = Factory.NewLine("arrowhead", .04f, Color.white, Factory.SoftGlowIntensity);
+            head.transform.SetParent(arrowheadContainer.transform, false);
+            head.positionCount = 3;
+            arrowheads.Add(head);
+        }
+
+        for (int i = 0; i < arrowheads.Count; i++)
+        {
+            bool active = i < count;
+            arrowheads[i].enabled = active;
+            if (!active) continue;
+
+            Vector3 from = joints[i];
+            Vector3 to = joints[i + 1];
+            Vector3 dir = to - from;
+            float length = dir.magnitude;
+            if (length < 1e-4f)
+            {
+                arrowheads[i].enabled = false;
+                continue;
+            }
+
+            dir /= length;
+            Vector3 side = Vector3.Cross(dir, Vector3.up).normalized;
+            float size = Mathf.Clamp(length * .3f, .04f, .16f);
+            Color c = ChainColor((float)i / Math.Max(1, joints.Length - 1));
+            arrowheads[i].startColor = c;
+            arrowheads[i].endColor = c;
+            arrowheads[i].SetPositions(new[] { to - dir * size + side * size * .55f, to, to - dir * size - side * size * .55f });
+        }
+    }
+
+    void UpdateLengthLabels(Vector3[] joints, Complex s)
+    {
+        if (!ShowLengthLabels) return;
+        int count = Math.Min(joints.Length - 1, MaxLengthLabels);
+        while (lengthLabels.Count < count)
+        {
+            TextBox label = TextBox.Create("", 1.6f);
+            label.transform.SetParent(lengthLabelContainer.transform, false);
+            label.Alignment = TMPro.TextAlignmentOptions.Center;
+            label.Color = new Color(1f, 1f, 1f, .85f);
+            label.gameObject.AddComponent<Billboard>();
+            lengthLabels.Add(label);
+        }
+
+        for (int i = 0; i < lengthLabels.Count; i++)
+        {
+            bool active = i < count;
+            lengthLabels[i].gameObject.SetActive(active);
+            if (!active) continue;
+            double length = Math.Pow(i + 1, -s.Re);
+            lengthLabels[i].Text = i == 0 ? "1" : length.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            Vector3 mid = (joints[i] + joints[i + 1]) * .5f;
+            lengthLabels[i].transform.position = mid + Vector3.up * .05f + Vector3.back * .4f;
+        }
     }
 
     class LimitCurveSpiral : MonoBehaviour

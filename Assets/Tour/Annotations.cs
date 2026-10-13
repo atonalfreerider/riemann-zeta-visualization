@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Meta.Numerics;
 using TMPro;
 using UnityEngine;
@@ -35,7 +36,12 @@ public class Annotations : MonoBehaviour
     TextBox ghostLabel;
     double ghostBeta = 0.9, ghostGamma = 14.134725;
     bool ghostOn;
+    bool ghostAllZeros;
     MeshRenderer gapQuad;
+    GameObject tipRoot, centerRoot, numberLineRoot, poleLabelRoot;
+    GameObject tipSphere, centerSphere;
+    TextBox dialLabel;
+    LineRenderer centerRing;
 
     public static Annotations Create(Main main)
     {
@@ -122,7 +128,7 @@ public class Annotations : MonoBehaviour
         }
 
         Label(stripRoot.transform, "Im(s) = t\nimaginary part\nof the input", StripPoint(-0.08, 4) + Vector3.left * 1.2f, 2.0f, Factory.Palette.ImAxis, TextAlignmentOptions.Right);
-        Label(stripRoot.transform, "the critical line  Re(s) = ½", StripPoint(0.5, -1.2), 1.9f, Factory.Palette.CriticalLine, TextAlignmentOptions.Center);
+        Label(stripRoot.transform, "the one-half line", StripPoint(0.5, -1.2), 2.2f, Factory.Palette.CriticalLine, TextAlignmentOptions.Center);
         Label(stripRoot.transform, "INPUT\ns = ½ + i·t", StripPoint(1.14, 46), 2.6f, Color.white, TextAlignmentOptions.Left);
 
         probe = Factory.NewSphere("Probe", .28f, Color.white, Factory.GlowIntensity);
@@ -137,16 +143,16 @@ public class Annotations : MonoBehaviour
         zCurveRoot.SetActive(false);
 
         // zero-free bands
-        band78Root = Band("ZeroFree_7_8", 0.875, 1.0, height, "Re(s) > 7/8\nzero-free\n(OpenAI, Sept 2026 — Lean-checked claim)", TextAlignmentOptions.Left, 1.14);
-        band18Root = Band("ZeroFree_1_8", 0.0, 0.125, height, "Re(s) < 1/8\nzero-free by symmetry\nζ(s) ↔ ζ(1 − s)", TextAlignmentOptions.Right, -0.14);
-        band1112Root = DashedVertical("Line_11_12", 11d / 12d, height, "11/12 — companion proof", TextAlignmentOptions.Left, 24);
+        band78Root = Band("ZeroFree_7_8", 0.875, 1.0, height, "shrink rate > 7/8\nno collisions\n(OpenAI, 2026 —\nLean-checked claim)", TextAlignmentOptions.Left, 1.14);
+        band18Root = Band("ZeroFree_1_8", 0.0, 0.125, height, "< 1/8\nnone either\n(by symmetry)", TextAlignmentOptions.Right, -0.14);
+        band1112Root = DashedVertical("Line_11_12", 11d / 12d, height, "11/12\ncompanion\nproof", TextAlignmentOptions.Left, 30);
         classicRoot = ClassicRegion(height);
         gapRoot = new GameObject("OpenGap");
         gapRoot.transform.SetParent(stripRoot.transform, false);
         gapQuad = Factory.NewQuad("Gap", new Vector2(PanelWidth * .375f, height), new Color(1f, .5f, .2f, .18f));
         gapQuad.transform.SetParent(gapRoot.transform, false);
         gapQuad.transform.position = new Vector3(PanelLeft + PanelWidth * (0.5f + 0.375f * .5f), midY, 0.01f);
-        Label(gapRoot.transform, "still open:\n½ < Re(s) ≤ 7/8\nthe Riemann Hypothesis lives here", StripPoint(0.6875, 12), 1.7f, new Color(1f, .7f, .4f), TextAlignmentOptions.Center);
+        Label(gapRoot.transform, "still open\n½ < rate ≤ 7/8\nthe Riemann\nHypothesis\nlives here", StripPoint(0.6875, 16), 2.2f, new Color(1f, .7f, .4f), TextAlignmentOptions.Center);
         band78Root.SetActive(false);
         band18Root.SetActive(false);
         band1112Root.SetActive(false);
@@ -164,23 +170,70 @@ public class Annotations : MonoBehaviour
 
         imAxisRoot = new GameObject("ImaginaryAxisHighlight");
         imAxisRoot.transform.SetParent(transform, false);
-        LineRenderer tAxis = Factory.NewLine("t axis", .07f, Factory.Palette.ImAxis, Factory.GlowIntensity);
+        LineRenderer tAxis = Factory.NewLine("t axis", .035f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
         tAxis.transform.SetParent(imAxisRoot.transform, false);
         tAxis.positionCount = 2;
         tAxis.SetPositions(new[] { Vector3.zero, Vector3.up * (PanelMaxT * Graph.yScale) });
         Arrowhead(imAxisRoot.transform, Vector3.up * (PanelMaxT * Graph.yScale), Vector3.up, Factory.Palette.ImAxis, .4f);
         for (int t = 10; t < PanelMaxT; t += 10)
         {
-            Label(imAxisRoot.transform, "t = " + t, new Vector3(.6f, t * Graph.yScale, 0), 1.8f, Factory.Palette.ImAxis, TextAlignmentOptions.Left);
+            TextBox tick = Label(imAxisRoot.transform, "t = " + t, new Vector3(.45f, t * Graph.yScale, 0), 1.3f, Factory.Palette.ImAxis, TextAlignmentOptions.Left);
+            tick.gameObject.AddComponent<Billboard>();
         }
 
-        Label(imAxisRoot.transform, "the imaginary axis of the input: t = Im(s)", new Vector3(.8f, 2f, 0), 2.2f, Factory.Palette.ImAxis, TextAlignmentOptions.Left);
+        // ---- number line under the waves / spikes --------------------------------------------
+        numberLineRoot = new GameObject("NumberLine");
+        numberLineRoot.transform.SetParent(transform, false);
+        LineRenderer baseline = Factory.NewLine("baseline", .04f, new Color(.6f, .6f, .65f));
+        baseline.transform.SetParent(numberLineRoot.transform, false);
+        baseline.positionCount = 2;
+        baseline.SetPositions(new[] { new Vector3(0, 0, 0.05f), new Vector3(24, 0, 0.05f) });
+        for (int n = 1; n <= 24; n++)
+        {
+            bool prime = n is 2 or 3 or 5 or 7 or 11 or 13 or 17 or 19 or 23;
+            bool primePower = n is 4 or 8 or 9 or 16;
+            LineRenderer tick = Factory.NewLine("tick", .03f, new Color(.6f, .6f, .65f));
+            tick.transform.SetParent(numberLineRoot.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { new Vector3(n, -.25f, 0.05f), new Vector3(n, .25f, 0.05f) });
+            Color c = prime ? Factory.Palette.Dagger : primePower ? new Color(1f, .7f, .5f) : new Color(.55f, .55f, .6f);
+            TextBox label = Label(numberLineRoot.transform, n.ToString(), new Vector3(n, -1.7f, 0), prime ? 4.2f : 2.8f, c, TextAlignmentOptions.Center);
+            label.gameObject.AddComponent<Billboard>();
+        }
+
+        numberLineRoot.SetActive(false);
+
+        poleLabelRoot = new GameObject("PoleLabel");
+        poleLabelRoot.transform.SetParent(transform, false);
+        TextBox axisLabel = Label(poleLabelRoot.transform, "t  — the dial\n(the imaginary part of s)", new Vector3(.8f, 1.6f, 0), 2.0f, Factory.Palette.ImAxis, TextAlignmentOptions.Left);
+        axisLabel.gameObject.AddComponent<Billboard>();
+        poleLabelRoot.SetActive(false);
         imAxisRoot.SetActive(false);
+
+        // ---- spiral tip and the centre it must hit ---------------------------------------------
+        tipRoot = new GameObject("Tip");
+        tipRoot.transform.SetParent(transform, false);
+        tipSphere = Factory.NewSphere("tip", .16f, Color.white, Factory.GlowIntensity);
+        tipSphere.transform.SetParent(tipRoot.transform, false);
+        tipRoot.SetActive(false);
+
+        centerRoot = new GameObject("Centre");
+        centerRoot.transform.SetParent(transform, false);
+        centerSphere = Factory.NewSphere("centre", .12f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+        centerSphere.transform.SetParent(centerRoot.transform, false);
+        centerRing = Factory.NewLine("centre ring", .025f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+        centerRing.transform.SetParent(centerRoot.transform, false);
+        centerRing.loop = true;
+        const int ringSegments = 40;
+        centerRing.positionCount = ringSegments;
+        dialLabel = Label(centerRoot.transform, "", Vector3.zero, 1.0f, Factory.Palette.ImAxis, TextAlignmentOptions.Right);
+        dialLabel.gameObject.AddComponent<Billboard>();
+        centerRoot.SetActive(false);
 
         // ---- rogue zero ---------------------------------------------------------------------
         ghostRoot = new GameObject("RogueZero");
         ghostRoot.transform.SetParent(transform, false);
-        ghostCurve = Factory.NewLine("rogue psi", .06f, Factory.Palette.Ghost, Factory.GlowIntensity);
+        ghostCurve = Factory.NewLine("rogue psi", .09f, Factory.Palette.Ghost, Factory.GlowIntensity);
         ghostCurve.transform.SetParent(ghostRoot.transform, false);
         ghostCurve.positionCount = Main.NumPrimeCurvePoints;
         ghostLabel = Label(ghostRoot.transform, "", new Vector3(60, 85, 0), 3.5f, Factory.Palette.Ghost, TextAlignmentOptions.Center);
@@ -200,7 +253,7 @@ public class Annotations : MonoBehaviour
         edge.positionCount = 2;
         double edgeSigma = from > 0.5 ? from : to;
         edge.SetPositions(new[] { StripPoint(edgeSigma, 0), StripPoint(edgeSigma, PanelMaxT) });
-        Label(root.transform, text, StripPoint(labelSigma, 8), 1.7f, Factory.Palette.ZeroFree, align);
+        Label(root.transform, text, StripPoint(labelSigma, 12), 2.3f, Factory.Palette.ZeroFree, align);
         return root;
     }
 
@@ -218,7 +271,7 @@ public class Annotations : MonoBehaviour
             seg.SetPositions(new[] { p, p + Vector3.up * Mathf.Min(dash, height - y) });
         }
 
-        Label(root.transform, text, StripPoint(1.14, labelT), 1.6f, new Color(.7f, .85f, 1f), align);
+        Label(root.transform, text, StripPoint(1.14, labelT), 2.1f, new Color(.7f, .85f, 1f), align);
         return root;
     }
 
@@ -327,20 +380,76 @@ public class Annotations : MonoBehaviour
             float pulse = .14f + .08f * Mathf.Sin(Time.time * 2.5f);
             Factory.SetColor(gapQuad, new Color(1f, .5f, .2f, pulse));
         }
+
+        if (tipRoot.activeSelf)
+        {
+            Vector3[] joints = main.Limit.LastJoints;
+            Vector3 tip = main.Limit.ShowTail && main.Limit.LastDecomposition.PartialSums != null
+                ? LimitCurve.ToWorld(main.Limit.LastDecomposition.Total, (float)main.Limit.LastT * Graph.yScale)
+                : joints.Length > 0 ? joints[^1] : Vector3.zero;
+            tipSphere.transform.position = tip;
+        }
+
+        if (centerRoot.activeSelf)
+        {
+            float y = (float)t * Graph.yScale;
+            Vector3 c = new(0, y, 0);
+            centerSphere.transform.position = c;
+            float r = .5f;
+            Vector3[] ring = new Vector3[centerRing.positionCount];
+            for (int i = 0; i < ring.Length; i++)
+            {
+                float a = i / (float)ring.Length * Mathf.PI * 2f;
+                ring[i] = c + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
+            }
+
+            centerRing.SetPositions(ring);
+            double distance = main.Limit.LastDecomposition.PartialSums != null ? ComplexMath.Abs(main.Limit.LastDecomposition.Total) : 0;
+            dialLabel.Text = $"dial  t = {t:0.00}\ntip to centre  {distance:0.00}";
+            // the first arrow always points along +x, so the −x side stays free
+            dialLabel.transform.position = c + new Vector3(-1.1f, .05f, -0.9f);
+        }
     }
+
+    public void ShowTip(bool on) => tipRoot.SetActive(on);
+    public void ShowNumberLine(bool on) => numberLineRoot.SetActive(on);
+    public void ShowPoleLabel(bool on) => poleLabelRoot.SetActive(on);
+    public void ShowCenter(bool on) => centerRoot.SetActive(on);
 
     void UpdateGhost()
     {
         Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
+        // use at least the first 40 zeros so the wobble is unmistakable even early in the tour
+        IReadOnlyList<double> zeros = null;
+        if (ghostAllZeros)
+        {
+            int count = System.Math.Max(main.PassedZeros.Count, 40);
+            zeros = main.zetaZeroValues.Take(System.Math.Min(count, main.zetaZeroValues.Length)).ToList();
+        }
+        string beta = ghostBeta.ToString("0.##", CultureInfo.InvariantCulture);
         for (int i = 0; i < Main.NumPrimeCurvePoints; i++)
         {
             double x = Main.PrimeCurveX(i);
-            float psi = main.PsiValues[i] - (float)ZetaMath.OffLineZeroPairTerm(x, ghostBeta, ghostGamma);
-            pts[i] = x < 2 || psi < 0 ? Vector3.zero : new Vector3((float)x, psi, -0.05f);
+            double psi;
+            if (ghostAllZeros)
+            {
+                // every collision moved from ½ to β: ψ(x) = x − ln 2π − Σ 2·Re(x^ρ/ρ)
+                double sum = 0;
+                for (int z = 0; z < zeros.Count; z++) sum += ZetaMath.OffLineZeroPairTerm(x, ghostBeta, zeros[z]);
+                psi = x - System.Math.Log(2 * System.Math.PI) - sum;
+            }
+            else
+            {
+                psi = main.PsiValues[i] - ZetaMath.OffLineZeroPairTerm(x, ghostBeta, ghostGamma);
+            }
+
+            pts[i] = x < 2 ? Vector3.zero : new Vector3((float)x, (float)System.Math.Max(psi, -40), -0.05f);
         }
 
         ghostCurve.SetPositions(pts);
-        ghostLabel.Text = $"if a zero sat at Re(s) = {ghostBeta.ToString("0.##", CultureInfo.InvariantCulture)}\nits wave would grow like x^{ghostBeta.ToString("0.##", CultureInfo.InvariantCulture)}";
+        ghostLabel.Text = ghostAllZeros
+            ? $"every collision moved to a shrink rate of {beta}\neach wave now grows like x^{beta}"
+            : $"if a zero sat at Re(s) = {beta}\nits wave would grow like x^{beta}";
     }
 
     // ---- toggles used by the tour ------------------------------------------------------------
@@ -358,14 +467,29 @@ public class Annotations : MonoBehaviour
     public void SetGhostZero(bool on, double beta = 0.9, double gamma = 14.134725)
     {
         ghostOn = on;
+        ghostAllZeros = false;
         ghostBeta = beta;
         ghostGamma = gamma;
         ghostRoot.SetActive(on);
         if (on) UpdateGhost();
     }
 
+    /// <summary>Draw the staircase as if every zero found so far sat at Re(s) = β.</summary>
+    public void SetGhostAllZeros(double beta)
+    {
+        ghostOn = true;
+        ghostAllZeros = true;
+        ghostBeta = beta;
+        ghostRoot.SetActive(true);
+        UpdateGhost();
+    }
+
     public void HideAll()
     {
+        ShowTip(false);
+        ShowCenter(false);
+        ShowNumberLine(false);
+        ShowPoleLabel(false);
         ShowStrip(false);
         ShowOutputAxes(false);
         ShowImAxis(false);

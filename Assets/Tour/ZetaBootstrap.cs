@@ -55,6 +55,8 @@ public static class ZetaBootstrap
                 case "-record": director.AutoStart = true; director.RecordOnStart = true; break;
                 case "-landscape": director.Portrait = false; break;
                 case "-chapter": if (i + 1 < args.Length) director.StartChapter = args[++i]; break;
+                case "-storyboard": director.AutoStart = true; director.Storyboard = true; break;
+                case "-storyboard-dir": if (i + 1 < args.Length) director.StoryboardDirectory = args[++i]; break;
             }
         }
 
@@ -70,6 +72,15 @@ public static class ZetaBootstrap
             director.AutoStart = true;
             director.RecordOnStart = true;
             UnityEditor.EditorPrefs.SetBool("Zeta.RecordTour", false);
+        }
+
+        if (UnityEditor.EditorPrefs.GetBool("Zeta.Storyboard", false))
+        {
+            director.AutoStart = true;
+            director.Storyboard = true;
+            director.StoryboardDirectory = UnityEditor.EditorPrefs.GetString("Zeta.StoryboardDir", "");
+            director.StoryboardSecondsPerLine = UnityEditor.EditorPrefs.GetFloat("Zeta.StoryboardSeconds", 3f);
+            UnityEditor.EditorPrefs.SetBool("Zeta.Storyboard", false);
         }
 
         string chapter = UnityEditor.EditorPrefs.GetString("Zeta.StartChapter", "");

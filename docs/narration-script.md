@@ -1,159 +1,132 @@
-# The Spiral, the Zeros, and the Primes — narration script
+# The Spiral, the Collisions, and the Primes — narration script
 
 Every line below is one caption/narration unit. The tour highlights each word in yellow as it is spoken.
 Camera cues and scene actions are listed for reference; see docs/TOUR.md for the vocabulary.
 
-## 1. A Machine for Primes
-*The Riemann zeta function, drawn in three dimensions*
+## 1. The Stage
+*A floor, a pole, and a dial*
 
-**intro_01** — This is the Riemann zeta function, drawn as a spiral that climbs a line through the complex plane.
-  <sub>camera `overview_orbit` · actions `reset speed:2.5 play`</sub>
+**stage_01** — Start with an empty stage. A flat floor, and a pole going straight up.
+  <sub>camera `stage` · actions `reset pause hide:spiral show:outaxes show:imaxis show:polelabel`</sub>
 
-**intro_02** — Every time the spiral closes on the origin, a zero is born, and that zero becomes a wave.
-  <sub>camera `follow_tip`</sub>
+**stage_02** — Every point on the floor is a complex number: so many steps to the right, so many steps toward the back.
+  <sub>camera `stage_floor`</sub>
 
-**intro_03** — Add enough of those waves together and a staircase appears, stepping up at every prime number.
-  <sub>camera `prime_overview` · actions `speed:6`</sub>
+**stage_03** — The pole is a dial. We will turn it slowly, and everything on the floor will move. Its reading is called t.
+  <sub>camera `stage` · actions `show:center`</sub>
 
-**intro_04** — In the next few minutes we will build this picture from scratch, find the hidden axis, and see what a 2026 result changes.
-  <sub>camera `overview_pull` · actions `speed:3`</sub>
+## 2. Zeno's Chain
+*Shrink, then turn*
 
-## 2. Building the Spiral
-*One arrow per term of the zeta series*
+**chain_01** — Lay down an arrow of length one.
+  <sub>camera `chain_flat` · actions `terms:1 hide:tail show:spiral show:lengths hide:center hide:outaxes hide:imaxis hide:polelabel`</sub>
 
-**spiral_01** — Zeta starts as an infinite sum: one, plus one over two to the s, plus one over three to the s, and so on forever.
-  <sub>camera `spiral_close` · actions `reset jump:10 pause hide:tail`</sub>
+**chain_02** — Add a second, shorter arrow, then a third, shorter still. Zeno would halve each step. Our rule is gentler: one over the square root of the step number.
+  <sub>camera `chain_flat` · actions `build:1:6`</sub>
 
-**spiral_02** — Each term is an arrow. Its length shrinks like one over the square root of n, because the real part of s is one half.
-  <sub>camera `spiral_top`</sub>
+**chain_03** — One. Point seven one. Point five eight. Point five. The arrows shrink, but only slowly.
+  <sub>camera `chain_flat` · actions `build:6:12`</sub>
 
-**spiral_03** — And each arrow is rotated by the imaginary part of s, by an angle of t times the log of n. The arrows chain head to tail.
-  <sub>camera `spiral_top` · actions `show:components speed:0.6 play`</sub>
+**chain_04** — Zeno's halves add up to two and stop. Ours never stop. Sixty arrows reach fourteen, a million reach two thousand. The chain runs off the floor forever.
+  <sub>camera `chain_long` · actions `hide:lengths build:12:60`</sub>
 
-**spiral_04** — But here is the catch. On the critical line the plain sum never converges. Sixteen arrows, or a thousand, land nowhere in particular.
-  <sub>camera `spiral_top` · actions `pause hide:components`</sub>
+**chain_05** — Now turn the dial. At every joint, bend the chain by the dial reading times the log of the step number. The straight chain curls into a spiral.
+  <sub>camera `spiral_curl` · actions `terms:24 show:center show:imaxis speed:0.35 play`</sub>
 
-**spiral_05** — The fix is Euler and Maclaurin's. The missing tail of the sum is almost exactly an integral, and we can draw that integral as one more arrow.
-  <sub>camera `spiral_top` · actions `show:tail flash:tail`</sub>
+**chain_06** — The chain is endless, so we add one honest orange arrow standing in for every arrow too small to draw. Now the tip is exact.
+  <sub>camera `spiral_curl` · actions `show:tail flash:tail speed:0.5` · footnote: the orange arrow is the Euler–Maclaurin tail: N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms</sub>
 
-**spiral_06** — Add it, plus a few tiny Bernoulli corrections, and the chain lands on the true value of zeta to thirteen decimal places.
-  <sub>camera `spiral_tail_zoom` · actions `flash:tail` · footnote: ζ(s) = Σ n^-s (n < N)  +  N^(1-s)/(s-1)  +  N^-s/2  +  Bernoulli terms      N ≈ t/2 + 4</sub>
+**chain_07** — Here is the strange talent of the one half rule. Keep turning, and the tip wanders, then dives straight into the centre.
+  <sub>camera `tip_center` · actions `show:tip speed:1.3`</sub>
 
-**spiral_07** — That orange arrow is the difference between a pretty picture and an exact one. Now the spiral really does predict the zeros.
-  <sub>camera `follow_tip` · actions `speed:2 play`</sub>
+**chain_08** — At a dial reading of fourteen point one three, it hits dead centre. We drop a marker on the pole at that height.
+  <sub>camera `tip_center` · actions `pause jump:14.134725 flash:zero`</sub>
 
-## 3. Where Is the Imaginary Axis?
-*Two complex planes, not one*
+## 3. Collisions
+*The tip keeps finding the centre*
 
-**axis_01** — Here is the part that confuses everyone, including me. There are two complex planes in this picture, not one.
-  <sub>camera `axes_wide` · actions `pause show:axes`</sub>
+**coll_01** — Keep turning. Twenty one. Twenty five. Thirty point four. The tip keeps finding the centre.
+  <sub>camera `markers_axis` · actions `terms:auto speed:3 play`</sub>
 
-**axis_02** — The input, s, lives on the glowing panel to the left. Its real part runs left to right, from zero to one.
-  <sub>camera `strip_panel` · actions `show:strip`</sub>
+**coll_02** — It never stops. Riemann proved the collisions go on forever. Ten thousand of them are loaded here, every one on this pole.
+  <sub>camera `markers_axis` · actions `speed:5`</sub>
 
-**axis_03** — Its imaginary part, t, runs straight up. So the vertical direction of this whole scene is the imaginary axis of the input.
-  <sub>camera `strip_vertical` · actions `show:imaxis`</sub>
+**coll_03** — Here is the tip's whole path, winding up the pole and threading the centre again and again. Those collision heights are the famous zeros of the zeta function.
+  <sub>camera `markers_axis_wide` · actions `show:trail speed:6`</sub>
 
-**axis_04** — We only feed zeta points with real part one half, so the input crawls up the critical line in the middle of the strip.
-  <sub>camera `strip_probe` · actions `speed:1.2 play`</sub>
+## 4. Collisions Become Waves
+*A probability map of the primes*
 
-**axis_05** — The output is a second complex number, drawn flat. Real part to the right, imaginary part toward the back.
-  <sub>camera `output_plane` · actions `show:outaxes`</sub>
+**wave_01** — Now take the first collision height, fourteen point one three, and turn it into a wave: the cosine of fourteen point one three times the log of x.
+  <sub>camera `wave` · actions `pause hide:spiral hide:tail hide:tip hide:center hide:trail hide:imaxis hide:outaxes hide:zeros cosine:1 show:cosine show:numbers`</sub>
 
-**axis_06** — So the spiral lives in the output plane, floating at the height of its input. Climb the input axis and the spiral redraws itself.
-  <sub>camera `follow_tip` · actions `speed:1.8`</sub>
+**wave_02** — Add the wave from the second collision.
+  <sub>camera `wave` · actions `cosine:2`</sub>
 
-**axis_07** — A zero is simply an input whose output lands on the origin: the spiral closes, and we drop a yellow marker on the vertical axis.
-  <sub>camera `zero_marker` · actions `pause jump:14.4 flash:zero`</sub>
+**wave_03** — And the third.
+  <sub>camera `wave` · actions `cosine:3`</sub>
 
-## 4. Hunting Zeros
-*Hardy's Z function makes the hunt visible*
+**wave_04** — Ten waves. Most of the time they cancel each other out.
+  <sub>camera `wave` · actions `cosine:10`</sub>
 
-**zeros_01** — Riemann's Z function makes the hunt visible. It is zeta rotated to be real, so it just wiggles left and right of the critical line.
-  <sub>camera `strip_z` · actions `reset show:zcurve hide:imaxis speed:2 play`</sub>
+**wave_05** — All of them. Where they agree, they pile up into spikes, and the spikes sit exactly on two, three, five, seven, eleven, thirteen, and their powers: four, eight, nine.
+  <sub>camera `spikes` · actions `cosine:all speed:6 play`</sub>
 
-**zeros_02** — Every time the wiggle crosses the line, zeta is exactly zero. The first crossing is at t equals fourteen point one three four seven.
-  <sub>camera `strip_z_first` · actions `jump:14.5 flash:zero pause`</sub>
+**wave_06** — This is a probability map of the primes, built from nothing but collision heights.
+  <sub>camera `spikes`</sub>
 
-**zeros_03** — Then twenty one point zero two, twenty five point zero one, thirty point four two. The zeros keep coming, irregular but never missing.
-  <sub>camera `zero_ladder` · actions `speed:3 play`</sub>
+## 5. The Staircase
+*Riemann's exact recipe*
 
-**zeros_04** — Every one of the ten thousand zeros we loaded sits precisely on the line. Nobody has ever found one anywhere else.
-  <sub>camera `zero_ladder_up` · actions `speed:5` · footnote: zeros from the LMFDB table · Assets/Resources/zetazeros.txt</sub>
+**stair_01** — Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision.
+  <sub>camera `staircase_close` · actions `pause hide:cosine show:prime hide:numbers`</sub>
 
-## 5. From Zeros to Primes
-*Riemann's explicit formula*
+**stair_02** — Each weight is fixed by the recipe. Nothing is tuned by hand.
+  <sub>camera `staircase_close` · actions `show:equations` · footnote: ψ(x) = x − ln 2π − ½ ln(1 − x⁻²) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)</sub>
 
-**primes_01** — Now the magic. Each zero, gamma, becomes a wave in x: the cosine of gamma times the log of x.
-  <sub>camera `cosine_wave` · actions `pause hide:prime hide:strip hide:outaxes hide:zcurve show:cosine`</sub>
+**stair_03** — The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.
+  <sub>camera `staircase` · actions `hide:equations speed:8 play`</sub>
 
-**primes_02** — One wave says nothing. But stack the waves from many zeros and they interfere, cancelling almost everywhere.
-  <sub>camera `cosine_wave` · actions `speed:4 play`</sub>
-
-**primes_03** — Where they do not cancel, they spike. And they spike exactly at the primes and their powers: two, three, four, five, seven, eight, nine, eleven.
-  <sub>camera `cosine_spikes`</sub>
-
-**primes_04** — Riemann's explicit formula turns that chorus into a staircase. Start with the line psi equals x, then subtract four root x times a weighted wave for every zero.
-  <sub>camera `formula` · actions `hide:cosine show:prime show:equations`</sub>
-
-**primes_05** — The weights, cosine plus two gamma sine over one plus four gamma squared, come from dividing x to the rho by rho. Nothing is fudged.
-  <sub>camera `formula_close` · footnote: ψ(x) = x − Σ_ρ x^ρ/ρ − ln 2π − ½ ln(1 − x^-2)        ρ = ½ ± iγ</sub>
-
-**primes_06** — With a few hundred zeros the staircase sharpens and the red markers find the primes on their own: two, three, five, seven, eleven, thirteen.
-  <sub>camera `staircase` · actions `speed:8 play`</sub>
-
-**primes_07** — The zeros of zeta and the primes are the same information, written in two languages. The spiral is the translator.
+**stair_04** — More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.
   <sub>camera `staircase_wide`</sub>
 
-## 6. Why One Half Matters
-*The real part sets the size of every wave*
+## 6. Move the One Half
+*Why the shrink rate matters*
 
-**half_01** — Why does everyone care that the zeros sit at real part one half? Because the real part sets the size of each wave.
-  <sub>camera `strip_panel` · actions `pause show:strip`</sub>
+**half_01** — Everything so far used the one half rule. Let us move it. Shrink the arrows faster: n to the zero point nine.
+  <sub>camera `sigma_spiral` · actions `pause hide:prime jump:14.134725 sigma:0.9 terms:auto show:spiral show:tail show:tip show:center`</sub>
 
-**half_02** — A zero at real part beta adds a wave of height x to the beta. At one half, that is the square root of x, the smallest wobble possible.
-  <sub>camera `staircase`</sub>
+**half_02** — Turn the dial. The spiral is tighter, and the tip never hits the centre. No collisions, no markers.
+  <sub>camera `sigma_spiral` · actions `speed:2.5 play`</sub>
 
-**half_03** — Suppose a rogue zero existed at real part zero point nine. Its wave would grow like x to the zero point nine, and the staircase would be wrecked.
-  <sub>camera `ghost` · actions `ghost:0.9:14.134725` · footnote: red: the staircase if the first zero were moved from ½ + 14.13i to 0.9 + 14.13i (hypothetical)</sub>
+**half_03** — And if we pretend the collisions did happen at zero point nine, every wave grows like x to the zero point nine. The staircase wobbles out of control and stops counting.
+  <sub>camera `wobble` · actions `pause sigma:0.5 hide:spiral hide:tail hide:tip hide:center show:prime ghost:all:0.9` · footnote: red: the staircase if every collision had shrink rate 0.9 instead of ½</sub>
 
-**half_04** — The Riemann Hypothesis says no such rogue exists. The error in counting primes is essentially as small as it can be: about the square root of x, for every x.
-  <sub>camera `staircase` · actions `ghost:off`</sub>
+**half_04** — The Riemann Hypothesis is the claim that the one half rule is the only one that works: every collision, forever, at exactly one half.
+  <sub>camera `wobble` · actions `ghost:off`</sub>
 
 ## 7. 2026: A Wall at Seven Eighths
 *OpenAI's quasi-Riemann hypothesis claim*
 
-**qrh_01** — On October sixth, 2026, OpenAI released an AI generated proof of what it calls the quasi Riemann hypothesis.
-  <sub>camera `strip_panel` · actions `pause show:strip` · footnote: openai/math · family 003 · manuscript dated Sept 30, 2026 · released Oct 6, 2026</sub>
+**qrh_01** — In October 2026, OpenAI published an AI generated proof that no collision can happen with a shrink rate above seven eighths. They call it the quasi Riemann hypothesis.
+  <sub>camera `strip_band` · actions `hide:prime show:strip show:band78` · footnote: openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026</sub>
 
-**qrh_02** — The claim: the zeta function, and every Dirichlet L function, has no zeros with real part greater than seven eighths.
-  <sub>camera `strip_band` · actions `show:band78`</sub>
-
-**qrh_03** — By the functional equation that also clears everything below one eighth. The shaded bands are now off limits.
+**qrh_02** — By symmetry, none below one eighth either. The blue bands are now off limits.
   <sub>camera `strip_band_sym` · actions `show:band18`</sub>
 
-**qrh_04** — Before this, the known zero free region was a sliver hugging real part one, shrinking as t grows. A fixed wall at seven eighths is new territory.
-  <sub>camera `strip_band_classic` · actions `show:classic`</sub>
+**qrh_03** — The core theorem is machine checked in Lean, and a companion proof reaches eleven twelfths. Human peer review is still under way, so call it a strong claim, not settled fact.
+  <sub>camera `strip_band` · actions `show:band1112` · footnote: Lean: riemannZeta s ≠ 0 for 7/8 < Re s · independently re-checked · not yet peer reviewed</sub>
 
-**qrh_05** — The proof goes through cubic theta functions and Hecke L functions over Q adjoined root negative three, then transfers to zeta. A companion paper reaches eleven twelfths by a different route.
-  <sub>camera `strip_band` · actions `hide:classic show:band1112`</sub>
+**qrh_04** — The orange gap, from one half to seven eighths, is where the Riemann Hypothesis still lives. Close it, and the primes are finally tamed.
+  <sub>camera `strip_gap` · actions `hide:band1112 show:gap`</sub>
 
-**qrh_06** — The core theorem was formalized in Lean and re checked by an independent kernel. Human peer review is still in progress, so treat it as a strong claim, not settled fact.
-  <sub>camera `strip_band` · footnote: Lean statement: riemannZeta s ≠ 0 for 7/8 < Re s · axioms: propext, Classical.choice, Quot.sound · not yet peer reviewed</sub>
+## 8. The Whole Machine
 
-**qrh_07** — For the staircase it means every rogue wave is at most x to the seven eighths. For this picture it means the yellow markers can only hide in the narrow unshaded band.
-  <sub>camera `strip_band_sym` · actions `hide:band1112`</sub>
+**outro_01** — A chain that shrinks by one half. A dial that turns. A tip that keeps striking the centre. And a staircase of primes that falls out of it.
+  <sub>camera `outro` · actions `hide:strip hide:gap show:spiral show:tail show:trail show:zeros show:prime show:imaxis speed:4 play`</sub>
 
-**qrh_08** — The gap from seven eighths down to one half is where the Riemann Hypothesis still lives. Commentators expect the method to stall near three quarters. A new idea is needed.
-  <sub>camera `strip_gap` · actions `show:gap`</sub>
-
-## 8. The State of Play
-
-**outro_01** — So this is the state of play. Ten thousand zeros on the line, a spiral that lands on every one of them, and a wall at seven eighths.
-  <sub>camera `overview_orbit` · actions `hide:gap show:imaxis show:cosine speed:4 play`</sub>
-
-**outro_02** — Prove the wall is at one half and the primes are finally tamed. Until then, watch the spiral climb.
-  <sub>camera `overview_pull_final`</sub>
+**outro_02** — Watch the spiral climb.
+  <sub>camera `outro`</sub>
 
 ---
-1017 words ≈ 6.8 minutes of speech at 150 wpm, plus pauses and title cards.
+689 words ≈ 4.6 minutes of speech at 150 wpm, plus pauses and title cards.

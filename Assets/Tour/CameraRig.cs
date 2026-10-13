@@ -134,10 +134,43 @@ public class CameraRig : MonoBehaviour
         cues["ghost"] = () => new CueState { Position = new Vector3(52, 46, -120), LookAt = new Vector3(52, 48, 0), Up = up, Fov = 60 };
 
         // ---- chapter 7: 7/8 --------------------------------------------------------------
-        cues["strip_band"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 0.8f, 8, -12), LookAt = new Vector3(Annotations.PanelCenterX + 0.8f, 8, 0), Up = up, Fov = 60 };
-        cues["strip_band_sym"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX, 8, -14), LookAt = new Vector3(Annotations.PanelCenterX, 8, 0), Up = up, Fov = 60 };
+        cues["strip_band"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 1.0f, 9, -10), LookAt = new Vector3(Annotations.PanelCenterX + 1.0f, 9, 0), Up = up, Fov = 60 };
+        cues["strip_band_sym"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX, 9, -11), LookAt = new Vector3(Annotations.PanelCenterX, 9, 0), Up = up, Fov = 60 };
         cues["strip_band_classic"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 1.2f, 16, -22), LookAt = new Vector3(Annotations.PanelCenterX + 1.2f, 18, 0), Up = up, Fov = 60 };
         cues["strip_gap"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 0.75f, 6, -8), LookAt = new Vector3(Annotations.PanelCenterX + 0.75f, 6, 0), Up = up, Fov = 60 };
+
+        // ---- from-scratch narrative --------------------------------------------------------
+        cues["stage"] = () => new CueState { Position = new Vector3(4.5f, 4.2f, -9f), LookAt = new Vector3(1.2f, 2.6f, 1.2f), Up = up, Fov = 60 };
+        cues["stage_floor"] = () => new CueState { Position = new Vector3(1.8f, 8f, -2.5f), LookAt = new Vector3(1.8f, 0f, 1.5f), Up = Vector3.forward, Fov = 60 };
+        cues["chain_flat"] = () => new CueState { Position = new Vector3(2.8f, 8.5f, -0.4f), LookAt = new Vector3(2.8f, 0f, 0f), Up = Vector3.right, Fov = 60 };
+        cues["chain_long"] = () => new CueState { Position = new Vector3(6.5f, 16f, -1f), LookAt = new Vector3(6.5f, 0f, 0f), Up = Vector3.right, Fov = 60 };
+        cues["spiral_curl"] = () => new CueState { Position = new Vector3(0.6f, TipY + 7.5f, -1.6f), LookAt = new Vector3(0.6f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
+        cues["sigma_spiral"] = () => new CueState { Position = new Vector3(0.3f, TipY + 4.2f, -1.0f), LookAt = new Vector3(0.3f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
+        cues["tip_center"] = () => new CueState { Position = new Vector3(0.25f, TipY + 4.6f, -1.1f), LookAt = new Vector3(0.2f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
+        cues["markers_axis"] = () =>
+        {
+            float h = Mathf.Max(5f, TipY * .55f + 1.5f);
+            float d = Mathf.Max(9f, TipY * .95f);
+            return new CueState { Position = new Vector3(d * .45f, h + 1.5f, -d), LookAt = new Vector3(0, h, 0), Up = up, Fov = 60 };
+        };
+        cues["markers_axis_wide"] = () =>
+        {
+            float h = Mathf.Max(6f, TipY * .5f);
+            float d = Mathf.Max(14f, TipY * 1.1f);
+            float a = Time.time * 0.15f;
+            return new CueState { Position = new Vector3(Mathf.Sin(a) * d, h + 2f, -Mathf.Cos(a) * d), LookAt = new Vector3(0, h, 0), Up = up, Fov = 60 };
+        };
+        cues["wave"] = () => new CueState { Position = new Vector3(8f, 0f, -29f), LookAt = new Vector3(8f, 0f, 0f), Up = up, Fov = 60 };
+        cues["spikes"] = () => new CueState { Position = new Vector3(8f, 2f, -24f), LookAt = new Vector3(8f, 2f, 0f), Up = up, Fov = 60 };
+        cues["staircase_close"] = () => new CueState { Position = new Vector3(9f, 7f, -24f), LookAt = new Vector3(9f, 7f, 0f), Up = up, Fov = 60 };
+        cues["wobble"] = () => new CueState { Position = new Vector3(30f, 30f, -82f), LookAt = new Vector3(30f, 30f, 0f), Up = up, Fov = 60 };
+        cues["outro"] = () =>
+        {
+            float a = Time.time * 0.1f;
+            float radius = 28f + Mathf.Clamp01((Time.time - cueStartTime) / 14f) * 30f;
+            Vector3 center = new(8, Mathf.Max(10f, TipY * .5f), 0);
+            return new CueState { Position = center + new Vector3(Mathf.Sin(a) * radius, radius * .3f, -Mathf.Cos(a) * radius), LookAt = center, Up = up, Fov = 60 };
+        };
 
         // ---- chapter 8: outro --------------------------------------------------------------
         cues["overview_pull_final"] = () =>
@@ -177,6 +210,21 @@ public class CameraRig : MonoBehaviour
         activeCueName = name;
         cueStartTime = Time.time;
         smoothTime = Mathf.Max(0.15f, transitionSeconds * 0.4f);
+    }
+
+    /// <summary>Jump straight to the active cue's current target (no smoothing).</summary>
+    public void Snap()
+    {
+        if (activeCue == null) return;
+        CueState target = activeCue();
+        cam.transform.position = target.Position;
+        currentLook = target.LookAt;
+        Vector3 forward = target.LookAt - target.Position;
+        if (forward.sqrMagnitude > 1e-6f) cam.transform.rotation = Quaternion.LookRotation(forward, target.Up);
+        cam.fieldOfView = target.Fov;
+        positionVelocity = Vector3.zero;
+        lookVelocity = Vector3.zero;
+        fovVelocity = 0f;
     }
 
     public void Activate()

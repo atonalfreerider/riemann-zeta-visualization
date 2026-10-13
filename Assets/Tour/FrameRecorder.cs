@@ -45,10 +45,13 @@ public class FrameRecorder : MonoBehaviour
         return recorder;
     }
 
-    public void StartRecording(string directory)
-    {
-        if (IsRecording) return;
+    /// <summary>True while the camera renders into the offscreen portrait texture (recording or storyboard).</summary>
+    public bool IsOffscreen { get; private set; }
 
+    /// <summary>Render offscreen at a fixed frame rate without streaming frames (used for storyboard snapshots).</summary>
+    public void BeginOffscreen(string directory)
+    {
+        if (IsOffscreen) return;
         OutputDirectory = Path.GetFullPath(directory);
         Directory.CreateDirectory(OutputDirectory);
         FrameIndex = 0;
@@ -61,14 +64,55 @@ public class FrameRecorder : MonoBehaviour
         previousVSync = QualitySettings.vSyncCount;
         Time.captureFramerate = Fps;
         QualitySettings.vSyncCount = 0;
+        IsOffscreen = true;
+        captureLoop = StartCoroutine(CaptureLoop());
+    }
+
+    public void EndOffscreen()
+    {
+        if (!IsOffscreen) return;
+        IsOffscreen = false;
+        if (captureLoop != null) StopCoroutine(captureLoop);
+        AsyncGPUReadback.WaitAllRequests();
+        cam.targetTexture = null;
+        target.Release();
+        Destroy(target);
+        target = null;
+        Time.captureFramerate = previousCaptureFramerate;
+        QualitySettings.vSyncCount = previousVSync;
+    }
+
+    /// <summary>Save the next rendered frame as a PNG in the output directory (offscreen mode only).</summary>
+    public void Snapshot(string fileName)
+    {
+        if (!IsOffscreen || target == null) return;
+        string path = Path.Combine(OutputDirectory, fileName);
+        int w = Width, h = Height;
+        AsyncGPUReadback.Request(target, 0, TextureFormat.RGBA32, request =>
+        {
+            if (request.hasError) return;
+            byte[] data = request.GetData<byte>().ToArray();
+            bool flip = NeedsFlip;
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                byte[] flipped = flip ? FlipVertically(data, w, h, 4) : data;
+                File.WriteAllBytes(path, ImageConversion.EncodeArrayToPNG(flipped, GraphicsFormat.R8G8B8A8_UNorm, (uint)w, (uint)h));
+            });
+        });
+    }
+
+    public void StartRecording(string directory)
+    {
+        if (IsRecording) return;
+        BeginOffscreen(directory);
 
         frames = new BlockingCollection<byte[]>(boundedCapacity: 60);
+        needsFlip = NeedsFlip;
         usePng = !TryStartFfmpeg();
         writerThread = new Thread(WriterLoop) { IsBackground = true, Name = "FrameRecorderWriter" };
         writerThread.Start();
 
         IsRecording = true;
-        captureLoop = StartCoroutine(CaptureLoop());
         Debug.Log($"Recording {Width}x{Height}@{Fps} to {OutputDirectory} ({(usePng ? "PNG sequence" : "ffmpeg h264")})");
     }
 
@@ -76,7 +120,6 @@ public class FrameRecorder : MonoBehaviour
     {
         if (!IsRecording) return;
         IsRecording = false;
-        if (captureLoop != null) StopCoroutine(captureLoop);
 
         AsyncGPUReadback.WaitAllRequests();
         frames.CompleteAdding();
@@ -92,14 +135,7 @@ public class FrameRecorder : MonoBehaviour
             ffmpegInput = null;
         }
 
-        cam.targetTexture = null;
-        target.Release();
-        Destroy(target);
-        target = null;
-
-        Time.captureFramerate = previousCaptureFramerate;
-        QualitySettings.vSyncCount = previousVSync;
-
+        EndOffscreen();
         WriteTimeline(audioTimeline);
         Debug.Log($"Recording stopped after {FrameIndex} frames → {OutputDirectory}");
     }
@@ -136,7 +172,8 @@ public class FrameRecorder : MonoBehaviour
             {
                 FileName = "ffmpeg",
                 Arguments = $"-y -loglevel error -f rawvideo -pix_fmt rgba -s {Width}x{Height} -r {Fps} -i - " +
-                            $"-vf vflip -c:v libx264 -preset fast -crf {Crf} -pix_fmt yuv420p -movflags +faststart \"{output}\"",
+                            (NeedsFlip ? "-vf vflip " : "") +
+                            $"-c:v libx264 -preset fast -crf {Crf} -pix_fmt yuv420p -movflags +faststart \"{output}\"",
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardError = true,
@@ -162,16 +199,27 @@ public class FrameRecorder : MonoBehaviour
     IEnumerator CaptureLoop()
     {
         WaitForEndOfFrame endOfFrame = new();
-        while (IsRecording)
+        while (IsOffscreen)
         {
             yield return endOfFrame;
             if (target == null) yield break;
 
-            // show the portrait frame on screen as well (the camera is rendering offscreen)
-            Graphics.Blit(target, (RenderTexture)null);
+            if (Application.isBatchMode)
+            {
+                // no game view in batch mode: render explicitly so the texture is up to date
+                cam.Render();
+            }
+            else
+            {
+                // show the portrait frame on screen as well (the camera is rendering offscreen)
+                Graphics.Blit(target, (RenderTexture)null);
+            }
 
             int index = FrameIndex++;
-            AsyncGPUReadback.Request(target, 0, TextureFormat.RGBA32, request => OnFrame(request, index));
+            if (IsRecording)
+            {
+                AsyncGPUReadback.Request(target, 0, TextureFormat.RGBA32, request => OnFrame(request, index));
+            }
         }
     }
 
@@ -202,7 +250,7 @@ public class FrameRecorder : MonoBehaviour
         {
             if (usePng)
             {
-                byte[] flipped = FlipVertically(frame, Width, Height, 4);
+                byte[] flipped = needsFlip ? FlipVertically(frame, Width, Height, 4) : frame;
                 byte[] png = ImageConversion.EncodeArrayToPNG(flipped, GraphicsFormat.R8G8B8A8_UNorm, (uint)Width, (uint)Height);
                 File.WriteAllBytes(Path.Combine(OutputDirectory, "frames", $"frame_{written:D6}.png"), png);
             }
@@ -214,6 +262,23 @@ public class FrameRecorder : MonoBehaviour
             written++;
         }
     }
+
+    /// <summary>
+    /// Whether readback rows must be flipped before encoding. Verified on Linux/OpenGL (no flip needed);
+    /// APIs with top-left UV origin render the camera target upside down relative to that.
+    /// Override with the environment variable ZETA_FLIP=0/1 if a platform disagrees.
+    /// </summary>
+    static bool NeedsFlip
+    {
+        get
+        {
+            string env = Environment.GetEnvironmentVariable("ZETA_FLIP");
+            if (env == "0") return false;
+            if (env == "1") return true;
+            return SystemInfo.graphicsUVStartsAtTop;
+        }
+    }
+    bool needsFlip;
 
     static byte[] FlipVertically(byte[] src, int width, int height, int bpp)
     {
@@ -230,5 +295,6 @@ public class FrameRecorder : MonoBehaviour
     void OnDestroy()
     {
         if (IsRecording) StopRecording();
+        else if (IsOffscreen) EndOffscreen();
     }
 }

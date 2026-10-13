@@ -6,11 +6,20 @@ public class Graph : MonoBehaviour
     const int axisHeight = 200;
     public const float yScale = .3f;
 
+    GameObject root;
+
+    public void SetVisible(bool visible)
+    {
+        if (root != null) root.SetActive(visible);
+    }
+
     void Start()
     {
+        root = new GameObject("Grid");
+        root.transform.SetParent(transform, false);
         Color grid = Factory.Palette.Grid;
         LineRenderer xAxis = Factory.NewLine("xAxis", .05f, grid);
-        xAxis.transform.SetParent(transform, false);
+        xAxis.transform.SetParent(root.transform, false);
         xAxis.positionCount = 2;
         xAxis.SetPositions(new[] { Vector3.zero, new Vector3(axisHeight, 0, 0) });
 
@@ -29,7 +38,7 @@ public class Graph : MonoBehaviour
         }
 
         LineRenderer yAxis = Factory.NewLine("yAxis", .05f, grid);
-        yAxis.transform.SetParent(transform, false);
+        yAxis.transform.SetParent(root.transform, false);
         yAxis.positionCount = 2;
         yAxis.SetPositions(new[] { Vector3.zero, new Vector3(0, axisHeight, 0) });
 

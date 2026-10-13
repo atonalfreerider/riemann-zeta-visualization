@@ -31,6 +31,26 @@ public class Main : MonoBehaviour
     [Tooltip("How fast t advances, in units of t per second.")]
     public double Speed = 1.8d;
 
+    /// <summary>Extra factor on Speed (the storyboard uses it to compress a line's animation into fewer seconds).</summary>
+    public double SpeedMultiplier = 1d;
+
+    /// <summary>Real part of s. The visualization lives on the critical line (½); the tour moves it to show what breaks.</summary>
+    public double Sigma = .5d;
+
+    /// <summary>How many zeros the cosine chorus sums (-1 = all found so far). The tour builds it up one wave at a time.</summary>
+    public int CosineZeroLimit = -1;
+
+    /// <summary>Only the first N zero markers get a numeric label (-1 = all).</summary>
+    public int ZeroLabelLimit = -1;
+
+    public bool OnCriticalLine => Math.Abs(Sigma - .5d) < 1e-9;
+
+    /// <summary>When > 0 the cosine chorus is drawn as −(Σ cos)·CosineScale/N so its height stays bounded; ≤ 0 draws the raw sum.</summary>
+    public float CosineScale = -1f;
+
+    /// <summary>Heights γ of the zeros passed so far.</summary>
+    public IReadOnlyList<double> PassedZeros => zetaCurvesByZero.Keys.ToList();
+
     LineRenderer zetaCurve;
     LineRenderer primeCurve;
     LineRenderer cosineWaveCurve;
@@ -216,6 +236,28 @@ public class Main : MonoBehaviour
         zetaPointContainer.SetActive(visible);
     }
 
+    public void SetGridVisible(bool visible)
+    {
+        GetComponent<Graph>()?.SetVisible(visible);
+    }
+
+    /// <summary>Change the real part of s and redraw the trail from t = 0 (markers only drop on the critical line).</summary>
+    public void SetSigma(double sigma)
+    {
+        if (Math.Abs(sigma - Sigma) < 1e-12) return;
+        Sigma = sigma;
+        double t = currentIter;
+        ResetAnimation();
+        JumpTo(t);
+    }
+
+    public void SetCosineZeroLimit(int limit)
+    {
+        CosineZeroLimit = limit;
+        heavyUpdateDirty = true;
+        DrawCosineWave(currentIter);
+    }
+
     public Vector3 ZeroMarkerPosition(int index)
     {
         return new Vector3(0, (float)zetaZeroValues[index] * Graph.yScale, 0);
@@ -229,7 +271,7 @@ public class Main : MonoBehaviour
 
         if (!isPlaying) return;
 
-        double target = currentIter + Speed * Time.deltaTime;
+        double target = currentIter + Speed * SpeedMultiplier * Time.deltaTime;
         int steps = 0;
         while (currentIter + AnimStep <= target && steps < MaxStepsPerFrame)
         {
@@ -286,7 +328,7 @@ public class Main : MonoBehaviour
     void RiemannZeta(double iter)
     {
         // compute the actual Riemann Zeta function output (analytic continuation, Meta.Numerics)
-        Complex input = new(.5d, iter);
+        Complex input = new(Sigma, iter);
         Complex output = ZetaMath.Exact(input);
         CurrentZeta = output;
 
@@ -303,6 +345,7 @@ public class Main : MonoBehaviour
 
     void UpdateZetaCurves(double iter)
     {
+        if (!OnCriticalLine) return; // off the line the tip never hits the centre, so no zeros to collect
         List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
         foreach (double zetaZero in zetaZeros)
         {
@@ -478,11 +521,15 @@ public class Main : MonoBehaviour
                 point.transform.Translate(Vector3.up * ((float)zetaZero * Graph.yScale));
                 zetaPoints.Add(point);
 
-                TextBox label = TextBox.Create(zetaZero.ToString("F4", CultureInfo.InvariantCulture), 10f);
-                label.Alignment = TextAlignmentOptions.Right;
-                label.transform.SetParent(point.transform, false);
-                label.transform.Translate(Vector3.left * .5f);
-                label.Color = Factory.Palette.Zero;
+                if (ZeroLabelLimit < 0 || count <= ZeroLabelLimit)
+                {
+                    TextBox label = TextBox.Create(zetaZero.ToString("F2", CultureInfo.InvariantCulture), 6f);
+                    label.Alignment = TextAlignmentOptions.Right;
+                    label.transform.SetParent(point.transform, false);
+                    label.transform.Translate(Vector3.left * .5f);
+                    label.Color = Factory.Palette.Zero;
+                    label.gameObject.AddComponent<Billboard>();
+                }
 
                 ZeroPassed?.Invoke(count - 1, zetaZero, point.transform.position);
             }
@@ -499,10 +546,12 @@ public class Main : MonoBehaviour
         if (!cosineWaveCurve.enabled) return;
 
         List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
+        if (CosineZeroLimit >= 0 && zetaZeros.Count > CosineZeroLimit) zetaZeros = zetaZeros.Take(CosineZeroLimit).ToList();
         Vector3[] cosineWavePoints = new Vector3[NumPrimeCurvePoints];
         const double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
         float x = (float)curveResolution;
 
+        float scale = CosineScale > 0f && zetaZeros.Count > 0 ? CosineScale / zetaZeros.Count : 1f;
         for (int i = 0; i < NumPrimeCurvePoints; i++)
         {
             float y = 0;
@@ -512,7 +561,8 @@ public class Main : MonoBehaviour
                 y -= Mathf.Cos((float)zetaZero * logX);
             }
 
-            cosineWavePoints[i] = new Vector3(x, y, 0);
+            // x = 1 makes every cosine 1 and produces a meaningless spike; start the curve at 1.5
+            cosineWavePoints[i] = x < 1.5f ? new Vector3(1.5f, 0, 0) : new Vector3(x, y * scale, 0);
             x += (float)curveResolution;
         }
 

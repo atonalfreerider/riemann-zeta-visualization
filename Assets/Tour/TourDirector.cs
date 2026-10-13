@@ -18,6 +18,10 @@ public class TourDirector : MonoBehaviour
 
     public bool AutoStart;
     public bool RecordOnStart;
+    /// <summary>Storyboard: snap the camera per line, compress each line to a few seconds and save two PNGs per line.</summary>
+    public bool Storyboard;
+    public float StoryboardSecondsPerLine = 3f;
+    public string StoryboardDirectory = "";
     public bool Portrait = true;
     public string StartChapter = "";
     public float ChapterTitleSeconds = 3.2f;
@@ -106,7 +110,15 @@ public class TourDirector : MonoBehaviour
         tourStartTime = Time.time;
         Captions.SetHint("");
 
-        if (RecordOnStart && !Recorder.IsRecording)
+        if (Storyboard)
+        {
+            string dir = string.IsNullOrEmpty(StoryboardDirectory)
+                ? System.IO.Path.Combine(Application.dataPath, "..", "Recordings", "storyboard-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"))
+                : StoryboardDirectory;
+            Recorder.BeginOffscreen(dir);
+            Debug.Log("Storyboard → " + Recorder.OutputDirectory);
+        }
+        else if (RecordOnStart && !Recorder.IsRecording)
         {
             StartRecording();
         }
@@ -125,6 +137,30 @@ public class TourDirector : MonoBehaviour
         Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
         Rig.Release();
         if (Recorder.IsRecording) StopRecording();
+    }
+
+    float currentLineSeconds = 3f;
+
+    IEnumerator BuildTerms(int from, int to)
+    {
+        float seconds = Mathf.Max(0.5f, currentLineSeconds * 0.85f);
+        float start = Time.time;
+        int last = -1;
+        while (Time.time - start < seconds)
+        {
+            int n = Mathf.RoundToInt(Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, (Time.time - start) / seconds)));
+            if (n != last)
+            {
+                last = n;
+                Main.Limit.TermOverride = n;
+                Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
+            }
+
+            yield return null;
+        }
+
+        Main.Limit.TermOverride = to;
+        Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
     }
 
     /// <summary>Jump to the next narration line (same as pressing N).</summary>
@@ -162,11 +198,22 @@ public class TourDirector : MonoBehaviour
         }
 
         Annotations.HideAll();
+        Main.SetSigma(.5d);
         Main.ResetAnimation();
         Main.Speed = 1.8d;
-        Main.SetPrimeCurveVisible(true);
-        Main.SetCosineVisible(true);
+        Main.ZeroLabelLimit = 6;
+        Main.CosineScale = 11f;
+        Main.SetCosineZeroLimit(-1);
+        Main.Limit.TermOverride = 0;
         Main.Limit.SetTailVisible(true);
+        Main.Limit.SetArrowheadsVisible(true);
+        Main.Limit.SetLengthLabelsVisible(false);
+        // start from an empty stage; chapters reveal what they need
+        Main.SetPrimeCurveVisible(false);
+        Main.SetCosineVisible(false);
+        Main.SetEquationsVisible(false);
+        Main.SetZetaCurveVisible(false);
+        Main.SetGridVisible(false);
 
         bool started = string.IsNullOrEmpty(StartChapter);
         int total = script.chapters.Length;
@@ -192,18 +239,40 @@ public class TourDirector : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         Running = false;
         Rig.Release();
+        // restore the free-roam visualization
+        Main.SetPrimeCurveVisible(true);
+        Main.SetCosineVisible(true);
+        Main.SetEquationsVisible(true);
+        Main.SetZetaCurveVisible(true);
+        Main.SetGridVisible(true);
+        Main.Limit.TermOverride = 0;
+        Main.ZeroLabelLimit = -1;
+        Main.CosineScale = -1f;
+        Main.SetCosineZeroLimit(-1);
+        Annotations.HideAll();
         if (Recorder.IsRecording) StopRecording();
+        else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
+        Main.SpeedMultiplier = 1d;
         Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+
+#if UNITY_EDITOR
+        if (UnityEditor.EditorPrefs.GetBool("Zeta.BatchQuitAfterPlay", false))
+        {
+            Debug.Log("Tour finished in batch mode; leaving play mode.");
+            UnityEditor.EditorApplication.ExitPlaymode();
+        }
+#endif
     }
 
     IEnumerator PlayLine(TourLine line)
     {
         skipRequested = false;
         Rig.SetCue(line.camera);
-        ApplyActions(line.actions);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);
+        currentLineSeconds = Storyboard ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
+        ApplyActions(line.actions);
         if (timing == null)
         {
             timing = TourScriptLoader.Estimate(line.text);
@@ -225,6 +294,12 @@ public class TourDirector : MonoBehaviour
         Captions.SetLine(timing);
         Captions.SetFootnote(line.footnote);
 
+        if (Storyboard)
+        {
+            yield return StoryboardLine(line, timing, duration + Mathf.Max(0f, line.pause));
+            yield break;
+        }
+
         if (clip != null)
         {
             audioSource.PlayOneShot(clip);
@@ -243,6 +318,38 @@ public class TourDirector : MonoBehaviour
             Captions.SetTime(Time.time - start);
             yield return null;
         }
+    }
+
+    int storyboardIndex;
+
+    IEnumerator StoryboardLine(TourLine line, LineTiming timing, float realDuration)
+    {
+        // compress the real line duration into StoryboardSecondsPerLine, keeping the same amount of animation
+        float seconds = Mathf.Max(0.5f, StoryboardSecondsPerLine);
+        Main.SpeedMultiplier = realDuration / seconds;
+        Rig.Snap();
+        yield return null;
+        Rig.Snap();
+
+        int index = storyboardIndex++;
+        float start = Time.time;
+        bool first = false;
+        while (Time.time - start < seconds)
+        {
+            float elapsed = Time.time - start;
+            Captions.SetTime(elapsed / seconds * timing.duration);
+            if (!first && elapsed >= seconds * 0.45f)
+            {
+                first = true;
+                Recorder.Snapshot($"{index:D2}_{line.id}_a.png");
+            }
+
+            yield return null;
+        }
+
+        Recorder.Snapshot($"{index:D2}_{line.id}_b.png");
+        yield return null;
+        yield return null;
     }
 
     /// <summary>
@@ -272,9 +379,21 @@ public class TourDirector : MonoBehaviour
                         if (arg == "zero") Annotations.PulseZero(Main.ZeroCount - 1);
                         else if (arg == "tail") Annotations.PulseTail();
                         break;
+                    case "terms":
+                        Main.Limit.TermOverride = arg == "auto" ? 0 : int.Parse(arg, CultureInfo.InvariantCulture);
+                        Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
+                        break;
+                    case "build":
+                        // build:from:to — raise the arrow count across the line's duration
+                        StartCoroutine(BuildTerms(int.Parse(parts[1], CultureInfo.InvariantCulture), int.Parse(parts[2], CultureInfo.InvariantCulture)));
+                        break;
+                    case "sigma": Main.SetSigma(double.Parse(arg, CultureInfo.InvariantCulture)); break;
+                    case "cosine": Main.SetCosineZeroLimit(arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture)); break;
+                    case "labels": Main.ZeroLabelLimit = arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "ghost":
                         if (arg == "off") Annotations.SetGhostZero(false);
                         else if (arg == "on") Annotations.SetGhostZero(true);
+                        else if (arg == "all") Annotations.SetGhostAllZeros(parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 0.9);
                         else Annotations.SetGhostZero(true, double.Parse(arg, CultureInfo.InvariantCulture), parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 14.134725);
                         break;
                     case "show":
@@ -299,6 +418,14 @@ public class TourDirector : MonoBehaviour
         {
             case "tail": Main.Limit.SetTailVisible(on); break;
             case "spiral": Main.Limit.SetSpiralVisible(on); break;
+            case "arrows": Main.Limit.SetArrowheadsVisible(on); break;
+            case "lengths": Main.Limit.SetLengthLabelsVisible(on); break;
+            case "tip": Annotations.ShowTip(on); break;
+            case "center": Annotations.ShowCenter(on); break;
+            case "numbers": Annotations.ShowNumberLine(on); break;
+            case "polelabel": Annotations.ShowPoleLabel(on); break;
+            case "grid": Main.SetGridVisible(on); break;
+            case "trail": Main.SetZetaCurveVisible(on); break;
             case "components":
                 if (Main.Limit.ShowSpirals != on)
                 {
