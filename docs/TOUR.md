@@ -13,7 +13,7 @@ A narrated, chaptered camera fly-through of the visualization, laid out for vert
 | Player build | `./zeta-visualization -tour`, `-record`, `-chapter qrh`, `-landscape` |
 
 Keys in Play mode: **T** start/stop tour · **N** skip to the next line · **F9** start/stop recording ·
-**P** toggle the 9:16 pillarbox · Space / Esc / R / WASD as before.
+**P** toggle the 9:16 pillarbox · **F** fps readout · Space / Esc / R / WASD as before.
 
 The tour pillarboxes the camera to 9:16 so the editor preview matches the recording.
 **Zeta ▸ Game View – Portrait 1080x1920** adds and selects a matching Game view size.
@@ -101,7 +101,9 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `squares:on` / `squares:off` | the muted-squares callout under the number line |
 | `primepowers:on` / `primepowers:off` | orange ticks at 4, 8, 9, 16, 25, 27 on the staircase |
 | `zeno_zoom` camera cue | follows the newest Zeno footprint and halves its distance each step |
-| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers`) |
+| `sacks:lattice` / `sacks:squares` / `sacks:composites` | build the 2×/3×/5× multiplication lattice; pulse squares / composites on the spiral or saddle |
+| `logseq:on` / `logseq:off` | bar panel of the bend sequence log(n/(n−1)) with live degrees |
+| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers` `logseq` `floorgrid`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
