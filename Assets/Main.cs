@@ -20,7 +20,9 @@ using UnityEngine.InputSystem;
 public class Main : MonoBehaviour
 {
     readonly List<Vector3> zetaCurvePoints = new();
+    Unity.Collections.NativeArray<Vector3> trailBuffer;
     readonly List<GameObject> zetaPoints = new();
+    int passedZeroCount;
 
     public const int NumPrimeCurvePoints = 10000;
     public const int PrimeCurveXLength = 100;
@@ -201,6 +203,7 @@ public class Main : MonoBehaviour
 
         zetaPoints.Clear();
         zetaCurvePoints.Clear();
+        passedZeroCount = 0;
         foreach (LineRenderer lineRenderer in daggerLines)
         {
             Destroy(lineRenderer.gameObject);
@@ -258,9 +261,7 @@ public class Main : MonoBehaviour
     IEnumerator TrailStyleRoutine(float width, float intensity, float seconds)
     {
         float w0 = zetaCurve.startWidth;
-        MaterialPropertyBlock block = new();
-        zetaCurve.GetPropertyBlock(block);
-        float i0 = block.GetFloat("_Intensity");
+        float i0 = Factory.GetIntensity(zetaCurve);
         if (i0 <= 0f) i0 = Factory.NoGlow;
         float t = 0f;
         while (t < seconds)
@@ -430,15 +431,37 @@ public class Main : MonoBehaviour
             (float)output.Im);
 
         zetaCurvePoints.Add(point);
+        if (!trailBuffer.IsCreated || trailBuffer.Length < zetaCurvePoints.Count)
+        {
+            int capacity = Mathf.Max(4096, trailBuffer.IsCreated ? trailBuffer.Length * 2 : 0);
+            Unity.Collections.NativeArray<Vector3> grown = new(capacity, Unity.Collections.Allocator.Persistent);
+            if (trailBuffer.IsCreated)
+            {
+                Unity.Collections.NativeArray<Vector3>.Copy(trailBuffer, grown, trailBuffer.Length);
+                trailBuffer.Dispose();
+            }
+
+            trailBuffer = grown;
+        }
+
+        trailBuffer[zetaCurvePoints.Count - 1] = point;
 
         zetaCurve.positionCount = zetaCurvePoints.Count;
-        zetaCurve.SetPositions(zetaCurvePoints.ToArray());
+        zetaCurve.SetPositions(trailBuffer.GetSubArray(0, zetaCurvePoints.Count));
+    }
+
+    void OnDestroy()
+    {
+        if (trailBuffer.IsCreated) trailBuffer.Dispose();
     }
 
     void UpdateZetaCurves(double iter)
     {
         if (!OnCriticalLine) return; // off the line the tip never hits the centre, so no zeros to collect
-        List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
+        while (passedZeroCount < zetaZeroValues.Length && zetaZeroValues[passedZeroCount] <= iter) passedZeroCount++;
+        if (passedZeroCount == zetaPoints.Count && passedZeroCount == zetaCurvesByZero.Count) return; // nothing new this frame
+        List<double> zetaZeros = new(passedZeroCount);
+        for (int i = 0; i < passedZeroCount; i++) zetaZeros.Add(zetaZeroValues[i]);
         foreach (double zetaZero in zetaZeros)
         {
             if (zetaCurvesByZero.ContainsKey(zetaZero)) continue;

@@ -110,6 +110,8 @@ public class Annotations : MonoBehaviour
     float nextReadoutTime;
     string lastDialText = "", lastAngleText = "";
     Vector3[] masterBuffer;
+    readonly Vector3[] soleBuffer = new Vector3[14];
+    readonly Vector3[] arcBuffer = new Vector3[13];
     GameObject tipSphere, centerSphere;
     TextBox dialLabel;
     LineRenderer centerRing;
@@ -730,7 +732,7 @@ public class Annotations : MonoBehaviour
             Vector3[] joints = main.Limit.LastJoints;
             Vector3 tip = main.Limit.ShowTail && main.Limit.LastDecomposition.PartialSums != null
                 ? LimitCurve.ToWorld(main.Limit.LastDecomposition.Total, (float)main.Limit.LastT * Graph.yScale)
-                : joints.Length > 0 ? joints[^1] : Vector3.zero;
+                : main.Limit.LastJointCount > 0 ? joints[main.Limit.LastJointCount - 1] : Vector3.zero;
             tipSphere.transform.position = tip;
         }
 
@@ -840,7 +842,7 @@ public class Annotations : MonoBehaviour
     {
         Vector3[] joints = main.Limit.LastJoints;
         double t = main.Limit.LastT;
-        int count = Mathf.Min(angleArcs.Count, joints.Length - 2);
+        int count = Mathf.Min(angleArcs.Count, main.Limit.LastJointCount - 2);
         for (int i = 0; i < angleArcs.Count; i++)
         {
             bool active = i < count;
@@ -856,15 +858,14 @@ public class Annotations : MonoBehaviour
             float a0 = Mathf.Atan2(a.z, a.x), a1 = Mathf.Atan2(b.z, b.x);
             float delta = Mathf.DeltaAngle(a0 * Mathf.Rad2Deg, a1 * Mathf.Rad2Deg) * Mathf.Deg2Rad;
             const int segs = 12;
-            Vector3[] pts = new Vector3[segs + 1];
             for (int k = 0; k <= segs; k++)
             {
                 float ang = a0 + delta * k / segs;
-                pts[k] = j + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * r + Vector3.up * .02f;
+                arcBuffer[k] = j + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * r + Vector3.up * .02f;
             }
 
-            angleArcs[i].positionCount = pts.Length;
-            angleArcs[i].SetPositions(pts);
+            angleArcs[i].positionCount = arcBuffer.Length;
+            angleArcs[i].SetPositions(arcBuffer);
             int n = i + 2; // the outgoing arrow is arrow n
             double turn = t * System.Math.Log((double)n / (n - 1)) * 180 / System.Math.PI;
             if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"{turn:0}°";
@@ -1219,9 +1220,7 @@ public class Annotations : MonoBehaviour
 
     IEnumerator PulseGlow(Renderer r, float seconds, float strength)
     {
-        MaterialPropertyBlock block = new();
-        r.GetPropertyBlock(block);
-        float baseIntensity = block.GetFloat("_Intensity");
+        float baseIntensity = Factory.GetIntensity(r);
         if (baseIntensity <= 0f) baseIntensity = Factory.NoGlow;
         float t = 0f;
         while (t < seconds && r != null)
@@ -1406,7 +1405,7 @@ public class Annotations : MonoBehaviour
     void UpdateChainFeet()
     {
         Vector3[] joints = main.Limit.LastJoints;
-        int count = Mathf.Min(joints.Length - 1, 12);
+        int count = Mathf.Min(main.Limit.LastJointCount - 1, 12);
         while (chainFeet.Count < count)
         {
             GameObject foot = new GameObject("chain foot " + chainFeet.Count);
@@ -1434,14 +1433,13 @@ public class Annotations : MonoBehaviour
             LineRenderer sole = chainFeet[i].transform.GetChild(0).GetComponent<LineRenderer>();
             sole.startWidth = scale * .3f;
             sole.endWidth = scale * .3f;
-            Vector3[] sp = new Vector3[14];
             for (int k = 0; k < 14; k++)
             {
                 float a = k / 14f * Mathf.PI * 2f;
-                sp[k] = centre + dir * (Mathf.Cos(a) * scale * .5f) + side * (Mathf.Sin(a) * scale * .28f) + Vector3.up * .01f;
+                soleBuffer[k] = centre + dir * (Mathf.Cos(a) * scale * .5f) + side * (Mathf.Sin(a) * scale * .28f) + Vector3.up * .01f;
             }
 
-            sole.SetPositions(sp);
+            sole.SetPositions(soleBuffer);
         }
     }
     public void ShowNumberLine(bool on) => numberLineRoot.SetActive(on);

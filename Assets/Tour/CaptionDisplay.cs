@@ -328,7 +328,7 @@ public class CaptionDisplay : MonoBehaviour
 
     string hintText = "";
     public bool ShowFps;
-    float fpsAccum, fpsTime; int fpsFrames; float fps;
+    float fpsAccum, fpsTime; int fpsFrames; float fps; float worstFrame; int gcAtWindowStart;
 
     public void SetHint(string text)
     {
@@ -341,12 +341,16 @@ public class CaptionDisplay : MonoBehaviour
         if (!ShowFps) return;
         fpsFrames++;
         fpsTime += Time.unscaledDeltaTime;
-        if (fpsTime >= 0.5f)
+        worstFrame = Mathf.Max(worstFrame, Time.unscaledDeltaTime);
+        if (fpsTime >= 1f)
         {
             fps = fpsFrames / fpsTime;
+            int gcNow = System.GC.CollectionCount(0);
+            hint.text = $"{fps:0} fps   worst {worstFrame * 1000f:0} ms   GC/s {gcNow - gcAtWindowStart}   {hintText}";
+            gcAtWindowStart = gcNow;
             fpsFrames = 0;
             fpsTime = 0f;
-            hint.text = $"{fps:0} fps   {hintText}";
+            worstFrame = 0f;
         }
     }
 

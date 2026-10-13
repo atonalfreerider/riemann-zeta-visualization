@@ -18,23 +18,22 @@
             "hide:imaxis",
             "hide:polelabel",
             "primes:on",
-            "primes:build"
+            "primes:build",
+            "delay:3:sacks:sieve:22"
           ],
           "pause": 0.4
         },
         {
           "id": "hook_02",
-          "text": "Watch how the other numbers are built. Take two, and multiply it by two, three, four, and so on: four, six, eight, ten. Each product strikes a number off the list.",
-          "camera": "lattice",
-          "actions": [
-            "sacks:lattice"
-          ],
+          "text": "Break the grid open and let every number find its place on a spiral. Now start at two and draw an axis: two times two, two times three, two times five, two times seven. Each product is struck off.",
+          "camera": "sieve",
+          "actions": [],
           "pause": 0.4
         },
         {
           "id": "hook_03",
-          "text": "Then three times three and upward, then five times five. Every axis makes its own row of composites, and where a prime meets itself you get a perfect square: four, nine, twenty five, in orange.",
-          "camera": "lattice",
+          "text": "Start a new axis at three: three times three, three times five, three times seven. Then another at five: five times five. Axis by axis, the sieve strikes out every composite, and where a prime meets itself you get a perfect square, in orange.",
+          "camera": "sieve",
           "actions": [
             "pulse:primes"
           ],
@@ -42,7 +41,7 @@
         },
         {
           "id": "hook_04",
-          "text": "What survives the sieve is the primes. Now wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.",
+          "text": "What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.",
           "camera": "sacks_flat",
           "actions": [
             "sacks:spiral"

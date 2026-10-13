@@ -46,7 +46,7 @@ public static class ZetaMath
 
         public int N;
 
-        public Complex SpiralEnd => PartialSums[PartialSums.Length - 1];
+        public Complex SpiralEnd => PartialSums[N - 1];
         public Complex AfterTail => SpiralEnd + IntegralTail;
     }
 
@@ -64,10 +64,16 @@ public static class ZetaMath
 
     public static SpiralDecomposition Decompose(Complex s, int N, int correctionTerms = DefaultCorrectionTerms)
     {
+        return Decompose(s, N, null, correctionTerms);
+    }
+
+    /// <summary>Same as <see cref="Decompose(Complex,int,int)"/> but reuses <paramref name="buffer"/> when it is large enough (no per-frame allocation).</summary>
+    public static SpiralDecomposition Decompose(Complex s, int N, Complex[] buffer, int correctionTerms = DefaultCorrectionTerms)
+    {
         if (N < 2) N = 2;
         correctionTerms = Math.Min(correctionTerms, EvenBernoulli.Length);
 
-        SpiralDecomposition d = new SpiralDecomposition { N = N, PartialSums = new Complex[N] };
+        SpiralDecomposition d = new SpiralDecomposition { N = N, PartialSums = buffer != null && buffer.Length >= N ? buffer : new Complex[N] };
         Complex sum = Complex.Zero;
         d.PartialSums[0] = sum;
         for (int n = 1; n < N; n++)

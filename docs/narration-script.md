@@ -7,15 +7,15 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *Building blocks with no pattern*
 
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
-  <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build`</sub>
+  <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:22`</sub>
 
-**hook_02** — Watch how the other numbers are built. Take two, and multiply it by two, three, four, and so on: four, six, eight, ten. Each product strikes a number off the list.
-  <sub>camera `lattice` · actions `sacks:lattice`</sub>
+**hook_02** — Break the grid open and let every number find its place on a spiral. Now start at two and draw an axis: two times two, two times three, two times five, two times seven. Each product is struck off.
+  <sub>camera `sieve`</sub>
 
-**hook_03** — Then three times three and upward, then five times five. Every axis makes its own row of composites, and where a prime meets itself you get a perfect square: four, nine, twenty five, in orange.
-  <sub>camera `lattice` · actions `pulse:primes`</sub>
+**hook_03** — Start a new axis at three: three times three, three times five, three times seven. Then another at five: five times five. Axis by axis, the sieve strikes out every composite, and where a prime meets itself you get a perfect square, in orange.
+  <sub>camera `sieve` · actions `pulse:primes`</sub>
 
-**hook_04** — What survives the sieve is the primes. Now wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.
+**hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
 **hook_05** — Bend that spiral over a saddle. The composites fill the valleys, the squares line up along one ridge, and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.
@@ -179,4 +179,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
 
 ---
-1353 words ≈ 9.0 minutes of speech at 150 wpm, plus pauses and title cards.
+1369 words ≈ 9.1 minutes of speech at 150 wpm, plus pauses and title cards.

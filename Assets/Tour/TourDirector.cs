@@ -149,6 +149,12 @@ public class TourDirector : MonoBehaviour
 
     float currentLineSeconds = 3f;
 
+    IEnumerator Delayed(float seconds, string action)
+    {
+        yield return new WaitForSeconds(Storyboard ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
+        if (Running) ApplyActions(new[] { action });
+    }
+
     void PulseElement(string element, float seconds)
     {
         List<Renderer> renderers = new(Main.RenderersOf(element));
@@ -423,6 +429,10 @@ public class TourDirector : MonoBehaviour
             {
                 switch (verb)
                 {
+                    case "delay":
+                        // delay:SECONDS:action[:args] — run the rest after a pause (e.g. delay:3:sacks:sieve)
+                        StartCoroutine(Delayed(float.Parse(parts[1], CultureInfo.InvariantCulture), string.Join(":", parts, 2, parts.Length - 2)));
+                        break;
                     case "play": Main.Play(); break;
                     case "pause": Main.Pause(); break;
                     case "reset": Main.ResetAnimation(); break;
@@ -500,6 +510,7 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "saddle") StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
                         else if (arg == "flat") StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f)));
                         else if (arg == "lattice") StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f)));
+                        else if (arg == "sieve") StartCoroutine(Annotations.Sacks.SieveRoutine(parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(8f, currentLineSeconds * 2f)));
                         else if (arg == "squares") Annotations.Sacks.PulseSquares(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "composites") Annotations.Sacks.PulseComposites(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "routes") Annotations.Sacks.ShowRoutes(true);

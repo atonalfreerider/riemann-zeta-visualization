@@ -42,6 +42,9 @@ public class LimitCurve : MonoBehaviour
     GameObject ghostCenter;
     readonly Vector3[] headBuffer = new Vector3[3];
     readonly Vector3[] tailBuffer = new Vector3[3];
+    Complex[] sumBuffer = new Complex[256];
+    Vector3[] jointBuffer = new Vector3[256];
+    readonly List<string> lengthLabelCache = new();
     readonly List<LineRenderer> arrowheads = new();
     readonly List<TextBox> lengthLabels = new();
     GameObject arrowheadContainer;
@@ -175,8 +178,9 @@ public class LimitCurve : MonoBehaviour
         lengthLabelContainer.SetActive(visible);
     }
 
-    /// <summary>The spiral's joints in world space from the last draw (index 0 = origin).</summary>
+    /// <summary>The spiral's joints in world space from the last draw (index 0 = origin). Only the first <see cref="LastJointCount"/> entries are valid.</summary>
     public Vector3[] LastJoints { get; private set; } = System.Array.Empty<Vector3>();
+    public int LastJointCount { get; private set; }
 
     public void Reset()
     {
@@ -207,9 +211,13 @@ public class LimitCurve : MonoBehaviour
 
         // Each segment n^-s gets shorter (length n^-1/2) and rotates by -t·ln n.
         // see: https://youtu.be/sD0NjbwqlYw?t=418
-        ZetaMath.SpiralDecomposition d = ZetaMath.Decompose(s, N);
+        bool isMoving = limitCurve == MovingLimitCurve;
+        if (isMoving && sumBuffer.Length < N) sumBuffer = new Complex[N * 2];
+        ZetaMath.SpiralDecomposition d = ZetaMath.Decompose(s, N, isMoving ? sumBuffer : null);
 
-        Vector3[] joints = new Vector3[N];
+        // exact-size buffer so SetPositions can take it directly; it only reallocates when N changes
+        if (isMoving && jointBuffer.Length != N) jointBuffer = new Vector3[N];
+        Vector3[] joints = isMoving ? jointBuffer : new Vector3[N];
         for (int k = 0; k < N; k++)
         {
             joints[k] = ToWorld(d.PartialSums[k], yIntercept);
@@ -231,12 +239,12 @@ public class LimitCurve : MonoBehaviour
             tailCurve.SetPositions(tailBuffer);
         }
 
-        bool isMoving = limitCurve == MovingLimitCurve;
         if (isMoving)
         {
             LastDecomposition = d;
             LastT = t;
             LastJoints = joints;
+            LastJointCount = N;
             UpdateArrowheads(joints);
             UpdateLengthLabels(joints, s);
             UpdateTailGhost(d, s, yIntercept);
@@ -350,7 +358,7 @@ public class LimitCurve : MonoBehaviour
     void UpdateArrowheads(Vector3[] joints)
     {
         if (!ShowArrowheads) return;
-        int count = Math.Min(joints.Length - 1, MaxArrowheads);
+        int count = Math.Min(LastJointCount - 1, MaxArrowheads);
         while (arrowheads.Count < count)
         {
             LineRenderer head = Factory.NewLine("arrowhead", .04f, Color.white, Factory.SoftGlowIntensity);
@@ -378,7 +386,7 @@ public class LimitCurve : MonoBehaviour
             dir /= length;
             Vector3 side = Vector3.Cross(dir, Vector3.up).normalized;
             float size = Mathf.Clamp(length * .28f, .03f, .13f);
-            Color c = ChainColor((float)i / Math.Max(1, joints.Length - 1));
+            Color c = ChainColor((float)i / Math.Max(1, LastJointCount - 1));
             arrowheads[i].startColor = c;
             arrowheads[i].endColor = c;
             float w = Mathf.Clamp(length * .07f, .012f, .045f);
@@ -394,7 +402,7 @@ public class LimitCurve : MonoBehaviour
     void UpdateLengthLabels(Vector3[] joints, Complex s)
     {
         if (!ShowLengthLabels) return;
-        int count = Math.Min(joints.Length - 1, MaxLengthLabels);
+        int count = Math.Min(LastJointCount - 1, MaxLengthLabels);
         while (lengthLabels.Count < count)
         {
             TextBox label = TextBox.Create("", 1.35f);
@@ -403,23 +411,33 @@ public class LimitCurve : MonoBehaviour
             label.Color = new Color(1f, 1f, 1f, .85f);
             label.gameObject.AddComponent<Billboard>();
             lengthLabels.Add(label);
+            lengthLabelCache.Add("");
         }
 
         for (int i = 0; i < lengthLabels.Count; i++)
         {
             bool active = i < count;
-            lengthLabels[i].gameObject.SetActive(active);
+            if (lengthLabels[i].gameObject.activeSelf != active) lengthLabels[i].gameObject.SetActive(active);
             if (!active) continue;
-            double length = Math.Pow(i + 1, -s.Re);
-            int n = i + 1;
-            string len = length.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
-            lengthLabels[i].Text = Math.Abs(s.Re - .5) < 1e-9
-                ? $"<size=70%>step {n}</size>\n1/√{n} = {len}"
-                : $"<size=70%>step {n}</size>\n1/{n}^{s.Re:0.0#} = {len}";
+            if (lengthLabelCache[i].Length == 0 || lastLabelSigma != s.Re)
+            {
+                double length = Math.Pow(i + 1, -s.Re);
+                int n = i + 1;
+                string len = length.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+                string text = Math.Abs(s.Re - .5) < 1e-9
+                    ? $"<size=70%>step {n}</size>\n1/√{n} = {len}"
+                    : $"<size=70%>step {n}</size>\n1/{n}^{s.Re:0.0#} = {len}";
+                lengthLabelCache[i] = text;
+                lengthLabels[i].Text = text;
+            }
             Vector3 mid = (joints[i] + joints[i + 1]) * .5f;
             lengthLabels[i].transform.position = mid + Vector3.up * .05f + Vector3.back * .75f;
         }
+
+        lastLabelSigma = s.Re;
     }
+
+    double lastLabelSigma = double.NaN;
 
     class LimitCurveSpiral : MonoBehaviour
     {

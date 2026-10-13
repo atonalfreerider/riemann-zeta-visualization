@@ -34,6 +34,11 @@ public class SacksSpiral : MonoBehaviour
     readonly Vector3 latticeOrigin = new(-40f, 7.6f, 0f);
     const float LatticeCell = 1.5f, LatticeRow = 2.6f;
 
+    // sieve axes drawn in spiral space: from each prime p a glowing polyline through p×q
+    GameObject sieveRoot;
+    readonly List<LineRenderer> sieveAxes = new();
+    readonly List<TextBox> sieveLabels = new();
+
     float morph;   // 0 = grid, 1 = spiral
     float bend;    // 0 = flat, 1 = saddle
     float reveal;  // fraction of the extra numbers (31..Count) shown
@@ -226,6 +231,128 @@ public class SacksSpiral : MonoBehaviour
 
     public void HideLattice() => latticeRoot.SetActive(false);
 
+    static readonly int[] SievePrimes = { 2, 3, 5 };
+    static readonly Color[] SieveColors = { new(.35f, 1f, .55f), new(.55f, .6f, 1f), new(1f, .55f, .2f) };
+
+    /// <summary>
+    /// The sieve in spiral space: the 30 numbers fly to their spiral places, then from 2 an axis runs through
+    /// 2×2, 2×3, 2×5, 2×7 …, from 3 through 3×3, 3×5, 3×7, and from 5 through 5×5, striking each product.
+    /// </summary>
+    public IEnumerator SieveRoutine(float seconds)
+    {
+        gameObject.SetActive(true);
+        HideLattice();
+        foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
+        caption.gameObject.SetActive(true);
+        caption.Text = "each number n sits at distance √n from the centre, one full turn per square";
+
+        // phase A: break the grid open into spiral positions (only the first 30 numbers)
+        float flyTime = Mathf.Min(2.5f, seconds * .25f);
+        float t = 0f;
+        float m0 = morph;
+        while (t < flyTime)
+        {
+            t += Time.deltaTime;
+            morph = Mathf.Lerp(m0, 1f, Mathf.SmoothStep(0f, 1f, t / flyTime));
+            Layout();
+            yield return null;
+        }
+
+        morph = 1f;
+        Layout();
+
+        // phase B: one axis per prime
+        if (sieveRoot == null)
+        {
+            sieveRoot = new GameObject("SieveAxes");
+            sieveRoot.transform.SetParent(transform, false);
+        }
+
+        sieveRoot.SetActive(true);
+        foreach (LineRenderer a in sieveAxes) Destroy(a.gameObject);
+        foreach (TextBox l in sieveLabels) Destroy(l.gameObject);
+        sieveAxes.Clear();
+        sieveLabels.Clear();
+
+        float axisTime = (seconds - flyTime) / SievePrimes.Length;
+        for (int a = 0; a < SievePrimes.Length; a++)
+        {
+            int p = SievePrimes[a];
+            List<int> products = new();
+            for (int q = p; p * q <= GridCount; q++) if (IsPrime(q)) products.Add(p * q);
+            if (products.Count == 0) continue;
+
+            LineRenderer axis = Factory.NewLine("sieve axis " + p, .12f, SieveColors[a], Factory.GlowIntensity);
+            axis.transform.SetParent(sieveRoot.transform, false);
+            axis.numCornerVertices = 4;
+            sieveAxes.Add(axis);
+            TextBox label = TextBoxLabel($"{p} ×", 3.0f, SieveColors[a]);
+            label.transform.SetParent(sieveRoot.transform, false);
+            label.transform.position = Pos(p) + Vector3.back * .6f + Vector3.up * 1.3f;
+            sieveLabels.Add(label);
+            StartCoroutine(PulseScale(dots[p - 1].transform, .5f, 2.2f, 1.0f));
+
+            // grow the polyline product by product
+            List<Vector3> pts = new() { Pos(p) + Vector3.back * .15f };
+            axis.positionCount = 1;
+            axis.SetPositions(pts.ToArray());
+            float per = axisTime / products.Count;
+            foreach (int n in products)
+            {
+                Vector3 from = pts[^1];
+                Vector3 to = Pos(n) + Vector3.back * .15f;
+                float e = 0f;
+                while (e < per * .8f)
+                {
+                    e += Time.deltaTime;
+                    float k = Mathf.SmoothStep(0f, 1f, e / (per * .8f));
+                    axis.positionCount = pts.Count + 1;
+                    pts.Add(Vector3.Lerp(from, to, k));
+                    axis.SetPositions(pts.ToArray());
+                    pts.RemoveAt(pts.Count - 1);
+                    yield return null;
+                }
+
+                pts.Add(to);
+                axis.positionCount = pts.Count;
+                axis.SetPositions(pts.ToArray());
+
+                // strike the product
+                bool square = n == p * p;
+                labels[n - 1].Color = square ? new Color(1f, .55f, .2f) : new Color(.28f, .28f, .34f);
+                dots[n - 1].SetActive(true);
+                if (!square) dots[n - 1].GetComponent<Renderer>().enabled = true;
+                StartCoroutine(PulseScale(dots[n - 1].transform, square ? .32f : .22f, square ? 3f : 2f, .6f));
+                TextBox hit = TextBoxLabel($"{p}×{n / p}", 1.4f, SieveColors[a]);
+                hit.transform.SetParent(sieveRoot.transform, false);
+                hit.transform.position = Pos(n) + Vector3.back * .5f + Vector3.down * .9f;
+                sieveLabels.Add(hit);
+                yield return new WaitForSeconds(per * .2f);
+            }
+        }
+    }
+
+    IEnumerator FadeSieve(float seconds)
+    {
+        if (sieveRoot == null) yield break;
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            float a = 1f - t / seconds;
+            foreach (LineRenderer axis in sieveAxes)
+            {
+                Color c = axis.startColor;
+                axis.startColor = new Color(c.r, c.g, c.b, a);
+                axis.endColor = new Color(c.r, c.g, c.b, a);
+            }
+
+            yield return null;
+        }
+
+        sieveRoot.SetActive(false);
+    }
+
     /// <summary>Pulse the perfect squares (orange) on the spiral / saddle.</summary>
     public void PulseSquares(float seconds)
     {
@@ -333,6 +460,7 @@ public class SacksSpiral : MonoBehaviour
     {
         gameObject.SetActive(true);
         HideLattice();
+        if (sieveRoot != null) sieveRoot.SetActive(false);
         morph = 0f; bend = 0f; reveal = 0f;
         for (int i = 0; i < labels.Count; i++)
         {
@@ -390,13 +518,15 @@ public class SacksSpiral : MonoBehaviour
         for (int i = 0; i < GridCount; i++) dots[i].SetActive(true);
         caption.gameObject.SetActive(true);
         caption.Text = "Sacks spiral: number n at distance √n, one full turn per square";
+        StartCoroutine(FadeSieve(seconds * .6f));
+        float m0 = morph;
         float t = 0f;
         while (t < seconds)
         {
             t += Time.deltaTime;
             float k = Mathf.SmoothStep(0f, 1f, t / seconds);
-            morph = k;
-            reveal = Mathf.Clamp01((k - 0.35f) / 0.65f);
+            morph = Mathf.Lerp(m0, 1f, k);
+            reveal = Mathf.Clamp01((k - 0.2f) / 0.8f);
             Layout();
             yield return null;
         }

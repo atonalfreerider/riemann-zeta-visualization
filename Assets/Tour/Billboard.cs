@@ -4,9 +4,18 @@ using UnityEngine;
 [DefaultExecutionOrder(1000)]
 public class Billboard : MonoBehaviour
 {
+    static Transform camTransform;
+    static int camFrame = -1;
+
     void LateUpdate()
     {
-        Camera cam = Camera.main;
-        if (cam != null) transform.rotation = cam.transform.rotation;
+        if (camFrame != Time.frameCount)
+        {
+            camFrame = Time.frameCount;
+            Camera cam = Camera.main;
+            camTransform = cam != null ? cam.transform : null;
+        }
+
+        if (camTransform != null) transform.rotation = camTransform.rotation;
     }
 }

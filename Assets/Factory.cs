@@ -50,20 +50,27 @@ public class Factory : MonoBehaviour
     }
 
     /// <summary>Per-renderer HDR intensity without instancing a new material.</summary>
+    static MaterialPropertyBlock sharedBlockInstance;
+    static MaterialPropertyBlock sharedBlock => sharedBlockInstance ??= new MaterialPropertyBlock();
+
     public static void SetIntensity(Renderer renderer, float intensity)
     {
-        MaterialPropertyBlock block = new MaterialPropertyBlock();
-        renderer.GetPropertyBlock(block);
-        block.SetFloat(IntensityId, intensity);
-        renderer.SetPropertyBlock(block);
+        renderer.GetPropertyBlock(sharedBlock);
+        sharedBlock.SetFloat(IntensityId, intensity);
+        renderer.SetPropertyBlock(sharedBlock);
     }
 
     public static void SetColor(Renderer renderer, Color color)
     {
-        MaterialPropertyBlock block = new MaterialPropertyBlock();
-        renderer.GetPropertyBlock(block);
-        block.SetColor(ColorId, color);
-        renderer.SetPropertyBlock(block);
+        renderer.GetPropertyBlock(sharedBlock);
+        sharedBlock.SetColor(ColorId, color);
+        renderer.SetPropertyBlock(sharedBlock);
+    }
+
+    public static float GetIntensity(Renderer renderer)
+    {
+        renderer.GetPropertyBlock(sharedBlock);
+        return sharedBlock.GetFloat(IntensityId);
     }
 
     /// <summary>A glowing sphere marker (used for zeta zeros and probes).</summary>
