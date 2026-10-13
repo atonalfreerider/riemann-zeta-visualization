@@ -209,6 +209,26 @@ public class CameraRig : MonoBehaviour
             float d = annotations.Sacks.Extent * 1.5f;
             return new CueState { Position = annotations.Sacks.Center + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .9f), LookAt = c, Up = Vector3.back, Fov = 60 };
         };
+        cues["sacks_wave"] = () =>
+        {
+            // landscape: the saddle low in frame, the space above it (where the waves appear) filling the rest,
+            // looking across the level diagonal so each wave reads as a graph
+            Vector3 c = annotations.Sacks.Center;
+            float d = annotations.Sacks.Extent * 1.25f;
+            Vector3 diag = new(0.7071f, 0.7071f, 0), perp = new(0.7071f, -0.7071f, 0);
+            float sway = Mathf.Sin(Time.time * 0.18f) * 0.12f;
+            Vector3 pos = c + perp * (-d * (0.95f + sway)) + diag * (d * .25f) + Vector3.back * (d * .55f);
+            return new CueState { Position = pos, LookAt = c + diag * (d * .22f) + Vector3.back * 3.5f, Up = Vector3.back, Fov = 55 };
+        };
+        cues["sacks_wave_close"] = () =>
+        {
+            Vector3 c = annotations.Sacks.Center;
+            float d = annotations.Sacks.Extent * 0.9f;
+            Vector3 diag = new(0.7071f, 0.7071f, 0), perp = new(0.7071f, -0.7071f, 0);
+            float a = Time.time * 0.12f;
+            Vector3 pos = c + perp * (-d * Mathf.Cos(a)) + diag * (d * .3f * Mathf.Sin(a) + d * .2f) + Vector3.back * (d * .8f);
+            return new CueState { Position = pos, LookAt = c + diag * (d * .25f), Up = Vector3.back, Fov = 55 };
+        };
         cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
         cues["spiral_angles"] = () => new CueState { Position = new Vector3(-0.4f, TipY + 6.5f, -1.8f), LookAt = new Vector3(-0.4f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
         cues["zeno"] = () => new CueState { Position = new Vector3(2.4f, 9.5f, 0.3f), LookAt = new Vector3(2.4f, 0f, 0.55f), Up = Vector3.right, Fov = 60 };

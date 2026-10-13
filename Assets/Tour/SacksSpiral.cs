@@ -927,6 +927,142 @@ public class SacksSpiral : MonoBehaviour
 
     readonly Vector3[] ringBuffer = new Vector3[FieldSegs];
 
+    GameObject waveStackRoot;
+    LineRenderer masterProfile;
+    Coroutine waveRoutine;
+    const int ProfilePts = 240;
+    const float WaveAltitude = 9f, WaveAmp = 1.6f;
+    static readonly Vector3 Diag = new(0.70710678f, 0.70710678f, 0); // the saddle's level line (height 0)
+
+    /// <summary>A point on the saddle at distance r along the level diagonal, lifted by h along the normal.</summary>
+    Vector3 OnDiag(float r, float h) => origin + Diag * r + Vector3.back * (h + .15f);
+
+    void EnsureWaveStack()
+    {
+        if (waveStackRoot != null) return;
+        waveStackRoot = new GameObject("WaveStack");
+        waveStackRoot.transform.SetParent(hypothesisRoot.transform, false);
+        masterProfile = Factory.NewLine("master profile", .09f, Factory.Palette.Cosine, Factory.GlowIntensity);
+        masterProfile.transform.SetParent(waveStackRoot.transform, false);
+        masterProfile.positionCount = ProfilePts;
+        masterProfile.numCornerVertices = 3;
+        LineRenderer ray = Factory.NewLine("profile ray", .025f, new Color(.5f, .5f, .6f));
+        ray.transform.SetParent(waveStackRoot.transform, false);
+        ray.positionCount = 2;
+        ray.SetPositions(new[] { OnDiag(R * Mathf.Sqrt(FieldNMin), 0f), OnDiag(R * Mathf.Sqrt(FieldNMax), 0f) });
+        // prime tick marks along the ray so ridges can be compared to primes at a glance
+        for (int n = 2; n <= 120; n++)
+        {
+            if (!IsPrime(n)) continue;
+            LineRenderer tick = Factory.NewLine("prime tick", .04f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+            tick.transform.SetParent(waveStackRoot.transform, false);
+            tick.positionCount = 2;
+            float r = R * Mathf.Sqrt(n);
+            tick.SetPositions(new[] { OnDiag(r, -0.4f), OnDiag(r, 0.4f) });
+        }
+    }
+
+    float ProfileN(int i) => FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (ProfilePts - 1f));
+
+    void SetMasterProfile(int k)
+    {
+        double[] zs = Main.Instance.zetaZeroValues;
+        float scale = WaveAmp / Mathf.Sqrt(Mathf.Max(1, k));
+        Vector3[] pts = new Vector3[ProfilePts];
+        for (int i = 0; i < ProfilePts; i++)
+        {
+            float n = ProfileN(i);
+            double logN = System.Math.Log(n);
+            double sum = 0;
+            for (int z = 0; z < k; z++) sum -= System.Math.Cos(zs[z] * logN);
+            pts[i] = OnDiag(R * Mathf.Sqrt(n), (float)sum * scale);
+        }
+
+        masterProfile.SetPositions(pts);
+    }
+
+    /// <summary>
+    /// Dial the zeros in one at a time: each zero's cosine wave cos(γ·log n) appears as a graph high above the
+    /// saddle along the level diagonal, then sinks onto the surface and merges into the master wave; the ring
+    /// field (the same sum swept around the centre) updates with it, so the interference builds in 3D.
+    /// </summary>
+    public void StartWaveStack(float seconds, int count)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        waveStackRoot.SetActive(true);
+        if (interferenceRoot == null) StartInterference(0.01f); // builds the rings
+        if (fieldRoutine != null) StopCoroutine(fieldRoutine);
+        interferenceRoot.SetActive(true);
+        if (waveRoutine != null) StopCoroutine(waveRoutine);
+        waveRoutine = StartCoroutine(WaveStackRoutine(seconds, count));
+    }
+
+    IEnumerator WaveStackRoutine(float seconds, int count)
+    {
+        double[] zs = Main.Instance.zetaZeroValues;
+        count = Mathf.Min(count, zs.Length);
+        SetInterference(0);
+        SetMasterProfile(0);
+        float per = seconds / count;
+        for (int k = 0; k < count; k++)
+        {
+            float g = (float)zs[k];
+            Color c = Annotations.CollisionColor(k);
+            LineRenderer wave = Factory.NewLine("wave " + (k + 1), .07f, c, Factory.GlowIntensity);
+            wave.transform.SetParent(waveStackRoot.transform, false);
+            wave.positionCount = ProfilePts;
+            Vector3[] pts = new Vector3[ProfilePts];
+            float amp = WaveAmp / Mathf.Sqrt(k + 1);
+            caption.gameObject.SetActive(true);
+            caption.Text = $"collision {k + 1}:  dial γ = {g:0.00}  →  cos(γ · log n), drawn above the saddle, then settled onto it";
+
+            // appear high above the saddle (grow in from the centre), then descend and merge
+            float tIn = per * .35f, tDown = per * .45f, tHold = per * .2f;
+            float t = 0f;
+            while (t < tIn)
+            {
+                t += Time.deltaTime;
+                float u = Mathf.SmoothStep(0f, 1f, t / tIn);
+                for (int i = 0; i < ProfilePts; i++)
+                {
+                    float n = ProfileN(i);
+                    float reach = Mathf.Clamp01((u * 1.2f - i / (float)ProfilePts) * 6f);
+                    pts[i] = OnDiag(R * Mathf.Sqrt(n), WaveAltitude - amp * Mathf.Cos(g * Mathf.Log(n)) * reach);
+                }
+
+                wave.SetPositions(pts);
+                yield return null;
+            }
+
+            t = 0f;
+            while (t < tDown)
+            {
+                t += Time.deltaTime;
+                float u = Mathf.SmoothStep(0f, 1f, t / tDown);
+                float alt = Mathf.Lerp(WaveAltitude, 0f, u);
+                for (int i = 0; i < ProfilePts; i++)
+                {
+                    float n = ProfileN(i);
+                    pts[i] = OnDiag(R * Mathf.Sqrt(n), alt - amp * Mathf.Cos(g * Mathf.Log(n)));
+                }
+
+                wave.SetPositions(pts);
+                Color faded = new(c.r, c.g, c.b, 1f - u * .85f);
+                wave.startColor = faded;
+                wave.endColor = faded;
+                yield return null;
+            }
+
+            Destroy(wave.gameObject);
+            SetInterference(k + 1);
+            SetMasterProfile(k + 1);
+            yield return new WaitForSeconds(tHold);
+        }
+
+        caption.Text = $"{count} collision waves stacked: the ridges sit on the circles through the primes";
+    }
+
     void SetInterference(int k)
     {
         double[] zs = Main.Instance.zetaZeroValues;
@@ -960,24 +1096,38 @@ public class SacksSpiral : MonoBehaviour
     /// arrows point the same way are n = e^(2πk/t); their spiral positions trace a curve. Two curves are drawn,
     /// for the first two zeros (t = 14.13 and 21.02). Whether these curves mean anything is an open question.
     /// </summary>
+    GameObject ringsRoot;
+
+    /// <summary>Show only the zeta trail (and its zeros on the axis); rings, road, jump-off columns and squares hidden.</summary>
+    public void ShowZetaOnly()
+    {
+        ShowHypothesis(true);
+        foreach (Transform c in hypothesisRoot.transform)
+        {
+            c.gameObject.SetActive(c.name == "ZetaTrail" || c.name == "Interference" || c.name == "WaveStack");
+        }
+    }
+
     public void ShowHypothesis(bool on)
     {
-        if (!on) { HideInterference(); if (hypothesisRoot != null) hypothesisRoot.SetActive(false); return; }
+        if (!on) { HideInterference(); if (waveRoutine != null) StopCoroutine(waveRoutine); if (hypothesisRoot != null) hypothesisRoot.SetActive(false); return; }
         if (hypothesisRoot == null)
         {
             hypothesisRoot = new GameObject("Hypothesis");
             hypothesisRoot.transform.SetParent(transform, false);
             // the square-root rule: the spiral road itself, from 1 outward
+            ringsRoot = new GameObject("Rings");
+            ringsRoot.transform.SetParent(hypothesisRoot.transform, false);
             // only the inner turns, thin and dim: a guide for the eye, not a wall of yellow
             LineRenderer road = Factory.NewLine("sqrt road", .04f, new Color(1f, .85f, .3f, .55f), Factory.NoGlow);
-            road.transform.SetParent(hypothesisRoot.transform, false);
+            road.transform.SetParent(ringsRoot.transform, false);
             const int roadPts = 900, roadMax = 400;
             road.positionCount = roadPts;
             Vector3[] pts = new Vector3[roadPts];
             for (int i = 0; i < roadPts; i++) pts[i] = SpiralPos(1f + (roadMax - 1f) * i / (roadPts - 1f), 1f) + Vector3.back * .2f;
             road.SetPositions(pts);
             TextBox roadLabel = TextBoxLabel("the square-root rule: radius √n  (the chain's arrow 1/√n, inverted)", 2.4f, new Color(1f, .85f, .3f));
-            roadLabel.transform.SetParent(hypothesisRoot.transform, false);
+            roadLabel.transform.SetParent(ringsRoot.transform, false);
             roadLabel.transform.position = origin + new Vector3(0, -Extent - 4.5f, 0);
 
             // The logarithm rule: arrow n turns by t·log n. Between numbers n and m the chain makes one full
@@ -992,7 +1142,7 @@ public class SacksSpiral : MonoBehaviour
                 for (float r = 1f; r <= Mathf.Sqrt(Count); r *= ratio)
                 {
                     LineRenderer ring = Factory.NewLine("ring " + tz, z == 0 ? .07f : .05f, cs[z], Factory.SoftGlowIntensity);
-                    ring.transform.SetParent(hypothesisRoot.transform, false);
+                    ring.transform.SetParent(ringsRoot.transform, false);
                     ring.loop = true;
                     const int segs = 72;
                     ring.positionCount = segs;
@@ -1007,12 +1157,12 @@ public class SacksSpiral : MonoBehaviour
                     ring.SetPositions(rp);
                     float n = r * r;
                     GameObject dot = Factory.NewSphere("ring dot", .4f, cs[z], Factory.GlowIntensity);
-                    dot.transform.SetParent(hypothesisRoot.transform, false);
+                    dot.transform.SetParent(ringsRoot.transform, false);
                     dot.transform.position = SpiralPos(n, 1f) + Vector3.back * .3f;
                 }
 
                 TextBox l = TextBoxLabel($"the logarithm rule at t = {tz:0.00}:  one full turn of the chain per ring, radii × e^(π/t) = {ratio:0.000}", 2.2f, cs[z]);
-                l.transform.SetParent(hypothesisRoot.transform, false);
+                l.transform.SetParent(ringsRoot.transform, false);
                 l.transform.position = origin + new Vector3(0, -Extent - 7.5f - z * 3f, 0);
             }
         }
