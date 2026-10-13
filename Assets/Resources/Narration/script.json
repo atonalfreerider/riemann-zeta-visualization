@@ -1,247 +1,73 @@
 {
-  "title": "The Spiral, the Collisions, and the Primes",
+  "title": "The Square-Root Key: a machine for manufacturing primes",
   "chapters": [
+    {
+      "id": "zeno",
+      "title": "Zeno's Chain",
+      "subtitle": "and a gentler rule",
+      "lines": [
+        { "id": "zeno_01", "text": "Zeno's old puzzle. Walk half way to the wall. Then half of what is left. Then half again. Infinitely many steps, and you never pass two.",
+          "camera": "zeno", "actions": ["reset", "pause", "hide:spiral", "hide:outaxes", "hide:imaxis", "hide:polelabel", "show:zeno"], "pause": 0.4 },
+        { "id": "zeno_02", "text": "Lay the steps out as arrows: one, a half, a quarter, an eighth. The chain shrinks fast and stops dead at two.",
+          "camera": "zeno", "actions": [], "pause": 0.4 },
+        { "id": "zeno_03", "text": "Now a gentler rule. The second arrow is one over the square root of two. The third, one over root three. Every arrow is one over the square root of its number.",
+          "camera": "zeno", "actions": ["terms:1", "hide:tail", "show:spiral", "show:lengths", "hide:center", "build:1:8"], "pause": 0.4 },
+        { "id": "zeno_04", "text": "Shrinking this slowly, the chain never stops. Sixty arrows reach fourteen. A million reach two thousand. It runs off the floor forever.",
+          "camera": "chain_long", "actions": ["hide:zeno", "hide:lengths", "build:8:60"], "pause": 0.4 },
+        { "id": "zeno_05", "text": "Hold on to that square root. The exponent one half is the key to everything that follows, and we will come back to it at the end.",
+          "camera": "chain_long", "actions": [], "pause": 0.5 }
+      ]
+    },
     {
       "id": "stage",
       "title": "The Stage",
       "subtitle": "A floor, a pole, and a dial",
       "lines": [
-        {
-          "id": "stage_01",
-          "text": "Start with an empty stage. A flat floor, and a pole going straight up.",
-          "camera": "stage",
-          "actions": [
-            "reset",
-            "pause",
-            "hide:spiral",
-            "show:outaxes",
-            "show:imaxis",
-            "show:polelabel"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "stage_02",
-          "text": "Every point on the floor is a complex number: so many steps to the right, so many steps toward the back.",
-          "camera": "stage_floor",
-          "actions": [],
-          "pause": 0.3
-        },
-        {
-          "id": "stage_03",
-          "text": "The pole is a dial. We will turn it slowly, and everything on the floor will move. Its reading is called t.",
-          "camera": "stage",
-          "actions": [
-            "show:center"
-          ],
-          "pause": 0.5
-        }
+        { "id": "stage_01", "text": "The chain lives on a flat floor with a pole going up. Mathematicians call the floor the complex plane. For us it is just a floor: so many steps right, so many steps back.",
+          "camera": "stage", "actions": ["hide:spiral", "show:outaxes", "show:imaxis", "show:polelabel"], "pause": 0.4 },
+        { "id": "stage_02", "text": "The pole is a dial. Its reading is called t. Turn it, and every joint in the chain bends.",
+          "camera": "stage", "actions": ["show:center"], "pause": 0.5 }
       ]
     },
     {
-      "id": "chain",
-      "title": "Zeno's Chain",
-      "subtitle": "Shrink, then turn",
-      "lines": [
-        {
-          "id": "chain_01",
-          "text": "Lay down an arrow of length one.",
-          "camera": "chain_flat",
-          "actions": [
-            "terms:1",
-            "hide:tail",
-            "show:spiral",
-            "show:lengths",
-            "hide:center",
-            "hide:outaxes",
-            "hide:imaxis",
-            "hide:polelabel"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "chain_02",
-          "text": "Add a second, shorter arrow, then a third, shorter still. Zeno would halve each step. Our rule is gentler: one over the square root of the step number.",
-          "camera": "chain_flat",
-          "actions": [
-            "build:1:6"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "chain_03",
-          "text": "One. Point seven one. Point five eight. Point five. The arrows shrink, but only slowly.",
-          "camera": "chain_flat",
-          "actions": [
-            "build:6:12"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "chain_04",
-          "text": "Zeno's halves add up to two and stop. Ours never stop. Sixty arrows reach fourteen, a million reach two thousand. The chain runs off the floor forever.",
-          "camera": "chain_long",
-          "actions": [
-            "hide:lengths",
-            "build:12:60"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "chain_05",
-          "text": "Now turn the dial. At every joint, bend the chain by the dial reading times the log of the step number. The straight chain curls into a spiral.",
-          "camera": "spiral_curl",
-          "actions": [
-            "terms:24",
-            "show:center",
-            "show:imaxis",
-            "speed:0.35",
-            "play"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "chain_06",
-          "text": "The chain is endless, so we add one orange arrow that stands in for the whole rest of the chain. Now the tip is exact.",
-          "camera": "spiral_curl",
-          "actions": [
-            "show:tail",
-            "flash:tail",
-            "speed:0.5"
-          ],
-          "pause": 0.3,
-          "footnote": "the orange arrow is the Euler–Maclaurin tail: N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms"
-        },
-        {
-          "id": "chain_07",
-          "text": "Here is the strange talent of the one half rule. Keep turning, and the tip wanders, then dives straight into the centre.",
-          "camera": "tip_center",
-          "actions": [
-            "show:tip",
-            "speed:1.3"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "chain_08",
-          "text": "At a dial reading of fourteen point one three, it hits dead centre. We drop a marker on the pole at that height.",
-          "camera": "tip_center",
-          "actions": [
-            "pause",
-            "jump:14.134725",
-            "flash:zero"
-          ],
-          "pause": 0.6
-        }
-      ]
-    },
-    {
-      "id": "collisions",
-      "title": "Collisions",
+      "id": "turn",
+      "title": "Turn the Dial",
       "subtitle": "The tip keeps finding the centre",
       "lines": [
-        {
-          "id": "coll_01",
-          "text": "Keep turning. Twenty one. Twenty five. Thirty point four. The tip keeps finding the centre.",
-          "camera": "markers_axis",
-          "actions": [
-            "terms:auto",
-            "speed:3",
-            "play"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "coll_02",
-          "text": "It never stops. Riemann proved the collisions go on forever. Ten thousand of them are loaded here, every one on this pole.",
-          "camera": "markers_axis",
-          "actions": [
-            "speed:5"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "coll_03",
-          "text": "Here is the tip's whole path, winding up the pole and threading the centre again and again. Those collision heights are the famous zeros of the zeta function.",
-          "camera": "markers_axis_wide",
-          "actions": [
-            "show:trail",
-            "speed:6"
-          ],
-          "pause": 0.6
-        }
+        { "id": "turn_01", "text": "Each joint bends by the dial reading times the log of its number. The straight chain curls into a spiral.",
+          "camera": "spiral_curl", "actions": ["terms:24", "show:spiral", "show:center", "hide:polelabel", "speed:0.35", "play"], "pause": 0.3 },
+        { "id": "turn_02", "text": "The chain is endless, so one orange arrow stands in for the whole rest of it. Now the tip is exact.",
+          "camera": "spiral_curl", "actions": ["show:tail", "flash:tail", "speed:0.5"], "pause": 0.3,
+          "footnote": "the orange arrow is the Euler–Maclaurin tail: N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms" },
+        { "id": "turn_03", "text": "Keep turning. The tip wanders, then dives straight into the centre.",
+          "camera": "tip_center", "actions": ["show:tip", "speed:1.3"], "pause": 0.3 },
+        { "id": "turn_04", "text": "At a dial reading of fourteen point one three it hits dead centre. We drop a marker on the pole at that height and call it a collision.",
+          "camera": "tip_center", "actions": ["pause", "jump:14.134725", "flash:zero"], "pause": 0.5 },
+        { "id": "turn_05", "text": "Twenty one. Twenty five. Thirty point four. The collisions never stop. Ten thousand are loaded here, all on this pole.",
+          "camera": "markers_axis", "actions": ["terms:auto", "speed:3", "play"], "pause": 0.3 },
+        { "id": "turn_06", "text": "Here is the tip's whole path, threading the centre again and again. These collision heights are the famous zeros of the Riemann zeta function.",
+          "camera": "markers_axis_wide", "actions": ["show:trail", "speed:6"], "pause": 0.6 }
       ]
     },
     {
       "id": "waves",
       "title": "Collisions Become Waves",
-      "subtitle": "A probability map of the primes",
+      "subtitle": "One wave per collision",
       "lines": [
-        {
-          "id": "wave_01",
-          "text": "Now take the first collision height, fourteen point one three, and turn it into a wave: the cosine of fourteen point one three times the log of x.",
-          "camera": "wave",
-          "actions": [
-            "pause",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "hide:trail",
-            "hide:imaxis",
-            "hide:outaxes",
-            "hide:zeros",
-            "cosine:1",
-            "show:cosine",
-            "show:numbers"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "wave_02",
-          "text": "Add the wave from the second collision.",
-          "camera": "wave",
-          "actions": [
-            "cosine:2"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "wave_03",
-          "text": "And the third.",
-          "camera": "wave",
-          "actions": [
-            "cosine:3"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "wave_04",
-          "text": "Ten waves. Most of the time they cancel each other out.",
-          "camera": "wave",
-          "actions": [
-            "cosine:10"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "wave_05",
-          "text": "All of them. Where they agree, they pile up into spikes, and the spikes sit exactly on two, three, five, seven, eleven, thirteen, and their powers: four, eight, nine.",
-          "camera": "spikes",
-          "actions": [
-            "cosine:all",
-            "speed:6",
-            "play"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "wave_06",
-          "text": "This is a probability map of the primes, built from nothing but collision heights.",
-          "camera": "spikes",
-          "actions": [],
-          "pause": 0.6
-        }
+        { "id": "wave_01", "text": "Start with an ordinary cosine wave. Up, down, up, down, the same width forever.",
+          "camera": "wave", "actions": ["pause", "hide:spiral", "hide:tail", "hide:tip", "hide:center", "hide:trail", "hide:imaxis", "hide:outaxes", "hide:zeros", "show:numbers", "wave:plain"], "pause": 0.4 },
+        { "id": "wave_02", "text": "Now bend it. Stretch the wave with a logarithm, and set its speed to the first collision height, fourteen point one three. The ripples bunch up near zero and widen as x grows.",
+          "camera": "wave", "actions": ["wave:morph"], "pause": 0.5 },
+        { "id": "wave_03", "text": "That is the first collision's wave.",
+          "camera": "wave", "actions": ["cosine:1", "show:cosine", "wave:off"], "pause": 0.4 },
+        { "id": "wave_04", "text": "Take the second collision, twenty one point zero two, build its wave the same way, and add it on top. Where the two agree the peaks reinforce. Where they disagree they cancel.",
+          "camera": "wave", "actions": ["cosine:build:1:2"], "pause": 0.5 },
+        { "id": "wave_05", "text": "Keep going. The third wave. The fourth. Ten waves. More and more of the pattern cancels out.",
+          "camera": "wave", "actions": ["cosine:build:2:10"], "pause": 0.4 },
+        { "id": "wave_06", "text": "Hundreds of waves. What survives are sharp spikes, and they sit exactly on two, three, five, seven, eleven, thirteen, and the prime powers four, eight, nine.",
+          "camera": "spikes", "actions": ["cosine:build:10:all", "speed:6", "play"], "pause": 0.4 },
+        { "id": "wave_07", "text": "A map of where the primes are, built from nothing but collision heights.",
+          "camera": "spikes", "actions": [], "pause": 0.6 }
       ]
     },
     {
@@ -249,106 +75,44 @@
       "title": "The Staircase",
       "subtitle": "Riemann's exact recipe",
       "lines": [
-        {
-          "id": "stair_01",
-          "text": "Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision.",
-          "camera": "staircase_close",
-          "actions": [
-            "pause",
-            "hide:cosine",
-            "show:prime",
-            "hide:numbers"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "stair_02",
-          "text": "Each weight is fixed by the recipe. Nothing is tuned by hand.",
-          "camera": "staircase_close",
-          "actions": [
-            "show:equations"
-          ],
-          "pause": 0.3,
-          "footnote": "ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)"
-        },
-        {
-          "id": "stair_03",
-          "text": "The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.",
-          "camera": "staircase",
-          "actions": [
-            "hide:equations",
-            "speed:8",
-            "play"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "stair_04",
-          "text": "More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.",
-          "camera": "staircase_wide",
-          "actions": [],
-          "pause": 0.6
-        }
+        { "id": "stair_01", "text": "Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision.",
+          "camera": "staircase_close", "actions": ["pause", "hide:cosine", "hide:numbers", "show:prime"], "pause": 0.3 },
+        { "id": "stair_02", "text": "Each weight is fixed by the recipe. Nothing is tuned by hand.",
+          "camera": "staircase_close", "actions": ["show:equations"], "pause": 0.3,
+          "footnote": "ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)" },
+        { "id": "stair_03", "text": "The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.",
+          "camera": "staircase", "actions": ["hide:equations", "speed:8", "play"], "pause": 0.3 },
+        { "id": "stair_04", "text": "More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.",
+          "camera": "staircase_wide", "actions": [], "pause": 0.6 }
       ]
     },
     {
-      "id": "half",
-      "title": "Move the One Half",
-      "subtitle": "Why the shrink rate matters",
+      "id": "machine",
+      "title": "The Whole Machine",
+      "subtitle": "",
       "lines": [
-        {
-          "id": "half_01",
-          "text": "Everything so far used the one half rule. Let us move it. Shrink the arrows faster: n to the zero point nine.",
-          "camera": "sigma_spiral",
-          "actions": [
-            "pause",
-            "hide:prime",
-            "jump:14.134725",
-            "sigma:0.9",
-            "terms:auto",
-            "show:spiral",
-            "show:tail",
-            "show:tip",
-            "show:center"
-          ],
-          "pause": 0.3
-        },
-        {
-          "id": "half_02",
-          "text": "Turn the dial. The spiral is tighter, and the tip never hits the centre. No collisions, no markers.",
-          "camera": "sigma_spiral",
-          "actions": [
-            "speed:2.5",
-            "play"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "half_03",
-          "text": "And if we pretend the collisions did happen at zero point nine, every wave grows like x to the zero point nine. The staircase wobbles out of control and stops counting.",
-          "camera": "wobble",
-          "actions": [
-            "pause",
-            "sigma:0.5",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "show:prime",
-            "ghost:all:0.9"
-          ],
-          "pause": 0.5,
-          "footnote": "red: the staircase if every collision had shrink rate 0.9 instead of ½"
-        },
-        {
-          "id": "half_04",
-          "text": "The Riemann Hypothesis is the claim that the one half rule is the only one that works: every collision, forever, at exactly one half.",
-          "camera": "wobble",
-          "actions": [
-            "ghost:off"
-          ],
-          "pause": 0.6
-        }
+        { "id": "machine_01", "text": "Now see it all at once. The chain shrinks by the square root rule. The dial turns. The tip strikes the centre, and every strike drops a marker on the pole.",
+          "camera": "machine", "actions": ["show:spiral", "show:tail", "show:trail", "show:zeros", "show:imaxis", "show:cosine", "cosine:all", "speed:4", "play"], "pause": 0.4 },
+        { "id": "machine_02", "text": "Every marker becomes a wave, the waves pile up on the primes, and the staircase counts them. A machine for manufacturing prime numbers.",
+          "camera": "machine", "actions": [], "pause": 0.6 }
+      ]
+    },
+    {
+      "id": "key",
+      "title": "The Square-Root Key",
+      "subtitle": "Why one half, and nothing else",
+      "lines": [
+        { "id": "key_01", "text": "Back to the key. Everything used the square root: exponent one half. Change it to zero point nine and watch.",
+          "camera": "sigma_spiral", "actions": ["pause", "hide:prime", "hide:cosine", "hide:trail", "hide:imaxis", "jump:14.134725", "sigma:0.9", "terms:auto", "show:spiral", "show:tail", "show:tip", "show:center"], "pause": 0.3 },
+        { "id": "key_02", "text": "The spiral is tighter, and the tip never hits the centre. No collisions at all.",
+          "camera": "sigma_spiral", "actions": ["speed:2.5", "play"], "pause": 0.4 },
+        { "id": "key_03", "text": "Picture every possible exponent between zero and one as a strip. Our collisions all sit on the one half line, right down the middle.",
+          "camera": "strip_panel", "actions": ["pause", "sigma:0.5", "hide:spiral", "hide:tail", "hide:tip", "hide:center", "show:strip"], "pause": 0.4 },
+        { "id": "key_04", "text": "Suppose a collision strayed off that line, out to zero point nine. Its wave would grow like x to the zero point nine, and the staircase would wobble off the rails.",
+          "camera": "wobble", "actions": ["hide:strip", "show:prime", "ghost:all:0.9"], "pause": 0.5,
+          "footnote": "red: the staircase if every collision had exponent 0.9 instead of ½" },
+        { "id": "key_05", "text": "The Riemann Hypothesis says it never happens: every collision, forever, exactly on the one half line. That is why the square root is the magic key.",
+          "camera": "wobble", "actions": ["ghost:off"], "pause": 0.6 }
       ]
     },
     {
@@ -356,79 +120,27 @@
       "title": "2026: A Wall at Seven Eighths",
       "subtitle": "OpenAI's quasi-Riemann hypothesis claim",
       "lines": [
-        {
-          "id": "qrh_01",
-          "text": "In October 2026, OpenAI published an AI generated proof that no collision can happen with a shrink rate above seven eighths. They call it the quasi Riemann hypothesis.",
-          "camera": "strip_band",
-          "actions": [
-            "hide:prime",
-            "show:strip",
-            "show:band78"
-          ],
-          "pause": 0.4,
-          "footnote": "openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026"
-        },
-        {
-          "id": "qrh_02",
-          "text": "By symmetry, none below one eighth either. The blue bands are now off limits.",
-          "camera": "strip_band_sym",
-          "actions": [
-            "show:band18"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "qrh_03",
-          "text": "The core theorem is machine checked in Lean, and a companion proof reaches eleven twelfths. Human peer review is still under way, so call it a strong claim, not settled fact.",
-          "camera": "strip_band",
-          "actions": [
-            "show:band1112"
-          ],
-          "pause": 0.5,
-          "footnote": "Lean: riemannZeta s ≠ 0 for 7/8 < Re s · independently re-checked · not yet peer reviewed"
-        },
-        {
-          "id": "qrh_04",
-          "text": "The orange gap, from one half to seven eighths, is where the Riemann Hypothesis still lives. Close it, and the primes are finally tamed.",
-          "camera": "strip_gap",
-          "actions": [
-            "hide:band1112",
-            "show:gap"
-          ],
-          "pause": 0.7
-        }
+        { "id": "qrh_01", "text": "In October 2026, OpenAI published an AI generated proof that no collision can stray past seven eighths. They call it the quasi Riemann hypothesis.",
+          "camera": "strip_band", "actions": ["hide:prime", "show:strip", "show:band78"], "pause": 0.4,
+          "footnote": "openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026" },
+        { "id": "qrh_02", "text": "By symmetry, nothing below one eighth either. The blue bands are a wall: no collision can live there.",
+          "camera": "strip_band_sym", "actions": ["show:band18"], "pause": 0.4 },
+        { "id": "qrh_03", "text": "The core theorem is machine checked in Lean, and a companion proof reaches eleven twelfths. Human peer review is still under way, so call it a strong claim, not settled fact.",
+          "camera": "strip_band", "actions": ["show:band1112"], "pause": 0.5,
+          "footnote": "Lean: riemannZeta s ≠ 0 for 7/8 < Re s · independently re-checked · not yet peer reviewed" },
+        { "id": "qrh_04", "text": "The orange gap, from one half out to seven eighths, is where the Riemann Hypothesis still lives. Push the wall all the way to one half, and the primes are finally tamed.",
+          "camera": "strip_gap", "actions": ["hide:band1112", "show:gap"], "pause": 0.7 }
       ]
     },
     {
       "id": "outro",
-      "title": "The Whole Machine",
+      "title": "Watch the Spiral Climb",
       "subtitle": "",
       "lines": [
-        {
-          "id": "outro_01",
-          "text": "A chain that shrinks by one half. A dial that turns. A tip that keeps striking the centre. And a staircase of primes that falls out of it.",
-          "camera": "outro",
-          "actions": [
-            "hide:strip",
-            "hide:gap",
-            "show:spiral",
-            "show:tail",
-            "show:trail",
-            "show:zeros",
-            "show:prime",
-            "show:imaxis",
-            "speed:4",
-            "play"
-          ],
-          "pause": 0.4
-        },
-        {
-          "id": "outro_02",
-          "text": "Watch the spiral climb.",
-          "camera": "outro",
-          "actions": [],
-          "pause": 3.0
-        }
+        { "id": "outro_01", "text": "A chain that shrinks by the square root. A dial that turns. A tip that keeps striking the centre. And a staircase of primes that falls out of it.",
+          "camera": "outro", "actions": ["hide:strip", "hide:gap", "show:spiral", "show:tail", "show:trail", "show:zeros", "show:prime", "show:imaxis", "speed:4", "play"], "pause": 0.4 },
+        { "id": "outro_02", "text": "Watch the spiral climb.",
+          "camera": "outro", "actions": [], "pause": 3.0 }
       ]
     }
   ]

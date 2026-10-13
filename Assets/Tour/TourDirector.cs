@@ -143,6 +143,37 @@ public class TourDirector : MonoBehaviour
 
     float currentLineSeconds = 3f;
 
+    IEnumerator BuildWaves(int from, int to)
+    {
+        float seconds = Mathf.Max(0.5f, currentLineSeconds * 0.9f);
+        int available = Main.PassedZeros.Count;
+        int target = to < 0 ? available : Mathf.Min(to, available);
+        int steps = Mathf.Max(1, target - from);
+        float perStep = seconds / steps;
+        bool showEach = perStep >= 0.6f; // only preview each incoming wave when there is time to see it
+
+        for (int n = from; n < target; n++)
+        {
+            float amplitude = Main.CosineScale / (n + 1);
+            if (showEach)
+            {
+                Annotations.ShowIncomingWave(n, amplitude, Main.CosineScale * 0.7f);
+                yield return new WaitForSeconds(perStep * 0.55f);
+                Annotations.HideIncomingWave();
+                Main.SetCosineZeroLimit(n + 1);
+                yield return new WaitForSeconds(perStep * 0.45f);
+            }
+            else
+            {
+                Main.SetCosineZeroLimit(n + 1);
+                yield return new WaitForSeconds(perStep);
+            }
+        }
+
+        Annotations.HideIncomingWave();
+        Main.SetCosineZeroLimit(to < 0 ? -1 : target);
+    }
+
     IEnumerator BuildTerms(int from, int to)
     {
         float seconds = Mathf.Max(0.5f, currentLineSeconds * 0.85f);
@@ -392,7 +423,24 @@ public class TourDirector : MonoBehaviour
                         StartCoroutine(BuildTerms(int.Parse(parts[1], CultureInfo.InvariantCulture), int.Parse(parts[2], CultureInfo.InvariantCulture)));
                         break;
                     case "sigma": Main.SetSigma(double.Parse(arg, CultureInfo.InvariantCulture)); break;
-                    case "cosine": Main.SetCosineZeroLimit(arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture)); break;
+                    case "cosine":
+                        if (arg == "build")
+                        {
+                            // cosine:build:from:to — add collision waves one at a time across the line ("to" may be "all")
+                            int from = int.Parse(parts[2], CultureInfo.InvariantCulture);
+                            int to = parts[3] == "all" ? -1 : int.Parse(parts[3], CultureInfo.InvariantCulture);
+                            StartCoroutine(BuildWaves(from, to));
+                        }
+                        else
+                        {
+                            Main.SetCosineZeroLimit(arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture));
+                        }
+                        break;
+                    case "wave":
+                        if (arg == "plain") Annotations.ShowDemoWavePlain(Main.CosineScale);
+                        else if (arg == "morph") Annotations.MorphDemoWave(Mathf.Max(1f, currentLineSeconds * 0.7f), Main.CosineScale);
+                        else Annotations.HideDemoWave();
+                        break;
                     case "labels": Main.ZeroLabelLimit = arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "ghost":
                         if (arg == "off") Annotations.SetGhostZero(false);
@@ -428,6 +476,7 @@ public class TourDirector : MonoBehaviour
             case "center": Annotations.ShowCenter(on); break;
             case "numbers": Annotations.ShowNumberLine(on); break;
             case "polelabel": Annotations.ShowPoleLabel(on); break;
+            case "zeno": Annotations.ShowZeno(on); break;
             case "grid": Main.SetGridVisible(on); break;
             case "trail": Main.SetZetaCurveVisible(on); break;
             case "components":

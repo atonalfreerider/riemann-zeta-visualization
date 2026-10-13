@@ -38,7 +38,10 @@ public class Annotations : MonoBehaviour
     bool ghostOn;
     bool ghostAllZeros;
     MeshRenderer gapQuad;
-    GameObject tipRoot, centerRoot, numberLineRoot, poleLabelRoot;
+    GameObject tipRoot, centerRoot, numberLineRoot, poleLabelRoot, zenoRoot, waveDemoRoot, incomingRoot;
+    LineRenderer waveDemo, incomingWave;
+    TextBox incomingLabel;
+    Coroutine waveMorph;
     GameObject tipSphere, centerSphere;
     TextBox dialLabel;
     LineRenderer centerRing;
@@ -209,6 +212,65 @@ public class Annotations : MonoBehaviour
         axisLabel.gameObject.AddComponent<Billboard>();
         poleLabelRoot.SetActive(false);
         imAxisRoot.SetActive(false);
+
+        // ---- Zeno's halving chain, drawn beside the real chain for comparison -------------------
+        zenoRoot = new GameObject("ZenoChain");
+        zenoRoot.transform.SetParent(transform, false);
+        const float zenoZ = 1.15f;
+        float xPos = 0f;
+        string[] fractions = { "1", "½", "¼", "⅛", "1/16", "1/32", "1/64", "1/128" };
+        for (int i = 0; i < 8; i++)
+        {
+            float length = Mathf.Pow(0.5f, i);
+            Vector3 from = new(xPos, 0, zenoZ);
+            Vector3 to = new(xPos + length, 0, zenoZ);
+            Color c = LimitCurve.ChainColor(i / 7f);
+            LineRenderer seg = Factory.NewLine("zeno " + i, .05f, c, Factory.SoftGlowIntensity);
+            seg.transform.SetParent(zenoRoot.transform, false);
+            seg.positionCount = 2;
+            seg.SetPositions(new[] { from, to });
+            float size = Mathf.Clamp(length * .3f, .03f, .16f);
+            LineRenderer head = Factory.NewLine("zeno head", .04f, c, Factory.SoftGlowIntensity);
+            head.transform.SetParent(zenoRoot.transform, false);
+            head.positionCount = 3;
+            head.SetPositions(new[] { to - Vector3.right * size + Vector3.forward * size * .55f, to, to - Vector3.right * size - Vector3.forward * size * .55f });
+            if (i < 4)
+            {
+                TextBox label = Label(zenoRoot.transform, fractions[i], (from + to) * .5f + Vector3.forward * .4f, 1.6f, new Color(1f, 1f, 1f, .85f), TextAlignmentOptions.Center);
+                label.gameObject.AddComponent<Billboard>();
+            }
+
+            xPos += length;
+        }
+
+        LineRenderer wall = Factory.NewLine("zeno wall", .04f, Factory.Palette.Dagger, Factory.GlowIntensity);
+        wall.transform.SetParent(zenoRoot.transform, false);
+        wall.positionCount = 2;
+        wall.SetPositions(new[] { new Vector3(2f, 0, zenoZ - .45f), new Vector3(2f, 0, zenoZ + .45f) });
+        TextBox wallLabel = Label(zenoRoot.transform, "stops at 2", new Vector3(2f, 0, zenoZ + .95f), 1.6f, Factory.Palette.Dagger, TextAlignmentOptions.Center);
+        wallLabel.gameObject.AddComponent<Billboard>();
+        TextBox zenoTitle = Label(zenoRoot.transform, "Zeno: halve every step", new Vector3(-0.3f, 0, zenoZ), 1.5f, new Color(.8f, .8f, .9f), TextAlignmentOptions.Right);
+        zenoTitle.gameObject.AddComponent<Billboard>();
+        TextBox oursTitle = Label(zenoRoot.transform, "ours: 1 / √n", new Vector3(-0.3f, 0, 0), 1.5f, Factory.Palette.Zero, TextAlignmentOptions.Right);
+        oursTitle.gameObject.AddComponent<Billboard>();
+        zenoRoot.SetActive(false);
+
+        // ---- demo wave (plain cosine that bends into the first collision's wave) -----------------
+        waveDemoRoot = new GameObject("WaveDemo");
+        waveDemoRoot.transform.SetParent(transform, false);
+        waveDemo = Factory.NewLine("demo wave", .05f, Factory.Palette.Cosine, Factory.SoftGlowIntensity);
+        waveDemo.transform.SetParent(waveDemoRoot.transform, false);
+        waveDemo.positionCount = Main.NumPrimeCurvePoints;
+        waveDemoRoot.SetActive(false);
+
+        incomingRoot = new GameObject("IncomingWave");
+        incomingRoot.transform.SetParent(transform, false);
+        incomingWave = Factory.NewLine("incoming wave", .04f, new Color(1f, .9f, .4f), Factory.SoftGlowIntensity);
+        incomingWave.transform.SetParent(incomingRoot.transform, false);
+        incomingWave.positionCount = Main.NumPrimeCurvePoints;
+        incomingLabel = Label(incomingRoot.transform, "", new Vector3(12f, 9f, 0), 3.2f, new Color(1f, .9f, .4f), TextAlignmentOptions.Center);
+        incomingLabel.gameObject.AddComponent<Billboard>();
+        incomingRoot.SetActive(false);
 
         // ---- spiral tip and the centre it must hit ---------------------------------------------
         tipRoot = new GameObject("Tip");
@@ -412,6 +474,85 @@ public class Annotations : MonoBehaviour
     }
 
     public void ShowTip(bool on) => tipRoot.SetActive(on);
+    public void ShowZeno(bool on) => zenoRoot.SetActive(on);
+
+    const float DemoWaveOmega = 2.4f; // ordinary cosine period ≈ 2.6 units
+
+    /// <summary>u = 0: plain cos(ωx). u = 1: the first collision's wave cos(γ₁·log x).</summary>
+    void DrawDemoWave(float u, float amplitude)
+    {
+        double gamma = main.zetaZeroValues[0];
+        Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
+        for (int i = 0; i < pts.Length; i++)
+        {
+            float x = (float)Main.PrimeCurveX(i);
+            if (x < 1.5f)
+            {
+                pts[i] = new Vector3(1.5f, 0, 0);
+                continue;
+            }
+
+            float plain = DemoWaveOmega * (x - 1.5f);
+            float bent = (float)(gamma * System.Math.Log(x));
+            float arg = Mathf.Lerp(plain, bent, u);
+            pts[i] = new Vector3(x, -amplitude * Mathf.Cos(arg), 0);
+        }
+
+        waveDemo.SetPositions(pts);
+    }
+
+    public void ShowDemoWavePlain(float amplitude)
+    {
+        if (waveMorph != null) StopCoroutine(waveMorph);
+        waveDemoRoot.SetActive(true);
+        DrawDemoWave(0f, amplitude);
+    }
+
+    public void MorphDemoWave(float seconds, float amplitude)
+    {
+        if (waveMorph != null) StopCoroutine(waveMorph);
+        waveDemoRoot.SetActive(true);
+        waveMorph = StartCoroutine(MorphRoutine(seconds, amplitude));
+    }
+
+    IEnumerator MorphRoutine(float seconds, float amplitude)
+    {
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            DrawDemoWave(Mathf.SmoothStep(0f, 1f, t / seconds), amplitude);
+            yield return null;
+        }
+
+        DrawDemoWave(1f, amplitude);
+    }
+
+    public void HideDemoWave()
+    {
+        if (waveMorph != null) StopCoroutine(waveMorph);
+        waveDemoRoot.SetActive(false);
+    }
+
+    /// <summary>Draw collision number <paramref name="index"/>'s wave by itself, before it joins the chorus.</summary>
+    public void ShowIncomingWave(int index, float amplitude, float lift)
+    {
+        if (index < 0 || index >= main.zetaZeroValues.Length) return;
+        double gamma = main.zetaZeroValues[index];
+        Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
+        for (int i = 0; i < pts.Length; i++)
+        {
+            float x = (float)Main.PrimeCurveX(i);
+            pts[i] = x < 1.5f ? new Vector3(1.5f, lift, 0.02f) : new Vector3(x, lift - amplitude * (float)System.Math.Cos(gamma * System.Math.Log(x)), 0.02f);
+        }
+
+        incomingWave.SetPositions(pts);
+        incomingLabel.Text = $"collision {index + 1}:  {gamma:0.00}";
+        incomingLabel.transform.position = new Vector3(8f, lift + amplitude + 1.6f, 0);
+        incomingRoot.SetActive(true);
+    }
+
+    public void HideIncomingWave() => incomingRoot.SetActive(false);
     public void ShowNumberLine(bool on) => numberLineRoot.SetActive(on);
     public void ShowPoleLabel(bool on) => poleLabelRoot.SetActive(on);
     public void ShowCenter(bool on) => centerRoot.SetActive(on);
@@ -490,6 +631,9 @@ public class Annotations : MonoBehaviour
         ShowCenter(false);
         ShowNumberLine(false);
         ShowPoleLabel(false);
+        ShowZeno(false);
+        HideDemoWave();
+        HideIncomingWave();
         ShowStrip(false);
         ShowOutputAxes(false);
         ShowImAxis(false);

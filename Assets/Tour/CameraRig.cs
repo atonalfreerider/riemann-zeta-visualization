@@ -164,6 +164,17 @@ public class CameraRig : MonoBehaviour
         cues["spikes"] = () => new CueState { Position = new Vector3(8f, 2f, -24f), LookAt = new Vector3(8f, 2f, 0f), Up = up, Fov = 60 };
         cues["staircase_close"] = () => new CueState { Position = new Vector3(9f, 7f, -24f), LookAt = new Vector3(9f, 7f, 0f), Up = up, Fov = 60 };
         cues["wobble"] = () => new CueState { Position = new Vector3(30f, 30f, -82f), LookAt = new Vector3(30f, 30f, 0f), Up = up, Fov = 60 };
+        cues["zeno"] = () => new CueState { Position = new Vector3(2.4f, 9.5f, 0.3f), LookAt = new Vector3(2.4f, 0f, 0.55f), Up = Vector3.right, Fov = 60 };
+        cues["machine"] = () =>
+        {
+            // frame the pole with its markers (left), the staircase (right) and the wave chorus (bottom) together,
+            // with a gentle lateral sway instead of a full orbit so the flat graphs never go edge-on
+            float a = Time.time * 0.15f;
+            float height = Mathf.Max(60f, TipY + 10f);
+            float d = height * 1.6f;
+            Vector3 center = new(height * .42f, height * .47f, 0);
+            return new CueState { Position = center + new Vector3(Mathf.Sin(a) * d * .25f, d * .18f, -d), LookAt = center, Up = up, Fov = 60 };
+        };
         cues["outro"] = () =>
         {
             float a = Time.time * 0.1f;
