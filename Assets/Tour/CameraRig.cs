@@ -291,6 +291,19 @@ public class CameraRig : MonoBehaviour
 
     public bool HasCue(string name) => cues.ContainsKey(name);
 
+    /// <summary>Evaluate a named cue right now (used by the VR interface to fly to a view).</summary>
+    public bool TryEvaluate(string name, out CueState state)
+    {
+        if (cues.TryGetValue(name, out Func<CueState> cue))
+        {
+            state = cue();
+            return true;
+        }
+
+        state = default;
+        return false;
+    }
+
     public void SetCue(string name, float transitionSeconds = 2.5f)
     {
         if (string.IsNullOrEmpty(name)) return;
@@ -316,6 +329,13 @@ public class CameraRig : MonoBehaviour
     {
         if (activeCue == null) return;
         CueState target = activeCue();
+        if (VRMode.Enabled)
+        {
+            // the head is the camera; the guide moves the model instead
+            if (VRMode.Guide != null) VRMode.Guide.SetCue(target, true);
+            return;
+        }
+
         cam.transform.position = target.Position;
         currentLook = target.LookAt;
         Vector3 forward = target.LookAt - target.Position;
@@ -340,11 +360,18 @@ public class CameraRig : MonoBehaviour
         Active = false;
         activeCue = null;
         activeCueName = "";
-        if (manualControl != null) manualControl.enabled = true;
+        if (manualControl != null && !VRMode.Enabled) manualControl.enabled = true;
     }
 
     void LateUpdate()
     {
+        if (VRMode.Enabled)
+        {
+            // never move the head-tracked camera: hand the cue to the guide, which places the model in front of the user
+            if (Active && activeCue != null && VRMode.Guide != null) VRMode.Guide.SetCue(activeCue());
+            return;
+        }
+
         ApplyPortraitViewport();
 
         if (!Active || activeCue == null) return;

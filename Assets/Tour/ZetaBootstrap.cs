@@ -30,12 +30,14 @@ public static class ZetaBootstrap
         if (main == null) return; // not the visualization scene
 
         Camera cam = Camera.main != null ? Camera.main : UnityEngine.Object.FindAnyObjectByType<Camera>();
+        bool vr = VRMode.Wanted(out bool headset);
         if (cam != null)
         {
-            cam.allowHDR = true;
+            // a headset renders to a plain 8-bit eye buffer: no HDR, no post-processing
+            cam.allowHDR = !vr;
             cam.backgroundColor = new Color(0.012f, 0.012f, 0.02f);
             cam.clearFlags = CameraClearFlags.SolidColor;
-            if (cam.GetComponent<BloomEffect>() == null)
+            if (!vr && cam.GetComponent<BloomEffect>() == null)
             {
                 cam.gameObject.AddComponent<BloomEffect>();
             }
@@ -43,8 +45,15 @@ public static class ZetaBootstrap
 
         if (UnityEngine.Object.FindAnyObjectByType<TourDirector>() != null) return;
 
+        if (vr && cam != null && !VRMode.Enabled)
+        {
+            // the rig and the interface come up first so the tour's captions and camera cues find them
+            VRApp.Create(VRRig.Create(cam, headset));
+        }
+
         GameObject tourObject = new("Tour");
         TourDirector director = tourObject.AddComponent<TourDirector>();
+        if (vr) director.Portrait = false;
 
         string[] args = Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)

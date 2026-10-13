@@ -4,7 +4,11 @@
     "references": [
         "Unity.InputSystem",
         "Unity.TextMeshPro",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.XR.Management",
+        "Unity.XR.Hands",
+        "Unity.XR.CoreUtils",
+        "Unity.XR.ARFoundation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

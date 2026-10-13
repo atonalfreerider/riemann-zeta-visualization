@@ -19,6 +19,9 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
+        // no mouse or keyboard on a headset (or when VR owns the camera)
+        if (VRMode.Enabled || Mouse.current == null || Keyboard.current == null) return;
+
         // Rotate the camera on right click
         if (Mouse.current.rightButton.isPressed)
         {

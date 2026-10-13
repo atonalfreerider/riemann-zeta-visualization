@@ -1,0 +1,388 @@
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+/// <summary>
+/// The pages of the dock and the palm menu. Every control is a big icon with a short word under it, pushed with one
+/// finger; nothing needs a ray, a controller or a pinch.
+///
+///   Tour      one button per chapter (touch the playing one to restart it)
+///   Views     fly to a visualization on its own, and show or hide its layers
+///   Space     zoom, turn, tilt and move the model; reset the view
+///   Settings  captions, hands, comfort, volume, model distance
+///   Footer    previous / replay / play-pause / skip / next, follow the story, room or dark
+/// </summary>
+public partial class VRApp
+{
+    const float DockWidth = 600f, DockHeight = 450f;
+    const float PageTop = 70f, PageHeight = 296f;
+
+    static readonly string[] ChapterShort = { "Primes", "Zeno", "Stage", "Dial", "Waves", "Steps", "Machine", "Key", "2026", "Saddle" };
+    static readonly VRIcons.Id[] ChapterIcon =
+    {
+        VRIcons.Id.Sacks, VRIcons.Id.Zeno, VRIcons.Id.Stage, VRIcons.Id.Dial, VRIcons.Id.Waves,
+        VRIcons.Id.Stairs, VRIcons.Id.Machine, VRIcons.Id.Key, VRIcons.Id.Strip, VRIcons.Id.Saddle
+    };
+
+    readonly List<RectTransform> pages = new();
+    readonly List<VRButton> tabs = new();
+    int page;
+    TextMeshProUGUI nowLabel;
+    VRButton replayButton, skipButton, prevChapterButton, nextChapterButton;
+    bool autoNextChapter = true;
+
+    class Layers
+    {
+        public bool Chain = true, Tail = true, Zeros = true, Trail = true, Waves = true, Stairs = true, Grid = true, Equations = true;
+        public void All(bool on) => Chain = Tail = Zeros = Trail = Waves = Stairs = Grid = Equations = on;
+    }
+
+    readonly Layers layers = new();
+
+    bool PlayingNow => tour.Running ? !tour.Paused : main.IsPlaying;
+
+    // ---- dock ---------------------------------------------------------------------------------------
+
+    void BuildDock()
+    {
+        Dock = VRPanel.Create("Dock", new Vector2(DockWidth, DockHeight), Rig.Ui);
+
+        string[] tabNames = { "Tour", "Views", "Space", "Settings" };
+        VRIcons.Id[] tabIcons = { VRIcons.Id.List, VRIcons.Id.Cube, VRIcons.Id.Move, VRIcons.Id.Gear };
+        for (int i = 0; i < tabNames.Length; i++)
+        {
+            int index = i;
+            VRButton tab = Dock.AddButton(8 + i * 124, 8, 120, 54, tabNames[i], tabIcons[i], () => ShowPage(index), true, () => page == index, 22f);
+            tabs.Add(tab);
+        }
+
+        Dock.AddButton(508, 8, 84, 54, "", VRIcons.Id.Close, () => Dock.SetOpen(false));
+
+        for (int i = 0; i < 4; i++) pages.Add(Dock.AddPage(tabNames[i], 0, PageTop, DockWidth, PageHeight));
+        BuildTourPage(pages[0]);
+        BuildViewsPage(pages[1]);
+        BuildSpacePage(pages[2]);
+        BuildSettingsPage(pages[3]);
+        ShowPage(0);
+        BuildFooter();
+    }
+
+    void ShowPage(int index)
+    {
+        page = index;
+        for (int i = 0; i < pages.Count; i++) pages[i].gameObject.SetActive(i == index);
+    }
+
+    // ---- tour page -----------------------------------------------------------------------------------
+
+    void BuildTourPage(RectTransform p)
+    {
+        TourChapter[] chapters = tour.Chapters;
+        for (int i = 0; i < chapters.Length; i++)
+        {
+            int index = i;
+            int col = i % 5, row = i / 5;
+            string label = $"{i + 1}  {(i < ChapterShort.Length ? ChapterShort[i] : chapters[i].title)}";
+            VRIcons.Id icon = i < ChapterIcon.Length ? ChapterIcon[i] : VRIcons.Id.Play;
+            Dock.AddButton(8 + col * 118, 2 + row * 134, 110, 128, label, icon,
+                () => PlayChapter(index), true, () => tour.Running && tour.CurrentChapterIndex == index, 21f, p);
+        }
+
+        nowLabel = Dock.AddLabel(10, 272, 580, 26, "", 21f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
+    }
+
+    void PlayChapter(int index)
+    {
+        Guide.ResetOffsets();
+        Guide.SetFollow(true, true);
+        tour.GoToChapter(index, autoNextChapter);
+    }
+
+    // ---- views page ----------------------------------------------------------------------------------
+
+    struct ViewDef
+    {
+        public string Id, Label;
+        public VRIcons.Id Icon;
+    }
+
+    static readonly ViewDef[] Views =
+    {
+        new() { Id = "chain", Label = "Chain", Icon = VRIcons.Id.Chain },
+        new() { Id = "zeros", Label = "Zeros", Icon = VRIcons.Id.Zeros },
+        new() { Id = "strip", Label = "Strip", Icon = VRIcons.Id.Strip },
+        new() { Id = "waves", Label = "Waves", Icon = VRIcons.Id.Waves },
+        new() { Id = "stairs", Label = "Staircase", Icon = VRIcons.Id.Stairs },
+        new() { Id = "primes", Label = "Primes", Icon = VRIcons.Id.Sacks },
+        new() { Id = "saddle", Label = "Saddle", Icon = VRIcons.Id.Saddle },
+        new() { Id = "machine", Label = "Machine", Icon = VRIcons.Id.Machine },
+    };
+
+    void BuildViewsPage(RectTransform p)
+    {
+        for (int i = 0; i < Views.Length; i++)
+        {
+            ViewDef view = Views[i];
+            int col = i % 4, row = i / 4;
+            Dock.AddButton(8 + col * 148, 2 + row * 74, 140, 68, view.Label, view.Icon, () => ApplyView(view.Id), false, null, 20f, p);
+        }
+
+        Dock.AddLabel(10, 150, 400, 24, "Show or hide", 20f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
+        (string label, VRIcons.Id icon, System.Func<bool> get, System.Action<bool> set)[] toggles =
+        {
+            ("Chain", VRIcons.Id.Chain, () => layers.Chain, v => layers.Chain = v),
+            ("Tail", VRIcons.Id.Tail, () => layers.Tail, v => layers.Tail = v),
+            ("Zeros", VRIcons.Id.Zeros, () => layers.Zeros, v => layers.Zeros = v),
+            ("Trail", VRIcons.Id.Trail, () => layers.Trail, v => layers.Trail = v),
+            ("Waves", VRIcons.Id.Waves, () => layers.Waves, v => layers.Waves = v),
+            ("Primes", VRIcons.Id.Stairs, () => layers.Stairs, v => layers.Stairs = v),
+        };
+        for (int i = 0; i < toggles.Length; i++)
+        {
+            var t = toggles[i];
+            Dock.AddButton(8 + i * 98, 176, 90, 64, t.label, t.icon, () =>
+            {
+                t.set(!t.get());
+                ApplyLayers();
+            }, true, t.get, 17f, p);
+        }
+
+        Dock.AddSlider(10, 244, 580, 52, "Dial speed", 0f, 10f, () => (float)main.Speed, v => main.Speed = v, v => $"{v:0.0} per second", p);
+    }
+
+    void ApplyLayers()
+    {
+        main.Limit.SetTailVisible(layers.Tail);
+        main.Limit.SetSpiralVisible(layers.Chain);
+        main.SetZeroMarkersVisible(layers.Zeros);
+        main.SetZetaCurveVisible(layers.Trail);
+        main.SetCosineVisible(layers.Waves);
+        main.SetPrimeCurveVisible(layers.Stairs);
+        main.SetGridVisible(layers.Grid);
+        main.SetEquationsVisible(layers.Equations);
+    }
+
+    /// <summary>Leave the narrated tour and show one visualization on its own, framed for the user, running.</summary>
+    public void ApplyView(string id)
+    {
+        if (tour.Running) tour.StopTour();
+        tour.RestoreFreeRoam();
+        main.Speed = 1.8d;
+        main.SpeedMultiplier = 1d;
+        layers.All(true);
+
+        string cue = "machine";
+        double jump = -1d;
+        string[] actions = System.Array.Empty<string>();
+        string name = id;
+        switch (id)
+        {
+            case "chain":
+                layers.Stairs = layers.Waves = layers.Equations = false;
+                actions = new[] { "show:tip", "show:center", "show:polelabel", "show:outaxes" };
+                cue = "spiral_close";
+                name = "The chain of arrows. Turn the dial with the speed slider";
+                break;
+            case "zeros":
+                layers.Stairs = layers.Waves = layers.Equations = false;
+                actions = new[] { "show:polelabel", "show:outaxes", "labels:all" };
+                cue = "markers_axis";
+                jump = 20d;
+                name = "Every collision drops a marker on the pole";
+                break;
+            case "strip":
+                layers.Stairs = layers.Waves = layers.Equations = layers.Zeros = layers.Trail = false;
+                actions = new[] { "show:strip", "show:zcurve", "show:imaxis", "show:outaxes", "show:band78", "show:band18" };
+                cue = "strip_panel";
+                jump = 30d;
+                name = "The critical strip, and the 2026 walls at 7/8 and 1/8";
+                break;
+            case "waves":
+                layers.Stairs = layers.Chain = layers.Tail = layers.Trail = layers.Equations = false;
+                cue = "cosine_wave";
+                jump = 150d;
+                name = "One cosine wave per collision, added together";
+                break;
+            case "stairs":
+                layers.Waves = layers.Chain = layers.Tail = layers.Trail = layers.Equations = false;
+                cue = "staircase";
+                jump = 150d;
+                name = "The prime staircase from Riemann's formula";
+                break;
+            case "primes":
+                layers.All(false);
+                actions = new[] { "sacks:show" };
+                cue = "sacks_flat";
+                name = "The primes on the Sacks spiral";
+                break;
+            case "saddle":
+                layers.All(false);
+                actions = new[] { "sacks:show", "sacks:saddle", "sacks:routes" };
+                cue = "sacks_saddle";
+                name = "The spiral bent over a saddle";
+                break;
+            default:
+                jump = 60d;
+                name = "The whole machine";
+                break;
+        }
+
+        ApplyLayers();
+        if (jump >= 0d) main.JumpTo(jump);
+        else main.ResetAnimation();
+        tour.RunActions(actions);
+        main.Play();
+
+        Guide.ResetOffsets();
+        Guide.SetFollow(true, true);
+        tour.Rig.SetCue(cue);
+        Toast(name);
+    }
+
+    // ---- space page ----------------------------------------------------------------------------------
+
+    void BuildSpacePage(RectTransform p)
+    {
+        (string label, VRIcons.Id icon, VRGuide.NudgeKind kind, float amount)[] buttons =
+        {
+            ("Bigger", VRIcons.Id.ZoomIn, VRGuide.NudgeKind.Zoom, 1f),
+            ("Smaller", VRIcons.Id.ZoomOut, VRGuide.NudgeKind.Zoom, -1f),
+            ("Turn left", VRIcons.Id.RotateLeft, VRGuide.NudgeKind.Yaw, -1f),
+            ("Turn right", VRIcons.Id.RotateRight, VRGuide.NudgeKind.Yaw, 1f),
+            ("Tilt up", VRIcons.Id.TiltUp, VRGuide.NudgeKind.Pitch, 1f),
+            ("Tilt down", VRIcons.Id.TiltDown, VRGuide.NudgeKind.Pitch, -1f),
+            ("Raise", VRIcons.Id.Up, VRGuide.NudgeKind.Raise, -1f),
+            ("Lower", VRIcons.Id.Down, VRGuide.NudgeKind.Raise, 1f),
+            ("Closer", VRIcons.Id.Closer, VRGuide.NudgeKind.Closer, 1f),
+            ("Farther", VRIcons.Id.Farther, VRGuide.NudgeKind.Closer, -1f),
+        };
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            var b = buttons[i];
+            int col = i % 6, row = i / 6;
+            Dock.AddButton(8 + col * 99, 4 + row * 102, 91, 96, b.label, b.icon, () => Guide.Nudge(b.kind, b.amount), false, null, 18f, p);
+        }
+
+        // the last two cells of the second row
+        Dock.AddButton(8 + 4 * 99, 4 + 102, 91, 96, "Reset", VRIcons.Id.Reset, ResetModelView, false, null, 18f, p);
+        Dock.AddButton(8 + 5 * 99, 4 + 102, 91, 96, "Re-centre", VRIcons.Id.Target, () =>
+        {
+            Rig.Recenter();
+            Rig.SnapHud();
+            SummonDock();
+            Toast("Centred on where you stand and look");
+        }, false, null, 18f, p);
+
+        Dock.AddLabel(10, 212, 580, 80, "Pinch and drag in the air to move the model.\nPinch with both hands to scale and turn it.", 22f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
+    }
+
+    void ResetModelView()
+    {
+        Guide.ResetView();
+        Guide.SetFollow(true, true);
+        Toast("Back to the story's view");
+    }
+
+    // ---- settings page --------------------------------------------------------------------------------
+
+    void BuildSettingsPage(RectTransform p)
+    {
+        Dock.AddButton(8, 4, 190, 78, "Captions", VRIcons.Id.Captions, () => tour.Captions.Visible = !tour.Captions.Visible, true, () => tour.Captions.Visible, 21f, p);
+        Dock.AddButton(206, 4, 190, 78, "Hand outline", VRIcons.Id.Skeleton, () =>
+        {
+            Visual.Skeleton = Visual.Skeleton switch
+            {
+                VRHandVisual.SkeletonMode.Auto => VRHandVisual.SkeletonMode.On,
+                VRHandVisual.SkeletonMode.On => VRHandVisual.SkeletonMode.Off,
+                _ => VRHandVisual.SkeletonMode.Auto
+            };
+            Toast("Hand outline: " + Visual.Skeleton + (Visual.Skeleton == VRHandVisual.SkeletonMode.Auto ? " (shown in blackout)" : ""));
+        }, true, () => Visual.Skeleton != VRHandVisual.SkeletonMode.Off, 21f, p);
+        Dock.AddButton(404, 4, 190, 78, "Gentle motion", VRIcons.Id.Speed, () => Guide.Comfort = !Guide.Comfort, true, () => Guide.Comfort, 21f, p);
+
+        Dock.AddButton(8, 90, 190, 78, "Grid", VRIcons.Id.Grid, () => { layers.Grid = !layers.Grid; ApplyLayers(); }, true, () => layers.Grid, 21f, p);
+        Dock.AddButton(206, 90, 190, 78, "Formulas", VRIcons.Id.Equations, () => { layers.Equations = !layers.Equations; ApplyLayers(); }, true, () => layers.Equations, 21f, p);
+        Dock.AddButton(404, 90, 190, 78, "Play on", VRIcons.Id.NextChapter, () => autoNextChapter = !autoNextChapter, true, () => autoNextChapter, 21f, p);
+
+        Dock.AddSlider(10, 176, 580, 56, "Volume", 0f, 1f, () => AudioListener.volume, v => AudioListener.volume = v, v => $"{Mathf.RoundToInt(v * 100f)}%", p);
+        Dock.AddSlider(10, 236, 580, 56, "Model distance", 0.5f, 2f, () => Rig.ModelDistance, v => Rig.ModelDistance = v, v => $"{v:0.0} m", p);
+    }
+
+    // ---- footer: transport, follow, room / dark ----------------------------------------------------------
+
+    void BuildFooter()
+    {
+        const float y = 372f, h = 70f, w = 70f;
+        prevChapterButton = Dock.AddButton(8, y, w, h, "Back", VRIcons.Id.PrevChapter, () => tour.PreviousChapter(), false, null, 18f);
+        replayButton = Dock.AddButton(83, y, w, h, "Replay", VRIcons.Id.Replay, () => tour.ReplayLine(), false, null, 18f);
+        VRButton play = Dock.AddButton(158, y, w, h, "Pause", VRIcons.Id.Pause, PlayPause, false, null, 18f);
+        play.Dynamic(() => PlayingNow ? VRIcons.Id.Pause : VRIcons.Id.Play, () => PlayingNow ? "Pause" : "Play");
+        skipButton = Dock.AddButton(233, y, w, h, "Skip", VRIcons.Id.NextLine, () => tour.NextLine(), false, null, 18f);
+        nextChapterButton = Dock.AddButton(308, y, w, h, "Next", VRIcons.Id.NextChapter, NextChapter, false, null, 18f);
+
+        Dock.AddButton(386, y, 74, h, "Follow", VRIcons.Id.Pin, ToggleFollow, true, () => Guide.Follow, 18f);
+        Dock.AddButton(466, y, 62, h, "Room", VRIcons.Id.Eye, () => SetRoom(true), true, () => Rig.Passthrough, 18f);
+        Dock.AddButton(534, y, 58, h, "Dark", VRIcons.Id.Moon, () => SetRoom(false), true, () => !Rig.Passthrough, 18f);
+    }
+
+    void PlayPause() => tour.TogglePause();
+
+    void NextChapter()
+    {
+        if (tour.Running) tour.NextChapter();
+        else PlayChapter(0);
+    }
+
+    void ToggleFollow()
+    {
+        if (Guide.Follow)
+        {
+            Guide.SetFollow(false);
+            Toast("The model stays where it is. Pinch to move it");
+        }
+        else
+        {
+            Guide.ResetOffsets();
+            Guide.SetFollow(true);
+            Toast("Following the story");
+        }
+    }
+
+    public void SetRoom(bool room)
+    {
+        Rig.SetPassthrough(room);
+        Toast(room ? "Room view (passthrough)" : "Blackout. Only the model is visible");
+    }
+
+    // ---- palm menu --------------------------------------------------------------------------------------
+
+    void BuildPalm()
+    {
+        Palm = VRPanel.Create("Palm menu", new Vector2(424f, 96f), Rig.Ui);
+        const float y = 8f, w = 62f, h = 80f;
+        Palm.AddButton(8, y, w, h, "Menu", VRIcons.Id.Menu, ToggleDock, false, null, 16f);
+        VRButton play = Palm.AddButton(76, y, w, h, "Pause", VRIcons.Id.Pause, PlayPause, false, null, 16f);
+        play.Dynamic(() => PlayingNow ? VRIcons.Id.Pause : VRIcons.Id.Play, () => PlayingNow ? "Pause" : "Play");
+        Palm.AddButton(144, y, w, h, "Skip", VRIcons.Id.NextLine, () => tour.NextLine(), false, null, 16f);
+        Palm.AddButton(212, y, w, h, "Follow", VRIcons.Id.Pin, ToggleFollow, true, () => Guide.Follow, 16f);
+        Palm.AddButton(280, y, w, h, "Room", VRIcons.Id.Eye, () => SetRoom(true), true, () => Rig.Passthrough, 16f);
+        Palm.AddButton(348, y, w, h, "Dark", VRIcons.Id.Moon, () => SetRoom(false), true, () => !Rig.Passthrough, 16f);
+    }
+
+    // ---- state shown on the buttons ----------------------------------------------------------------------
+
+    void UpdateButtonsAvailability()
+    {
+        bool running = tour.Running;
+        replayButton.Interactable = running;
+        skipButton.Interactable = running;
+        prevChapterButton.Interactable = running;
+        if (nowLabel != null)
+        {
+            bool known = running && tour.CurrentChapterIndex >= 0 && tour.CurrentChapterIndex < tour.Chapters.Length;
+            nowLabel.text = known
+                ? $"<color=#FFD129>{tour.CurrentChapterIndex + 1}</color>  {tour.Chapters[tour.CurrentChapterIndex].title}" + (tour.Paused ? "   (paused)" : "")
+                : "Touch a chapter to hear the story";
+        }
+    }
+}

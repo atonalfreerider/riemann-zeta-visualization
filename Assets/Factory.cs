@@ -16,6 +16,7 @@ public class Factory : MonoBehaviour
                 Shader glow = Shader.Find("Zeta/GlowLine");
                 sharedMaterial = new Material(glow != null ? glow : Shader.Find("Sprites/Default"));
                 if (glow != null) sharedMaterial.SetFloat(IntensityId, NoGlow);
+                sharedMaterial.enableInstancing = true; // identical dots with different property blocks draw as one instanced call
             }
 
             return sharedMaterial;
@@ -55,6 +56,8 @@ public class Factory : MonoBehaviour
 
     public static void SetIntensity(Renderer renderer, float intensity)
     {
+        // the headset's eye buffer is 8-bit with no bloom: a glow multiplier above 1 would only clip and shift hues
+        if (VRMode.Enabled) intensity = Mathf.Min(intensity, 1f);
         renderer.GetPropertyBlock(sharedBlock);
         sharedBlock.SetFloat(IntensityId, intensity);
         renderer.SetPropertyBlock(sharedBlock);
@@ -79,6 +82,8 @@ public class Factory : MonoBehaviour
         GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         point.name = name;
         Object.Destroy(point.GetComponent<Collider>());
+        // 80 triangles instead of 768: the Sacks spiral alone has 1300 of these
+        if (VRMode.Enabled) point.GetComponent<MeshFilter>().sharedMesh = VRMeshes.LowPolySphere;
         point.transform.localScale = Vector3.one * scale;
         MeshRenderer renderer = point.GetComponent<MeshRenderer>();
         renderer.sharedMaterial = mainMat;
@@ -106,6 +111,52 @@ public class Factory : MonoBehaviour
         filter.sharedMesh = mesh;
         renderer.sharedMaterial = mainMat;
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        SetColor(renderer, color);
+        SetIntensity(renderer, intensity);
+        return renderer;
+    }
+
+    /// <summary>
+    /// Many thin segments as one mesh and one draw call (each is two crossed quads, so it reads from any angle).
+    /// Used for the grid's thousand tick marks in VR, where a thousand LineRenderers would not fit in a frame.
+    /// </summary>
+    public static MeshRenderer NewSegmentBatch(string name, System.Collections.Generic.IList<(Vector3 a, Vector3 b)> segments, float width, Color color, float intensity = NoGlow)
+    {
+        GameObject go = new(name);
+        MeshFilter filter = go.AddComponent<MeshFilter>();
+        MeshRenderer renderer = go.AddComponent<MeshRenderer>();
+        Vector3[] vertices = new Vector3[segments.Count * 8];
+        Color[] colors = new Color[vertices.Length];
+        int[] triangles = new int[segments.Count * 12];
+        float h = width * .5f;
+        for (int i = 0; i < segments.Count; i++)
+        {
+            Vector3 a = segments[i].a, b = segments[i].b;
+            Vector3 d = (b - a).normalized;
+            Vector3 n1 = Vector3.Cross(d, Mathf.Abs(d.y) > .9f ? Vector3.right : Vector3.up).normalized * h;
+            Vector3 n2 = Vector3.Cross(d, n1).normalized * h;
+            int v = i * 8;
+            vertices[v] = a - n1; vertices[v + 1] = a + n1; vertices[v + 2] = b + n1; vertices[v + 3] = b - n1;
+            vertices[v + 4] = a - n2; vertices[v + 5] = a + n2; vertices[v + 6] = b + n2; vertices[v + 7] = b - n2;
+            for (int k = 0; k < 8; k++) colors[v + k] = Color.white;
+            int t = i * 12;
+            for (int q = 0; q < 2; q++)
+            {
+                int o = v + q * 4;
+                triangles[t + q * 6] = o; triangles[t + q * 6 + 1] = o + 1; triangles[t + q * 6 + 2] = o + 2;
+                triangles[t + q * 6 + 3] = o; triangles[t + q * 6 + 4] = o + 2; triangles[t + q * 6 + 5] = o + 3;
+            }
+        }
+
+        Mesh mesh = new() { name = name, indexFormat = vertices.Length > 65000 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16 };
+        mesh.vertices = vertices;
+        mesh.colors = colors;
+        mesh.triangles = triangles;
+        mesh.RecalculateBounds();
+        filter.sharedMesh = mesh;
+        renderer.sharedMaterial = mainMat;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
         SetColor(renderer, color);
         SetIntensity(renderer, intensity);
         return renderer;

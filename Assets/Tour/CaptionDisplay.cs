@@ -59,16 +59,31 @@ public class CaptionDisplay : MonoBehaviour
         dimHex = ColorUtility.ToHtmlStringRGB(new Color(.78f, .78f, .8f));
 
         canvas = gameObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        canvas.worldCamera = cam;
-        canvas.planeDistance = 0.5f;
-        canvas.sortingOrder = 100;
+        if (VRMode.Enabled)
+        {
+            // a headset has no screen to overlay: hang the captions on the lazily gaze-following HUD anchor,
+            // 1080 x 1080 units at about 1.2 mm per unit, drawn over the model
+            canvas.renderMode = RenderMode.WorldSpace;
+            transform.SetParent(VRMode.Rig.Hud, false);
+            RectTransform rect = GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(1080, 1080);
+            rect.localPosition = Vector3.zero;
+            rect.localRotation = Quaternion.identity;
+            rect.localScale = Vector3.one * 0.0011f;
+        }
+        else
+        {
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = cam;
+            canvas.planeDistance = 0.5f;
+            canvas.sortingOrder = 100;
 
-        CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 1920);
-        scaler.matchWidthOrHeight = 0.5f;
-        gameObject.AddComponent<GraphicRaycaster>();
+            CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+            gameObject.AddComponent<GraphicRaycaster>();
+        }
 
         // chapter title card
         GameObject titleCard = new("TitleCard");
@@ -129,6 +144,27 @@ public class CaptionDisplay : MonoBehaviour
 
         BuildCard();
         Clear();
+        if (VRMode.Enabled) MakeOverlay();
+    }
+
+    /// <summary>In VR every graphic of the captions draws on top of the model (the scene is scaled around the user and would otherwise hide it).</summary>
+    void MakeOverlay()
+    {
+        foreach (Graphic g in GetComponentsInChildren<Graphic>(true))
+        {
+            if (g is TMP_Text text) text.isOverlay = true;
+            else g.material = VRStyle.UiMaterial;
+        }
+    }
+
+    /// <summary>Captions can be switched off from the VR settings page.</summary>
+    public bool Visible
+    {
+        get => canvas != null && canvas.enabled;
+        set
+        {
+            if (canvas != null) canvas.enabled = value;
+        }
     }
 
     void BuildCard()

@@ -1533,6 +1533,13 @@ public class Annotations : MonoBehaviour
         UpdateGhost();
     }
 
+    /// <summary>Stop the animations of the annotations and the Sacks spiral (used when the tour jumps to another chapter).</summary>
+    public void CancelAnimations()
+    {
+        StopAllCoroutines();
+        if (Sacks != null) Sacks.StopAllCoroutines();
+    }
+
     public void HideAll()
     {
         ShowTip(false);

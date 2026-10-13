@@ -230,6 +230,17 @@ public class Main : MonoBehaviour
         DrawRiemann(0);
     }
 
+    /// <summary>Stop every running animation (trail style, cosine blend, staircase build) so a new chapter starts from a clean stage.</summary>
+    public void CancelAnimations()
+    {
+        StopAllCoroutines();
+        cosineBlendRoutine = null;
+        cosineBlendMarker = null;
+        primeBlendRoutine = null;
+        trailStyleRoutine = null;
+        if (daggerContainer != null) daggerContainer.SetActive(DaggersVisible);
+    }
+
     public void SetPrimeCurveVisible(bool visible)
     {
         primeCurve.enabled = visible;

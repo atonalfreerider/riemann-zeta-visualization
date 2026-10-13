@@ -1,18 +1,25 @@
 // Unlit, vertex-colour tinted line/surface shader with an HDR intensity multiplier.
 // LineRenderer vertex colours are clamped to [0,1]; _Intensity pushes the final colour
 // above 1.0 so the Bloom effect (Assets/Rendering/BloomEffect.cs) picks it up.
+//
+// VR: written for single-pass instanced stereo (Meta Quest / OpenXR multiview), and _Color / _Intensity are
+// per-instance properties so MeshRenderers that share a mesh and this material but carry different
+// MaterialPropertyBlock values (the 1300 Sacks-spiral dots) collapse into a few GPU-instanced draw calls.
 Shader "Zeta/GlowLine"
 {
     Properties
     {
         [HDR] _Color ("Tint", Color) = (1, 1, 1, 1)
         _Intensity ("HDR Intensity", Float) = 1.0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Z Test", Float) = 4
     }
     SubShader
     {
         Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
-        Blend SrcAlpha OneMinusSrcAlpha
+        // colour blends as usual; alpha accumulates as source-over so passthrough sees a correct alpha channel
+        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
         ZWrite Off
+        ZTest [_ZTest]
         Cull Off
         Lighting Off
 
@@ -24,8 +31,10 @@ Shader "Zeta/GlowLine"
             #pragma multi_compile_instancing
             #include "UnityCG.cginc"
 
-            fixed4 _Color;
-            float _Intensity;
+            UNITY_INSTANCING_BUFFER_START(Props)
+                UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
+                UNITY_DEFINE_INSTANCED_PROP(float, _Intensity)
+            UNITY_INSTANCING_BUFFER_END(Props)
 
             struct appdata
             {
@@ -38,12 +47,17 @@ Shader "Zeta/GlowLine"
             {
                 float4 pos : SV_POSITION;
                 fixed4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             v2f vert(appdata v)
             {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.color = v.color;
                 return o;
@@ -51,8 +65,9 @@ Shader "Zeta/GlowLine"
 
             float4 frag(v2f i) : SV_Target
             {
-                float4 c = i.color * _Color;
-                c.rgb *= _Intensity;
+                UNITY_SETUP_INSTANCE_ID(i);
+                float4 c = i.color * UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
+                c.rgb *= UNITY_ACCESS_INSTANCED_PROP(Props, _Intensity);
                 return c;
             }
             ENDCG

@@ -2,7 +2,14 @@
     "name": "ZetaVisualization.Editor",
     "rootNamespace": "",
     "references": [
-        "ZetaVisualization"
+        "ZetaVisualization",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor",
+        "Unity.XR.OpenXR",
+        "Unity.XR.OpenXR.Editor",
+        "Unity.XR.OpenXR.Features.MetaQuestSupport",
+        "Unity.XR.MetaOpenXR",
+        "Unity.XR.Hands"
     ],
     "includePlatforms": [
         "Editor"

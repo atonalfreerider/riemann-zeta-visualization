@@ -47,11 +47,29 @@ public class TourDirector : MonoBehaviour
     Coroutine tourRoutine;
     float tourStartTime;
     bool skipRequested;
+    bool replayRequested;
+
+    // ---- navigation state (used by the VR interface, harmless on the desktop) -----------------------
+    public bool Paused { get; private set; }
+    public string CurrentChapterId { get; private set; } = "";
+    public int CurrentChapterIndex { get; private set; } = -1;
+    public string CurrentLineId { get; private set; } = "";
+    /// <summary>Seconds into the current line, and how long the line lasts.</summary>
+    public float LineElapsed { get; private set; }
+    public float LineDuration { get; private set; }
+    public TourChapter[] Chapters => script?.chapters ?? System.Array.Empty<TourChapter>();
+    /// <summary>When true the tour carries on into the next chapter; when false it stops at the end of the chapter it was started on.</summary>
+    public bool ContinueIntoNextChapter = true;
+    public event Action<int, TourChapter> ChapterStarted;
+    public event Action<TourLine> LineStarted;
+    public event Action TourEnded;
 
     void Awake()
     {
         Instance = this;
     }
+
+    void Hint(string text) => Captions.SetHint(VRMode.Enabled ? "" : text);
 
     void Start()
     {
@@ -68,7 +86,7 @@ public class TourDirector : MonoBehaviour
         audioSource.spatialBlend = 0f;
 
         script = TourScriptLoader.Load();
-        Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
 
         if (AutoStart)
         {
@@ -107,7 +125,7 @@ public class TourDirector : MonoBehaviour
         if (keyboard.fKey.wasPressedThisFrame)
         {
             Captions.ShowFps = !Captions.ShowFps;
-            if (!Captions.ShowFps) Captions.SetHint(Running ? "" : "T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait     F  fps");
+            if (!Captions.ShowFps) Hint(Running ? "" : "T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait     F  fps");
         }
     }
 
@@ -118,10 +136,11 @@ public class TourDirector : MonoBehaviour
         if (Running) return;
         Running = true;
         skipRequested = false;
+        replayRequested = false;
         AudioTimeline.Clear();
         Recorder.ChapterMarks.Clear();
         tourStartTime = Time.time;
-        Captions.SetHint("");
+        Hint("");
 
         if (Storyboard)
         {
@@ -143,14 +162,97 @@ public class TourDirector : MonoBehaviour
     {
         if (!Running) return;
         Running = false;
+        SetPaused(false);
         if (tourRoutine != null) StopCoroutine(tourRoutine);
         tourRoutine = null;
         audioSource.Stop();
         Captions.Clear();
-        Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
         Rig.Release();
         if (Recorder.IsRecording) StopRecording();
+        CurrentChapterId = "";
+        CurrentChapterIndex = -1;
+        CurrentLineId = "";
+        if (!jumping) TourEnded?.Invoke();
     }
+
+    bool jumping;
+
+    // ---- navigation (VR interface) -------------------------------------------------------------
+
+    /// <summary>Pause or resume everything: animation, narration and the tour clock (Time.timeScale), not the interface.</summary>
+    public void SetPaused(bool paused)
+    {
+        if (Paused == paused) return;
+        Paused = paused;
+        Time.timeScale = paused ? 0f : 1f;
+        AudioListener.pause = paused;
+    }
+
+    public void TogglePause()
+    {
+        if (Running) SetPaused(!Paused);
+        else Main.Toggle();
+    }
+
+    /// <summary>Start (or restart) the narrated tour at a chapter, from a clean stage.</summary>
+    public void GoToChapter(string chapterId, bool continueOn = true)
+    {
+        if (Running)
+        {
+            jumping = true;
+            StopTour();
+            jumping = false;
+        }
+
+        Main.CancelAnimations();
+        Annotations.CancelAnimations();
+        ContinueIntoNextChapter = continueOn;
+        StartChapter = chapterId;
+        EndChapter = continueOn ? "" : chapterId;
+        StartTour();
+    }
+
+    public void GoToChapter(int index, bool continueOn = true)
+    {
+        if (index < 0 || index >= Chapters.Length) return;
+        GoToChapter(Chapters[index].id, continueOn);
+    }
+
+    public void NextChapter()
+    {
+        int next = CurrentChapterIndex + 1;
+        if (!Running || next >= Chapters.Length) return;
+        GoToChapter(next, ContinueIntoNextChapter);
+    }
+
+    /// <summary>Restart the current chapter; pressed again within a moment it goes back one chapter.</summary>
+    public void PreviousChapter()
+    {
+        if (!Running) return;
+        int target = CurrentChapterIndex;
+        if (ChapterElapsed < 3f && target > 0) target--;
+        GoToChapter(target, ContinueIntoNextChapter);
+    }
+
+    float chapterStartedAt;
+    float ChapterElapsed => Time.unscaledTime - chapterStartedAt;
+
+    public void NextLine()
+    {
+        if (Running) skipRequested = true;
+    }
+
+    /// <summary>Play the current line again from its beginning (its camera and actions run again).</summary>
+    public void ReplayLine()
+    {
+        if (!Running) return;
+        replayRequested = true;
+        skipRequested = true;
+    }
+
+    /// <summary>Run action strings such as "show:strip" or "sacks:saddle" (the same vocabulary as script.json).</summary>
+    public void RunActions(params string[] actions) => ApplyActions(actions);
 
     float currentLineSeconds = 3f;
 
@@ -262,6 +364,8 @@ public class TourDirector : MonoBehaviour
             }
         }
 
+        Main.CancelAnimations();
+        Annotations.CancelAnimations();
         Annotations.HideAll();
         Main.SetSigma(.5d);
         Main.ResetAnimation();
@@ -294,6 +398,10 @@ public class TourDirector : MonoBehaviour
                 started = true;
             }
 
+            CurrentChapterIndex = c;
+            CurrentChapterId = chapter.id;
+            chapterStartedAt = Time.unscaledTime;
+            ChapterStarted?.Invoke(c, chapter);
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
             Recorder.ChapterMarks.Add((chapter.id, Recorder.FrameIndex));
@@ -310,21 +418,15 @@ public class TourDirector : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         Running = false;
         Rig.Release();
-        // restore the free-roam visualization
-        Main.SetPrimeCurveVisible(true);
-        Main.SetCosineVisible(true);
-        Main.SetEquationsVisible(true);
-        Main.SetZetaCurveVisible(true);
-        Main.SetGridVisible(true);
-        Main.Limit.TermOverride = 0;
-        Main.ZeroLabelLimit = -1;
-        Main.CosineScale = -1f;
-        Main.SetCosineZeroLimit(-1);
-        Annotations.HideAll();
+        RestoreFreeRoam();
         if (Recorder.IsRecording) StopRecording();
         else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
         Main.SpeedMultiplier = 1d;
-        Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        CurrentChapterId = "";
+        CurrentChapterIndex = -1;
+        CurrentLineId = "";
+        TourEnded?.Invoke();
 
 #if UNITY_EDITOR
         if (UnityEditor.EditorPrefs.GetBool("Zeta.BatchQuitAfterPlay", false))
@@ -335,7 +437,44 @@ public class TourDirector : MonoBehaviour
 #endif
     }
 
+    /// <summary>Put the stage back the way the original free-roam visualization starts (everything on, no annotations).</summary>
+    public void RestoreFreeRoam()
+    {
+        Main.CancelAnimations();
+        Annotations.CancelAnimations();
+        Main.SetPrimeCurveVisible(true);
+        Main.SetCosineVisible(true);
+        Main.SetEquationsVisible(true);
+        Main.SetZetaCurveVisible(true);
+        Main.SetGridVisible(true);
+        Main.SetZeroMarkersVisible(true);
+        Main.Limit.SetSpiralVisible(true);
+        Main.Limit.SetTailVisible(true);
+        Main.Limit.SetArrowheadsVisible(true);
+        Main.Limit.SetLengthLabelsVisible(false);
+        Main.Limit.SetTailGhostVisible(false);
+        Main.Limit.TermOverride = 0;
+        Main.Limit.TermFraction = 1f;
+        Main.ZeroLabelLimit = -1;
+        Main.CosineScale = -1f;
+        Main.SetCosineZeroLimit(-1);
+        Main.SetTrailStyle(0.05f, Factory.SoftGlowIntensity, 0f);
+        Annotations.HideAll();
+    }
+
     IEnumerator PlayLine(TourLine line)
+    {
+        CurrentLineId = line.id;
+        replayRequested = false;
+        yield return PlayLineOnce(line);
+        while (replayRequested && Running)
+        {
+            replayRequested = false;
+            yield return PlayLineOnce(line);
+        }
+    }
+
+    IEnumerator PlayLineOnce(TourLine line)
     {
         skipRequested = false;
         lineSerial++;
@@ -365,6 +504,9 @@ public class TourDirector : MonoBehaviour
         float duration = clip != null ? Mathf.Max(clip.length, timing.duration) : timing.duration;
         Captions.SetLine(timing);
         Captions.SetFootnote(line.footnote);
+        LineDuration = duration + Mathf.Max(0f, line.pause);
+        LineElapsed = 0f;
+        LineStarted?.Invoke(line);
 
         if (Storyboard)
         {
@@ -390,7 +532,8 @@ public class TourDirector : MonoBehaviour
                 break;
             }
 
-            Captions.SetTime(Time.time - start);
+            LineElapsed = Time.time - start;
+            Captions.SetTime(LineElapsed);
             yield return null;
             float now = Time.realtimeSinceStartup;
             float dt = now - wallPrev;
