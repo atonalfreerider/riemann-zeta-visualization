@@ -112,7 +112,7 @@ public class SacksSpiral : MonoBehaviour
         routesRoot.transform.SetParent(transform, false);
         AddRoute("squares", new Color(1f, .55f, .2f), k => k * k, 1f, 36f, "k²  — the squares: never a prime");
         AddRoute("pronic", new Color(.55f, .6f, 1f), k => k * (k + 1), 1f, 35f, "k(k+1)  — never a prime either");
-        AddRoute("euler", new Color(.35f, 1f, .55f), k => k * k + k + 41, 9f, 35f, "k² + k + 41  — Euler's route: 40 primes in a row");
+        AddRoute("euler", new Color(.35f, 1f, .55f), k => k * k + k + 41, 13f, 35f, "k² + k + 41  — Euler's route: 40 primes in a row");
         routesRoot.SetActive(false);
 
         caption = TextBoxLabel("", 2.4f, new Color(.85f, .85f, .95f));
