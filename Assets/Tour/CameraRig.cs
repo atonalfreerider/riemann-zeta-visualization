@@ -173,6 +173,7 @@ public class CameraRig : MonoBehaviour
         cues["staircase_close"] = () => new CueState { Position = new Vector3(9f, 7f, -24f), LookAt = new Vector3(9f, 7f, 0f), Up = up, Fov = 60 };
         cues["wobble"] = () => new CueState { Position = new Vector3(30f, 30f, -82f), LookAt = new Vector3(30f, 30f, 0f), Up = up, Fov = 60 };
         cues["primes_grid"] = () => new CueState { Position = new Vector3(-34f, 18.5f, -24f), LookAt = new Vector3(-34f, 18.5f, 0f), Up = up, Fov = 60 };
+        cues["lattice"] = () => new CueState { Position = new Vector3(-31f, 15.5f, -27f), LookAt = new Vector3(-31f, 15.5f, 0f), Up = up, Fov = 60 };
         cues["sacks_flat"] = () =>
         {
             Vector3 c = annotations.Sacks.Center;

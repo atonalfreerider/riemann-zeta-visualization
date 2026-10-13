@@ -28,6 +28,12 @@ public class SacksSpiral : MonoBehaviour
     GameObject routesRoot;
     TextBox caption;
 
+    GameObject latticeRoot;
+    readonly List<(int p, int m, GameObject cell, LineRenderer link)> latticeCells = new();
+    readonly List<TextBox> latticeRowLabels = new();
+    readonly Vector3 latticeOrigin = new(-40f, 7.6f, 0f);
+    const float LatticeCell = 1.5f, LatticeRow = 2.6f;
+
     float morph;   // 0 = grid, 1 = spiral
     float bend;    // 0 = flat, 1 = saddle
     float reveal;  // fraction of the extra numbers (31..Count) shown
@@ -117,7 +123,145 @@ public class SacksSpiral : MonoBehaviour
 
         caption = TextBoxLabel("", 2.4f, new Color(.85f, .85f, .95f));
         caption.gameObject.SetActive(false);
+        BuildLattice();
         Layout();
+    }
+
+    /// <summary>Rows p × m (m ≥ p) for p = 2, 3, 5: every composite ≤ 30 appears exactly where it is first made.</summary>
+    void BuildLattice()
+    {
+        latticeRoot = new GameObject("Lattice");
+        latticeRoot.transform.SetParent(transform, false);
+        int[] primes = { 2, 3, 5 };
+        for (int r = 0; r < primes.Length; r++)
+        {
+            int p = primes[r];
+            float y = latticeOrigin.y - r * LatticeRow;
+            TextBox rowLabel = TextBoxLabel($"{p} ×", 3.2f, Factory.Palette.Zero);
+            rowLabel.transform.SetParent(latticeRoot.transform, false);
+            rowLabel.transform.position = new Vector3(latticeOrigin.x - 2.0f, y, 0);
+            latticeRowLabels.Add(rowLabel);
+            for (int m = p; p * m <= GridCount; m++)
+            {
+                int n = p * m;
+                bool square = m == p;
+                GameObject cell = new GameObject($"{p}x{m}");
+                cell.transform.SetParent(latticeRoot.transform, false);
+                cell.transform.position = new Vector3(latticeOrigin.x + (m - 2) * LatticeCell, y, 0);
+                TextBox t = TextBox.Create($"{n}", square ? 3.4f : 2.8f);
+                t.transform.SetParent(cell.transform, false);
+                t.Alignment = TextAlignmentOptions.Center;
+                t.Color = square ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f);
+                t.gameObject.AddComponent<Billboard>();
+                TextBox sub = TextBox.Create($"{p}·{m}", 1.4f);
+                sub.transform.SetParent(cell.transform, false);
+                sub.Alignment = TextAlignmentOptions.Center;
+                sub.transform.localPosition = Vector3.down * 1.05f;
+                sub.Color = new Color(.45f, .45f, .55f);
+                sub.gameObject.AddComponent<Billboard>();
+                LineRenderer link = Factory.NewLine("link", .035f, square ? new Color(1f, .55f, .2f) : new Color(.5f, .5f, .6f), Factory.SoftGlowIntensity);
+                link.transform.SetParent(cell.transform, false);
+                link.positionCount = 2;
+                link.enabled = false;
+                cell.SetActive(false);
+                latticeCells.Add((p, m, cell, link));
+            }
+        }
+
+        latticeRoot.SetActive(false);
+    }
+
+    /// <summary>Animate the lattice: each product pops in and strikes its grid cell, dimming it (orange for squares).</summary>
+    public IEnumerator BuildLatticeRows(float seconds)
+    {
+        latticeRoot.SetActive(true);
+        foreach (TextBox l in latticeRowLabels) l.gameObject.SetActive(false);
+        float per = seconds / (latticeCells.Count + 3);
+        int lastP = -1;
+        foreach ((int p, int m, GameObject cell, LineRenderer link) in latticeCells)
+        {
+            if (p != lastP)
+            {
+                lastP = p;
+                latticeRowLabels[System.Array.IndexOf(new[] { 2, 3, 5 }, p)].gameObject.SetActive(true);
+                yield return new WaitForSeconds(per);
+            }
+
+            int n = p * m;
+            cell.SetActive(true);
+            StartCoroutine(Shrink(cell.transform, 1.8f, 1f, .35f));
+            Vector3 target = GridPos(n);
+            link.enabled = true;
+            float t = 0f;
+            while (t < per * .8f)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.SmoothStep(0, 1, t / (per * .8f));
+                link.SetPositions(new[] { cell.transform.position + Vector3.up * .6f, Vector3.Lerp(cell.transform.position + Vector3.up * .6f, target, k) });
+                yield return null;
+            }
+
+            // strike the grid cell
+            bool square = m == p;
+            labels[n - 1].Color = square ? new Color(1f, .55f, .2f) : new Color(.28f, .28f, .34f);
+            dots[n - 1].SetActive(square);
+            if (square) StartCoroutine(Shrink(dots[n - 1].transform, 1.6f, .32f, .5f));
+            StartCoroutine(FadeLink(link, .6f));
+        }
+    }
+
+    static IEnumerator FadeLink(LineRenderer link, float seconds)
+    {
+        Color c0 = link.startColor;
+        float t = 0f;
+        while (t < seconds && link != null)
+        {
+            t += Time.deltaTime;
+            float a = Mathf.Lerp(1f, .15f, t / seconds);
+            link.startColor = new Color(c0.r, c0.g, c0.b, a);
+            link.endColor = new Color(c0.r, c0.g, c0.b, a);
+            yield return null;
+        }
+    }
+
+    public void HideLattice() => latticeRoot.SetActive(false);
+
+    /// <summary>Pulse the perfect squares (orange) on the spiral / saddle.</summary>
+    public void PulseSquares(float seconds)
+    {
+        for (int i = 0; i < dots.Count; i++)
+        {
+            int n = i + 1;
+            if (IsSquare(n) && dots[i].activeSelf) StartCoroutine(PulseScale(dots[i].transform, n <= GridCount ? .32f : .22f, 3.2f, seconds));
+        }
+    }
+
+    /// <summary>Briefly brighten every composite so the prime pattern reads as the negative space.</summary>
+    public void PulseComposites(float seconds)
+    {
+        for (int i = 0; i < dots.Count; i++)
+        {
+            int n = i + 1;
+            if (!IsPrime(n) && !IsSquare(n))
+            {
+                dots[i].SetActive(true);
+                StartCoroutine(PulseScale(dots[i].transform, .22f, 2.2f, seconds));
+            }
+        }
+    }
+
+    static IEnumerator PulseScale(Transform t, float baseScale, float factor, float seconds)
+    {
+        float e = 0f;
+        while (e < seconds && t != null)
+        {
+            e += Time.deltaTime;
+            float k = 0.5f - 0.5f * Mathf.Cos(e / seconds * Mathf.PI * 2f);
+            t.localScale = Vector3.one * (baseScale * (1f + (factor - 1f) * k));
+            yield return null;
+        }
+
+        if (t != null) t.localScale = Vector3.one * baseScale;
     }
 
     TextBox TextBoxLabel(string text, float size, Color color)
@@ -188,6 +332,7 @@ public class SacksSpiral : MonoBehaviour
     public void ShowGrid()
     {
         gameObject.SetActive(true);
+        HideLattice();
         morph = 0f; bend = 0f; reveal = 0f;
         for (int i = 0; i < labels.Count; i++)
         {
@@ -216,9 +361,9 @@ public class SacksSpiral : MonoBehaviour
             }
             else
             {
-                labels[i].Color = new Color(.28f, .28f, .34f);
-                if (n > 1) factorLabels[i].gameObject.SetActive(true);
-                dots[i].SetActive(IsSquare(n));
+                // composites stay neutral until the lattice shows how they are made
+                labels[i].Color = new Color(.5f, .5f, .58f);
+                dots[i].SetActive(false);
             }
 
             yield return new WaitForSeconds(per);
@@ -240,6 +385,7 @@ public class SacksSpiral : MonoBehaviour
     public IEnumerator MorphToSpiral(float seconds)
     {
         gameObject.SetActive(true);
+        HideLattice();
         foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
         for (int i = 0; i < GridCount; i++) dots[i].SetActive(true);
         caption.gameObject.SetActive(true);

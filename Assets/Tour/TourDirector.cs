@@ -99,6 +99,12 @@ public class TourDirector : MonoBehaviour
             Portrait = !Portrait;
             Rig.Portrait = Portrait;
         }
+
+        if (keyboard.fKey.wasPressedThisFrame)
+        {
+            Captions.ShowFps = !Captions.ShowFps;
+            if (!Captions.ShowFps) Captions.SetHint(Running ? "" : "T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait     F  fps");
+        }
     }
 
     // ---- control -----------------------------------------------------------------------------
@@ -167,12 +173,8 @@ public class TourDirector : MonoBehaviour
             if (showEach)
             {
                 Annotations.SetWaveCount(n + 1);
-                Annotations.ShowIncomingWave(n, amplitude, 0f);
-                Annotations.AddStripDial(n, perStep * 0.4f);
-                yield return new WaitForSeconds(perStep * 0.45f);
-                Annotations.HideIncomingWave();
-                Main.SetCosineZeroLimitAnimated(n + 1, perStep * 0.5f);
-                yield return new WaitForSeconds(perStep * 0.55f);
+                Annotations.AddStripDial(n, perStep * 0.5f);
+                yield return Annotations.IncomingWaveRoutine(n, amplitude, perStep);
             }
             else
             {
@@ -497,12 +499,16 @@ public class TourDirector : MonoBehaviour
                         if (arg == "spiral") StartCoroutine(Annotations.Sacks.MorphToSpiral(Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
                         else if (arg == "saddle") StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
                         else if (arg == "flat") StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f)));
+                        else if (arg == "lattice") StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f)));
+                        else if (arg == "squares") Annotations.Sacks.PulseSquares(Mathf.Max(2f, currentLineSeconds * 0.8f));
+                        else if (arg == "composites") Annotations.Sacks.PulseComposites(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "routes") Annotations.Sacks.ShowRoutes(true);
                         else if (arg == "noroutes") Annotations.Sacks.ShowRoutes(false);
                         else if (arg == "show") { Annotations.Sacks.gameObject.SetActive(true); }
                         else Annotations.Sacks.Hide();
                         break;
                     case "chainfeet": Annotations.ShowChainFeet(arg != "off"); break;
+                    case "logseq": Annotations.ShowLogSequence(arg != "off"); break;
                     case "squares": Annotations.ShowSquaresLabel(arg != "off"); break;
                     case "primepowers": Annotations.ShowPrimePowers(arg != "off"); break;
                     case "waveview": Annotations.SetWaveCount(int.Parse(arg, CultureInfo.InvariantCulture)); break;

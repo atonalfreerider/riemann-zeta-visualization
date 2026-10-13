@@ -92,7 +92,7 @@ public class CaptionDisplay : MonoBehaviour
         chapterIndex.rectTransform.anchorMin = new Vector2(0, 1);
         chapterIndex.rectTransform.anchorMax = new Vector2(0, 1);
         chapterIndex.rectTransform.pivot = new Vector2(0, 1);
-        chapterIndex.rectTransform.anchoredPosition = new Vector2(48, -140);
+        chapterIndex.rectTransform.anchoredPosition = new Vector2(48, -60);
         chapterIndex.rectTransform.sizeDelta = new Vector2(900, 50);
         chapterIndex.color = new Color(.7f, .7f, .75f);
 
@@ -139,8 +139,8 @@ public class CaptionDisplay : MonoBehaviour
         card.anchorMin = new Vector2(1, 1);
         card.anchorMax = new Vector2(1, 1);
         card.pivot = new Vector2(1, 1);
-        card.anchoredPosition = new Vector2(-40, -600);
-        card.sizeDelta = new Vector2(560, 290);
+        card.anchoredPosition = new Vector2(-24, -96);
+        card.sizeDelta = new Vector2(470, 236);
         cardGroup = go.AddComponent<CanvasGroup>();
         cardGroup.alpha = 0f;
         Image bg = go.AddComponent<Image>();
@@ -156,8 +156,8 @@ public class CaptionDisplay : MonoBehaviour
         RectTransform ringRect = cardRing.rectTransform;
         ringRect.anchorMin = new Vector2(0, 0.5f);
         ringRect.anchorMax = new Vector2(0, 0.5f);
-        ringRect.anchoredPosition = new Vector2(95, 0);
-        ringRect.sizeDelta = new Vector2(150, 150);
+        ringRect.anchoredPosition = new Vector2(78, 0);
+        ringRect.sizeDelta = new Vector2(124, 124);
 
         GameObject medGo = new("Medallion");
         medGo.transform.SetParent(go.transform, false);
@@ -169,8 +169,8 @@ public class CaptionDisplay : MonoBehaviour
         RectTransform medRect = cardMedallion.rectTransform;
         medRect.anchorMin = new Vector2(0, 0.5f);
         medRect.anchorMax = new Vector2(0, 0.5f);
-        medRect.anchoredPosition = new Vector2(95, 0);
-        medRect.sizeDelta = new Vector2(134, 134);
+        medRect.anchoredPosition = new Vector2(78, 0);
+        medRect.sizeDelta = new Vector2(110, 110);
 
         GameObject portraitGo = new("Portrait");
         portraitGo.transform.SetParent(medGo.transform, false);
@@ -189,25 +189,25 @@ public class CaptionDisplay : MonoBehaviour
         cardGlyph.rectTransform.offsetMin = Vector2.zero;
         cardGlyph.rectTransform.offsetMax = Vector2.zero;
 
-        cardName = MakeText(go.transform, "Name", 31, FontStyles.Bold, TextAlignmentOptions.Left);
+        cardName = MakeText(go.transform, "Name", 27, FontStyles.Bold, TextAlignmentOptions.Left);
         cardName.rectTransform.anchorMin = new Vector2(0, 1);
         cardName.rectTransform.anchorMax = new Vector2(1, 1);
         cardName.rectTransform.pivot = new Vector2(0, 1);
-        cardName.rectTransform.anchoredPosition = new Vector2(190, -26);
-        cardName.rectTransform.sizeDelta = new Vector2(-210, 50);
-        cardYears = MakeText(go.transform, "Years", 26, FontStyles.Normal, TextAlignmentOptions.Left);
+        cardName.rectTransform.anchoredPosition = new Vector2(152, -18);
+        cardName.rectTransform.sizeDelta = new Vector2(-170, 44);
+        cardYears = MakeText(go.transform, "Years", 22, FontStyles.Normal, TextAlignmentOptions.Left);
         cardYears.rectTransform.anchorMin = new Vector2(0, 1);
         cardYears.rectTransform.anchorMax = new Vector2(1, 1);
         cardYears.rectTransform.pivot = new Vector2(0, 1);
-        cardYears.rectTransform.anchoredPosition = new Vector2(190, -72);
-        cardYears.rectTransform.sizeDelta = new Vector2(-210, 36);
+        cardYears.rectTransform.anchoredPosition = new Vector2(152, -60);
+        cardYears.rectTransform.sizeDelta = new Vector2(-170, 32);
         cardYears.color = new Color(.75f, .75f, .8f);
-        cardRole = MakeText(go.transform, "Role", 25, FontStyles.Normal, TextAlignmentOptions.TopLeft);
+        cardRole = MakeText(go.transform, "Role", 21, FontStyles.Normal, TextAlignmentOptions.TopLeft);
         cardRole.rectTransform.anchorMin = new Vector2(0, 1);
         cardRole.rectTransform.anchorMax = new Vector2(1, 1);
         cardRole.rectTransform.pivot = new Vector2(0, 1);
-        cardRole.rectTransform.anchoredPosition = new Vector2(190, -112);
-        cardRole.rectTransform.sizeDelta = new Vector2(-210, 170);
+        cardRole.rectTransform.anchoredPosition = new Vector2(152, -94);
+        cardRole.rectTransform.sizeDelta = new Vector2(-170, 140);
         cardRole.textWrappingMode = TextWrappingModes.Normal;
         cardRole.color = new Color(.9f, .9f, .95f);
     }
@@ -273,7 +273,7 @@ public class CaptionDisplay : MonoBehaviour
     IEnumerator CardIn(bool machine)
     {
         float t = 0f;
-        Vector2 target = new(-40, -600);
+        Vector2 target = new(-24, -96);
         while (t < 0.6f)
         {
             t += Time.deltaTime;
@@ -326,9 +326,28 @@ public class CaptionDisplay : MonoBehaviour
         return text;
     }
 
+    string hintText = "";
+    public bool ShowFps;
+    float fpsAccum, fpsTime; int fpsFrames; float fps;
+
     public void SetHint(string text)
     {
-        hint.text = text ?? "";
+        hintText = text ?? "";
+        hint.text = hintText;
+    }
+
+    void Update()
+    {
+        if (!ShowFps) return;
+        fpsFrames++;
+        fpsTime += Time.unscaledDeltaTime;
+        if (fpsTime >= 0.5f)
+        {
+            fps = fpsFrames / fpsTime;
+            fpsFrames = 0;
+            fpsTime = 0f;
+            hint.text = $"{fps:0} fps   {hintText}";
+        }
     }
 
     public void SetChapterIndex(int index, int total, string title)

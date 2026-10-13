@@ -37,6 +37,11 @@ public class LimitCurve : MonoBehaviour
     public bool ShowTailGhost = false;
     const int TailGhostTerms = 120;
     LineRenderer tailGhost;
+    readonly Vector3[] tailGhostBuffer = new Vector3[TailGhostTerms + 1];
+    readonly List<LineRenderer> ghostArrows = new();
+    GameObject ghostCenter;
+    readonly Vector3[] headBuffer = new Vector3[3];
+    readonly Vector3[] tailBuffer = new Vector3[3];
     readonly List<LineRenderer> arrowheads = new();
     readonly List<TextBox> lengthLabels = new();
     GameObject arrowheadContainer;
@@ -100,6 +105,18 @@ public class LimitCurve : MonoBehaviour
         tailGhost = Factory.NewLine("tailGhost", .012f, new Color(1f, .6f, .3f, .45f));
         tailGhost.transform.SetParent(transform, false);
         tailGhost.enabled = false;
+        for (int i = 0; i < 6; i++)
+        {
+            LineRenderer a = Factory.NewLine("ghost arrow", .03f, new Color(1f, .7f, .35f), Factory.GlowIntensity);
+            a.transform.SetParent(transform, false);
+            a.positionCount = 3;
+            a.enabled = false;
+            ghostArrows.Add(a);
+        }
+
+        ghostCenter = Factory.NewSphere("spring centre", .11f, new Color(1f, .75f, .4f), Factory.GlowIntensity);
+        ghostCenter.transform.SetParent(transform, false);
+        ghostCenter.SetActive(false);
 
         arrowheadContainer = new GameObject("Arrowheads");
         arrowheadContainer.transform.SetParent(transform, false);
@@ -208,12 +225,10 @@ public class LimitCurve : MonoBehaviour
 
         if (tailCurve != null)
         {
-            tailCurve.SetPositions(new[]
-            {
-                ToWorld(d.SpiralEnd, yIntercept),
-                ToWorld(d.AfterTail, yIntercept),
-                ToWorld(d.Total, yIntercept)
-            });
+            tailBuffer[0] = ToWorld(d.SpiralEnd, yIntercept);
+            tailBuffer[1] = ToWorld(d.AfterTail, yIntercept);
+            tailBuffer[2] = ToWorld(d.Total, yIntercept);
+            tailCurve.SetPositions(tailBuffer);
         }
 
         bool isMoving = limitCurve == MovingLimitCurve;
@@ -277,9 +292,12 @@ public class LimitCurve : MonoBehaviour
     /// <summary>The arrows we do not draw: partial sums from N onward, faint, to show what the orange tail replaces.</summary>
     void UpdateTailGhost(ZetaMath.SpiralDecomposition d, Complex s, float y)
     {
-        tailGhost.enabled = ShowTailGhost && MovingLimitCurve.enabled;
-        if (!tailGhost.enabled) return;
-        Vector3[] pts = new Vector3[TailGhostTerms + 1];
+        bool on = ShowTailGhost && MovingLimitCurve.enabled;
+        tailGhost.enabled = on;
+        ghostCenter.SetActive(on);
+        foreach (LineRenderer a in ghostArrows) a.enabled = on;
+        if (!on) return;
+        Vector3[] pts = tailGhostBuffer;
         Complex sum = d.SpiralEnd;
         pts[0] = ToWorld(sum, y + .005f);
         for (int n = d.N; n < d.N + TailGhostTerms; n++)
@@ -290,6 +308,26 @@ public class LimitCurve : MonoBehaviour
 
         tailGhost.positionCount = pts.Length;
         tailGhost.SetPositions(pts);
+
+        // the point the spring winds toward is the exact value the orange arrow jumps to
+        Vector3 centre = ToWorld(d.Total, y + .005f);
+        ghostCenter.transform.position = centre;
+        for (int k = 0; k < ghostArrows.Count; k++)
+        {
+            int i = 8 + k * 18;
+            Vector3 from = pts[i];
+            Vector3 dir = centre - from;
+            float dist = dir.magnitude;
+            if (dist < 1e-4f) { ghostArrows[k].enabled = false; continue; }
+            dir /= dist;
+            float size = Mathf.Clamp(dist * .25f, .04f, .14f);
+            Vector3 tip = from + dir * Mathf.Min(dist * .55f, size * 2.5f);
+            Vector3 side = Vector3.Cross(dir, Vector3.up).normalized;
+            headBuffer[0] = tip - dir * size + side * size * .5f;
+            headBuffer[1] = tip;
+            headBuffer[2] = tip - dir * size - side * size * .5f;
+            ghostArrows[k].SetPositions(headBuffer);
+        }
     }
 
     public IEnumerable<Renderer> ChainRenderers
@@ -346,7 +384,10 @@ public class LimitCurve : MonoBehaviour
             float w = Mathf.Clamp(length * .07f, .012f, .045f);
             arrowheads[i].startWidth = w;
             arrowheads[i].endWidth = w;
-            arrowheads[i].SetPositions(new[] { to - dir * size + side * size * .55f, to, to - dir * size - side * size * .55f });
+            headBuffer[0] = to - dir * size + side * size * .55f;
+            headBuffer[1] = to;
+            headBuffer[2] = to - dir * size - side * size * .55f;
+            arrowheads[i].SetPositions(headBuffer);
         }
     }
 

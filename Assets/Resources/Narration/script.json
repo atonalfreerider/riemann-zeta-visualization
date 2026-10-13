@@ -24,16 +24,25 @@
         },
         {
           "id": "hook_02",
-          "text": "Every whole number is made of primes: twelve is two times two times three. But where the next prime will fall has puzzled us for more than two thousand years.",
-          "camera": "primes_grid",
+          "text": "Watch how the other numbers are built. Take two, and multiply it by two, three, four, and so on: four, six, eight, ten. Each product strikes a number off the list.",
+          "camera": "lattice",
+          "actions": [
+            "sacks:lattice"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "hook_03",
+          "text": "Then three times three and upward, then five times five. Every axis makes its own row of composites, and where a prime meets itself you get a perfect square: four, nine, twenty five, in orange.",
+          "camera": "lattice",
           "actions": [
             "pulse:primes"
           ],
           "pause": 0.4
         },
         {
-          "id": "hook_03",
-          "text": "Wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.",
+          "id": "hook_04",
+          "text": "What survives the sieve is the primes. Now wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.",
           "camera": "sacks_flat",
           "actions": [
             "sacks:spiral"
@@ -42,22 +51,33 @@
           "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
         },
         {
-          "id": "hook_04",
-          "text": "Bend that spiral over a saddle and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.",
+          "id": "hook_05",
+          "text": "Bend that spiral over a saddle. The composites fill the valleys, the squares line up along one ridge, and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.",
           "camera": "sacks_saddle",
           "actions": [
             "sacks:saddle",
+            "sacks:composites",
+            "sacks:squares",
             "sacks:routes",
             "pulse:sacks"
           ],
           "pause": 0.5
         },
         {
-          "id": "hook_05",
-          "text": "Along the squares, never a prime. Along Euler's route, forty primes in a row. Find the rule behind this, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.",
+          "id": "hook_06",
+          "text": "Along the squares, never a prime. Along Euler's route, forty primes in a row. Humans carried this search for twenty three centuries: Euclid, Euler, Riemann, Hardy.",
           "camera": "sacks_routes",
           "actions": [
             "pulse:sacks"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "hook_07",
+          "text": "Now we are in the age of agentic AI mathematical discovery. The last lock will be opened by humans and machines working together. This is the story of a square root, a dial, a spiral, and a staircase.",
+          "camera": "sacks_routes",
+          "actions": [
+            "card:machine"
           ],
           "pause": 0.6
         }
@@ -73,6 +93,7 @@
           "text": "Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. The footsteps keep their shape, only the scale shrinks, forever, and you never pass two.",
           "camera": "zeno_zoom",
           "actions": [
+            "card:off",
             "sacks:hide",
             "primes:off",
             "hide:spiral",
@@ -141,7 +162,7 @@
       "lines": [
         {
           "id": "stage_01",
-          "text": "The chain lives on a flat floor with a pole going up. Mathematicians call the floor the complex plane. For us it is just a floor: so many steps right, so many steps back.",
+          "text": "The chain lives on a flat floor with a pole going up. Mathematicians call the floor the complex plane. For us it is just a floor, with a grid: so many steps right, so many steps back.",
           "camera": "stage",
           "actions": [
             "hide:spiral",
@@ -149,7 +170,7 @@
             "show:imaxis",
             "show:polelabel",
             "axes:sprout",
-            "pulse:outaxes"
+            "pulse:floorgrid"
           ],
           "pause": 0.4
         },
@@ -162,6 +183,7 @@
             "terms:24",
             "show:spiral",
             "hide:lengths",
+            "trail:thin",
             "speed:0.25",
             "play",
             "pulse:imaxis"
@@ -177,7 +199,7 @@
       "lines": [
         {
           "id": "turn_01",
-          "text": "Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number. Turn the dial, and every angle grows together.",
+          "text": "Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number.",
           "camera": "spiral_angles",
           "actions": [
             "hide:polelabel",
@@ -186,14 +208,36 @@
             "play",
             "pulse:angles"
           ],
-          "pause": 0.5
+          "pause": 0.4
+        },
+        {
+          "id": "turn_01b",
+          "text": "Here is that sequence of bends. Log of two over one, log of three over two, log of four over three. Each bend is smaller than the last, and all of them grow together as the dial turns.",
+          "camera": "spiral_angles",
+          "actions": [
+            "logseq:on",
+            "pulse:logseq"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "turn_01c",
+          "text": "Why logarithms? Euler wrote each term as a power of n. Riemann, in 1859, let that power be a complex number, and a complex power does not stretch, it turns: by the logarithm of n.",
+          "camera": "spiral_angles",
+          "actions": [
+            "card:riemann",
+            "logseq:off"
+          ],
+          "pause": 0.4,
+          "footnote": "n^(−s) = e^(−s · log n): a complex exponent rotates, and the rotation is proportional to log n"
         },
         {
           "id": "turn_02",
-          "text": "The chain is endless. Watch the arrows we skip: they wind up like a spring, orbiting one point. That point is where the endless chain truly ends.",
+          "text": "The chain is endless. Watch the arrows we skip: they wind up like a spring, every turn pointing toward one centre. That centre is where the endless chain truly ends.",
           "camera": "spiral_curl",
           "actions": [
             "angles:off",
+            "card:off",
             "tailghost:on",
             "card:euler",
             "speed:0.5",
@@ -322,7 +366,7 @@
         },
         {
           "id": "wave_05",
-          "text": "Now the second collision, in its own colour. Its dial turns to twenty one point zero two, and its wave is drawn on the same line. The coloured bars are the gap between the two. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel down to one master wave.",
+          "text": "Now the second collision, in its own colour. It is born as a plain cosine, and as its dial turns it winds up like a spring, the ripples forced to the left. Then it sinks into the master wave: where they agree the peaks reinforce, where they disagree they cancel.",
           "camera": "wave",
           "actions": [
             "cosine:1",
@@ -336,7 +380,7 @@
         },
         {
           "id": "wave_06",
-          "text": "Keep going. Each new dial brings a wave in its own colour onto the same line, and the view widens to make room. Wave by wave, the pattern cancels itself out.",
+          "text": "Keep going. Each new dial winds up its own wave and pours it into the master wave, and the view widens to make room. Wave by wave, the pattern cancels itself out.",
           "camera": "wave",
           "actions": [
             "cosine:build:2:10"

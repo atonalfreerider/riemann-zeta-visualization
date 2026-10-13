@@ -9,23 +9,29 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
   <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build`</sub>
 
-**hook_02** — Every whole number is made of primes: twelve is two times two times three. But where the next prime will fall has puzzled us for more than two thousand years.
-  <sub>camera `primes_grid` · actions `pulse:primes`</sub>
+**hook_02** — Watch how the other numbers are built. Take two, and multiply it by two, three, four, and so on: four, six, eight, ten. Each product strikes a number off the list.
+  <sub>camera `lattice` · actions `sacks:lattice`</sub>
 
-**hook_03** — Wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.
+**hook_03** — Then three times three and upward, then five times five. Every axis makes its own row of composites, and where a prime meets itself you get a perfect square: four, nine, twenty five, in orange.
+  <sub>camera `lattice` · actions `pulse:primes`</sub>
+
+**hook_04** — What survives the sieve is the primes. Now wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
-**hook_04** — Bend that spiral over a saddle and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.
-  <sub>camera `sacks_saddle` · actions `sacks:saddle sacks:routes pulse:sacks`</sub>
+**hook_05** — Bend that spiral over a saddle. The composites fill the valleys, the squares line up along one ridge, and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.
+  <sub>camera `sacks_saddle` · actions `sacks:saddle sacks:composites sacks:squares sacks:routes pulse:sacks`</sub>
 
-**hook_05** — Along the squares, never a prime. Along Euler's route, forty primes in a row. Find the rule behind this, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.
+**hook_06** — Along the squares, never a prime. Along Euler's route, forty primes in a row. Humans carried this search for twenty three centuries: Euclid, Euler, Riemann, Hardy.
   <sub>camera `sacks_routes` · actions `pulse:sacks`</sub>
+
+**hook_07** — Now we are in the age of agentic AI mathematical discovery. The last lock will be opened by humans and machines working together. This is the story of a square root, a dial, a spiral, and a staircase.
+  <sub>camera `sacks_routes` · actions `card:machine`</sub>
 
 ## 2. Zeno's Chain
 *and a gentler rule*
 
 **zeno_01** — Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. The footsteps keep their shape, only the scale shrinks, forever, and you never pass two.
-  <sub>camera `zeno_zoom` · actions `sacks:hide primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
+  <sub>camera `zeno_zoom` · actions `card:off sacks:hide primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
 
 **zeno_02** — Lay the steps out as arrows: one, a half, a quarter, an eighth. The chain shrinks fast and stops dead at two.
   <sub>camera `zeno` · actions `pulse:zeno`</sub>
@@ -42,20 +48,26 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 3. The Stage
 *A floor, a pole, and a dial*
 
-**stage_01** — The chain lives on a flat floor with a pole going up. Mathematicians call the floor the complex plane. For us it is just a floor: so many steps right, so many steps back.
-  <sub>camera `stage` · actions `hide:spiral show:outaxes show:imaxis show:polelabel axes:sprout pulse:outaxes`</sub>
+**stage_01** — The chain lives on a flat floor with a pole going up. Mathematicians call the floor the complex plane. For us it is just a floor, with a grid: so many steps right, so many steps back.
+  <sub>camera `stage` · actions `hide:spiral show:outaxes show:imaxis show:polelabel axes:sprout pulse:floorgrid`</sub>
 
 **stage_02** — The pole is a dial. Its reading is called t. Turn it, and watch: every joint in the chain begins to bend.
-  <sub>camera `stage` · actions `show:center terms:24 show:spiral hide:lengths speed:0.25 play pulse:imaxis`</sub>
+  <sub>camera `stage` · actions `show:center terms:24 show:spiral hide:lengths trail:thin speed:0.25 play pulse:imaxis`</sub>
 
 ## 4. Turn the Dial
 *The tip keeps finding the centre*
 
-**turn_01** — Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number. Turn the dial, and every angle grows together.
+**turn_01** — Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number.
   <sub>camera `spiral_angles` · actions `hide:polelabel angles:on speed:0.3 play pulse:angles`</sub>
 
-**turn_02** — The chain is endless. Watch the arrows we skip: they wind up like a spring, orbiting one point. That point is where the endless chain truly ends.
-  <sub>camera `spiral_curl` · actions `angles:off tailghost:on card:euler speed:0.5 pulse:tail` · footnote: faint spring: the next 120 arrows we do not draw</sub>
+**turn_01b** — Here is that sequence of bends. Log of two over one, log of three over two, log of four over three. Each bend is smaller than the last, and all of them grow together as the dial turns.
+  <sub>camera `spiral_angles` · actions `logseq:on pulse:logseq`</sub>
+
+**turn_01c** — Why logarithms? Euler wrote each term as a power of n. Riemann, in 1859, let that power be a complex number, and a complex power does not stretch, it turns: by the logarithm of n.
+  <sub>camera `spiral_angles` · actions `card:riemann logseq:off` · footnote: n^(−s) = e^(−s · log n): a complex exponent rotates, and the rotation is proportional to log n</sub>
+
+**turn_02** — The chain is endless. Watch the arrows we skip: they wind up like a spring, every turn pointing toward one centre. That centre is where the endless chain truly ends.
+  <sub>camera `spiral_curl` · actions `angles:off card:off tailghost:on card:euler speed:0.5 pulse:tail` · footnote: faint spring: the next 120 arrows we do not draw</sub>
 
 **turn_03** — One orange arrow jumps straight to it. Euler and Maclaurin's formula pins that point down exactly, to a trillionth.
   <sub>camera `spiral_curl` · actions `show:tail flash:tail pulse:tail` · footnote: orange: Euler–Maclaurin tail N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms</sub>
@@ -87,10 +99,10 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **wave_04** — Dial it up to fourteen point one three. This is the first collision's wave, and its dial goes on the shelf at the top.
   <sub>camera `wave` · actions `wave:dial:14.134725 dialstrip:1`</sub>
 
-**wave_05** — Now the second collision, in its own colour. Its dial turns to twenty one point zero two, and its wave is drawn on the same line. The coloured bars are the gap between the two. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel down to one master wave.
+**wave_05** — Now the second collision, in its own colour. It is born as a plain cosine, and as its dial turns it winds up like a spring, the ripples forced to the left. Then it sinks into the master wave: where they agree the peaks reinforce, where they disagree they cancel.
   <sub>camera `wave` · actions `cosine:1 show:cosine wave:off dial:off waveview:1 cosine:build:1:2`</sub>
 
-**wave_06** — Keep going. Each new dial brings a wave in its own colour onto the same line, and the view widens to make room. Wave by wave, the pattern cancels itself out.
+**wave_06** — Keep going. Each new dial winds up its own wave and pours it into the master wave, and the view widens to make room. Wave by wave, the pattern cancels itself out.
   <sub>camera `wave` · actions `cosine:build:2:10`</sub>
 
 **wave_07** — Hundreds of waves. What survives are sharp spikes, and they sit on two, three, five, seven, eleven, thirteen. Notice the squares, four, nine, sixteen, twenty five: faint spikes at first, muted as the waves pile up.
@@ -167,4 +179,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
 
 ---
-1214 words ≈ 8.1 minutes of speech at 150 wpm, plus pauses and title cards.
+1353 words ≈ 9.0 minutes of speech at 150 wpm, plus pauses and title cards.

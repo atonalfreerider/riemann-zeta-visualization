@@ -96,6 +96,20 @@ public class Annotations : MonoBehaviour
     GameObject primePowersRoot;
     readonly List<TextBox> primePowerLabels = new();
     readonly List<LineRenderer> primePowerTicks = new();
+    // floor grid (sprouts with the axes)
+    GameObject floorGridRoot;
+    // logarithm sequence panel
+    GameObject logSeqRoot;
+    readonly List<LineRenderer> logBars = new();
+    readonly List<TextBox> logBarLabels = new();
+    TextBox logSeqTitle;
+    bool showLogSeq;
+    // cached buffers / throttles
+    readonly Vector3[] ringBuffer = new Vector3[40];
+    readonly Vector3[] pair = new Vector3[2];
+    float nextReadoutTime;
+    string lastDialText = "", lastAngleText = "";
+    Vector3[] masterBuffer;
     GameObject tipSphere, centerSphere;
     TextBox dialLabel;
     LineRenderer centerRing;
@@ -223,6 +237,22 @@ public class Annotations : MonoBehaviour
         Axis(outputAxesRoot.transform, Vector3.zero, Vector3.right * 4.5f, Factory.Palette.ReAxis, "Re ζ(s)", Vector3.right * 5.2f);
         Axis(outputAxesRoot.transform, Vector3.zero, Vector3.forward * 4.5f, Factory.Palette.ImAxis, "Im ζ(s)", Vector3.forward * 5.2f + Vector3.up * .6f);
         Label(outputAxesRoot.transform, "OUTPUT   ζ(s)  — drawn flat at height t", new Vector3(2.2f, -0.9f, 0), 2.2f, Color.white, TextAlignmentOptions.Center);
+        floorGridRoot = new GameObject("FloorGrid");
+        floorGridRoot.transform.SetParent(outputAxesRoot.transform, false);
+        for (int i = -4; i <= 6; i++)
+        {
+            LineRenderer gx = Factory.NewLine("floor x", i == 0 ? .03f : .018f, new Color(.3f, .34f, .42f));
+            gx.transform.SetParent(floorGridRoot.transform, false);
+            gx.positionCount = 2;
+            gx.SetPositions(new[] { new Vector3(i, -0.005f, -4), new Vector3(i, -0.005f, 6) });
+            sproutLines.Add((gx, new[] { new Vector3(i, -0.005f, -4), new Vector3(i, -0.005f, 6) }));
+            LineRenderer gz = Factory.NewLine("floor z", i == 0 ? .03f : .018f, new Color(.3f, .34f, .42f));
+            gz.transform.SetParent(floorGridRoot.transform, false);
+            gz.positionCount = 2;
+            gz.SetPositions(new[] { new Vector3(-4, -0.005f, i), new Vector3(6, -0.005f, i) });
+            sproutLines.Add((gz, new[] { new Vector3(-4, -0.005f, i), new Vector3(6, -0.005f, i) }));
+        }
+
         outputAxesRoot.SetActive(false);
 
         imAxisRoot = new GameObject("ImaginaryAxisHighlight");
@@ -437,6 +467,24 @@ public class Annotations : MonoBehaviour
         angleFormula = Label(anglesRoot.transform, "", Vector3.zero, 0.85f, new Color(1f, .6f, .95f), TextAlignmentOptions.Left);
         angleFormula.gameObject.AddComponent<Billboard>();
         anglesRoot.SetActive(false);
+
+        // ---- the logarithm sequence: bars log(n/(n−1)) for n = 2..11, lying on the floor beside the spiral --------
+        logSeqRoot = new GameObject("LogSequence");
+        logSeqRoot.transform.SetParent(transform, false);
+        for (int n = 2; n <= 11; n++)
+        {
+            LineRenderer bar = Factory.NewLine("log bar", .18f, new Color(1f, .6f, .95f), Factory.SoftGlowIntensity);
+            bar.transform.SetParent(logSeqRoot.transform, false);
+            bar.positionCount = 2;
+            logBars.Add(bar);
+            TextBox l = Label(logSeqRoot.transform, "", Vector3.zero, 0.9f, new Color(1f, .75f, 1f), TextAlignmentOptions.Center);
+            l.gameObject.AddComponent<Billboard>();
+            logBarLabels.Add(l);
+        }
+
+        logSeqTitle = Label(logSeqRoot.transform, "", Vector3.zero, 1.0f, new Color(1f, .6f, .95f), TextAlignmentOptions.Center);
+        logSeqTitle.gameObject.AddComponent<Billboard>();
+        logSeqRoot.SetActive(false);
 
         // ---- dial strip (one small dial per collision added to the chorus) ----------------------
         dialStripRoot = new GameObject("DialStrip");
@@ -667,7 +715,9 @@ public class Annotations : MonoBehaviour
             UpdateAngles();
         }
 
+        if (showLogSeq) UpdateLogSequence();
         if (showChainFeet) UpdateChainFeet();
+        if (Time.time >= nextReadoutTime) nextReadoutTime = Time.time + 0.1f; // text readouts refresh at 10 Hz
 
         if (gapRoot.activeSelf)
         {
@@ -690,16 +740,20 @@ public class Annotations : MonoBehaviour
             Vector3 c = new(0, y, 0);
             centerSphere.transform.position = c;
             float r = .5f;
-            Vector3[] ring = new Vector3[centerRing.positionCount];
-            for (int i = 0; i < ring.Length; i++)
+            for (int i = 0; i < ringBuffer.Length; i++)
             {
-                float a = i / (float)ring.Length * Mathf.PI * 2f;
-                ring[i] = c + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
+                float a = i / (float)ringBuffer.Length * Mathf.PI * 2f;
+                ringBuffer[i] = c + new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
             }
 
-            centerRing.SetPositions(ring);
-            double distance = main.Limit.LastDecomposition.PartialSums != null ? ComplexMath.Abs(main.Limit.LastDecomposition.Total) : 0;
-            dialLabel.Text = $"dial  t = {t:0.00}\ntip to centre  {distance:0.00}";
+            centerRing.SetPositions(ringBuffer);
+            if (Time.time >= nextReadoutTime)
+            {
+                double distance = main.Limit.LastDecomposition.PartialSums != null ? ComplexMath.Abs(main.Limit.LastDecomposition.Total) : 0;
+                string text = $"dial  t = {t:0.00}\ntip to centre  {distance:0.00}";
+                if (text != lastDialText) { lastDialText = text; dialLabel.Text = text; }
+            }
+
             // the first arrow always points along +x, so the −x side stays free
             dialLabel.transform.position = c + new Vector3(-1.1f, .05f, -0.9f);
         }
@@ -813,13 +867,55 @@ public class Annotations : MonoBehaviour
             angleArcs[i].SetPositions(pts);
             int n = i + 2; // the outgoing arrow is arrow n
             double turn = t * System.Math.Log((double)n / (n - 1)) * 180 / System.Math.PI;
-            angleLabels[i].Text = $"{turn:0}°";
+            if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"{turn:0}°";
             float mid = a0 + delta * .5f;
             angleLabels[i].transform.position = j + new Vector3(Mathf.Cos(mid), 0, Mathf.Sin(mid)) * (r + .22f);
         }
 
-        angleFormula.Text = $"dial t = {t:0.00}\n<color=#FFD400>lengths follow square roots:</color>  arrow n = 1/√n\n<color=#FF99F0>bends follow logarithms:</color>  turn at joint n = t · log( n / (n−1) )\njoint 2: {t * System.Math.Log(2) * 180 / System.Math.PI:0}°   joint 3: {t * System.Math.Log(1.5) * 180 / System.Math.PI:0}°   joint 4: {t * System.Math.Log(4.0 / 3) * 180 / System.Math.PI:0}°";
-        angleFormula.transform.position = new Vector3(-2.35f, (float)t * Graph.yScale + .05f, 1.3f);
+        if (Time.time >= nextReadoutTime)
+        {
+            string text = $"dial t = {t:0.00}\n<color=#FFD400>lengths follow square roots:</color>  arrow n = 1/√n\n<color=#FF99F0>bends follow logarithms:</color>  turn at joint n = t · log( n / (n−1) )\njoint 2: {t * System.Math.Log(2) * 180 / System.Math.PI:0}°   joint 3: {t * System.Math.Log(1.5) * 180 / System.Math.PI:0}°   joint 4: {t * System.Math.Log(4.0 / 3) * 180 / System.Math.PI:0}°";
+            if (text != lastAngleText) { lastAngleText = text; angleFormula.Text = text; }
+        }
+        angleFormula.transform.position = new Vector3(-3.7f, (float)t * Graph.yScale + .05f, 3.3f);
+    }
+
+    // ---- logarithm sequence ---------------------------------------------------------------------------
+    public void ShowLogSequence(bool on)
+    {
+        showLogSeq = on;
+        logSeqRoot.SetActive(on);
+        if (on) UpdateLogSequence();
+    }
+
+    void UpdateLogSequence()
+    {
+        double t = main.Limit.LastT;
+        float y = (float)t * Graph.yScale + .02f;
+        // upper-left of the top-down spiral shot (screen-right = +x, screen-up = +z)
+        Vector3 origin = new(-3.7f, y, 0.9f);
+        const float spacing = .36f, heightScale = 2.2f;
+        bool refresh = Time.time >= nextReadoutTime;
+        for (int i = 0; i < logBars.Count; i++)
+        {
+            int n = i + 2;
+            float logv = Mathf.Log((float)n / (n - 1));
+            float h = logv * heightScale;
+            Vector3 b = origin + Vector3.right * (i * spacing);
+            pair[0] = b;
+            pair[1] = b + Vector3.forward * h;
+            logBars[i].SetPositions(pair);
+            if (refresh)
+            {
+                double turn = t * logv * 180 / System.Math.PI;
+                logBarLabels[i].Text = $"log {n}/{n - 1}\n{logv:0.00}\n{turn:0}°";
+            }
+
+            logBarLabels[i].transform.position = b + Vector3.forward * (h + .55f);
+        }
+
+        if (refresh) logSeqTitle.Text = "the bends: t × log(n / (n−1)), a shrinking sequence";
+        logSeqTitle.transform.position = origin + new Vector3(spacing * 4.5f, 0, -.55f);
     }
 
     // ---- dial strip ---------------------------------------------------------------------------------
@@ -1149,7 +1245,7 @@ public class Annotations : MonoBehaviour
             "numbers" => numberLineRoot, "zeno" => zenoRoot, "wave" => waveDemoRoot, "dial" => dialRoot,
             "center" => centerRoot, "tip" => tipRoot, "imaxis" => imAxisRoot, "outaxes" => outputAxesRoot, "ghost" => ghostRoot,
             "primes" => Sacks.gameObject, "angles" => anglesRoot, "dialstrip" => dialStripRoot, "primearrows" => primeArrowsRoot,
-            "chainfeet" => chainFeetRoot, "primepowers" => primePowersRoot,
+            "chainfeet" => chainFeetRoot, "primepowers" => primePowersRoot, "logseq" => logSeqRoot, "floorgrid" => floorGridRoot,
             _ => null
         };
         if (root == null) yield break;
@@ -1158,10 +1254,12 @@ public class Annotations : MonoBehaviour
 
     /// <summary>Draw collision number <paramref name="index"/>'s wave by itself, before it joins the chorus.</summary>
     /// <summary>One distinct hue per collision, shared by its dial, its wave and its difference lines.</summary>
+    static readonly float[] CollisionHues = { 0.86f, 0.08f, 0.28f, 0.72f, 0.0f, 0.15f, 0.62f, 0.42f, 0.95f, 0.05f };
+
     public static Color CollisionColor(int index)
     {
         if (index == 0) return Factory.Palette.Cosine;
-        return Color.HSVToRGB(Mathf.Repeat(0.86f + index * 0.618034f, 1f), .85f, 1f);
+        return Color.HSVToRGB(CollisionHues[(index - 1) % CollisionHues.Length], .85f, 1f);
     }
 
     /// <summary>Draw collision <paramref name="index"/>'s wave on the SAME axis as the chorus, plus the gap to the chorus.</summary>
@@ -1203,6 +1301,75 @@ public class Annotations : MonoBehaviour
     {
         incomingRoot.SetActive(false);
         diffRoot.SetActive(false);
+    }
+
+    readonly Vector3[] incomingBuffer = new Vector3[Main.NumPrimeCurvePoints];
+
+    /// <summary>
+    /// One collision joining the chorus, as a continuous animation:
+    /// born as a plain cosine, wound up by its dial (γ sweeps 1 → γₙ, the ripples pack to the left),
+    /// then absorbed into the master wave while the gap bars collapse.
+    /// </summary>
+    public IEnumerator IncomingWaveRoutine(int index, float amplitude, float seconds)
+    {
+        if (index < 0 || index >= main.zetaZeroValues.Length) yield break;
+        float gamma = (float)main.zetaZeroValues[index];
+        Color c = CollisionColor(index);
+        incomingWave.startColor = c;
+        incomingWave.endColor = c;
+        incomingLabel.Color = c;
+        incomingRoot.SetActive(true);
+        diffRoot.SetActive(true);
+        masterBuffer ??= new Vector3[Main.NumPrimeCurvePoints];
+        main.GetCosinePositions(masterBuffer);
+
+        float wind = seconds * .5f, absorb = seconds * .5f;
+        float t = 0f;
+        while (t < wind)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / wind);
+            float g = Mathf.Lerp(1f, gamma, k);
+            DrawIncoming(g, amplitude, 1f, c);
+            incomingLabel.Text = $"collision {index + 1}:  dial → {g:0.00}";
+            incomingLabel.transform.position = new Vector3(WaveViewMax * .5f, amplitude * 1.15f + 2.2f, 0);
+            yield return null;
+        }
+
+        main.SetCosineZeroLimitAnimated(index + 1, absorb);
+        t = 0f;
+        while (t < absorb)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / absorb);
+            DrawIncoming(gamma, amplitude, 1f - k, c);
+            incomingLabel.Text = $"collision {index + 1}:  {gamma:0.00}  joins the master wave";
+            yield return null;
+        }
+
+        HideIncomingWave();
+    }
+
+    void DrawIncoming(float gamma, float amplitude, float scale, Color c)
+    {
+        for (int i = 0; i < incomingBuffer.Length; i++)
+        {
+            float x = (float)Main.PrimeCurveX(i);
+            incomingBuffer[i] = x < 1.5f ? new Vector3(1.5f, 0, 0.02f) : new Vector3(x, -amplitude * scale * Mathf.Cos(gamma * Mathf.Log(x)), 0.02f);
+        }
+
+        incomingWave.SetPositions(incomingBuffer);
+        main.GetCosinePositions(masterBuffer);
+        for (int k = 0; k < diffLines.Count; k++)
+        {
+            float x = 1.8f + (WaveViewMax - 2f) * k / (diffLines.Count - 1f);
+            int i = Mathf.Clamp(Mathf.RoundToInt(x / Main.PrimeCurveXLength * Main.NumPrimeCurvePoints) - 1, 0, Main.NumPrimeCurvePoints - 1);
+            diffLines[k].startColor = c;
+            diffLines[k].endColor = new Color(c.r, c.g, c.b, .25f);
+            pair[0] = new Vector3(incomingBuffer[i].x, incomingBuffer[i].y, 0.03f);
+            pair[1] = new Vector3(masterBuffer[i].x, masterBuffer[i].y, 0.03f);
+            diffLines[k].SetPositions(pair);
+        }
     }
 
     /// <summary>Widen the wave view as more collisions join (the camera cues read this).</summary>
@@ -1360,6 +1527,7 @@ public class Annotations : MonoBehaviour
         ShowPrimes(false);
         Sacks.Hide();
         ShowChainFeet(false);
+        ShowLogSequence(false);
         HideIncomingWave();
         ShowSquaresLabel(false);
         ShowPrimePowers(false);
