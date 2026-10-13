@@ -73,17 +73,49 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | action | effect |
 |---|---|
 | `play`, `pause`, `reset` | animation control |
-| `speed:X` | t advances X units per second |
+| `speed:X` | the dial t advances X units per second |
 | `jump:T` | fast-forward (or restart and forward) to t = T |
-| `show:X` / `hide:X` | `tail` `spiral` `components` `strip` `axes` `imaxis` `outaxes` `zcurve` `band78` `band18` `classic` `band1112` `gap` `cosine` `prime` `equations` `zeros` `zetacurve` |
+| `terms:N` / `terms:auto` | fix the number of chain arrows (auto grows with t) |
+| `build:A:B` | animate the arrow count from A to B across the line |
+| `sigma:S` | shrink rate / real part of s (½ is the critical line; nothing else drops markers) |
+| `cosine:N` / `cosine:all` | how many collisions the wave chorus sums |
+| `labels:N` | numeric labels on the first N zero markers |
+| `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
-| `ghost:on`, `ghost:off`, `ghost:β:γ` | draw the prime staircase as if a zero sat at β + iγ |
+| `ghost:all:β` | draw the staircase as if every collision had shrink rate β |
+| `ghost:β:γ`, `ghost:off` | a single hypothetical zero at β + iγ |
+
+## Reviewing without a window (headless)
+
+`StoryboardRenderTest` is a render driver disguised as a PlayMode test, so the Unity test runner
+drives play mode in batch mode (plain `-executeMethod` never ticks the player loop). Close the editor first.
+
+Storyboard: two PNGs per narration line, each line compressed to 3 s of animation (~2 minutes total):
+
+```bash
+ZETA_OUT=/tmp/storyboard ZETA_MODE=storyboard ZETA_STORYBOARD_SECONDS=3 ~/Unity/Hub/Editor/6000.6.5f1/Editor/Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter StoryboardRenderTest -logFile /tmp/storyboard.log
+```
+
+Contact sheets for a quick look:
+
+```bash
+ffmpeg -framerate 1 -pattern_type glob -i '/tmp/storyboard/*.png' -vf "scale=360:640,tile=3x2" /tmp/sheet_%02d.png
+```
+
+Full video (real time, no narration yet; mux audio afterwards with `Tools/mux_recording.py`):
+
+```bash
+ZETA_OUT=/tmp/tour-render ZETA_MODE=record ~/Unity/Hub/Editor/6000.6.5f1/Editor/Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter StoryboardRenderTest -logFile /tmp/tour.log
+```
+
+`ZETA_CHAPTER=<id>` starts from one chapter; `ZETA_FLIP=0/1` overrides the frame flip if a platform renders upside down.
 
 ## What the scene shows
 
 - **Output space** (the original visualization): x = Re ζ(s), z = Im ζ(s), y = t·0.3. The spiral at
-  height t is the chain of arrows n^-s; the orange arrow is the Euler–Maclaurin tail that closes it
-  onto ζ(s) exactly (see `Assets/Math/ZetaMath.cs`). Yellow markers on the vertical axis are the zeros.
+  height t is the chain of arrows n^-s (the tour calls t "the dial" and Re s "the shrink rate");
+  the orange arrow is the Euler–Maclaurin tail that closes it onto ζ(s) exactly
+  (see `Assets/Math/ZetaMath.cs`). Yellow markers on the vertical pole are the zeros ("collisions").
 - **Input panel** (tour only, left of the scene): the critical strip 0 ≤ Re(s) ≤ 1 with the critical
   line at ½, the moving probe s = ½ + it, Hardy's Z(t) wiggle (real, crosses the line at the zeros),
   zero ticks linked to the markers, and the zero-free bands — classical sliver, the 11/12 companion
