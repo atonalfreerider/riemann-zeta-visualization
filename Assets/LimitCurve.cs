@@ -4,27 +4,78 @@ using System.Linq;
 using Meta.Numerics;
 using UnityEngine;
 
+/// <summary>
+/// Draws ζ(1/2 + it) as a chain of arrows (the "spiral") at height t, using the
+/// Euler–Maclaurin decomposition in <see cref="ZetaMath"/> so the chain lands exactly on ζ.
+///
+///   viridis segments : the first N-1 terms n^-s of the Dirichlet series
+///   orange segment   : the integral tail N^(1-s)/(s-1) plus Bernoulli corrections
+/// </summary>
 public class LimitCurve : MonoBehaviour
 {
-    [HideInInspector]
-    public LineRenderer MovingLimitCurve;
+    [HideInInspector] public LineRenderer MovingLimitCurve;
+    [HideInInspector] public LineRenderer TailCurve;
+
     readonly List<LimitCurveSpiral> limitCurveSpirals = new();
 
     [Header("Settings")]
+    [Tooltip("Minimum number of spiral arrows. More are added automatically as t grows (N ≈ t/2 + 4).")]
     public int NumLimitCurvePoints = 16;
     public bool ShowSpirals = false;
+    [Tooltip("Draw the Euler–Maclaurin tail that closes the spiral onto the exact zeta value.")]
+    public bool ShowTail = true;
     public int PreRenderedZeroCurveCount = 0;
     public bool ShowInflectionCurves = false;
-    public bool ShowFlattenedHoles = false;
+
+    /// <summary>The decomposition drawn on the last frame (spiral joints, tail, total).</summary>
+    public ZetaMath.SpiralDecomposition LastDecomposition { get; private set; }
+    public double LastT { get; private set; }
 
     GameObject limitCurveSpiralContainer;
+    readonly List<GameObject> preRendered = new();
+    bool initialized;
 
     void Start()
     {
-        MovingLimitCurve = Factory.NewLine("limitCurve", .05f, Factory.Viridis.ViridisColor(1));
+        EnsureInitialized();
+
+        for (int ii = 0; ii < PreRenderedZeroCurveCount; ii++)
+        {
+            LineRenderer curve = Factory.NewLine("preRenderedLimitCurve", .05f, Factory.Viridis.ViridisColor(1));
+            curve.endColor = Factory.Viridis.ViridisColor(0);
+            curve.transform.SetParent(transform, false);
+
+            LineRenderer tail = Factory.NewLine("preRenderedTail", .05f, Factory.Palette.Tail, Factory.SoftGlowIntensity);
+            tail.transform.SetParent(curve.transform, false);
+            tail.positionCount = 3;
+
+            LineRenderer inflectionCurve = null;
+            if (ShowInflectionCurves)
+            {
+                inflectionCurve = Factory.NewLine("inflectionCurve", .05f, Color.gray);
+                inflectionCurve.endColor = Color.white;
+                inflectionCurve.transform.SetParent(curve.transform, false);
+            }
+
+            RenderLimitCurve(Main.Instance.zetaZeroValues[ii], curve, inflectionCurve, tail);
+            preRendered.Add(curve.gameObject);
+        }
+    }
+
+    void EnsureInitialized()
+    {
+        if (initialized) return;
+        initialized = true;
+
+        MovingLimitCurve = Factory.NewLine("limitCurve", .05f, Factory.Viridis.ViridisColor(1), Factory.SoftGlowIntensity);
         MovingLimitCurve.endColor = Factory.Viridis.ViridisColor(0);
         MovingLimitCurve.transform.SetParent(transform, false);
         MovingLimitCurve.positionCount = NumLimitCurvePoints;
+
+        TailCurve = Factory.NewLine("tailCurve", .07f, Factory.Palette.Tail, Factory.GlowIntensity);
+        TailCurve.transform.SetParent(transform, false);
+        TailCurve.positionCount = 3;
+        TailCurve.enabled = ShowTail;
 
         limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
         limitCurveSpiralContainer.transform.SetParent(transform, false);
@@ -33,39 +84,37 @@ public class LimitCurve : MonoBehaviour
         {
             GenerateSpirals();
         }
-
-        for (int ii = 0; ii < PreRenderedZeroCurveCount; ii++)
-        {
-            LineRenderer curve = Factory.NewLine("limitCurve", .05f, Factory.Viridis.ViridisColor(1));
-            curve.endColor = Factory.Viridis.ViridisColor(0);
-            curve.transform.SetParent(transform, false);
-            curve.positionCount = NumLimitCurvePoints;
-
-            LineRenderer inflectionCurve = null;
-            if (ShowInflectionCurves)
-            {
-                inflectionCurve = Factory.NewLine("inflectionCurve", .05f, Color.gray);
-                inflectionCurve.endColor = Color.white;
-                inflectionCurve.transform.SetParent(transform, false);
-            }
-
-            RenderLimitCurve(Main.Instance.zetaZeroValues[ii], curve, inflectionCurve);
-        }
     }
 
     public void GenerateSpirals()
     {
+        EnsureInitialized();
         for (int i = 1; i < NumLimitCurvePoints; i++)
         {
             LimitCurveSpiral limitCurveSpiral = new GameObject(i.ToString()).AddComponent<LimitCurveSpiral>();
             limitCurveSpiral.transform.SetParent(limitCurveSpiralContainer.transform, false);
             limitCurveSpiral.Init(i.ToString(), Factory.Viridis.ViridisColor(1f - (float)i / NumLimitCurvePoints));
             limitCurveSpirals.Add(limitCurveSpiral);
-        } 
+        }
+    }
+
+    public void SetTailVisible(bool visible)
+    {
+        EnsureInitialized();
+        ShowTail = visible;
+        if (TailCurve != null) TailCurve.enabled = visible;
+    }
+
+    public void SetSpiralVisible(bool visible)
+    {
+        EnsureInitialized();
+        if (MovingLimitCurve != null) MovingLimitCurve.enabled = visible;
+        if (TailCurve != null) TailCurve.enabled = visible && ShowTail;
     }
 
     public void Reset()
     {
+        EnsureInitialized();
         Destroy(limitCurveSpiralContainer);
         limitCurveSpirals.Clear();
         limitCurveSpiralContainer = new("LimitCurveSpiralContainer");
@@ -75,103 +124,89 @@ public class LimitCurve : MonoBehaviour
             GenerateSpirals();
         }
     }
-    
-    public void RenderLimitCurve(double iter, LineRenderer limitCurve, LineRenderer inflectionCurve)
+
+    public void RenderLimitCurve(double t, LineRenderer limitCurve, LineRenderer inflectionCurve)
     {
-        float yIntercept = (float)iter * Graph.yScale;
-        // graph the limit that results in the Riemann Zeta funtion output
-        DoubleVector2[] limitCurvePoints = new DoubleVector2[NumLimitCurvePoints];
-        DoubleVector2 previousPoint = new(
-            0d,
-            0d);
+        EnsureInitialized();
+        if (limitCurve == null) limitCurve = MovingLimitCurve;
+        RenderLimitCurve(t, limitCurve, inflectionCurve, limitCurve == MovingLimitCurve ? TailCurve : null);
+    }
 
-        limitCurvePoints[0] = previousPoint;
-        List<DoubleVector2> inflectionPoints = new();
-        int prevSign = 0;
-        int newSign = 0;
-        Complex previousRotation = Complex.One;
-        
-        List<double> segLengths = new(); 
+    public void RenderLimitCurve(double t, LineRenderer limitCurve, LineRenderer inflectionCurve, LineRenderer tailCurve)
+    {
+        float yIntercept = (float)t * Graph.yScale;
+        Complex s = new(.5d, t);
+        int N = ZetaMath.TermCount(t, NumLimitCurvePoints);
 
-        for (int kk = 1; kk < NumLimitCurvePoints; kk++)
+        // Each segment n^-s gets shorter (length n^-1/2) and rotates by -t·ln n.
+        // see: https://youtu.be/sD0NjbwqlYw?t=418
+        ZetaMath.SpiralDecomposition d = ZetaMath.Decompose(s, N);
+
+        Vector3[] joints = new Vector3[N];
+        for (int k = 0; k < N; k++)
         {
-            // each segment gets shorter, and bends as the complex exponent rotates it in a circle 
-            // eventually this process reaches a limit on the Zeta curve 
-            // see: https://youtu.be/sD0NjbwqlYw?t=418 
-            double segLength = Math.Pow(1d / kk, .5d);
-            Complex rotation = ComplexMath.Pow(1d / kk, iter * Complex.I);
-            double xTerm = previousPoint.X + segLength * rotation.Re;
-            double zTerm = previousPoint.Z + segLength * rotation.Im;
+            joints[k] = ToWorld(d.PartialSums[k], yIntercept);
+        }
 
-            if (ShowInflectionCurves)
+        limitCurve.positionCount = N;
+        limitCurve.SetPositions(joints);
+
+        if (tailCurve != null)
+        {
+            tailCurve.SetPositions(new[]
             {
-                // detect when the rotation flips directions and draw a curve through these points
-                Vector3 cross = Vector3.Cross(
-                    new Vector3((float)previousRotation.Re, 0f, (float)previousRotation.Im),
-                    new Vector3((float)rotation.Re, 0f, (float)rotation.Im));
-                newSign = Math.Sign(cross.y);
+                ToWorld(d.SpiralEnd, yIntercept),
+                ToWorld(d.AfterTail, yIntercept),
+                ToWorld(d.Total, yIntercept)
+            });
+        }
 
-                if (kk > 2 && prevSign != newSign)
-                {
-                    inflectionPoints.Add(previousPoint);
-                }
-            }
-
-            if (ShowFlattenedHoles)
-            {
-                if (kk > 2 && Math.Sign(zTerm) != Math.Sign(previousPoint.Z))
-                {
-                    // curve has crossed the x axis -> make a hole  
-                    double xIntercept = (xTerm - previousPoint.X) / (zTerm - previousPoint.Z) * -zTerm + xTerm;
-
-                    double dFromJoint =
-                        Math.Sqrt(Math.Pow(xIntercept - previousPoint.X, 2d) + Math.Pow(0d - previousPoint.Z, 2d));
-                    double flattened = segLengths.Sum() + dFromJoint;
-
-                    GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    point.transform.SetParent(transform, false);
-                    point.transform.localScale = Vector3.one * .03f;
-                    point.GetComponent<MeshRenderer>().material = Factory.mainMat;
-                    point.GetComponent<MeshRenderer>().material.color = Color.red;
-                    point.transform.position = new Vector3(
-                        (float)flattened,
-                        yIntercept,
-                        0);
-                }
-
-                segLengths.Add(segLength);
-            }
-
-            previousPoint = new( 
-                xTerm, 
-                zTerm); 
-            limitCurvePoints[kk] = previousPoint; 
-            
-            DoubleVector2 newPoint = new(
-                xTerm,
-                zTerm);
-            
-            limitCurvePoints[kk] = newPoint;
+        bool isMoving = limitCurve == MovingLimitCurve;
+        if (isMoving)
+        {
+            LastDecomposition = d;
+            LastT = t;
 
             if (ShowSpirals)
             {
-                limitCurveSpirals[kk - 1].AddPoint(previousPoint.Convert(yIntercept));
+                int spiralCount = Math.Min(N - 1, limitCurveSpirals.Count);
+                for (int kk = 1; kk <= spiralCount; kk++)
+                {
+                    limitCurveSpirals[kk - 1].AddPoint(joints[kk]);
+                }
             }
-
-            previousPoint = newPoint;
-            previousRotation = rotation;
-            prevSign = newSign;
         }
-
-        Vector3[] limitCurvePointsVector3 = limitCurvePoints.Select(x => x.Convert(yIntercept)).ToArray();
-        limitCurve.SetPositions(limitCurvePointsVector3);
 
         if (ShowInflectionCurves && inflectionCurve != null)
         {
-            Vector3[] inflectionCurvePointsVector3 = inflectionPoints.Select(x => x.Convert(yIntercept + .01f)).ToArray();
+            // detect when the rotation flips directions and draw a curve through these points
+            List<Vector3> inflectionPoints = new();
+            int prevSign = 0;
+            Complex previousRotation = Complex.One;
+            for (int kk = 1; kk < N; kk++)
+            {
+                Complex rotation = ComplexMath.Pow(1d / kk, t * Complex.I);
+                Vector3 cross = Vector3.Cross(
+                    new Vector3((float)previousRotation.Re, 0f, (float)previousRotation.Im),
+                    new Vector3((float)rotation.Re, 0f, (float)rotation.Im));
+                int newSign = Math.Sign(cross.y);
+                if (kk > 2 && prevSign != newSign)
+                {
+                    inflectionPoints.Add(joints[kk - 1] + Vector3.up * .01f);
+                }
+
+                previousRotation = rotation;
+                prevSign = newSign;
+            }
+
             inflectionCurve.positionCount = inflectionPoints.Count;
-            inflectionCurve.SetPositions(inflectionCurvePointsVector3);
+            inflectionCurve.SetPositions(inflectionPoints.ToArray());
         }
+    }
+
+    public static Vector3 ToWorld(Complex value, float y)
+    {
+        return new Vector3((float)value.Re, y, (float)value.Im);
     }
 
     class LimitCurveSpiral : MonoBehaviour

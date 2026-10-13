@@ -4,14 +4,14 @@ using UnityEngine;
 public static class RenderedEquations
 {
     public static TextBox zetaZeroCounter;
-    
-    public static void DrawPrimeEquation()
+
+    public static GameObject DrawPrimeEquation()
     {
         GameObject equation = new GameObject("prime equation");
         float dropD = 1.5f;
         float shiftD = 2.6f;
 
-        TextBox numerator = TextBox.Create("cos(γ * log(x)) + 2γ * sin(γ * log(x))", 3f);
+        TextBox numerator = TextBox.Create("cos(γ · log x) + 2γ · sin(γ · log x)", 3f);
         numerator.transform.SetParent(equation.transform, false);
         numerator.Alignment = TextAlignmentOptions.Center;
         numerator.transform.Translate(Vector3.up * .2f);
@@ -26,7 +26,7 @@ public static class RenderedEquations
             new Vector3(2.1f + shiftD, -dropD, 0)
         });
 
-        TextBox denomenator = TextBox.Create("1 + 4γ ^ 2", 3f);
+        TextBox denomenator = TextBox.Create("1 + 4γ²", 3f);
         denomenator.transform.SetParent(equation.transform, false);
         denomenator.Alignment = TextAlignmentOptions.Center;
         denomenator.transform.Translate(Vector3.down * .2f);
@@ -45,10 +45,10 @@ public static class RenderedEquations
         gamma.transform.Translate(Vector3.down * .45f);
         gamma.Color = Color.gray;
 
-        TextBox fourRoot = TextBox.Create("4√x", 3f);
+        TextBox fourRoot = TextBox.Create("ψ(x) ≈ x − ln 2π − 4√x", 3f);
         fourRoot.transform.SetParent(equation.transform, false);
-        fourRoot.Alignment = TextAlignmentOptions.Center;
-        fourRoot.transform.Translate(Vector3.left * 3.2f);
+        fourRoot.Alignment = TextAlignmentOptions.Right;
+        fourRoot.transform.Translate(Vector3.left * 3.1f);
         fourRoot.Color = Color.gray;
 
         zetaZeroCounter = TextBox.Create("", 3f);
@@ -56,19 +56,20 @@ public static class RenderedEquations
         zetaZeroCounter.Alignment = TextAlignmentOptions.Center;
         zetaZeroCounter.transform.Translate(Vector3.left * 2.7f);
         zetaZeroCounter.transform.Translate(Vector3.up * .5f);
-        zetaZeroCounter.Color = Color.yellow;
+        zetaZeroCounter.Color = Factory.Palette.Zero;
 
         equation.transform.Translate(Vector3.down * dropD);
         equation.transform.Translate(Vector3.right * shiftD);
+        return equation;
     }
 
-    public static void DrawZetaEquation()
+    public static GameObject DrawZetaEquation()
     {
         GameObject equation = new GameObject("zeta equation");
         float dropD = 1.5f;
         float shiftD = 3f;
 
-        TextBox numerator = TextBox.Create("ζ(x) = ", 3f);
+        TextBox numerator = TextBox.Create("ζ(s) = ", 3f);
         numerator.transform.SetParent(equation.transform, false);
         numerator.Alignment = TextAlignmentOptions.Center;
         numerator.Color = Color.white;
@@ -86,13 +87,20 @@ public static class RenderedEquations
         n.transform.Translate(Vector3.down * .45f);
         n.Color = Color.white;
 
-        TextBox term = TextBox.Create("1 / n ^ s", 3f);
+        TextBox term = TextBox.Create("1 / n^s   +  tail", 3f);
         term.transform.SetParent(equation.transform, false);
-        term.Alignment = TextAlignmentOptions.Center;
-        term.transform.Translate(Vector3.right * 1.7f);
+        term.Alignment = TextAlignmentOptions.Left;
+        term.transform.Translate(Vector3.right * 1.1f);
         term.Color = Color.white;
+
+        TextBox s = TextBox.Create("s = ½ + i·t", 2.2f);
+        s.transform.SetParent(equation.transform, false);
+        s.Alignment = TextAlignmentOptions.Center;
+        s.transform.Translate(Vector3.down * .9f + Vector3.right * 1.2f);
+        s.Color = Color.gray;
 
         equation.transform.Translate(Vector3.up * dropD);
         equation.transform.Translate(Vector3.left * shiftD);
+        return equation;
     }
 }
