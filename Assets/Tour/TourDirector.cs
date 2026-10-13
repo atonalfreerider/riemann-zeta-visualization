@@ -22,6 +22,8 @@ public class TourDirector : MonoBehaviour
     public bool Storyboard;
     public float StoryboardSecondsPerLine = 3f;
     public string StoryboardDirectory = "";
+    /// <summary>Where full recordings go (empty = Recordings/&lt;timestamp&gt; next to the project).</summary>
+    public string RecordDirectory = "";
     public bool Portrait = true;
     public string StartChapter = "";
     public float ChapterTitleSeconds = 3.2f;
@@ -171,7 +173,9 @@ public class TourDirector : MonoBehaviour
 
     public void StartRecording()
     {
-        string dir = System.IO.Path.Combine(Application.dataPath, "..", "Recordings", DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+        string dir = string.IsNullOrEmpty(RecordDirectory)
+            ? System.IO.Path.Combine(Application.dataPath, "..", "Recordings", DateTime.Now.ToString("yyyyMMdd-HHmmss"))
+            : RecordDirectory;
         Recorder.StartRecording(dir);
     }
 

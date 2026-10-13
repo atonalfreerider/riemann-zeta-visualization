@@ -269,7 +269,7 @@
             "show:equations"
           ],
           "pause": 0.3,
-          "footnote": "ψ(x) = x − ln 2π − ½ ln(1 − x⁻²) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)"
+          "footnote": "ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)"
         },
         {
           "id": "stair_03",

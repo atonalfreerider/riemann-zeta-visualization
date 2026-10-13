@@ -82,7 +82,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `staircase_close` · actions `pause hide:cosine show:prime hide:numbers`</sub>
 
 **stair_02** — Each weight is fixed by the recipe. Nothing is tuned by hand.
-  <sub>camera `staircase_close` · actions `show:equations` · footnote: ψ(x) = x − ln 2π − ½ ln(1 − x⁻²) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)</sub>
+  <sub>camera `staircase_close` · actions `show:equations` · footnote: ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)</sub>
 
 **stair_03** — The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.
   <sub>camera `staircase` · actions `hide:equations speed:8 play`</sub>

@@ -199,17 +199,16 @@ public class FrameRecorder : MonoBehaviour
     IEnumerator CaptureLoop()
     {
         WaitForEndOfFrame endOfFrame = new();
+        bool batch = Application.isBatchMode;
         while (IsOffscreen)
         {
-            yield return endOfFrame;
+            // WaitForEndOfFrame never resumes in -batchmode (no presentation), so fall back to a
+            // plain frame yield there: the texture then holds the previous frame, consistently.
+            if (batch) yield return null;
+            else yield return endOfFrame;
             if (target == null) yield break;
 
-            if (Application.isBatchMode)
-            {
-                // no game view in batch mode: render explicitly so the texture is up to date
-                cam.Render();
-            }
-            else
+            if (!batch)
             {
                 // show the portrait frame on screen as well (the camera is rendering offscreen)
                 Graphics.Blit(target, (RenderTexture)null);

@@ -36,6 +36,7 @@ public class StoryboardRenderTest
         director.Storyboard = mode == "storyboard";
         director.StoryboardDirectory = outDir;
         director.RecordOnStart = mode == "record";
+        director.RecordDirectory = outDir;
         if (float.TryParse(Environment.GetEnvironmentVariable("ZETA_STORYBOARD_SECONDS"), out float seconds)) director.StoryboardSecondsPerLine = seconds;
         string chapter = Environment.GetEnvironmentVariable("ZETA_CHAPTER");
         if (!string.IsNullOrEmpty(chapter)) director.StartChapter = chapter;
