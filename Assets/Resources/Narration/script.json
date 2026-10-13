@@ -71,26 +71,6 @@
           "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
         },
         {
-          "id": "hook_04",
-          "text": "What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.",
-          "camera": "sacks_flat",
-          "actions": [
-            "sacks:spiral"
-          ],
-          "pause": 0.5,
-          "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
-        },
-        {
-          "id": "hook_04",
-          "text": "What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.",
-          "camera": "sacks_flat",
-          "actions": [
-            "sacks:spiral"
-          ],
-          "pause": 0.5,
-          "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
-        },
-        {
           "id": "hook_05",
           "text": "Bend that spiral over a saddle. The composites fill the valleys, the squares line up along one ridge, and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.",
           "camera": "sacks_saddle",

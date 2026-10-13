@@ -67,3 +67,7 @@ crashlytics-build.properties
 
 # Unity test runner scratch scenes
 /Assets/InitTestScene*
+
+# Raw, un-normalised Chatterbox renders (the loudness-normalised copies live in Assets/Resources/Narration/Audio)
+/Tools/narration_raw/
+/Tools/__pycache__/
