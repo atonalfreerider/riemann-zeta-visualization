@@ -224,8 +224,9 @@ public class CameraRig : MonoBehaviour
             return;
         }
 
-        if (!Portrait)
+        if (!Portrait || !Active)
         {
+            // free-roam mode uses the whole window; the 9:16 frame only applies while the tour drives the camera
             cam.rect = new Rect(0, 0, 1, 1);
             return;
         }
