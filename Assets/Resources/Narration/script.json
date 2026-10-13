@@ -1,0 +1,368 @@
+{
+  "title": "The Spiral, the Zeros, and the Primes",
+  "chapters": [
+    {
+      "id": "intro",
+      "title": "A Machine for Primes",
+      "subtitle": "The Riemann zeta function, drawn in three dimensions",
+      "lines": [
+        {
+          "id": "intro_01",
+          "text": "This is the Riemann zeta function, drawn as a spiral that climbs a line through the complex plane.",
+          "camera": "overview_orbit",
+          "actions": ["reset", "speed:2.5", "play"],
+          "pause": 0.4
+        },
+        {
+          "id": "intro_02",
+          "text": "Every time the spiral closes on the origin, a zero is born, and that zero becomes a wave.",
+          "camera": "follow_tip",
+          "actions": [],
+          "pause": 0.3
+        },
+        {
+          "id": "intro_03",
+          "text": "Add enough of those waves together and a staircase appears, stepping up at every prime number.",
+          "camera": "prime_overview",
+          "actions": ["speed:6"],
+          "pause": 0.4
+        },
+        {
+          "id": "intro_04",
+          "text": "In the next few minutes we will build this picture from scratch, find the hidden axis, and see what a 2026 result changes.",
+          "camera": "overview_pull",
+          "actions": ["speed:3"],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "spiral",
+      "title": "Building the Spiral",
+      "subtitle": "One arrow per term of the zeta series",
+      "lines": [
+        {
+          "id": "spiral_01",
+          "text": "Zeta starts as an infinite sum: one, plus one over two to the s, plus one over three to the s, and so on forever.",
+          "camera": "spiral_close",
+          "actions": ["reset", "jump:10", "pause", "hide:tail"],
+          "pause": 0.3
+        },
+        {
+          "id": "spiral_02",
+          "text": "Each term is an arrow. Its length shrinks like one over the square root of n, because the real part of s is one half.",
+          "camera": "spiral_top",
+          "actions": [],
+          "pause": 0.3
+        },
+        {
+          "id": "spiral_03",
+          "text": "And each arrow is rotated by the imaginary part of s, by an angle of t times the log of n. The arrows chain head to tail.",
+          "camera": "spiral_top",
+          "actions": ["show:components", "speed:0.6", "play"],
+          "pause": 0.3
+        },
+        {
+          "id": "spiral_04",
+          "text": "But here is the catch. On the critical line the plain sum never converges. Sixteen arrows, or a thousand, land nowhere in particular.",
+          "camera": "spiral_top",
+          "actions": ["pause", "hide:components"],
+          "pause": 0.3
+        },
+        {
+          "id": "spiral_05",
+          "text": "The fix is Euler and Maclaurin's. The missing tail of the sum is almost exactly an integral, and we can draw that integral as one more arrow.",
+          "camera": "spiral_top",
+          "actions": ["show:tail", "flash:tail"],
+          "pause": 0.3
+        },
+        {
+          "id": "spiral_06",
+          "text": "Add it, plus a few tiny Bernoulli corrections, and the chain lands on the true value of zeta to thirteen decimal places.",
+          "camera": "spiral_tail_zoom",
+          "actions": ["flash:tail"],
+          "pause": 0.4,
+          "footnote": "ζ(s) = Σ n^-s (n < N)  +  N^(1-s)/(s-1)  +  N^-s/2  +  Bernoulli terms      N ≈ t/2 + 4"
+        },
+        {
+          "id": "spiral_07",
+          "text": "That orange arrow is the difference between a pretty picture and an exact one. Now the spiral really does predict the zeros.",
+          "camera": "follow_tip",
+          "actions": ["speed:2", "play"],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "axis",
+      "title": "Where Is the Imaginary Axis?",
+      "subtitle": "Two complex planes, not one",
+      "lines": [
+        {
+          "id": "axis_01",
+          "text": "Here is the part that confuses everyone, including me. There are two complex planes in this picture, not one.",
+          "camera": "axes_wide",
+          "actions": ["pause", "show:axes"],
+          "pause": 0.3
+        },
+        {
+          "id": "axis_02",
+          "text": "The input, s, lives on the glowing panel to the left. Its real part runs left to right, from zero to one.",
+          "camera": "strip_panel",
+          "actions": ["show:strip"],
+          "pause": 0.3
+        },
+        {
+          "id": "axis_03",
+          "text": "Its imaginary part, t, runs straight up. So the vertical direction of this whole scene is the imaginary axis of the input.",
+          "camera": "strip_vertical",
+          "actions": ["show:imaxis"],
+          "pause": 0.4
+        },
+        {
+          "id": "axis_04",
+          "text": "We only feed zeta points with real part one half, so the input crawls up the critical line in the middle of the strip.",
+          "camera": "strip_probe",
+          "actions": ["speed:1.2", "play"],
+          "pause": 0.3
+        },
+        {
+          "id": "axis_05",
+          "text": "The output is a second complex number, drawn flat. Real part to the right, imaginary part toward the back.",
+          "camera": "output_plane",
+          "actions": ["show:outaxes"],
+          "pause": 0.3
+        },
+        {
+          "id": "axis_06",
+          "text": "So the spiral lives in the output plane, floating at the height of its input. Climb the input axis and the spiral redraws itself.",
+          "camera": "follow_tip",
+          "actions": ["speed:1.8"],
+          "pause": 0.3
+        },
+        {
+          "id": "axis_07",
+          "text": "A zero is simply an input whose output lands on the origin: the spiral closes, and we drop a yellow marker on the vertical axis.",
+          "camera": "zero_marker",
+          "actions": ["pause", "jump:14.4", "flash:zero"],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "zeros",
+      "title": "Hunting Zeros",
+      "subtitle": "Hardy's Z function makes the hunt visible",
+      "lines": [
+        {
+          "id": "zeros_01",
+          "text": "Riemann's Z function makes the hunt visible. It is zeta rotated to be real, so it just wiggles left and right of the critical line.",
+          "camera": "strip_z",
+          "actions": ["reset", "show:zcurve", "hide:imaxis", "speed:2", "play"],
+          "pause": 0.3
+        },
+        {
+          "id": "zeros_02",
+          "text": "Every time the wiggle crosses the line, zeta is exactly zero. The first crossing is at t equals fourteen point one three four seven.",
+          "camera": "strip_z_first",
+          "actions": ["jump:14.5", "flash:zero", "pause"],
+          "pause": 0.4
+        },
+        {
+          "id": "zeros_03",
+          "text": "Then twenty one point zero two, twenty five point zero one, thirty point four two. The zeros keep coming, irregular but never missing.",
+          "camera": "zero_ladder",
+          "actions": ["speed:3", "play"],
+          "pause": 0.3
+        },
+        {
+          "id": "zeros_04",
+          "text": "Every one of the ten thousand zeros we loaded sits precisely on the line. Nobody has ever found one anywhere else.",
+          "camera": "zero_ladder_up",
+          "actions": ["speed:5"],
+          "pause": 0.6,
+          "footnote": "zeros from the LMFDB table · Assets/Resources/zetazeros.txt"
+        }
+      ]
+    },
+    {
+      "id": "primes",
+      "title": "From Zeros to Primes",
+      "subtitle": "Riemann's explicit formula",
+      "lines": [
+        {
+          "id": "primes_01",
+          "text": "Now the magic. Each zero, gamma, becomes a wave in x: the cosine of gamma times the log of x.",
+          "camera": "cosine_wave",
+          "actions": ["pause", "hide:prime", "hide:strip", "hide:outaxes", "hide:zcurve", "show:cosine"],
+          "pause": 0.3
+        },
+        {
+          "id": "primes_02",
+          "text": "One wave says nothing. But stack the waves from many zeros and they interfere, cancelling almost everywhere.",
+          "camera": "cosine_wave",
+          "actions": ["speed:4", "play"],
+          "pause": 0.3
+        },
+        {
+          "id": "primes_03",
+          "text": "Where they do not cancel, they spike. And they spike exactly at the primes and their powers: two, three, four, five, seven, eight, nine, eleven.",
+          "camera": "cosine_spikes",
+          "actions": [],
+          "pause": 0.5
+        },
+        {
+          "id": "primes_04",
+          "text": "Riemann's explicit formula turns that chorus into a staircase. Start with the line psi equals x, then subtract four root x times a weighted wave for every zero.",
+          "camera": "formula",
+          "actions": ["hide:cosine", "show:prime", "show:equations"],
+          "pause": 0.3
+        },
+        {
+          "id": "primes_05",
+          "text": "The weights, cosine plus two gamma sine over one plus four gamma squared, come from dividing x to the rho by rho. Nothing is fudged.",
+          "camera": "formula_close",
+          "actions": [],
+          "pause": 0.3,
+          "footnote": "ψ(x) = x − Σ_ρ x^ρ/ρ − ln 2π − ½ ln(1 − x^-2)        ρ = ½ ± iγ"
+        },
+        {
+          "id": "primes_06",
+          "text": "With a few hundred zeros the staircase sharpens and the red markers find the primes on their own: two, three, five, seven, eleven, thirteen.",
+          "camera": "staircase",
+          "actions": ["speed:8", "play"],
+          "pause": 0.4
+        },
+        {
+          "id": "primes_07",
+          "text": "The zeros of zeta and the primes are the same information, written in two languages. The spiral is the translator.",
+          "camera": "staircase_wide",
+          "actions": [],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "half",
+      "title": "Why One Half Matters",
+      "subtitle": "The real part sets the size of every wave",
+      "lines": [
+        {
+          "id": "half_01",
+          "text": "Why does everyone care that the zeros sit at real part one half? Because the real part sets the size of each wave.",
+          "camera": "strip_panel",
+          "actions": ["pause", "show:strip"],
+          "pause": 0.3
+        },
+        {
+          "id": "half_02",
+          "text": "A zero at real part beta adds a wave of height x to the beta. At one half, that is the square root of x, the smallest wobble possible.",
+          "camera": "staircase",
+          "actions": [],
+          "pause": 0.3
+        },
+        {
+          "id": "half_03",
+          "text": "Suppose a rogue zero existed at real part zero point nine. Its wave would grow like x to the zero point nine, and the staircase would be wrecked.",
+          "camera": "ghost",
+          "actions": ["ghost:0.9:14.134725"],
+          "pause": 0.5,
+          "footnote": "red: the staircase if the first zero were moved from ½ + 14.13i to 0.9 + 14.13i (hypothetical)"
+        },
+        {
+          "id": "half_04",
+          "text": "The Riemann Hypothesis says no such rogue exists. The error in counting primes is essentially as small as it can be: about the square root of x, for every x.",
+          "camera": "staircase",
+          "actions": ["ghost:off"],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "qrh",
+      "title": "2026: A Wall at Seven Eighths",
+      "subtitle": "OpenAI's quasi-Riemann hypothesis claim",
+      "lines": [
+        {
+          "id": "qrh_01",
+          "text": "On October sixth, 2026, OpenAI released an AI generated proof of what it calls the quasi Riemann hypothesis.",
+          "camera": "strip_panel",
+          "actions": ["pause", "show:strip"],
+          "pause": 0.3,
+          "footnote": "openai/math · family 003 · manuscript dated Sept 30, 2026 · released Oct 6, 2026"
+        },
+        {
+          "id": "qrh_02",
+          "text": "The claim: the zeta function, and every Dirichlet L function, has no zeros with real part greater than seven eighths.",
+          "camera": "strip_band",
+          "actions": ["show:band78"],
+          "pause": 0.4
+        },
+        {
+          "id": "qrh_03",
+          "text": "By the functional equation that also clears everything below one eighth. The shaded bands are now off limits.",
+          "camera": "strip_band_sym",
+          "actions": ["show:band18"],
+          "pause": 0.4
+        },
+        {
+          "id": "qrh_04",
+          "text": "Before this, the known zero free region was a sliver hugging real part one, shrinking as t grows. A fixed wall at seven eighths is new territory.",
+          "camera": "strip_band_classic",
+          "actions": ["show:classic"],
+          "pause": 0.4
+        },
+        {
+          "id": "qrh_05",
+          "text": "The proof goes through cubic theta functions and Hecke L functions over Q adjoined root negative three, then transfers to zeta. A companion paper reaches eleven twelfths by a different route.",
+          "camera": "strip_band",
+          "actions": ["hide:classic", "show:band1112"],
+          "pause": 0.4
+        },
+        {
+          "id": "qrh_06",
+          "text": "The core theorem was formalized in Lean and re checked by an independent kernel. Human peer review is still in progress, so treat it as a strong claim, not settled fact.",
+          "camera": "strip_band",
+          "actions": [],
+          "pause": 0.5,
+          "footnote": "Lean statement: riemannZeta s ≠ 0 for 7/8 < Re s · axioms: propext, Classical.choice, Quot.sound · not yet peer reviewed"
+        },
+        {
+          "id": "qrh_07",
+          "text": "For the staircase it means every rogue wave is at most x to the seven eighths. For this picture it means the yellow markers can only hide in the narrow unshaded band.",
+          "camera": "strip_band_sym",
+          "actions": ["hide:band1112"],
+          "pause": 0.4
+        },
+        {
+          "id": "qrh_08",
+          "text": "The gap from seven eighths down to one half is where the Riemann Hypothesis still lives. Commentators expect the method to stall near three quarters. A new idea is needed.",
+          "camera": "strip_gap",
+          "actions": ["show:gap"],
+          "pause": 0.7
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "title": "The State of Play",
+      "subtitle": "",
+      "lines": [
+        {
+          "id": "outro_01",
+          "text": "So this is the state of play. Ten thousand zeros on the line, a spiral that lands on every one of them, and a wall at seven eighths.",
+          "camera": "overview_orbit",
+          "actions": ["hide:gap", "show:imaxis", "show:cosine", "speed:4", "play"],
+          "pause": 0.4
+        },
+        {
+          "id": "outro_02",
+          "text": "Prove the wall is at one half and the primes are finally tamed. Until then, watch the spiral climb.",
+          "camera": "overview_pull_final",
+          "actions": [],
+          "pause": 3.0
+        }
+      ]
+    }
+  ]
+}

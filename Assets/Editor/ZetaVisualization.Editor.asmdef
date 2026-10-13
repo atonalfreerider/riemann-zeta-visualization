@@ -1,0 +1,17 @@
+{
+    "name": "ZetaVisualization.Editor",
+    "rootNamespace": "",
+    "references": [
+        "ZetaVisualization"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "defineConstraints": [],
+    "noEngineReferences": false
+}
