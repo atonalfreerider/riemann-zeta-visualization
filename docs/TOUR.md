@@ -80,7 +80,13 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `sigma:S` | shrink rate / real part of s (½ is the critical line; nothing else drops markers) |
 | `cosine:N` / `cosine:all` | how many collisions the wave chorus sums |
 | `cosine:build:A:B` | add collision waves one at a time across the line (each previewed, then merged); B may be `all` |
-| `wave:plain` / `wave:morph` / `wave:off` | ordinary cosine, morph it into the first collision's wave, hide |
+| `wave:plain[:γ]` / `wave:dial:γ` / `wave:log` / `wave:off` | ordinary cosine; sweep the γ dial across the line; bend with the logarithm; hide |
+| `dial:on` / `dial:off` | the on-screen γ dial (needle follows the demo wave) |
+| `zeno:build` / `zeno:reset` | grow Zeno's halving chain arrow by arrow |
+| `card:<id>` / `card:off` | character card: `zeno` `euler` `riemann` `hardy` `machine` (portrait from `Resources/Portraits/<id>.png` if present, else a glyph medallion) |
+| `trail:thin` / `trail:full` | the tip's path: barely visible, or grown to full width and glow |
+| `tailghost:on` / `tailghost:off` | faint path of the next 120 arrows the orange tail replaces |
+| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
