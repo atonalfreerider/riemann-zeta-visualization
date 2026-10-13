@@ -154,10 +154,14 @@ public class TourDirector : MonoBehaviour
 
     float currentLineSeconds = 3f;
 
+    int lineSerial;
+
     IEnumerator Delayed(float seconds, string action)
     {
+        int serial = lineSerial;
         yield return new WaitForSeconds(Storyboard ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
-        if (Running) ApplyActions(new[] { action });
+        // only if the tour is still on the line that scheduled it (skipping ahead cancels it)
+        if (Running && serial == lineSerial) ApplyActions(new[] { action });
     }
 
     void PulseElement(string element, float seconds)
@@ -334,6 +338,7 @@ public class TourDirector : MonoBehaviour
     IEnumerator PlayLine(TourLine line)
     {
         skipRequested = false;
+        lineSerial++;
         Rig.SetCue(line.camera);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
@@ -528,10 +533,10 @@ public class TourDirector : MonoBehaviour
                     case "stair": if (arg == "build") Main.BuildStaircase(Mathf.Max(2f, currentLineSeconds * 0.8f)); break;
                     case "rootlabel": Annotations.ShowRootFormula(arg); break;
                     case "sacks":
-                        if (arg == "spiral") StartCoroutine(Annotations.Sacks.MorphToSpiral(Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
-                        else if (arg == "saddle") StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
-                        else if (arg == "flat") StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f)));
-                        else if (arg == "lattice") StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f)));
+                        if (arg == "spiral") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.MorphToSpiral(Mathf.Max(2.5f, currentLineSeconds * 0.8f))); }
+                        else if (arg == "saddle") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f))); }
+                        else if (arg == "flat") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f))); }
+                        else if (arg == "lattice") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f))); }
                         else if (arg == "sieve")
                         {
                             float seconds = parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(8f, currentLineSeconds * 2f);

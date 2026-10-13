@@ -176,8 +176,9 @@ public class CameraRig : MonoBehaviour
         cues["lattice"] = () => new CueState { Position = new Vector3(-31f, 15.5f, -27f), LookAt = new Vector3(-31f, 15.5f, 0f), Up = up, Fov = 60 };
         cues["sieve"] = () =>
         {
-            Vector3 c = annotations.Sacks.Center + new Vector3(0, 2.4f, 0);
-            return new CueState { Position = c + new Vector3(0, 0, -27f), LookAt = c, Up = up, Fov = 60 };
+            // tilted so the altitude rows (toward the camera) stack visibly above the spiral
+            Vector3 c = annotations.Sacks.Center + new Vector3(0, 1.0f, 0);
+            return new CueState { Position = c + new Vector3(-3f, -13f, -23f), LookAt = c + Vector3.back * .8f, Up = up, Fov = 60 };
         };
         cues["sacks_flat"] = () =>
         {
@@ -199,6 +200,14 @@ public class CameraRig : MonoBehaviour
             float a = Time.time * 0.15f;
             float d = annotations.Sacks.Extent * 2.1f;
             return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .35f, d * .1f, -d * .95f), LookAt = c, Up = up, Fov = 60 };
+        };
+        cues["sacks_3d"] = () =>
+        {
+            // a slow orbit around the saddle normal so the zeta trail above and below reads in parallax
+            Vector3 c = annotations.Sacks.Center;
+            float a = Time.time * 0.2f;
+            float d = annotations.Sacks.Extent * 1.6f;
+            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d * .45f, -d * .75f), LookAt = c, Up = Vector3.back, Fov = 60 };
         };
         cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
         cues["spiral_angles"] = () => new CueState { Position = new Vector3(-0.4f, TipY + 6.5f, -1.8f), LookAt = new Vector3(-0.4f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };

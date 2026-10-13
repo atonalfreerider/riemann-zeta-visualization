@@ -19,39 +19,56 @@
             "hide:polelabel",
             "primes:on",
             "primes:build",
-            "delay:3:sacks:sieve:64"
+            "delay:3:sacks:sieve:70"
           ],
           "pause": 0.4
         },
         {
           "id": "hook_02",
-          "text": "Break the grid open and let every number find its place on the spiral. The primes glow, then fade away, all but the two. Count two along the road, and count two again beside it.",
+          "text": "Break the grid open and let every number find its place on the spiral. The primes glow, then draw back to just the two; the number one is skipped. Two is our jumping-off point.",
           "camera": "sieve",
           "actions": [],
           "pause": 0.3
         },
         {
           "id": "hook_02b",
-          "text": "Bend the second count off to the side. Two by two: the corner is missing, so fill it in: four dots. Now roll them along the road, past the gap, and they land on four. The number they skipped, three, is a prime.",
+          "text": "Count one, two along the spiral. Now build a second row of two, one unit above the first. It slides along the spiral at that altitude to the next free spots and drops onto three and four. Four is a perfect square. Three was only passed over, never produced: a prime.",
           "camera": "sieve",
           "actions": [],
           "pause": 0.3
         },
         {
           "id": "hook_02c",
-          "text": "Count two, count three beside it, bend the three to the side, fill in the rectangle: six dots. Roll them to six, and the number they skipped, five, is a prime. Then two by five: ten. Three by three: nine, a perfect square.",
+          "text": "Count one, two, three. Stack a row of three above it, let it slide on and drop onto four, five, six. Six is our first composite that is not a square. Five was passed over: a prime.",
+          "camera": "sieve",
+          "actions": [],
+          "pause": 0.3
+        },
+        {
+          "id": "hook_02d",
+          "text": "Now three times three: a row of three, a second row one unit up, a third row two units up. They uncoil in turn, landing on four, five, six, then seven, eight, nine. Nine is a perfect square, and seven was passed over: a prime.",
           "camera": "sieve",
           "actions": [],
           "pause": 0.3
         },
         {
           "id": "hook_03",
-          "text": "Two by seven, three by five, five by five, three by seven. Every composite is a rectangle of dots, every square is a square of dots, and whatever the counting skips is a prime.",
+          "text": "Then five times two, seven times two, five times three, five times five, seven times three. A new prime is multiplied, or an old one is squared, back and forth. Every composite is a stack of rows dropped onto the spiral, and every number the rows pass over without producing is a prime.",
           "camera": "sieve",
           "actions": [
             "pulse:primes"
           ],
           "pause": 0.4
+        },
+        {
+          "id": "hook_04",
+          "text": "What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.",
+          "camera": "sacks_flat",
+          "actions": [
+            "sacks:spiral"
+          ],
+          "pause": 0.5,
+          "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
         },
         {
           "id": "hook_04",
@@ -701,7 +718,7 @@
         },
         {
           "id": "outro_03",
-          "text": "One last picture, and this one is a guess, not a result. Lay the two chain rules on the saddle. The square-root rule is the spiral itself: radius root n, the arrow length turned upside down.",
+          "text": "One last picture, and this one is a guess, not a result. Put everything on the saddle. The jumping-off points of the sieve: each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn.",
           "camera": "sacks_routes",
           "actions": [
             "sacks:noroutes",
@@ -712,8 +729,8 @@
         },
         {
           "id": "outro_04",
-          "text": "The logarithm rule, at the first collision's t, picks out rings. Between one ring and the next the chain makes exactly one full turn, so each ring is a fixed factor wider than the last. At the second collision's t the rings come tighter.",
-          "camera": "sacks_saddle",
+          "text": "The logarithm rule at the first collision's t picks out rings, each a fixed factor wider than the last; at the second collision's t the rings come tighter. And the zeta trail itself, threaded through the saddle along its normal, above and below, crossing the axis at every collision.",
+          "camera": "sacks_3d",
           "actions": [
             "pulse:sacks"
           ],
@@ -721,8 +738,8 @@
         },
         {
           "id": "outro_05",
-          "text": "Do the rings know where the valleys are? Nobody knows. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
-          "camera": "sacks_saddle",
+          "text": "Rings, squares, jumping-off points, and the trail of zeros, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
+          "camera": "sacks_3d",
           "actions": [],
           "pause": 3.0
         }

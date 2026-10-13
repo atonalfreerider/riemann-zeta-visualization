@@ -809,7 +809,8 @@ public class Annotations : MonoBehaviour
     /// <summary>Light the primes one by one; composites fade and show their factors.</summary>
     public void BuildPrimes(float seconds)
     {
-        StartCoroutine(Sacks.BuildGrid(seconds));
+        Sacks.gameObject.SetActive(true);
+        Sacks.StartCoroutine(Sacks.BuildGrid(seconds));
     }
 
     static IEnumerator ShrinkGlow(Transform t, float from, float to, float seconds)

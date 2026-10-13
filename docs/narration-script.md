@@ -7,19 +7,25 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *Building blocks with no pattern*
 
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
-  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:64`</sub>
+  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:70`</sub>
 
-**hook_02** — Break the grid open and let every number find its place on the spiral. The primes glow, then fade away, all but the two. Count two along the road, and count two again beside it.
+**hook_02** — Break the grid open and let every number find its place on the spiral. The primes glow, then draw back to just the two; the number one is skipped. Two is our jumping-off point.
   <sub>camera `sieve`</sub>
 
-**hook_02b** — Bend the second count off to the side. Two by two: the corner is missing, so fill it in: four dots. Now roll them along the road, past the gap, and they land on four. The number they skipped, three, is a prime.
+**hook_02b** — Count one, two along the spiral. Now build a second row of two, one unit above the first. It slides along the spiral at that altitude to the next free spots and drops onto three and four. Four is a perfect square. Three was only passed over, never produced: a prime.
   <sub>camera `sieve`</sub>
 
-**hook_02c** — Count two, count three beside it, bend the three to the side, fill in the rectangle: six dots. Roll them to six, and the number they skipped, five, is a prime. Then two by five: ten. Three by three: nine, a perfect square.
+**hook_02c** — Count one, two, three. Stack a row of three above it, let it slide on and drop onto four, five, six. Six is our first composite that is not a square. Five was passed over: a prime.
   <sub>camera `sieve`</sub>
 
-**hook_03** — Two by seven, three by five, five by five, three by seven. Every composite is a rectangle of dots, every square is a square of dots, and whatever the counting skips is a prime.
+**hook_02d** — Now three times three: a row of three, a second row one unit up, a third row two units up. They uncoil in turn, landing on four, five, six, then seven, eight, nine. Nine is a perfect square, and seven was passed over: a prime.
+  <sub>camera `sieve`</sub>
+
+**hook_03** — Then five times two, seven times two, five times three, five times five, seven times three. A new prime is multiplied, or an old one is squared, back and forth. Every composite is a stack of rows dropped onto the spiral, and every number the rows pass over without producing is a prime.
   <sub>camera `sieve` · actions `pulse:primes`</sub>
+
+**hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
+  <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
 **hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
@@ -184,14 +190,14 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **outro_02** — Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.
   <sub>camera `sacks_saddle` · actions `sacks:show sacks:routes pulse:sacks`</sub>
 
-**outro_03** — One last picture, and this one is a guess, not a result. Lay the two chain rules on the saddle. The square-root rule is the spiral itself: radius root n, the arrow length turned upside down.
+**outro_03** — One last picture, and this one is a guess, not a result. Put everything on the saddle. The jumping-off points of the sieve: each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn.
   <sub>camera `sacks_routes` · actions `sacks:noroutes hypothesis:on` · footnote: a visual hypothesis, not a theorem</sub>
 
-**outro_04** — The logarithm rule, at the first collision's t, picks out rings. Between one ring and the next the chain makes exactly one full turn, so each ring is a fixed factor wider than the last. At the second collision's t the rings come tighter.
-  <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
+**outro_04** — The logarithm rule at the first collision's t picks out rings, each a fixed factor wider than the last; at the second collision's t the rings come tighter. And the zeta trail itself, threaded through the saddle along its normal, above and below, crossing the axis at every collision.
+  <sub>camera `sacks_3d` · actions `pulse:sacks`</sub>
 
-**outro_05** — Do the rings know where the valleys are? Nobody knows. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
-  <sub>camera `sacks_saddle`</sub>
+**outro_05** — Rings, squares, jumping-off points, and the trail of zeros, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
+  <sub>camera `sacks_3d`</sub>
 
 ---
-1626 words ≈ 10.8 minutes of speech at 150 wpm, plus pauses and title cards.
+1742 words ≈ 11.6 minutes of speech at 150 wpm, plus pauses and title cards.
