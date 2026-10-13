@@ -65,6 +65,7 @@ public class Main : MonoBehaviour
     GameObject equationContainer;
 
     double currentIter = 0;
+    double pendingAdvance = 0;
     bool isPlaying = false;
     bool heavyUpdateDirty = true;
 
@@ -173,6 +174,7 @@ public class Main : MonoBehaviour
     public void ResetAnimation()
     {
         isPlaying = false;
+        pendingAdvance = 0;
 
         foreach (GameObject zetaPoint in zetaPoints)
         {
@@ -271,14 +273,18 @@ public class Main : MonoBehaviour
 
         if (!isPlaying) return;
 
-        double target = currentIter + Speed * SpeedMultiplier * Time.deltaTime;
+        // accumulate so slow speeds (less than one AnimStep per frame) still advance
+        pendingAdvance += Speed * SpeedMultiplier * Time.deltaTime;
         int steps = 0;
-        while (currentIter + AnimStep <= target && steps < MaxStepsPerFrame)
+        while (pendingAdvance >= AnimStep && steps < MaxStepsPerFrame)
         {
+            pendingAdvance -= AnimStep;
             currentIter += AnimStep;
             RiemannZeta(currentIter);
             steps++;
         }
+
+        if (steps == MaxStepsPerFrame) pendingAdvance = 0; // drop backlog rather than stall
 
         DrawRiemann(currentIter);
     }
