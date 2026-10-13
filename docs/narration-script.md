@@ -193,14 +193,14 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **outro_03** — One last picture, and this one is a guess, not a result. Keep the spiral on the saddle, and let the zeta trail rise from its centre, with a collision wherever the trail returns to the axis.
   <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:zeta` · footnote: a visual hypothesis, not a theorem</sub>
 
-**outro_04** — Every collision is a dial. Dial the first one in and its cosine wave appears above the saddle. Let it settle onto the surface. Dial in the second, the third, the fourth: each new wave sinks onto the last, and the interference builds in three dimensions.
-  <sub>camera `sacks_wave` · actions `hypothesis:wavestack:24`</sub>
+**outro_04** — Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.
+  <sub>camera `sacks_wave` · actions `hypothesis:wavestack:13`</sub>
 
-**outro_05** — As the waves pile up the ridges settle on circles through the primes. The yellow ticks are the primes; the ridges find them. Saddle, trail and waves, agreeing on the same places.
+**outro_05** — Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes; the spikes find them. Saddle, trail and waves, one structure seen three ways.
   <sub>camera `sacks_wave_close` · actions `pulse:sacks`</sub>
 
 **outro_06** — Do these three structures know about each other, or are we only seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
   <sub>camera `sacks_wave_close`</sub>
 
 ---
-1767 words ≈ 11.8 minutes of speech at 150 wpm, plus pauses and title cards.
+1791 words ≈ 11.9 minutes of speech at 150 wpm, plus pauses and title cards.

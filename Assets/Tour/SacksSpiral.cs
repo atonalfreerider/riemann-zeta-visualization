@@ -928,72 +928,64 @@ public class SacksSpiral : MonoBehaviour
     readonly Vector3[] ringBuffer = new Vector3[FieldSegs];
 
     GameObject waveStackRoot;
-    LineRenderer masterProfile;
+    LineRenderer masterWave;
     Coroutine waveRoutine;
-    const int ProfilePts = 240;
-    const float WaveAltitude = 9f, WaveAmp = 1.6f;
-    static readonly Vector3 Diag = new(0.70710678f, 0.70710678f, 0); // the saddle's level line (height 0)
+    const int WavePts = 720;
+    const float WaveAmp = 2.2f;
 
-    /// <summary>A point on the saddle at distance r along the level diagonal, lifted by h along the normal.</summary>
-    Vector3 OnDiag(float r, float h) => origin + Diag * r + Vector3.back * (h + .15f);
+    float WaveN(int i) => FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (WavePts - 1f));
+
+    /// <summary>The spiral road at a given altitude above the saddle, displaced along the normal by a wave.</summary>
+    Vector3 OnSpiral(float n, float altitude, float displacement) => SpiralPos(n, 1f) + Vector3.back * (altitude + displacement + .15f);
 
     void EnsureWaveStack()
     {
         if (waveStackRoot != null) return;
         waveStackRoot = new GameObject("WaveStack");
         waveStackRoot.transform.SetParent(hypothesisRoot.transform, false);
-        masterProfile = Factory.NewLine("master profile", .09f, Factory.Palette.Cosine, Factory.GlowIntensity);
-        masterProfile.transform.SetParent(waveStackRoot.transform, false);
-        masterProfile.positionCount = ProfilePts;
-        masterProfile.numCornerVertices = 3;
-        LineRenderer ray = Factory.NewLine("profile ray", .025f, new Color(.5f, .5f, .6f));
-        ray.transform.SetParent(waveStackRoot.transform, false);
-        ray.positionCount = 2;
-        ray.SetPositions(new[] { OnDiag(R * Mathf.Sqrt(FieldNMin), 0f), OnDiag(R * Mathf.Sqrt(FieldNMax), 0f) });
-        // prime tick marks along the ray so ridges can be compared to primes at a glance
-        for (int n = 2; n <= 120; n++)
+        masterWave = Factory.NewLine("master wave", .10f, Factory.Palette.Cosine, Factory.GlowIntensity);
+        masterWave.transform.SetParent(waveStackRoot.transform, false);
+        masterWave.positionCount = WavePts;
+        masterWave.numCornerVertices = 3;
+        // prime ticks standing on the saddle along the spiral, so the spikes can be read against them
+        for (int n = 2; n <= (int)FieldNMax; n++)
         {
             if (!IsPrime(n)) continue;
-            LineRenderer tick = Factory.NewLine("prime tick", .04f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+            LineRenderer tick = Factory.NewLine("prime tick", .05f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
             tick.transform.SetParent(waveStackRoot.transform, false);
             tick.positionCount = 2;
-            float r = R * Mathf.Sqrt(n);
-            tick.SetPositions(new[] { OnDiag(r, -0.4f), OnDiag(r, 0.4f) });
+            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, 0.9f) });
         }
     }
 
-    float ProfileN(int i) => FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (ProfilePts - 1f));
-
-    void SetMasterProfile(int k)
+    void SetMasterWave(int k)
     {
         double[] zs = Main.Instance.zetaZeroValues;
         float scale = WaveAmp / Mathf.Sqrt(Mathf.Max(1, k));
-        Vector3[] pts = new Vector3[ProfilePts];
-        for (int i = 0; i < ProfilePts; i++)
+        Vector3[] pts = new Vector3[WavePts];
+        for (int i = 0; i < WavePts; i++)
         {
-            float n = ProfileN(i);
+            float n = WaveN(i);
             double logN = System.Math.Log(n);
             double sum = 0;
             for (int z = 0; z < k; z++) sum -= System.Math.Cos(zs[z] * logN);
-            pts[i] = OnDiag(R * Mathf.Sqrt(n), (float)sum * scale);
+            pts[i] = OnSpiral(n, 0f, (float)sum * scale);
         }
 
-        masterProfile.SetPositions(pts);
+        masterWave.SetPositions(pts);
     }
 
     /// <summary>
-    /// Dial the zeros in one at a time: each zero's cosine wave cos(γ·log n) appears as a graph high above the
-    /// saddle along the level diagonal, then sinks onto the surface and merges into the master wave; the ring
-    /// field (the same sum swept around the centre) updates with it, so the interference builds in 3D.
+    /// Dial the zeros in one at a time. Zero k's wave is born at its own height on the trail (γ·ZetaT up the axis),
+    /// runs out along the spiral at that altitude as cos(γ·log n), then sinks onto the saddle and merges into the
+    /// master wave: the spiral road displaced by the stacked sum, which spikes at every prime.
     /// </summary>
     public void StartWaveStack(float seconds, int count)
     {
         ShowHypothesis(true);
         EnsureWaveStack();
         waveStackRoot.SetActive(true);
-        if (interferenceRoot == null) StartInterference(0.01f); // builds the rings
-        if (fieldRoutine != null) StopCoroutine(fieldRoutine);
-        interferenceRoot.SetActive(true);
+        HideInterference();
         if (waveRoutine != null) StopCoroutine(waveRoutine);
         waveRoutine = StartCoroutine(WaveStackRoutine(seconds, count));
     }
@@ -1002,65 +994,70 @@ public class SacksSpiral : MonoBehaviour
     {
         double[] zs = Main.Instance.zetaZeroValues;
         count = Mathf.Min(count, zs.Length);
-        SetInterference(0);
-        SetMasterProfile(0);
+        SetMasterWave(0);
         float per = seconds / count;
         for (int k = 0; k < count; k++)
         {
             float g = (float)zs[k];
+            float altitude = g * ZetaT;
             Color c = Annotations.CollisionColor(k);
-            LineRenderer wave = Factory.NewLine("wave " + (k + 1), .07f, c, Factory.GlowIntensity);
+            if (k < zeroMarkers.Count) StartCoroutine(PulseScale(zeroMarkers[k].transform, .3f, 3f, per * .5f));
+            LineRenderer wave = Factory.NewLine("wave " + (k + 1), .08f, c, Factory.GlowIntensity);
             wave.transform.SetParent(waveStackRoot.transform, false);
-            wave.positionCount = ProfilePts;
-            Vector3[] pts = new Vector3[ProfilePts];
+            wave.numCornerVertices = 3;
+            Vector3[] pts = new Vector3[WavePts + 1];
             float amp = WaveAmp / Mathf.Sqrt(k + 1);
             caption.gameObject.SetActive(true);
-            caption.Text = $"collision {k + 1}:  dial γ = {g:0.00}  →  cos(γ · log n), drawn above the saddle, then settled onto it";
+            caption.Text = $"collision {k + 1}:  γ = {g:0.00}  →  cos(γ · log n) follows the spiral at height γ, then sinks onto the saddle";
 
-            // appear high above the saddle (grow in from the centre), then descend and merge
-            float tIn = per * .35f, tDown = per * .45f, tHold = per * .2f;
+            // phase 1: grow out from the zero on the axis, along the spiral, at the zero's height
+            float tOut = per * .4f, tDown = per * .4f, tHold = per * .2f;
             float t = 0f;
-            while (t < tIn)
+            pts[0] = origin + Vector3.back * (altitude + .15f);
+            while (t < tOut)
             {
                 t += Time.deltaTime;
-                float u = Mathf.SmoothStep(0f, 1f, t / tIn);
-                for (int i = 0; i < ProfilePts; i++)
+                float u = Mathf.SmoothStep(0f, 1f, t / tOut);
+                int shown = Mathf.Max(2, Mathf.CeilToInt(u * WavePts) + 1);
+                for (int i = 1; i < shown; i++)
                 {
-                    float n = ProfileN(i);
-                    float reach = Mathf.Clamp01((u * 1.2f - i / (float)ProfilePts) * 6f);
-                    pts[i] = OnDiag(R * Mathf.Sqrt(n), WaveAltitude - amp * Mathf.Cos(g * Mathf.Log(n)) * reach);
+                    float n = WaveN(i - 1);
+                    pts[i] = OnSpiral(n, altitude, -amp * Mathf.Cos(g * Mathf.Log(n)));
                 }
 
-                wave.SetPositions(pts);
+                wave.positionCount = shown;
+                wave.SetPositions(pts[..shown]);
                 yield return null;
             }
 
+            // phase 2: sink to the saddle, fading into the master wave
             t = 0f;
             while (t < tDown)
             {
                 t += Time.deltaTime;
                 float u = Mathf.SmoothStep(0f, 1f, t / tDown);
-                float alt = Mathf.Lerp(WaveAltitude, 0f, u);
-                for (int i = 0; i < ProfilePts; i++)
+                float alt = Mathf.Lerp(altitude, 0f, u);
+                pts[0] = origin + Vector3.back * (alt + .15f);
+                for (int i = 1; i <= WavePts; i++)
                 {
-                    float n = ProfileN(i);
-                    pts[i] = OnDiag(R * Mathf.Sqrt(n), alt - amp * Mathf.Cos(g * Mathf.Log(n)));
+                    float n = WaveN(i - 1);
+                    pts[i] = OnSpiral(n, alt, -amp * Mathf.Cos(g * Mathf.Log(n)));
                 }
 
+                wave.positionCount = pts.Length;
                 wave.SetPositions(pts);
-                Color faded = new(c.r, c.g, c.b, 1f - u * .85f);
+                Color faded = new(c.r, c.g, c.b, 1f - u * .8f);
                 wave.startColor = faded;
                 wave.endColor = faded;
                 yield return null;
             }
 
             Destroy(wave.gameObject);
-            SetInterference(k + 1);
-            SetMasterProfile(k + 1);
+            SetMasterWave(k + 1);
             yield return new WaitForSeconds(tHold);
         }
 
-        caption.Text = $"{count} collision waves stacked: the ridges sit on the circles through the primes";
+        caption.Text = $"{count} collision waves stacked on the spiral: the master wave spikes at every prime";
     }
 
     void SetInterference(int k)

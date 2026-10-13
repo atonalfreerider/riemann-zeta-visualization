@@ -738,16 +738,16 @@
         },
         {
           "id": "outro_04",
-          "text": "Every collision is a dial. Dial the first one in and its cosine wave appears above the saddle. Let it settle onto the surface. Dial in the second, the third, the fourth: each new wave sinks onto the last, and the interference builds in three dimensions.",
+          "text": "Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.",
           "camera": "sacks_wave",
           "actions": [
-            "hypothesis:wavestack:24"
+            "hypothesis:wavestack:13"
           ],
           "pause": 0.5
         },
         {
           "id": "outro_05",
-          "text": "As the waves pile up the ridges settle on circles through the primes. The yellow ticks are the primes; the ridges find them. Saddle, trail and waves, agreeing on the same places.",
+          "text": "Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes; the spikes find them. Saddle, trail and waves, one structure seen three ways.",
           "camera": "sacks_wave_close",
           "actions": [
             "pulse:sacks"
