@@ -42,7 +42,7 @@ public class StoryboardRenderTest
         if (!string.IsNullOrEmpty(chapter)) director.StartChapter = chapter;
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_FPS"), out int fps)) director.Recorder.Fps = fps;
 
-        if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.gameObject.SetActive(false); // clean frames for thumbnails
+        if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.GetComponent<Canvas>().enabled = false; // clean frames for thumbnails
         yield return null;
         director.StartTour();
         yield return null;

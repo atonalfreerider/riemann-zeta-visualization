@@ -559,6 +559,26 @@ public class SacksSpiral : MonoBehaviour
 
     public void Hide() => gameObject.SetActive(false);
 
+    /// <summary>Show the complete spiral immediately (used when a chapter starts without the hook having built it).</summary>
+    public void ShowFull()
+    {
+        gameObject.SetActive(true);
+        HideLattice();
+        if (sieveRoot != null) sieveRoot.SetActive(false);
+        foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
+        for (int i = 0; i < GridCount; i++)
+        {
+            int n = i + 1;
+            dots[i].SetActive(IsPrime(n) || IsSquare(n));
+            labels[i].Color = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.28f, .28f, .34f);
+        }
+
+        morph = 1f;
+        reveal = 1f;
+        caption.gameObject.SetActive(false);
+        Layout();
+    }
+
     public IEnumerable<Renderer> Renderers()
     {
         foreach (GameObject d in dots) if (d.activeSelf) yield return d.GetComponent<Renderer>();

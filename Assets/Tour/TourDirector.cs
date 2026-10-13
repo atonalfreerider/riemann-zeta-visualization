@@ -515,7 +515,7 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "composites") Annotations.Sacks.PulseComposites(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "routes") Annotations.Sacks.ShowRoutes(true);
                         else if (arg == "noroutes") Annotations.Sacks.ShowRoutes(false);
-                        else if (arg == "show") { Annotations.Sacks.gameObject.SetActive(true); }
+                        else if (arg == "show") Annotations.Sacks.ShowFull();
                         else Annotations.Sacks.Hide();
                         break;
                     case "chainfeet": Annotations.ShowChainFeet(arg != "off"); break;
