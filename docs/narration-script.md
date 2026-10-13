@@ -12,23 +12,29 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **hook_02** — Every whole number is made of primes: twelve is two times two times three. But where the next prime will fall has puzzled us for more than two thousand years.
   <sub>camera `primes_grid` · actions `pulse:primes`</sub>
 
-**hook_03** — Find their pattern, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.
-  <sub>camera `primes_grid` · actions `pulse:primes`</sub>
+**hook_03** — Wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.
+  <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
+
+**hook_04** — Bend that spiral over a saddle and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.
+  <sub>camera `sacks_saddle` · actions `sacks:saddle sacks:routes pulse:sacks`</sub>
+
+**hook_05** — Along the squares, never a prime. Along Euler's route, forty primes in a row. Find the rule behind this, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.
+  <sub>camera `sacks_routes` · actions `pulse:sacks`</sub>
 
 ## 2. Zeno's Chain
 *and a gentler rule*
 
-**zeno_01** — Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. Infinitely many steps, and you never pass two.
-  <sub>camera `zeno` · actions `primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
+**zeno_01** — Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. The footsteps keep their shape, only the scale shrinks, forever, and you never pass two.
+  <sub>camera `zeno_zoom` · actions `sacks:hide primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
 
 **zeno_02** — Lay the steps out as arrows: one, a half, a quarter, an eighth. The chain shrinks fast and stops dead at two.
   <sub>camera `zeno` · actions `pulse:zeno`</sub>
 
-**zeno_03** — Now a gentler rule, step by step. Step one: length one. Step two: one over the square root of two. Step three: one over root three. Every arrow is one over the square root of its number.
-  <sub>camera `zeno` · actions `card:off terms:1 hide:tail show:spiral show:lengths hide:center build:1:8`</sub>
+**zeno_03** — Now a gentler rule, step by step. Step one: length one. Step two: one over the square root of two. Step three: one over root three. Every footstep is one over the square root of its number. Hold on to that square root.
+  <sub>camera `zeno` · actions `card:off terms:1 hide:tail show:spiral show:lengths chainfeet:on rootlabel:chain hide:center build:1:8 pulse:spiral`</sub>
 
 **zeno_04** — Shrinking this slowly, the chain never stops. Sixty arrows reach fourteen. A million reach two thousand. It runs off the floor forever.
-  <sub>camera `chain_long` · actions `hide:zeno hide:lengths build:8:60`</sub>
+  <sub>camera `chain_long` · actions `hide:zeno hide:lengths chainfeet:off rootlabel:off build:8:60`</sub>
 
 **zeno_05** — Hold on to that square root. The exponent one half is the key to everything that follows, and we will come back to it at the end.
   <sub>camera `chain_long` · actions `pulse:spiral`</sub>
@@ -45,8 +51,8 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 4. Turn the Dial
 *The tip keeps finding the centre*
 
-**turn_01** — Each joint bends by the dial reading times the log of its number. At joint two, t times log two. At joint three, t times log of three over two. Turn the dial, and every angle grows together.
-  <sub>camera `spiral_angles` · actions `hide:polelabel angles:on speed:0.3 play`</sub>
+**turn_01** — Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number. Turn the dial, and every angle grows together.
+  <sub>camera `spiral_angles` · actions `hide:polelabel angles:on speed:0.3 play pulse:angles`</sub>
 
 **turn_02** — The chain is endless. Watch the arrows we skip: they wind up like a spring, orbiting one point. That point is where the endless chain truly ends.
   <sub>camera `spiral_curl` · actions `angles:off tailghost:on card:euler speed:0.5 pulse:tail` · footnote: faint spring: the next 120 arrows we do not draw</sub>
@@ -81,14 +87,14 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **wave_04** — Dial it up to fourteen point one three. This is the first collision's wave, and its dial goes on the shelf at the top.
   <sub>camera `wave` · actions `wave:dial:14.134725 dialstrip:1`</sub>
 
-**wave_05** — Now the second collision, in magenta. Its own dial turns to twenty one point zero two and its wave lands on the same line. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel.
-  <sub>camera `wave` · actions `cosine:1 show:cosine wave:off dial:off cosine:build:1:2`</sub>
+**wave_05** — Now the second collision, in its own colour. Its dial turns to twenty one point zero two, and its wave is drawn on the same line. The coloured bars are the gap between the two. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel down to one master wave.
+  <sub>camera `wave` · actions `cosine:1 show:cosine wave:off dial:off waveview:1 cosine:build:1:2`</sub>
 
-**wave_06** — Keep going. Each new dial adds a wave, and each new wave cancels more of the pattern.
+**wave_06** — Keep going. Each new dial brings a wave in its own colour onto the same line, and the view widens to make room. Wave by wave, the pattern cancels itself out.
   <sub>camera `wave` · actions `cosine:build:2:10`</sub>
 
-**wave_07** — Hundreds of waves. What survives are sharp spikes, and they sit exactly on two, three, five, seven, eleven, thirteen, and the prime powers four, eight, nine.
-  <sub>camera `spikes` · actions `cosine:build:10:all speed:6 play`</sub>
+**wave_07** — Hundreds of waves. What survives are sharp spikes, and they sit on two, three, five, seven, eleven, thirteen. Notice the squares, four, nine, sixteen, twenty five: faint spikes at first, muted as the waves pile up.
+  <sub>camera `spikes` · actions `cosine:build:10:all squares:on speed:6 play`</sub>
 
 **wave_08** — The spikes sit exactly on two, three, five, seven, eleven, thirteen. A map of the primes, built from nothing but collision heights.
   <sub>camera `spikes` · actions `primes:arrows primes:highlight pulse:numbers`</sub>
@@ -102,11 +108,11 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **stair_02** — Each weight is fixed by the recipe. Nothing is tuned by hand.
   <sub>camera `staircase_close` · actions `show:equations pulse:prime` · footnote: ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)</sub>
 
-**stair_03** — The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.
-  <sub>camera `staircase` · actions `hide:equations speed:8 play`</sub>
+**stair_03** — The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own. The squares and cubes are here too, as small orange steps.
+  <sub>camera `staircase` · actions `hide:equations primepowers:on speed:8 play pulse:primepowers`</sub>
 
 **stair_04** — More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.
-  <sub>camera `staircase_wide` · actions `card:off pulse:prime`</sub>
+  <sub>camera `staircase_wide` · actions `primepowers:off card:off pulse:prime`</sub>
 
 ## 7. The Whole Machine
 
@@ -155,10 +161,10 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `outro` · actions `hide:strip hide:gap show:spiral show:tail show:trail show:zeros show:prime show:imaxis speed:4 play`</sub>
 
 **outro_02** — Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.
-  <sub>camera `outro` · actions `pulse:zeros`</sub>
+  <sub>camera `sacks_saddle` · actions `sacks:show sacks:routes pulse:sacks`</sub>
 
-**outro_03** — Prove the one half key, and we will have read one line of that instruction set. Watch the spiral climb.
-  <sub>camera `outro` · actions `pulse:prime`</sub>
+**outro_03** — Prove the one half key, and we will have read one line of that instruction set.
+  <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
 
 ---
-1088 words ≈ 7.3 minutes of speech at 150 wpm, plus pauses and title cards.
+1214 words ≈ 8.1 minutes of speech at 150 wpm, plus pauses and title cards.

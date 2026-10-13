@@ -33,10 +33,31 @@
         },
         {
           "id": "hook_03",
-          "text": "Find their pattern, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.",
-          "camera": "primes_grid",
+          "text": "Wind the numbers into a spiral, each one a little farther out, one full turn per square, and the primes stop looking random.",
+          "camera": "sacks_flat",
           "actions": [
-            "pulse:primes"
+            "sacks:spiral"
+          ],
+          "pause": 0.5,
+          "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
+        },
+        {
+          "id": "hook_04",
+          "text": "Bend that spiral over a saddle and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.",
+          "camera": "sacks_saddle",
+          "actions": [
+            "sacks:saddle",
+            "sacks:routes",
+            "pulse:sacks"
+          ],
+          "pause": 0.5
+        },
+        {
+          "id": "hook_05",
+          "text": "Along the squares, never a prime. Along Euler's route, forty primes in a row. Find the rule behind this, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.",
+          "camera": "sacks_routes",
+          "actions": [
+            "pulse:sacks"
           ],
           "pause": 0.6
         }
@@ -49,9 +70,10 @@
       "lines": [
         {
           "id": "zeno_01",
-          "text": "Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. Infinitely many steps, and you never pass two.",
-          "camera": "zeno",
+          "text": "Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. The footsteps keep their shape, only the scale shrinks, forever, and you never pass two.",
+          "camera": "zeno_zoom",
           "actions": [
+            "sacks:hide",
             "primes:off",
             "hide:spiral",
             "show:zeno",
@@ -72,7 +94,7 @@
         },
         {
           "id": "zeno_03",
-          "text": "Now a gentler rule, step by step. Step one: length one. Step two: one over the square root of two. Step three: one over root three. Every arrow is one over the square root of its number.",
+          "text": "Now a gentler rule, step by step. Step one: length one. Step two: one over the square root of two. Step three: one over root three. Every footstep is one over the square root of its number. Hold on to that square root.",
           "camera": "zeno",
           "actions": [
             "card:off",
@@ -80,8 +102,11 @@
             "hide:tail",
             "show:spiral",
             "show:lengths",
+            "chainfeet:on",
+            "rootlabel:chain",
             "hide:center",
-            "build:1:8"
+            "build:1:8",
+            "pulse:spiral"
           ],
           "pause": 0.4
         },
@@ -92,6 +117,8 @@
           "actions": [
             "hide:zeno",
             "hide:lengths",
+            "chainfeet:off",
+            "rootlabel:off",
             "build:8:60"
           ],
           "pause": 0.4
@@ -150,15 +177,16 @@
       "lines": [
         {
           "id": "turn_01",
-          "text": "Each joint bends by the dial reading times the log of its number. At joint two, t times log two. At joint three, t times log of three over two. Turn the dial, and every angle grows together.",
+          "text": "Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number. Turn the dial, and every angle grows together.",
           "camera": "spiral_angles",
           "actions": [
             "hide:polelabel",
             "angles:on",
             "speed:0.3",
-            "play"
+            "play",
+            "pulse:angles"
           ],
-          "pause": 0.4
+          "pause": 0.5
         },
         {
           "id": "turn_02",
@@ -294,20 +322,21 @@
         },
         {
           "id": "wave_05",
-          "text": "Now the second collision, in magenta. Its own dial turns to twenty one point zero two and its wave lands on the same line. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel.",
+          "text": "Now the second collision, in its own colour. Its dial turns to twenty one point zero two, and its wave is drawn on the same line. The coloured bars are the gap between the two. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel down to one master wave.",
           "camera": "wave",
           "actions": [
             "cosine:1",
             "show:cosine",
             "wave:off",
             "dial:off",
+            "waveview:1",
             "cosine:build:1:2"
           ],
           "pause": 0.5
         },
         {
           "id": "wave_06",
-          "text": "Keep going. Each new dial adds a wave, and each new wave cancels more of the pattern.",
+          "text": "Keep going. Each new dial brings a wave in its own colour onto the same line, and the view widens to make room. Wave by wave, the pattern cancels itself out.",
           "camera": "wave",
           "actions": [
             "cosine:build:2:10"
@@ -316,14 +345,15 @@
         },
         {
           "id": "wave_07",
-          "text": "Hundreds of waves. What survives are sharp spikes, and they sit exactly on two, three, five, seven, eleven, thirteen, and the prime powers four, eight, nine.",
+          "text": "Hundreds of waves. What survives are sharp spikes, and they sit on two, three, five, seven, eleven, thirteen. Notice the squares, four, nine, sixteen, twenty five: faint spikes at first, muted as the waves pile up.",
           "camera": "spikes",
           "actions": [
             "cosine:build:10:all",
+            "squares:on",
             "speed:6",
             "play"
           ],
-          "pause": 0.4
+          "pause": 0.5
         },
         {
           "id": "wave_08",
@@ -372,20 +402,23 @@
         },
         {
           "id": "stair_03",
-          "text": "The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own.",
+          "text": "The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own. The squares and cubes are here too, as small orange steps.",
           "camera": "staircase",
           "actions": [
             "hide:equations",
+            "primepowers:on",
             "speed:8",
-            "play"
+            "play",
+            "pulse:primepowers"
           ],
-          "pause": 0.3
+          "pause": 0.4
         },
         {
           "id": "stair_04",
           "text": "More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.",
           "camera": "staircase_wide",
           "actions": [
+            "primepowers:off",
             "card:off",
             "pulse:prime"
           ],
@@ -587,18 +620,20 @@
         {
           "id": "outro_02",
           "text": "Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.",
-          "camera": "outro",
+          "camera": "sacks_saddle",
           "actions": [
-            "pulse:zeros"
+            "sacks:show",
+            "sacks:routes",
+            "pulse:sacks"
           ],
           "pause": 0.5
         },
         {
           "id": "outro_03",
-          "text": "Prove the one half key, and we will have read one line of that instruction set. Watch the spiral climb.",
-          "camera": "outro",
+          "text": "Prove the one half key, and we will have read one line of that instruction set.",
+          "camera": "sacks_saddle",
           "actions": [
-            "pulse:prime"
+            "pulse:sacks"
           ],
           "pause": 3.0
         }

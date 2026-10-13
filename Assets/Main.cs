@@ -63,6 +63,9 @@ public class Main : MonoBehaviour
         }
     }
 
+    /// <summary>Current chorus curve (for difference lines in the tour).</summary>
+    public void GetCosinePositions(Vector3[] into) => cosineWaveCurve.GetPositions(into);
+
     /// <summary>Heights γ of the zeros passed so far.</summary>
     public IReadOnlyList<double> PassedZeros => zetaCurvesByZero.Keys.ToList();
 
@@ -568,13 +571,16 @@ public class Main : MonoBehaviour
 
         primeLabels.Clear();
 
+        // Collect steep runs, then keep exactly one (the tallest) per integer so Gibbs ringing
+        // around small primes cannot produce several red lines for the same step.
+        Dictionary<int, (float height, Vector3 top)> best = new();
         bool verticalRun = false;
         Vector3 previousPoint = Vector3.zero;
         List<Vector3> verticalRunPoints = new();
         const float primeFindingThreshold = 1f / NumPrimeCurvePoints * .5f;
         foreach (Vector3 point in primeCurvePoints)
         {
-            if (point.x < 2f)
+            if (point.x < 1.6f)
             {
                 previousPoint = point;
                 continue;
@@ -582,58 +588,49 @@ public class Main : MonoBehaviour
 
             if (point.y - previousPoint.y > primeFindingThreshold)
             {
-                if (!verticalRun)
-                {
-                    verticalRun = true;
-                }
-
+                verticalRun = true;
                 verticalRunPoints.Add(point);
             }
 
             if (verticalRun && point.y - previousPoint.y < primeFindingThreshold)
             {
                 verticalRun = false;
-
-                if (verticalRunPoints[0].x < 3.5f ||
-                    verticalRunPoints[^1].y - verticalRunPoints[0].y > PrimeFilterHeight)
+                float height = verticalRunPoints[^1].y - verticalRunPoints[0].y;
+                Vector3 halfwayPoint = verticalRunPoints[Mathf.FloorToInt(verticalRunPoints.Count * .5f)];
+                int estPrime = Mathf.RoundToInt(halfwayPoint.x);
+                bool small = estPrime <= 3;
+                bool nearInteger = Math.Abs(halfwayPoint.x - estPrime) < (small ? .3f : .5f);
+                float needed = small ? .35f : PrimeFilterHeight;
+                if (nearInteger && height > needed)
                 {
-                    Vector3 halfwayPoint = verticalRunPoints[Mathf.FloorToInt(verticalRunPoints.Count * .5f)];
-                    int estPrime = Convert.ToInt32(halfwayPoint.x);
-                    if (verticalRunPoints[0].x < 2.5f && verticalRunPoints[0].x - 2 > .01f)
+                    if (!best.TryGetValue(estPrime, out (float height, Vector3 top) current) || height > current.height)
                     {
-                        // hack: cleanup around 2
-                        verticalRunPoints.Clear();
-                        previousPoint = point;
-                        continue;
+                        best[estPrime] = (height, halfwayPoint);
                     }
-
-                    if (verticalRunPoints[0].x is >= 2.5f and < 3.5f && Math.Abs(verticalRunPoints[0].x - 3) > .15f)
-                    {
-                        // hack: cleanup around 3
-                        verticalRunPoints.Clear();
-                        previousPoint = point;
-                        continue;
-                    }
-
-                    LineRenderer daggerLine = Factory.NewLine("dagger", .08f, Factory.Palette.Dagger, Factory.GlowIntensity);
-                    daggerLine.transform.SetParent(daggerContainer.transform, false);
-                    daggerLine.positionCount = 2;
-                    daggerLine.SetPositions(new[] { halfwayPoint, new Vector3(halfwayPoint.x, 0, 0) });
-                    daggerLines.Add(daggerLine);
-
-                    TextBox primeLabel = TextBox.Create(estPrime.ToString(CultureInfo.InvariantCulture), 10f);
-                    primeLabel.transform.SetParent(daggerContainer.transform, false);
-                    primeLabel.Alignment = TextAlignmentOptions.Center;
-                    primeLabel.transform.localPosition = new Vector3(estPrime, -.5f, 0);
-                    primeLabel.Color = Factory.Palette.Dagger;
-
-                    primeLabels.Add(primeLabel);
                 }
 
                 verticalRunPoints.Clear();
             }
 
             previousPoint = point;
+        }
+
+        foreach (KeyValuePair<int, (float height, Vector3 top)> entry in best)
+        {
+            int estPrime = entry.Key;
+            Vector3 halfwayPoint = entry.Value.top;
+            LineRenderer daggerLine = Factory.NewLine("dagger", .08f, Factory.Palette.Dagger, Factory.GlowIntensity);
+            daggerLine.transform.SetParent(daggerContainer.transform, false);
+            daggerLine.positionCount = 2;
+            daggerLine.SetPositions(new[] { new Vector3(estPrime, halfwayPoint.y, 0), new Vector3(estPrime, 0, 0) });
+            daggerLines.Add(daggerLine);
+
+            TextBox primeLabel = TextBox.Create(estPrime.ToString(CultureInfo.InvariantCulture), 10f);
+            primeLabel.transform.SetParent(daggerContainer.transform, false);
+            primeLabel.Alignment = TextAlignmentOptions.Center;
+            primeLabel.transform.localPosition = new Vector3(estPrime, -.5f, 0);
+            primeLabel.Color = Factory.Palette.Dagger;
+            primeLabels.Add(primeLabel);
         }
     }
 

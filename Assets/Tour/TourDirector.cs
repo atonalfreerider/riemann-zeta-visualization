@@ -147,6 +147,7 @@ public class TourDirector : MonoBehaviour
     {
         List<Renderer> renderers = new(Main.RenderersOf(element));
         renderers.AddRange(Annotations.RenderersOf(element));
+        if (element == "sacks") renderers.AddRange(Annotations.Sacks.Renderers());
         if (renderers.Count == 0) Debug.LogWarning($"Tour: nothing to pulse for '{element}'");
         Annotations.PulseRenderers(renderers, seconds);
     }
@@ -165,7 +166,8 @@ public class TourDirector : MonoBehaviour
             float amplitude = Main.CosineScale / (n + 1);
             if (showEach)
             {
-                Annotations.ShowIncomingWave(n, amplitude, Main.CosineScale * 0.7f);
+                Annotations.SetWaveCount(n + 1);
+                Annotations.ShowIncomingWave(n, amplitude, 0f);
                 Annotations.AddStripDial(n, perStep * 0.4f);
                 yield return new WaitForSeconds(perStep * 0.45f);
                 Annotations.HideIncomingWave();
@@ -174,6 +176,8 @@ public class TourDirector : MonoBehaviour
             }
             else
             {
+                Annotations.SetWaveCount(n + 1);
+                if (n < 12) Annotations.AddStripDial(n, perStep * 0.8f);
                 Main.SetCosineZeroLimitAnimated(n + 1, perStep);
                 yield return new WaitForSeconds(perStep);
             }
@@ -489,6 +493,19 @@ public class TourDirector : MonoBehaviour
                         break;
                     case "stair": if (arg == "build") Main.BuildStaircase(Mathf.Max(2f, currentLineSeconds * 0.8f)); break;
                     case "rootlabel": Annotations.ShowRootFormula(arg); break;
+                    case "sacks":
+                        if (arg == "spiral") StartCoroutine(Annotations.Sacks.MorphToSpiral(Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
+                        else if (arg == "saddle") StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
+                        else if (arg == "flat") StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f)));
+                        else if (arg == "routes") Annotations.Sacks.ShowRoutes(true);
+                        else if (arg == "noroutes") Annotations.Sacks.ShowRoutes(false);
+                        else if (arg == "show") { Annotations.Sacks.gameObject.SetActive(true); }
+                        else Annotations.Sacks.Hide();
+                        break;
+                    case "chainfeet": Annotations.ShowChainFeet(arg != "off"); break;
+                    case "squares": Annotations.ShowSquaresLabel(arg != "off"); break;
+                    case "primepowers": Annotations.ShowPrimePowers(arg != "off"); break;
+                    case "waveview": Annotations.SetWaveCount(int.Parse(arg, CultureInfo.InvariantCulture)); break;
                     case "labels": Main.ZeroLabelLimit = arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "ghost":
                         if (arg == "off") Annotations.SetGhostZero(false);

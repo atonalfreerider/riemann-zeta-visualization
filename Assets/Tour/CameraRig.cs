@@ -160,11 +160,40 @@ public class CameraRig : MonoBehaviour
             float a = Time.time * 0.15f;
             return new CueState { Position = new Vector3(Mathf.Sin(a) * d, h + 2f, -Mathf.Cos(a) * d), LookAt = new Vector3(0, h, 0), Up = up, Fov = 60 };
         };
-        cues["wave"] = () => new CueState { Position = new Vector3(8f, 0f, -29f), LookAt = new Vector3(8f, 0f, 0f), Up = up, Fov = 60 };
-        cues["spikes"] = () => new CueState { Position = new Vector3(8f, 2f, -24f), LookAt = new Vector3(8f, 2f, 0f), Up = up, Fov = 60 };
+        cues["wave"] = () =>
+        {
+            float w = annotations.WaveViewMax;
+            return new CueState { Position = new Vector3(w * .5f, 0f, -w * 1.8f), LookAt = new Vector3(w * .5f, 0f, 0f), Up = up, Fov = 60 };
+        };
+        cues["spikes"] = () =>
+        {
+            float w = annotations.WaveViewMax;
+            return new CueState { Position = new Vector3(w * .5f, 2f, -w * 1.5f), LookAt = new Vector3(w * .5f, 2f, 0f), Up = up, Fov = 60 };
+        };
         cues["staircase_close"] = () => new CueState { Position = new Vector3(9f, 7f, -24f), LookAt = new Vector3(9f, 7f, 0f), Up = up, Fov = 60 };
         cues["wobble"] = () => new CueState { Position = new Vector3(30f, 30f, -82f), LookAt = new Vector3(30f, 30f, 0f), Up = up, Fov = 60 };
         cues["primes_grid"] = () => new CueState { Position = new Vector3(-34f, 18.5f, -24f), LookAt = new Vector3(-34f, 18.5f, 0f), Up = up, Fov = 60 };
+        cues["sacks_flat"] = () =>
+        {
+            Vector3 c = annotations.Sacks.Center;
+            return new CueState { Position = c + new Vector3(0, -2f, -annotations.Sacks.Extent * 1.75f), LookAt = c, Up = up, Fov = 60 };
+        };
+        cues["sacks_saddle"] = () =>
+        {
+            // sway around the front of the saddle so its curvature reads in parallax
+            Vector3 c = annotations.Sacks.Center;
+            float a = Time.time * 0.25f;
+            float d = annotations.Sacks.Extent * 2.4f;
+            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .55f, Mathf.Cos(a * .7f) * d * .3f, -d * .8f), LookAt = c, Up = up, Fov = 60 };
+        };
+        cues["sacks_routes"] = () =>
+        {
+            Vector3 c = annotations.Sacks.Center;
+            float a = Time.time * 0.15f;
+            float d = annotations.Sacks.Extent * 2.1f;
+            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .35f, d * .1f, -d * .95f), LookAt = c, Up = up, Fov = 60 };
+        };
+        cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
         cues["spiral_angles"] = () => new CueState { Position = new Vector3(-0.4f, TipY + 6.5f, -1.8f), LookAt = new Vector3(-0.4f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
         cues["zeno"] = () => new CueState { Position = new Vector3(2.4f, 9.5f, 0.3f), LookAt = new Vector3(2.4f, 0f, 0.55f), Up = Vector3.right, Fov = 60 };
         cues["machine"] = () =>

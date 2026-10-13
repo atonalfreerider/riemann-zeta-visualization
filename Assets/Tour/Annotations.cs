@@ -80,6 +80,22 @@ public class Annotations : MonoBehaviour
     TextBox rootFormula;
     GameObject rootFormulaRoot;
     TextBox ghostFormula;
+    public SacksSpiral Sacks { get; private set; }
+    // zeno zoom: the camera follows the newest footprint and halves its distance each step
+    public Vector3 ZenoFocus { get; private set; } = new(1f, 0f, 1.15f);
+    public float ZenoZoom { get; private set; } = 9.5f;
+    // footprints along the √n chain
+    GameObject chainFeetRoot;
+    readonly List<GameObject> chainFeet = new();
+    bool showChainFeet;
+    // waves: colour per collision, difference lines, growing view
+    readonly List<LineRenderer> diffLines = new();
+    GameObject diffRoot;
+    public float WaveViewMax { get; private set; } = 16f;
+    TextBox squaresLabel;
+    GameObject primePowersRoot;
+    readonly List<TextBox> primePowerLabels = new();
+    readonly List<LineRenderer> primePowerTicks = new();
     GameObject tipSphere, centerSphere;
     TextBox dialLabel;
     LineRenderer centerRing;
@@ -229,17 +245,17 @@ public class Annotations : MonoBehaviour
         LineRenderer baseline = Factory.NewLine("baseline", .04f, new Color(.6f, .6f, .65f));
         baseline.transform.SetParent(numberLineRoot.transform, false);
         baseline.positionCount = 2;
-        baseline.SetPositions(new[] { new Vector3(0, 0, 0.05f), new Vector3(24, 0, 0.05f) });
-        for (int n = 1; n <= 24; n++)
+        baseline.SetPositions(new[] { new Vector3(0, 0, 0.05f), new Vector3(42, 0, 0.05f) });
+        for (int n = 1; n <= 41; n++)
         {
-            bool prime = n is 2 or 3 or 5 or 7 or 11 or 13 or 17 or 19 or 23;
-            bool primePower = n is 4 or 8 or 9 or 16;
+            bool prime = n is 2 or 3 or 5 or 7 or 11 or 13 or 17 or 19 or 23 or 29 or 31 or 37 or 41;
+            bool primePower = n is 4 or 8 or 9 or 16 or 25 or 27 or 32;
             LineRenderer tick = Factory.NewLine("tick", .03f, new Color(.6f, .6f, .65f));
             tick.transform.SetParent(numberLineRoot.transform, false);
             tick.positionCount = 2;
             tick.SetPositions(new[] { new Vector3(n, -.25f, 0.05f), new Vector3(n, .25f, 0.05f) });
-            Color c = prime ? Factory.Palette.Dagger : primePower ? new Color(1f, .7f, .5f) : new Color(.55f, .55f, .6f);
-            TextBox label = Label(numberLineRoot.transform, n.ToString(), new Vector3(n, -1.7f, 0), prime ? 4.2f : 2.8f, c, TextAlignmentOptions.Center);
+            Color c = prime ? Factory.Palette.Dagger : primePower ? new Color(1f, .6f, .25f) : new Color(.55f, .55f, .6f);
+            TextBox label = Label(numberLineRoot.transform, n.ToString(), new Vector3(n, -1.7f, 0), prime ? 4.2f : primePower ? 3.4f : 2.8f, c, TextAlignmentOptions.Center);
             label.gameObject.AddComponent<Billboard>();
             label.name = "number: " + n;
         }
@@ -267,23 +283,20 @@ public class Annotations : MonoBehaviour
             Color c = LimitCurve.ChainColor(i / 7f);
             GameObject arrow = new GameObject("zeno arrow " + i);
             arrow.transform.SetParent(zenoRoot.transform, false);
-            LineRenderer seg = Factory.NewLine("zeno " + i, Mathf.Lerp(.06f, .02f, i / 7f), c, Factory.SoftGlowIntensity);
+            LineRenderer seg = Factory.NewLine("zeno " + i, .06f * length, c, Factory.SoftGlowIntensity);
             seg.transform.SetParent(arrow.transform, false);
             seg.positionCount = 2;
             seg.numCapVertices = 4;
             seg.SetPositions(new[] { from, to });
             float size = Mathf.Clamp(length * .28f, .03f, .13f);
-            LineRenderer head = Factory.NewLine("zeno head", Mathf.Clamp(length * .07f, .012f, .045f), c, Factory.SoftGlowIntensity);
+            LineRenderer head = Factory.NewLine("zeno head", length * .05f, c, Factory.SoftGlowIntensity);
             head.transform.SetParent(arrow.transform, false);
             head.positionCount = 3;
             head.SetPositions(new[] { to - Vector3.right * size + Vector3.forward * size * .55f, to, to - Vector3.right * size - Vector3.forward * size * .55f });
             zenoArrows.Add(arrow);
-            if (i < 4)
-            {
-                TextBox label = Label(zenoRoot.transform, fractions[i], (from + to) * .5f + Vector3.forward * .4f, 1.6f, new Color(1f, 1f, 1f, .85f), TextAlignmentOptions.Center);
-                label.gameObject.AddComponent<Billboard>();
-                zenoLabels.Add(label.gameObject);
-            }
+            TextBox label = Label(zenoRoot.transform, fractions[i], (from + to) * .5f + Vector3.forward * .4f * length, 1.6f * length, new Color(1f, 1f, 1f, .85f), TextAlignmentOptions.Center);
+            label.gameObject.AddComponent<Billboard>();
+            zenoLabels.Add(label.gameObject);
 
             xPos += length;
         }
@@ -294,10 +307,10 @@ public class Annotations : MonoBehaviour
         {
             float length = Mathf.Pow(0.5f, i);
             fx += length;
-            float side = i % 2 == 0 ? .28f : -.28f;
+            float side = (i % 2 == 0 ? .28f : -.28f) * length;
             GameObject foot = new GameObject("footprint " + i);
             foot.transform.SetParent(zenoRoot.transform, false);
-            float scale = Mathf.Clamp(length * .5f, .08f, .22f);
+            float scale = length * .34f;
             LineRenderer sole = Factory.NewLine("sole", scale * .35f, new Color(1f, .95f, .8f), Factory.SoftGlowIntensity);
             sole.transform.SetParent(foot.transform, false);
             sole.loop = true;
@@ -315,12 +328,9 @@ public class Annotations : MonoBehaviour
             toes.positionCount = 2;
             toes.SetPositions(new[] { new Vector3(fx + scale * .3f, 0.01f, zenoZ + side - scale * .2f), new Vector3(fx + scale * .3f, 0.01f, zenoZ + side + scale * .2f) });
             zenoFootprints.Add(foot);
-            if (i < 3)
-            {
-                TextBox step = Label(zenoRoot.transform, "step " + (i + 1), new Vector3(fx - length * .5f, 0, zenoZ - .95f), 1.3f, new Color(.8f, .8f, .9f), TextAlignmentOptions.Center);
-                step.gameObject.AddComponent<Billboard>();
-                zenoStepLabels.Add(step.gameObject);
-            }
+            TextBox step = Label(zenoRoot.transform, "step " + (i + 1), new Vector3(fx - length * .5f, 0, zenoZ - .95f * length), 1.3f * length, new Color(.8f, .8f, .9f), TextAlignmentOptions.Center);
+            step.gameObject.AddComponent<Billboard>();
+            zenoStepLabels.Add(step.gameObject);
         }
 
         zenoWall = new GameObject("zeno wall");
@@ -411,33 +421,6 @@ public class Annotations : MonoBehaviour
         dialLabel.gameObject.AddComponent<Billboard>();
         centerRoot.SetActive(false);
 
-        // ---- primes intro grid (1..30) ---------------------------------------------------------
-        primesRoot = new GameObject("PrimesGrid");
-        primesRoot.transform.SetParent(transform, false);
-        Vector3 gridOrigin = new(-40f, 26f, 0f);
-        const float cell = 3.0f;
-        for (int n = 1; n <= 30; n++)
-        {
-            int col = (n - 1) % 5, row = (n - 1) / 5;
-            Vector3 pos = gridOrigin + new Vector3(col * cell, -row * cell, 0);
-            bool prime = IsPrime(n);
-            TextBox label = Label(primesRoot.transform, n.ToString(), pos, prime ? 4.6f : 3.4f, new Color(.45f, .45f, .5f), TextAlignmentOptions.Center);
-            GameObject glow = Factory.NewSphere("prime glow", 0.001f, new Color(1f, .8f, .2f), Factory.SoftGlowIntensity);
-            glow.transform.SetParent(primesRoot.transform, false);
-            glow.transform.position = pos + Vector3.forward * .9f;
-            glow.SetActive(false);
-            if (!prime && n > 1)
-            {
-                TextBox fac = Label(primesRoot.transform, Factorization(n), pos + Vector3.down * 1.0f, 1.5f, new Color(.55f, .55f, .65f), TextAlignmentOptions.Center);
-                fac.gameObject.SetActive(false);
-                primeCells.Add((-n, fac, null));
-            }
-
-            primeCells.Add((n, label, glow));
-        }
-
-        primesRoot.SetActive(false);
-
         // ---- joint angle arcs ------------------------------------------------------------------
         anglesRoot = new GameObject("JointAngles");
         anglesRoot.transform.SetParent(transform, false);
@@ -451,7 +434,7 @@ public class Annotations : MonoBehaviour
             angleLabels.Add(l);
         }
 
-        angleFormula = Label(anglesRoot.transform, "", Vector3.zero, 1.5f, new Color(1f, .6f, .95f), TextAlignmentOptions.Left);
+        angleFormula = Label(anglesRoot.transform, "", Vector3.zero, 0.85f, new Color(1f, .6f, .95f), TextAlignmentOptions.Left);
         angleFormula.gameObject.AddComponent<Billboard>();
         anglesRoot.SetActive(false);
 
@@ -491,6 +474,46 @@ public class Annotations : MonoBehaviour
         rootFormula = Label(rootFormulaRoot.transform, "", Vector3.zero, 1.25f, Color.white, TextAlignmentOptions.Center);
         rootFormula.gameObject.AddComponent<Billboard>();
         rootFormulaRoot.SetActive(false);
+
+        Sacks = SacksSpiral.Create();
+        Sacks.transform.SetParent(transform, false);
+
+        // ---- footprints along the √n chain -------------------------------------------------------
+        chainFeetRoot = new GameObject("ChainFeet");
+        chainFeetRoot.transform.SetParent(transform, false);
+        chainFeetRoot.SetActive(false);
+
+        // ---- difference lines between the master wave and an incoming wave -----------------------
+        diffRoot = new GameObject("WaveDifferences");
+        diffRoot.transform.SetParent(transform, false);
+        for (int i = 0; i < 70; i++)
+        {
+            LineRenderer d = Factory.NewLine("diff", .035f, Color.white, Factory.SoftGlowIntensity);
+            d.transform.SetParent(diffRoot.transform, false);
+            d.positionCount = 2;
+            diffLines.Add(d);
+        }
+
+        diffRoot.SetActive(false);
+
+        squaresLabel = Label(numberLineRoot.transform, "squares 4, 9, 16, 25 and cubes 8, 27:\nfaint spikes at first, muted as the waves pile up", new Vector3(14f, -5.2f, 0), 2.6f, new Color(1f, .6f, .25f), TextAlignmentOptions.Center);
+        squaresLabel.gameObject.AddComponent<Billboard>();
+        squaresLabel.gameObject.SetActive(false);
+
+        primePowersRoot = new GameObject("PrimePowers");
+        primePowersRoot.transform.SetParent(transform, false);
+        foreach (int q in new[] { 4, 8, 9, 16, 25, 27 })
+        {
+            LineRenderer tick = Factory.NewLine("pp tick", .05f, new Color(1f, .6f, .25f), Factory.GlowIntensity);
+            tick.transform.SetParent(primePowersRoot.transform, false);
+            tick.positionCount = 2;
+            primePowerTicks.Add(tick);
+            TextBox l = Label(primePowersRoot.transform, q.ToString(), Vector3.zero, 2.2f, new Color(1f, .6f, .25f), TextAlignmentOptions.Center);
+            l.gameObject.AddComponent<Billboard>();
+            primePowerLabels.Add(l);
+        }
+
+        primePowersRoot.SetActive(false);
 
         // ---- rogue zero ---------------------------------------------------------------------
         ghostRoot = new GameObject("RogueZero");
@@ -644,6 +667,8 @@ public class Annotations : MonoBehaviour
             UpdateAngles();
         }
 
+        if (showChainFeet) UpdateChainFeet();
+
         if (gapRoot.activeSelf)
         {
             float pulse = .14f + .08f * Mathf.Sin(Time.time * 2.5f);
@@ -705,45 +730,13 @@ public class Annotations : MonoBehaviour
     // ---- primes intro -----------------------------------------------------------------------------
     public void ShowPrimes(bool on)
     {
-        primesRoot.SetActive(on);
-        if (on)
-        {
-            foreach ((int n, TextBox label, GameObject glow) in primeCells)
-            {
-                if (n < 0) label.gameObject.SetActive(false);
-                else { label.Color = new Color(.35f, .35f, .4f); glow?.SetActive(false); }
-            }
-        }
+        if (on) Sacks.ShowGrid(); else Sacks.Hide();
     }
 
     /// <summary>Light the primes one by one; composites fade and show their factors.</summary>
     public void BuildPrimes(float seconds)
     {
-        StartCoroutine(BuildPrimesRoutine(seconds));
-    }
-
-    IEnumerator BuildPrimesRoutine(float seconds)
-    {
-        ShowPrimes(true);
-        List<(int n, TextBox label, GameObject glow)> cells = primeCells.FindAll(c => c.n > 0);
-        float per = seconds / cells.Count;
-        foreach ((int n, TextBox label, GameObject glow) in cells)
-        {
-            if (IsPrime(n))
-            {
-                label.Color = Factory.Palette.Zero;
-                glow.SetActive(true);
-                StartCoroutine(ShrinkGlow(glow.transform, 1.6f, .18f, .7f));
-            }
-            else
-            {
-                label.Color = new Color(.28f, .28f, .34f);
-                (int fn, TextBox fac, GameObject _) = primeCells.Find(c => c.n == -n);
-                if (fac != null) fac.gameObject.SetActive(true);
-            }
-
-            yield return new WaitForSeconds(per);
-        }
+        StartCoroutine(Sacks.BuildGrid(seconds));
     }
 
     static IEnumerator ShrinkGlow(Transform t, float from, float to, float seconds)
@@ -825,8 +818,8 @@ public class Annotations : MonoBehaviour
             angleLabels[i].transform.position = j + new Vector3(Mathf.Cos(mid), 0, Mathf.Sin(mid)) * (r + .22f);
         }
 
-        angleFormula.Text = $"dial t = {t:0.00}\nturn at joint n = t · log( n / (n−1) )\njoint 2: {t * System.Math.Log(2) * 180 / System.Math.PI:0}°   joint 3: {t * System.Math.Log(1.5) * 180 / System.Math.PI:0}°   joint 4: {t * System.Math.Log(4.0 / 3) * 180 / System.Math.PI:0}°";
-        angleFormula.transform.position = new Vector3(-2.3f, (float)t * Graph.yScale + .05f, 2.5f);
+        angleFormula.Text = $"dial t = {t:0.00}\n<color=#FFD400>lengths follow square roots:</color>  arrow n = 1/√n\n<color=#FF99F0>bends follow logarithms:</color>  turn at joint n = t · log( n / (n−1) )\njoint 2: {t * System.Math.Log(2) * 180 / System.Math.PI:0}°   joint 3: {t * System.Math.Log(1.5) * 180 / System.Math.PI:0}°   joint 4: {t * System.Math.Log(4.0 / 3) * 180 / System.Math.PI:0}°";
+        angleFormula.transform.position = new Vector3(-2.35f, (float)t * Graph.yScale + .05f, 1.3f);
     }
 
     // ---- dial strip ---------------------------------------------------------------------------------
@@ -847,7 +840,7 @@ public class Annotations : MonoBehaviour
         Vector3 center = new(2.6f + slot * 2.7f, 13.6f, 0);
         GameObject root = new GameObject("strip dial " + (index + 1));
         root.transform.SetParent(dialStripRoot.transform, false);
-        Color accent = index == 0 ? Factory.Palette.Cosine : new Color(1f, .35f, .85f);
+        Color accent = CollisionColor(index);
         LineRenderer ring = Factory.NewLine("ring", .03f, accent, Factory.SoftGlowIntensity);
         ring.transform.SetParent(root.transform, false);
         ring.loop = true;
@@ -918,7 +911,8 @@ public class Annotations : MonoBehaviour
         if (mode == "off") { rootFormulaRoot.SetActive(false); return; }
         rootFormulaRoot.SetActive(true);
         float y = (float)main.CurrentT * Graph.yScale;
-        rootFormula.transform.position = new Vector3(0.3f, y + .05f, 1.55f);
+        rootFormula.transform.position = mode == "chain" ? new Vector3(2.4f, .05f, 1.9f) : new Vector3(0.3f, y + .05f, 1.55f);
+        if (mode == "chain") mode = "sqrt";
         rootFormula.Text = mode == "sqrt"
             ? "arrow n  =  <color=#FFD400>1 / √n</color>  =  1 / n<sup>½</sup>"
             : $"arrow n  =  <color=#FF5A6E>1 / n<sup>{mode}</sup></color>";
@@ -1045,6 +1039,8 @@ public class Annotations : MonoBehaviour
     // ---- Zeno build-up: arrows grow one after another ------------------------------------------
     public void ResetZeno()
     {
+        ZenoFocus = new Vector3(1f, 0f, 1.15f);
+        ZenoZoom = 9.5f;
         foreach (GameObject a in zenoArrows) a.SetActive(false);
         foreach (GameObject l in zenoLabels) l.SetActive(false);
         foreach (GameObject f in zenoFootprints) f.SetActive(false);
@@ -1087,11 +1083,17 @@ public class Annotations : MonoBehaviour
             {
                 zenoFootprints[i].SetActive(true);
                 StartCoroutine(Pulse(zenoFootprints[i].transform, 1f, 1.5f, .5f));
+                float reached = 2f - Mathf.Pow(0.5f, i);
+                ZenoFocus = new Vector3(reached - Mathf.Pow(0.5f, i) * .3f, 0f, 1.15f);
+                ZenoZoom = Mathf.Max(0.35f, 9.5f * Mathf.Pow(0.5f, i));
             }
 
             if (i < zenoStepLabels.Count) zenoStepLabels[i].SetActive(true);
             yield return new WaitForSeconds(per * .2f);
         }
+
+        ZenoFocus = new Vector3(1f, 0f, 1.15f);
+        ZenoZoom = 9.5f;
 
         // the wall slides in from the left of the screen (screen-left is +z in the zeno cue)
         zenoWall.SetActive(true);
@@ -1146,7 +1148,8 @@ public class Annotations : MonoBehaviour
             "strip" => stripRoot, "band78" => band78Root, "band18" => band18Root, "gap" => gapRoot,
             "numbers" => numberLineRoot, "zeno" => zenoRoot, "wave" => waveDemoRoot, "dial" => dialRoot,
             "center" => centerRoot, "tip" => tipRoot, "imaxis" => imAxisRoot, "outaxes" => outputAxesRoot, "ghost" => ghostRoot,
-            "primes" => primesRoot, "angles" => anglesRoot, "dialstrip" => dialStripRoot, "primearrows" => primeArrowsRoot,
+            "primes" => Sacks.gameObject, "angles" => anglesRoot, "dialstrip" => dialStripRoot, "primearrows" => primeArrowsRoot,
+            "chainfeet" => chainFeetRoot, "primepowers" => primePowersRoot,
             _ => null
         };
         if (root == null) yield break;
@@ -1154,24 +1157,126 @@ public class Annotations : MonoBehaviour
     }
 
     /// <summary>Draw collision number <paramref name="index"/>'s wave by itself, before it joins the chorus.</summary>
+    /// <summary>One distinct hue per collision, shared by its dial, its wave and its difference lines.</summary>
+    public static Color CollisionColor(int index)
+    {
+        if (index == 0) return Factory.Palette.Cosine;
+        return Color.HSVToRGB(Mathf.Repeat(0.86f + index * 0.618034f, 1f), .85f, 1f);
+    }
+
+    /// <summary>Draw collision <paramref name="index"/>'s wave on the SAME axis as the chorus, plus the gap to the chorus.</summary>
     public void ShowIncomingWave(int index, float amplitude, float lift)
     {
         if (index < 0 || index >= main.zetaZeroValues.Length) return;
         double gamma = main.zetaZeroValues[index];
+        Color c = CollisionColor(index);
+        incomingWave.startColor = c;
+        incomingWave.endColor = c;
+        incomingLabel.Color = c;
         Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
         for (int i = 0; i < pts.Length; i++)
         {
             float x = (float)Main.PrimeCurveX(i);
-            pts[i] = x < 1.5f ? new Vector3(1.5f, lift, 0.02f) : new Vector3(x, lift - amplitude * (float)System.Math.Cos(gamma * System.Math.Log(x)), 0.02f);
+            pts[i] = x < 1.5f ? new Vector3(1.5f, 0, 0.02f) : new Vector3(x, -amplitude * (float)System.Math.Cos(gamma * System.Math.Log(x)), 0.02f);
         }
 
         incomingWave.SetPositions(pts);
         incomingLabel.Text = $"collision {index + 1}:  {gamma:0.00}";
-        incomingLabel.transform.position = new Vector3(8f, lift + amplitude + 1.6f, 0);
+        incomingLabel.transform.position = new Vector3(WaveViewMax * .5f, amplitude * 1.15f + 2.2f, 0);
         incomingRoot.SetActive(true);
+
+        // difference lines: from the master wave to the new wave, across the visible range
+        Vector3[] master = new Vector3[Main.NumPrimeCurvePoints];
+        main.GetCosinePositions(master);
+        diffRoot.SetActive(true);
+        for (int k = 0; k < diffLines.Count; k++)
+        {
+            float x = 1.8f + (WaveViewMax - 2f) * k / (diffLines.Count - 1f);
+            int i = Mathf.Clamp(Mathf.RoundToInt(x / Main.PrimeCurveXLength * Main.NumPrimeCurvePoints) - 1, 0, Main.NumPrimeCurvePoints - 1);
+            diffLines[k].startColor = c;
+            diffLines[k].endColor = new Color(c.r, c.g, c.b, .25f);
+            diffLines[k].SetPositions(new[] { new Vector3(pts[i].x, pts[i].y, 0.03f), new Vector3(master[i].x, master[i].y, 0.03f) });
+        }
     }
 
-    public void HideIncomingWave() => incomingRoot.SetActive(false);
+    public void HideIncomingWave()
+    {
+        incomingRoot.SetActive(false);
+        diffRoot.SetActive(false);
+    }
+
+    /// <summary>Widen the wave view as more collisions join (the camera cues read this).</summary>
+    public void SetWaveCount(int count)
+    {
+        WaveViewMax = Mathf.Clamp(14f + count * 2.6f, 16f, 40f);
+    }
+
+    public void ShowSquaresLabel(bool on) => squaresLabel.gameObject.SetActive(on);
+
+    /// <summary>Orange ticks on the staircase at the prime powers 4, 8, 9, 16, 25, 27.</summary>
+    public void ShowPrimePowers(bool on)
+    {
+        primePowersRoot.SetActive(on);
+        if (!on) return;
+        int[] q = { 4, 8, 9, 16, 25, 27 };
+        for (int k = 0; k < q.Length; k++)
+        {
+            int i = Mathf.Clamp(Mathf.RoundToInt((float)q[k] / Main.PrimeCurveXLength * Main.NumPrimeCurvePoints) - 1, 0, Main.NumPrimeCurvePoints - 1);
+            float y = main.PsiValues[i];
+            primePowerTicks[k].SetPositions(new[] { new Vector3(q[k], y + 0.6f, -0.05f), new Vector3(q[k], y + 3.2f, -0.05f) });
+            primePowerLabels[k].transform.position = new Vector3(q[k], y + 4.3f, -0.05f);
+        }
+    }
+
+    // ---- footprints along the √n chain -------------------------------------------------------------
+    public void ShowChainFeet(bool on)
+    {
+        showChainFeet = on;
+        chainFeetRoot.SetActive(on);
+        if (on) UpdateChainFeet();
+    }
+
+    void UpdateChainFeet()
+    {
+        Vector3[] joints = main.Limit.LastJoints;
+        int count = Mathf.Min(joints.Length - 1, 12);
+        while (chainFeet.Count < count)
+        {
+            GameObject foot = new GameObject("chain foot " + chainFeet.Count);
+            foot.transform.SetParent(chainFeetRoot.transform, false);
+            LineRenderer sole = Factory.NewLine("sole", .02f, new Color(1f, .95f, .8f), Factory.SoftGlowIntensity);
+            sole.transform.SetParent(foot.transform, false);
+            sole.loop = true;
+            sole.positionCount = 14;
+            chainFeet.Add(foot);
+        }
+
+        for (int i = 0; i < chainFeet.Count; i++)
+        {
+            bool active = i < count;
+            chainFeet[i].SetActive(active);
+            if (!active) continue;
+            Vector3 from = joints[i], to = joints[i + 1];
+            Vector3 dir = to - from;
+            float length = dir.magnitude;
+            if (length < 1e-4f) { chainFeet[i].SetActive(false); continue; }
+            dir /= length;
+            Vector3 side = Vector3.Cross(dir, Vector3.up).normalized * (i % 2 == 0 ? 1f : -1f);
+            float scale = Mathf.Clamp(length * .34f, .04f, .3f);
+            Vector3 centre = to - dir * scale * .6f + side * scale * .9f;
+            LineRenderer sole = chainFeet[i].transform.GetChild(0).GetComponent<LineRenderer>();
+            sole.startWidth = scale * .3f;
+            sole.endWidth = scale * .3f;
+            Vector3[] sp = new Vector3[14];
+            for (int k = 0; k < 14; k++)
+            {
+                float a = k / 14f * Mathf.PI * 2f;
+                sp[k] = centre + dir * (Mathf.Cos(a) * scale * .5f) + side * (Mathf.Sin(a) * scale * .28f) + Vector3.up * .01f;
+            }
+
+            sole.SetPositions(sp);
+        }
+    }
     public void ShowNumberLine(bool on) => numberLineRoot.SetActive(on);
     public void ShowPoleLabel(bool on) => poleLabelRoot.SetActive(on);
     public void ShowCenter(bool on) => centerRoot.SetActive(on);
@@ -1253,6 +1358,12 @@ public class Annotations : MonoBehaviour
         ShowPoleLabel(false);
         ShowZeno(false);
         ShowPrimes(false);
+        Sacks.Hide();
+        ShowChainFeet(false);
+        HideIncomingWave();
+        ShowSquaresLabel(false);
+        ShowPrimePowers(false);
+        SetWaveCount(0);
         ShowAngles(false);
         ClearDialStrip();
         ShowPrimeArrows(false);
