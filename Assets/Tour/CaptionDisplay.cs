@@ -23,6 +23,23 @@ public class CaptionDisplay : MonoBehaviour
     CanvasGroup titleGroup;
 
     LineTiming current;
+    RectTransform card;
+    CanvasGroup cardGroup;
+    Image cardMedallion;
+    RawImage cardPortrait;
+    TextMeshProUGUI cardGlyph, cardName, cardYears, cardRole;
+    Coroutine cardRoutine;
+    Image cardRing;
+
+    struct Character { public string Name, Years, Role, Glyph; public Color Accent; }
+    static readonly Dictionary<string, Character> Characters = new()
+    {
+        ["zeno"] = new Character { Name = "Zeno of Elea", Years = "c. 490 – 430 BC", Role = "The paradox of endless halving: infinitely many steps that never pass a wall", Glyph = "Z", Accent = new Color(.55f, .85f, 1f) },
+        ["euler"] = new Character { Name = "Leonhard Euler", Years = "1707 – 1783", Role = "Tamed the endless sum; with Maclaurin, the formula that turns the missing tail into one exact arrow", Glyph = "E", Accent = new Color(1f, .7f, .35f) },
+        ["riemann"] = new Character { Name = "Bernhard Riemann", Years = "1826 – 1866", Role = "Turned the dial into the complex plane, found the collisions, wrote the staircase recipe, and made the hypothesis", Glyph = "R", Accent = new Color(1f, .85f, .3f) },
+        ["hardy"] = new Character { Name = "G. H. Hardy", Years = "1877 – 1947", Role = "Proved in 1914 that infinitely many collisions sit exactly on the one-half line", Glyph = "H", Accent = new Color(.6f, 1f, .7f) },
+        ["machine"] = new Character { Name = "OpenAI's internal model", Years = "October 2026", Role = "AI-generated, Lean-checked proof of the quasi-Riemann hypothesis: no collision past seven eighths", Glyph = "AI", Accent = new Color(.5f, .9f, 1f) },
+    };
     readonly List<(int start, int end)> pages = new();
     string highlightHex;
     string dimHex;
@@ -110,7 +127,180 @@ public class CaptionDisplay : MonoBehaviour
         hint.rectTransform.sizeDelta = new Vector2(1000, 80);
         hint.color = new Color(.6f, .6f, .65f);
 
+        BuildCard();
         Clear();
+    }
+
+    void BuildCard()
+    {
+        GameObject go = new("CharacterCard");
+        go.transform.SetParent(transform, false);
+        card = go.AddComponent<RectTransform>();
+        card.anchorMin = new Vector2(1, 1);
+        card.anchorMax = new Vector2(1, 1);
+        card.pivot = new Vector2(1, 1);
+        card.anchoredPosition = new Vector2(-40, -600);
+        card.sizeDelta = new Vector2(560, 290);
+        cardGroup = go.AddComponent<CanvasGroup>();
+        cardGroup.alpha = 0f;
+        Image bg = go.AddComponent<Image>();
+        bg.color = new Color(0.03f, 0.03f, 0.06f, 0.78f);
+        bg.raycastTarget = false;
+
+        GameObject ringGo = new("Ring");
+        ringGo.transform.SetParent(go.transform, false);
+        cardRing = ringGo.AddComponent<Image>();
+        cardRing.sprite = CircleSprite();
+        cardRing.color = Color.white;
+        cardRing.raycastTarget = false;
+        RectTransform ringRect = cardRing.rectTransform;
+        ringRect.anchorMin = new Vector2(0, 0.5f);
+        ringRect.anchorMax = new Vector2(0, 0.5f);
+        ringRect.anchoredPosition = new Vector2(95, 0);
+        ringRect.sizeDelta = new Vector2(150, 150);
+
+        GameObject medGo = new("Medallion");
+        medGo.transform.SetParent(go.transform, false);
+        cardMedallion = medGo.AddComponent<Image>();
+        cardMedallion.sprite = CircleSprite();
+        cardMedallion.color = new Color(0.1f, 0.1f, 0.16f, 1f);
+        cardMedallion.raycastTarget = false;
+        RectTransform medRect = cardMedallion.rectTransform;
+        medRect.anchorMin = new Vector2(0, 0.5f);
+        medRect.anchorMax = new Vector2(0, 0.5f);
+        medRect.anchoredPosition = new Vector2(95, 0);
+        medRect.sizeDelta = new Vector2(134, 134);
+
+        GameObject portraitGo = new("Portrait");
+        portraitGo.transform.SetParent(medGo.transform, false);
+        cardPortrait = portraitGo.AddComponent<RawImage>();
+        cardPortrait.raycastTarget = false;
+        RectTransform pr = cardPortrait.rectTransform;
+        pr.anchorMin = Vector2.zero;
+        pr.anchorMax = Vector2.one;
+        pr.offsetMin = new Vector2(6, 6);
+        pr.offsetMax = new Vector2(-6, -6);
+        cardPortrait.enabled = false;
+
+        cardGlyph = MakeText(medGo.transform, "Glyph", 64, FontStyles.Bold, TextAlignmentOptions.Center);
+        cardGlyph.rectTransform.anchorMin = Vector2.zero;
+        cardGlyph.rectTransform.anchorMax = Vector2.one;
+        cardGlyph.rectTransform.offsetMin = Vector2.zero;
+        cardGlyph.rectTransform.offsetMax = Vector2.zero;
+
+        cardName = MakeText(go.transform, "Name", 31, FontStyles.Bold, TextAlignmentOptions.Left);
+        cardName.rectTransform.anchorMin = new Vector2(0, 1);
+        cardName.rectTransform.anchorMax = new Vector2(1, 1);
+        cardName.rectTransform.pivot = new Vector2(0, 1);
+        cardName.rectTransform.anchoredPosition = new Vector2(190, -26);
+        cardName.rectTransform.sizeDelta = new Vector2(-210, 50);
+        cardYears = MakeText(go.transform, "Years", 26, FontStyles.Normal, TextAlignmentOptions.Left);
+        cardYears.rectTransform.anchorMin = new Vector2(0, 1);
+        cardYears.rectTransform.anchorMax = new Vector2(1, 1);
+        cardYears.rectTransform.pivot = new Vector2(0, 1);
+        cardYears.rectTransform.anchoredPosition = new Vector2(190, -72);
+        cardYears.rectTransform.sizeDelta = new Vector2(-210, 36);
+        cardYears.color = new Color(.75f, .75f, .8f);
+        cardRole = MakeText(go.transform, "Role", 25, FontStyles.Normal, TextAlignmentOptions.TopLeft);
+        cardRole.rectTransform.anchorMin = new Vector2(0, 1);
+        cardRole.rectTransform.anchorMax = new Vector2(1, 1);
+        cardRole.rectTransform.pivot = new Vector2(0, 1);
+        cardRole.rectTransform.anchoredPosition = new Vector2(190, -112);
+        cardRole.rectTransform.sizeDelta = new Vector2(-210, 170);
+        cardRole.textWrappingMode = TextWrappingModes.Normal;
+        cardRole.color = new Color(.9f, .9f, .95f);
+    }
+
+    static Sprite circleSprite;
+    static Sprite CircleSprite()
+    {
+        if (circleSprite != null) return circleSprite;
+        const int size = 128;
+        Texture2D tex = new(size, size, TextureFormat.RGBA32, false);
+        Color32[] px = new Color32[size * size];
+        float r = size * .5f - 1f;
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + .5f, y + .5f), new Vector2(size * .5f, size * .5f));
+            float a = Mathf.Clamp01(r - d + .5f);
+            px[y * size + x] = new Color(1, 1, 1, a);
+        }
+
+        tex.SetPixels32(px);
+        tex.Apply();
+        circleSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(.5f, .5f), 100f);
+        return circleSprite;
+    }
+
+    /// <summary>Show a character card (top right). Drops in a portrait from Resources/Portraits/&lt;id&gt; when present.</summary>
+    public void ShowCard(string id)
+    {
+        if (!Characters.TryGetValue(id, out Character c))
+        {
+            Debug.LogWarning($"Captions: unknown character '{id}'");
+            return;
+        }
+
+        cardName.text = c.Name;
+        cardYears.text = c.Years;
+        cardRole.text = c.Role;
+        cardGlyph.text = c.Glyph;
+        cardGlyph.color = c.Accent;
+        cardRing.color = c.Accent;
+        Texture2D portrait = Resources.Load<Texture2D>("Portraits/" + id);
+        cardPortrait.enabled = portrait != null;
+        cardGlyph.enabled = portrait == null;
+        if (portrait != null) cardPortrait.texture = portrait;
+        if (cardRoutine != null) StopCoroutine(cardRoutine);
+        cardRoutine = StartCoroutine(CardIn(id == "machine"));
+    }
+
+    public void HideCard()
+    {
+        if (cardRoutine != null) StopCoroutine(cardRoutine);
+        cardRoutine = StartCoroutine(CardOut());
+    }
+
+    IEnumerator CardIn(bool machine)
+    {
+        float t = 0f;
+        Vector2 target = new(-40, -600);
+        while (t < 0.6f)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0, 1, t / 0.6f);
+            cardGroup.alpha = k;
+            card.anchoredPosition = target + new Vector2((1 - k) * 220f, 0);
+            yield return null;
+        }
+
+        cardGroup.alpha = 1f;
+        card.anchoredPosition = target;
+        // keep the medallion ring breathing; the machine's ring spins as well
+        float time = 0f;
+        while (true)
+        {
+            time += Time.deltaTime;
+            float s = 1f + 0.05f * Mathf.Sin(time * 3f);
+            cardRing.rectTransform.localScale = Vector3.one * s;
+            if (machine) cardRing.rectTransform.localRotation = Quaternion.Euler(0, 0, time * 40f);
+            yield return null;
+        }
+    }
+
+    IEnumerator CardOut()
+    {
+        float a0 = cardGroup.alpha;
+        float t = 0f;
+        while (t < 0.4f)
+        {
+            t += Time.deltaTime;
+            cardGroup.alpha = Mathf.Lerp(a0, 0f, t / 0.4f);
+            yield return null;
+        }
+
+        cardGroup.alpha = 0f;
     }
 
     static TextMeshProUGUI MakeText(Transform parent, string name, float size, FontStyles style, TextAlignmentOptions alignment)
@@ -224,6 +414,8 @@ public class CaptionDisplay : MonoBehaviour
 
     public void Clear()
     {
+        if (cardRoutine != null) StopCoroutine(cardRoutine);
+        if (cardGroup != null) cardGroup.alpha = 0f;
         current = null;
         pages.Clear();
         caption.text = "";

@@ -262,6 +262,9 @@ public class CameraRig : MonoBehaviour
         if (!Active || activeCue == null) return;
 
         CueState target = activeCue();
+        // never fully static: a slow figure-eight drift on top of every cue
+        float drift = 0.012f * Vector3.Distance(target.Position, target.LookAt);
+        target.Position += new Vector3(Mathf.Sin(Time.time * 0.37f), Mathf.Sin(Time.time * 0.23f) * .6f, Mathf.Cos(Time.time * 0.31f)) * drift;
         Transform t = cam.transform;
         t.position = Vector3.SmoothDamp(t.position, target.Position, ref positionVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
         currentLook = Vector3.SmoothDamp(currentLook, target.LookAt, ref lookVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);

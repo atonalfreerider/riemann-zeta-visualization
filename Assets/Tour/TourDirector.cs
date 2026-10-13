@@ -143,6 +143,14 @@ public class TourDirector : MonoBehaviour
 
     float currentLineSeconds = 3f;
 
+    void PulseElement(string element, float seconds)
+    {
+        List<Renderer> renderers = new(Main.RenderersOf(element));
+        renderers.AddRange(Annotations.RenderersOf(element));
+        if (renderers.Count == 0) Debug.LogWarning($"Tour: nothing to pulse for '{element}'");
+        Annotations.PulseRenderers(renderers, seconds);
+    }
+
     IEnumerator BuildWaves(int from, int to)
     {
         float seconds = Mathf.Max(0.5f, currentLineSeconds * 0.9f);
@@ -158,20 +166,20 @@ public class TourDirector : MonoBehaviour
             if (showEach)
             {
                 Annotations.ShowIncomingWave(n, amplitude, Main.CosineScale * 0.7f);
-                yield return new WaitForSeconds(perStep * 0.55f);
-                Annotations.HideIncomingWave();
-                Main.SetCosineZeroLimit(n + 1);
                 yield return new WaitForSeconds(perStep * 0.45f);
+                Annotations.HideIncomingWave();
+                Main.SetCosineZeroLimitAnimated(n + 1, perStep * 0.5f);
+                yield return new WaitForSeconds(perStep * 0.55f);
             }
             else
             {
-                Main.SetCosineZeroLimit(n + 1);
+                Main.SetCosineZeroLimitAnimated(n + 1, perStep);
                 yield return new WaitForSeconds(perStep);
             }
         }
 
         Annotations.HideIncomingWave();
-        Main.SetCosineZeroLimit(to < 0 ? -1 : target);
+        Main.SetCosineZeroLimitAnimated(to < 0 ? -1 : target, 0.6f);
     }
 
     IEnumerator BuildTerms(int from, int to)
@@ -181,18 +189,18 @@ public class TourDirector : MonoBehaviour
         int last = -1;
         while (Time.time - start < seconds)
         {
-            int n = Mathf.RoundToInt(Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, (Time.time - start) / seconds)));
-            if (n != last)
-            {
-                last = n;
-                Main.Limit.TermOverride = n;
-                Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
-            }
-
+            float v = Mathf.Lerp(from, to, (Time.time - start) / seconds);
+            int n = Mathf.FloorToInt(v);
+            Main.Limit.TermOverride = Mathf.Max(1, n + 1);
+            Main.Limit.TermFraction = Mathf.Clamp01(v - n);
+            if (n + 1 > to) { Main.Limit.TermOverride = to; Main.Limit.TermFraction = 1f; }
+            Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
+            last = n;
             yield return null;
         }
 
         Main.Limit.TermOverride = to;
+        Main.Limit.TermFraction = 1f;
         Main.Limit.RenderLimitCurve(Main.CurrentT, null, null);
     }
 
@@ -240,9 +248,12 @@ public class TourDirector : MonoBehaviour
         Main.CosineScale = 11f;
         Main.SetCosineZeroLimit(-1);
         Main.Limit.TermOverride = 0;
+        Main.Limit.TermFraction = 1f;
         Main.Limit.SetTailVisible(true);
         Main.Limit.SetArrowheadsVisible(true);
         Main.Limit.SetLengthLabelsVisible(false);
+        Main.Limit.SetTailGhostVisible(false);
+        Main.SetTrailStyle(0.05f, Factory.SoftGlowIntensity, 0f);
         // start from an empty stage; chapters reveal what they need
         Main.SetPrimeCurveVisible(false);
         Main.SetCosineVisible(false);
@@ -437,10 +448,31 @@ public class TourDirector : MonoBehaviour
                         }
                         break;
                     case "wave":
-                        if (arg == "plain") Annotations.ShowDemoWavePlain(Main.CosineScale);
-                        else if (arg == "morph") Annotations.MorphDemoWave(Mathf.Max(1f, currentLineSeconds * 0.7f), Main.CosineScale);
+                        // wave:plain[:γ] · wave:dial:γ (sweep γ across the line) · wave:log (bend with the logarithm) · wave:off
+                        if (arg == "plain") Annotations.ShowDemoWavePlain(Main.CosineScale, parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : 2.4f);
+                        else if (arg == "dial") Annotations.SweepDemoGamma(float.Parse(parts[2], CultureInfo.InvariantCulture), Mathf.Max(1f, currentLineSeconds * 0.8f));
+                        else if (arg == "log" || arg == "morph") Annotations.MorphDemoWave(Mathf.Max(1f, currentLineSeconds * 0.7f), Main.CosineScale);
                         else Annotations.HideDemoWave();
                         break;
+                    case "dial": Annotations.ShowDial(arg != "off"); break;
+                    case "zeno":
+                        if (arg == "build") Annotations.BuildZeno(Mathf.Max(2f, currentLineSeconds * 0.85f));
+                        else if (arg == "reset") Annotations.ResetZeno();
+                        break;
+                    case "card":
+                        if (arg == "off") Captions.HideCard();
+                        else Captions.ShowCard(arg);
+                        break;
+                    case "trail":
+                        Main.SetZetaCurveVisible(true);
+                        if (arg == "thin") Main.SetTrailStyle(0.012f, 0.75f, 1f);
+                        else Main.SetTrailStyle(0.05f, Factory.SoftGlowIntensity, 2.5f);
+                        break;
+                    case "pulse":
+                        // pulse:element — breathe the glow of an element for the rest of the line
+                        PulseElement(arg, Mathf.Max(1.5f, currentLineSeconds - 0.3f));
+                        break;
+                    case "tailghost": Main.Limit.SetTailGhostVisible(arg != "off"); break;
                     case "labels": Main.ZeroLabelLimit = arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "ghost":
                         if (arg == "off") Annotations.SetGhostZero(false);

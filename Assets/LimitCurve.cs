@@ -30,8 +30,13 @@ public class LimitCurve : MonoBehaviour
     public int TermOverride = 0;
     public bool ShowArrowheads = true;
     public bool ShowLengthLabels = false;
-    const int MaxArrowheads = 12;
+    const int MaxArrowheads = 14;
     const int MaxLengthLabels = 10;
+    /// <summary>0..1: how much of the newest arrow is drawn (lets the chain grow one arrow at a time).</summary>
+    public float TermFraction = 1f;
+    public bool ShowTailGhost = false;
+    const int TailGhostTerms = 120;
+    LineRenderer tailGhost;
     readonly List<LineRenderer> arrowheads = new();
     readonly List<TextBox> lengthLabels = new();
     GameObject arrowheadContainer;
@@ -81,11 +86,20 @@ public class LimitCurve : MonoBehaviour
         MovingLimitCurve.endColor = ChainColor(1f);
         MovingLimitCurve.transform.SetParent(transform, false);
         MovingLimitCurve.positionCount = NumLimitCurvePoints;
+        MovingLimitCurve.numCornerVertices = 6;
+        MovingLimitCurve.numCapVertices = 4;
+        MovingLimitCurve.widthCurve = new AnimationCurve(new Keyframe(0f, .075f), new Keyframe(.35f, .045f), new Keyframe(1f, .016f));
 
         TailCurve = Factory.NewLine("tailCurve", .07f, Factory.Palette.Tail, Factory.GlowIntensity);
         TailCurve.transform.SetParent(transform, false);
         TailCurve.positionCount = 3;
         TailCurve.enabled = ShowTail;
+        TailCurve.numCapVertices = 4;
+        TailCurve.widthCurve = new AnimationCurve(new Keyframe(0f, .055f), new Keyframe(1f, .02f));
+
+        tailGhost = Factory.NewLine("tailGhost", .012f, new Color(1f, .6f, .3f, .45f));
+        tailGhost.transform.SetParent(transform, false);
+        tailGhost.enabled = false;
 
         arrowheadContainer = new GameObject("Arrowheads");
         arrowheadContainer.transform.SetParent(transform, false);
@@ -184,6 +198,11 @@ public class LimitCurve : MonoBehaviour
             joints[k] = ToWorld(d.PartialSums[k], yIntercept);
         }
 
+        if (TermOverride > 0 && TermFraction < 1f && N >= 2)
+        {
+            joints[N - 1] = Vector3.Lerp(joints[N - 2], joints[N - 1], Mathf.Clamp01(TermFraction));
+        }
+
         limitCurve.positionCount = N;
         limitCurve.SetPositions(joints);
 
@@ -205,6 +224,7 @@ public class LimitCurve : MonoBehaviour
             LastJoints = joints;
             UpdateArrowheads(joints);
             UpdateLengthLabels(joints, s);
+            UpdateTailGhost(d, s, yIntercept);
 
             if (ShowSpirals)
             {
@@ -254,6 +274,41 @@ public class LimitCurve : MonoBehaviour
         return Factory.Viridis.ViridisColor(1f - Mathf.Lerp(0.6f, 0f, Mathf.Clamp01(fraction)));
     }
 
+    /// <summary>The arrows we do not draw: partial sums from N onward, faint, to show what the orange tail replaces.</summary>
+    void UpdateTailGhost(ZetaMath.SpiralDecomposition d, Complex s, float y)
+    {
+        tailGhost.enabled = ShowTailGhost && MovingLimitCurve.enabled;
+        if (!tailGhost.enabled) return;
+        Vector3[] pts = new Vector3[TailGhostTerms + 1];
+        Complex sum = d.SpiralEnd;
+        pts[0] = ToWorld(sum, y + .005f);
+        for (int n = d.N; n < d.N + TailGhostTerms; n++)
+        {
+            sum += ZetaMath.Term(n, s);
+            pts[n - d.N + 1] = ToWorld(sum, y + .005f);
+        }
+
+        tailGhost.positionCount = pts.Length;
+        tailGhost.SetPositions(pts);
+    }
+
+    public IEnumerable<Renderer> ChainRenderers
+    {
+        get
+        {
+            EnsureInitialized();
+            yield return MovingLimitCurve;
+            foreach (LineRenderer h in arrowheads) if (h.enabled) yield return h;
+        }
+    }
+
+    public void SetTailGhostVisible(bool on)
+    {
+        EnsureInitialized();
+        ShowTailGhost = on;
+        if (!on) tailGhost.enabled = false;
+    }
+
     void UpdateArrowheads(Vector3[] joints)
     {
         if (!ShowArrowheads) return;
@@ -284,10 +339,13 @@ public class LimitCurve : MonoBehaviour
 
             dir /= length;
             Vector3 side = Vector3.Cross(dir, Vector3.up).normalized;
-            float size = Mathf.Clamp(length * .3f, .04f, .16f);
+            float size = Mathf.Clamp(length * .28f, .03f, .13f);
             Color c = ChainColor((float)i / Math.Max(1, joints.Length - 1));
             arrowheads[i].startColor = c;
             arrowheads[i].endColor = c;
+            float w = Mathf.Clamp(length * .07f, .012f, .045f);
+            arrowheads[i].startWidth = w;
+            arrowheads[i].endWidth = w;
             arrowheads[i].SetPositions(new[] { to - dir * size + side * size * .55f, to, to - dir * size - side * size * .55f });
         }
     }

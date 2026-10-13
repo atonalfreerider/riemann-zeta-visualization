@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -47,6 +48,20 @@ public class Main : MonoBehaviour
 
     /// <summary>When > 0 the cosine chorus is drawn as −(Σ cos)·CosineScale/N so its height stays bounded; ≤ 0 draws the raw sum.</summary>
     public float CosineScale = -1f;
+
+    /// <summary>Renderers that make up a named element, for attention pulses.</summary>
+    public IEnumerable<Renderer> RenderersOf(string element)
+    {
+        switch (element)
+        {
+            case "prime": yield return primeCurve; foreach (LineRenderer d in daggerLines) yield return d; break;
+            case "cosine": yield return cosineWaveCurve; break;
+            case "trail": yield return zetaCurve; break;
+            case "zeros": foreach (GameObject z in zetaPoints) yield return z.GetComponent<Renderer>(); break;
+            case "spiral": foreach (Renderer r in limitCurve.ChainRenderers) yield return r; break;
+            case "tail": yield return limitCurve.TailCurve; break;
+        }
+    }
 
     /// <summary>Heights γ of the zeros passed so far.</summary>
     public IReadOnlyList<double> PassedZeros => zetaCurvesByZero.Keys.ToList();
@@ -226,6 +241,74 @@ public class Main : MonoBehaviour
     public void SetZetaCurveVisible(bool visible)
     {
         zetaCurve.enabled = visible;
+    }
+
+    Coroutine trailStyleRoutine;
+
+    /// <summary>Animate the trail's width and glow (thin and faint → full and bright, or back).</summary>
+    public void SetTrailStyle(float width, float intensity, float seconds)
+    {
+        if (trailStyleRoutine != null) StopCoroutine(trailStyleRoutine);
+        trailStyleRoutine = StartCoroutine(TrailStyleRoutine(width, intensity, seconds));
+    }
+
+    IEnumerator TrailStyleRoutine(float width, float intensity, float seconds)
+    {
+        float w0 = zetaCurve.startWidth;
+        MaterialPropertyBlock block = new();
+        zetaCurve.GetPropertyBlock(block);
+        float i0 = block.GetFloat("_Intensity");
+        if (i0 <= 0f) i0 = Factory.NoGlow;
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, seconds <= 0f ? 1f : t / seconds);
+            float w = Mathf.Lerp(w0, width, k);
+            zetaCurve.startWidth = w;
+            zetaCurve.endWidth = w;
+            Factory.SetIntensity(zetaCurve, Mathf.Lerp(i0, intensity, k));
+            yield return null;
+        }
+
+        zetaCurve.startWidth = width;
+        zetaCurve.endWidth = width;
+        Factory.SetIntensity(zetaCurve, intensity);
+    }
+
+    Coroutine cosineBlendRoutine;
+    Coroutine cosineBlendMarker;
+
+    /// <summary>Morph the chorus from its current shape to the sum over the first <paramref name="limit"/> collisions.</summary>
+    public void SetCosineZeroLimitAnimated(int limit, float seconds)
+    {
+        if (cosineBlendMarker != null) StopCoroutine(cosineBlendMarker);
+        cosineBlendMarker = StartCoroutine(CosineBlendRoutine(limit, seconds));
+        cosineBlendRoutine = cosineBlendMarker;
+    }
+
+    IEnumerator CosineBlendRoutine(int limit, float seconds)
+    {
+        Vector3[] from = new Vector3[NumPrimeCurvePoints];
+        cosineWaveCurve.GetPositions(from);
+        CosineZeroLimit = limit;
+        cosineBlendRoutine = null;
+        Vector3[] to = ComputeCosineWave(currentIter);
+        cosineBlendRoutine = cosineBlendMarker;
+        Vector3[] blend = new Vector3[NumPrimeCurvePoints];
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / seconds);
+            for (int i = 0; i < blend.Length; i++) blend[i] = Vector3.Lerp(from[i], to[i], k);
+            cosineWaveCurve.SetPositions(blend);
+            yield return null;
+        }
+
+        cosineWaveCurve.SetPositions(to);
+        cosineBlendRoutine = null;
+        cosineBlendMarker = null;
     }
 
     public void SetEquationsVisible(bool visible)
@@ -550,7 +633,12 @@ public class Main : MonoBehaviour
     void DrawCosineWave(double iter)
     {
         if (!cosineWaveCurve.enabled) return;
+        if (cosineBlendRoutine != null) return; // a blend is in progress; it will set the final shape
+        cosineWaveCurve.SetPositions(ComputeCosineWave(iter));
+    }
 
+    Vector3[] ComputeCosineWave(double iter)
+    {
         List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
         if (CosineZeroLimit >= 0 && zetaZeros.Count > CosineZeroLimit) zetaZeros = zetaZeros.Take(CosineZeroLimit).ToList();
         Vector3[] cosineWavePoints = new Vector3[NumPrimeCurvePoints];
@@ -572,6 +660,6 @@ public class Main : MonoBehaviour
             x += (float)curveResolution;
         }
 
-        cosineWaveCurve.SetPositions(cosineWavePoints);
+        return cosineWavePoints;
     }
 }

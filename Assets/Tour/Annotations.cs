@@ -42,6 +42,19 @@ public class Annotations : MonoBehaviour
     LineRenderer waveDemo, incomingWave;
     TextBox incomingLabel;
     Coroutine waveMorph;
+    // demo wave state
+    float demoGamma = 2.4f;
+    float demoBend = 0f; // 0 = cos(γ·k·x), 1 = cos(γ·log x)
+    float demoAmplitude = 11f;
+    TextBox formulaLabel;
+    GameObject dialRoot;
+    LineRenderer dialNeedle;
+    const float PlainK = 0.35f;
+    // zeno build
+    readonly List<GameObject> zenoArrows = new();
+    readonly List<GameObject> zenoLabels = new();
+    GameObject zenoWall;
+    readonly Dictionary<Renderer, Coroutine> pulses = new();
     GameObject tipSphere, centerSphere;
     TextBox dialLabel;
     LineRenderer centerRing;
@@ -225,29 +238,36 @@ public class Annotations : MonoBehaviour
             Vector3 from = new(xPos, 0, zenoZ);
             Vector3 to = new(xPos + length, 0, zenoZ);
             Color c = LimitCurve.ChainColor(i / 7f);
-            LineRenderer seg = Factory.NewLine("zeno " + i, .05f, c, Factory.SoftGlowIntensity);
-            seg.transform.SetParent(zenoRoot.transform, false);
+            GameObject arrow = new GameObject("zeno arrow " + i);
+            arrow.transform.SetParent(zenoRoot.transform, false);
+            LineRenderer seg = Factory.NewLine("zeno " + i, Mathf.Lerp(.06f, .02f, i / 7f), c, Factory.SoftGlowIntensity);
+            seg.transform.SetParent(arrow.transform, false);
             seg.positionCount = 2;
+            seg.numCapVertices = 4;
             seg.SetPositions(new[] { from, to });
-            float size = Mathf.Clamp(length * .3f, .03f, .16f);
-            LineRenderer head = Factory.NewLine("zeno head", .04f, c, Factory.SoftGlowIntensity);
-            head.transform.SetParent(zenoRoot.transform, false);
+            float size = Mathf.Clamp(length * .28f, .03f, .13f);
+            LineRenderer head = Factory.NewLine("zeno head", Mathf.Clamp(length * .07f, .012f, .045f), c, Factory.SoftGlowIntensity);
+            head.transform.SetParent(arrow.transform, false);
             head.positionCount = 3;
             head.SetPositions(new[] { to - Vector3.right * size + Vector3.forward * size * .55f, to, to - Vector3.right * size - Vector3.forward * size * .55f });
+            zenoArrows.Add(arrow);
             if (i < 4)
             {
                 TextBox label = Label(zenoRoot.transform, fractions[i], (from + to) * .5f + Vector3.forward * .4f, 1.6f, new Color(1f, 1f, 1f, .85f), TextAlignmentOptions.Center);
                 label.gameObject.AddComponent<Billboard>();
+                zenoLabels.Add(label.gameObject);
             }
 
             xPos += length;
         }
 
-        LineRenderer wall = Factory.NewLine("zeno wall", .04f, Factory.Palette.Dagger, Factory.GlowIntensity);
-        wall.transform.SetParent(zenoRoot.transform, false);
+        zenoWall = new GameObject("zeno wall");
+        zenoWall.transform.SetParent(zenoRoot.transform, false);
+        LineRenderer wall = Factory.NewLine("zeno wall line", .04f, Factory.Palette.Dagger, Factory.GlowIntensity);
+        wall.transform.SetParent(zenoWall.transform, false);
         wall.positionCount = 2;
         wall.SetPositions(new[] { new Vector3(2f, 0, zenoZ - .45f), new Vector3(2f, 0, zenoZ + .45f) });
-        TextBox wallLabel = Label(zenoRoot.transform, "stops at 2", new Vector3(2f, 0, zenoZ + .95f), 1.6f, Factory.Palette.Dagger, TextAlignmentOptions.Center);
+        TextBox wallLabel = Label(zenoWall.transform, "stops at 2", new Vector3(2f, 0, zenoZ + .95f), 1.6f, Factory.Palette.Dagger, TextAlignmentOptions.Center);
         wallLabel.gameObject.AddComponent<Billboard>();
         TextBox zenoTitle = Label(zenoRoot.transform, "Zeno: halve every step", new Vector3(-0.3f, 0, zenoZ), 1.5f, new Color(.8f, .8f, .9f), TextAlignmentOptions.Right);
         zenoTitle.gameObject.AddComponent<Billboard>();
@@ -261,7 +281,44 @@ public class Annotations : MonoBehaviour
         waveDemo = Factory.NewLine("demo wave", .05f, Factory.Palette.Cosine, Factory.SoftGlowIntensity);
         waveDemo.transform.SetParent(waveDemoRoot.transform, false);
         waveDemo.positionCount = Main.NumPrimeCurvePoints;
+        formulaLabel = Label(waveDemoRoot.transform, "", new Vector3(8.5f, 12.8f, 0), 6.5f, Color.white, TextAlignmentOptions.Center);
+        formulaLabel.gameObject.AddComponent<Billboard>();
         waveDemoRoot.SetActive(false);
+
+        // the dial that sets γ
+        dialRoot = new GameObject("WaveDial");
+        dialRoot.transform.SetParent(transform, false);
+        Vector3 dialCenter = new(13.5f, -9f, 0);
+        const float dialRadius = 2.2f;
+        LineRenderer ring = Factory.NewLine("dial ring", .05f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
+        ring.transform.SetParent(dialRoot.transform, false);
+        ring.loop = true;
+        ring.positionCount = 48;
+        Vector3[] ringPts = new Vector3[48];
+        for (int i = 0; i < 48; i++)
+        {
+            float a = i / 48f * Mathf.PI * 2f;
+            ringPts[i] = dialCenter + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0) * dialRadius;
+        }
+
+        ring.SetPositions(ringPts);
+        for (int i = 0; i <= 10; i++)
+        {
+            float a = DialAngle(i / 10f * 15f);
+            Vector3 dir = new(Mathf.Cos(a), Mathf.Sin(a), 0);
+            LineRenderer tick = Factory.NewLine("dial tick", .03f, Factory.Palette.ImAxis);
+            tick.transform.SetParent(dialRoot.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { dialCenter + dir * dialRadius * .82f, dialCenter + dir * dialRadius * .97f });
+        }
+
+        dialNeedle = Factory.NewLine("dial needle", .07f, Factory.Palette.Zero, Factory.GlowIntensity);
+        dialNeedle.transform.SetParent(dialRoot.transform, false);
+        dialNeedle.positionCount = 2;
+        dialNeedle.numCapVertices = 4;
+        TextBox dialTitle = Label(dialRoot.transform, "γ", dialCenter + Vector3.down * (dialRadius + 1.1f), 3.2f, Factory.Palette.ImAxis, TextAlignmentOptions.Center);
+        dialTitle.gameObject.AddComponent<Billboard>();
+        dialRoot.SetActive(false);
 
         incomingRoot = new GameObject("IncomingWave");
         incomingRoot.transform.SetParent(transform, false);
@@ -476,12 +533,11 @@ public class Annotations : MonoBehaviour
     public void ShowTip(bool on) => tipRoot.SetActive(on);
     public void ShowZeno(bool on) => zenoRoot.SetActive(on);
 
-    const float DemoWaveOmega = 2.4f; // ordinary cosine period ≈ 2.6 units
+    static float DialAngle(float gamma) => Mathf.Deg2Rad * (225f - Mathf.Clamp(gamma, 0f, 15f) / 15f * 270f);
 
-    /// <summary>u = 0: plain cos(ωx). u = 1: the first collision's wave cos(γ₁·log x).</summary>
-    void DrawDemoWave(float u, float amplitude)
+    /// <summary>Demo wave: cos(γ·k·x) bent by <see cref="demoBend"/> toward cos(γ·log x); formula label and dial follow γ.</summary>
+    void DrawDemoWave()
     {
-        double gamma = main.zetaZeroValues[0];
         Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
         for (int i = 0; i < pts.Length; i++)
         {
@@ -492,46 +548,172 @@ public class Annotations : MonoBehaviour
                 continue;
             }
 
-            float plain = DemoWaveOmega * (x - 1.5f);
-            float bent = (float)(gamma * System.Math.Log(x));
-            float arg = Mathf.Lerp(plain, bent, u);
-            pts[i] = new Vector3(x, -amplitude * Mathf.Cos(arg), 0);
+            float plain = demoGamma * PlainK * (x - 1.5f);
+            float bent = demoGamma * Mathf.Log(x);
+            float arg = Mathf.Lerp(plain, bent, demoBend);
+            pts[i] = new Vector3(x, -demoAmplitude * Mathf.Cos(arg), 0);
         }
 
         waveDemo.SetPositions(pts);
+        string g = $"<color=#FFD400>{demoGamma:0.00}</color>";
+        string inner = demoBend < 0.5f
+            ? $"{g} · x"
+            : $"{g} · <color=#80E8FF>log x</color>";
+        if (demoBend > 0.02f && demoBend < 0.98f) inner = $"{g} · <color=#80E8FF>log</color> x";
+        formulaLabel.Text = $"cos( {inner} )";
+
+        if (dialRoot.activeSelf)
+        {
+            Vector3 center = new(13.5f, -9f, 0);
+            float a = DialAngle(demoGamma);
+            dialNeedle.SetPositions(new[] { center, center + new Vector3(Mathf.Cos(a), Mathf.Sin(a), -0.02f) * 1.9f });
+        }
     }
 
-    public void ShowDemoWavePlain(float amplitude)
+    public void ShowDial(bool on)
+    {
+        dialRoot.SetActive(on);
+        if (on) DrawDemoWave();
+    }
+
+    public void ShowDemoWavePlain(float amplitude, float gamma)
     {
         if (waveMorph != null) StopCoroutine(waveMorph);
         waveDemoRoot.SetActive(true);
-        DrawDemoWave(0f, amplitude);
+        demoAmplitude = amplitude;
+        demoGamma = gamma;
+        demoBend = 0f;
+        DrawDemoWave();
     }
 
+    /// <summary>Turn the dial: sweep γ (keeps whatever bend is current).</summary>
+    public void SweepDemoGamma(float to, float seconds)
+    {
+        if (waveMorph != null) StopCoroutine(waveMorph);
+        waveDemoRoot.SetActive(true);
+        waveMorph = StartCoroutine(SweepRoutine(demoGamma, to, demoBend, demoBend, seconds));
+    }
+
+    /// <summary>Bend the wave with the logarithm at the current γ.</summary>
     public void MorphDemoWave(float seconds, float amplitude)
     {
         if (waveMorph != null) StopCoroutine(waveMorph);
         waveDemoRoot.SetActive(true);
-        waveMorph = StartCoroutine(MorphRoutine(seconds, amplitude));
+        demoAmplitude = amplitude;
+        waveMorph = StartCoroutine(SweepRoutine(demoGamma, demoGamma, demoBend, 1f, seconds));
     }
 
-    IEnumerator MorphRoutine(float seconds, float amplitude)
+    IEnumerator SweepRoutine(float g0, float g1, float b0, float b1, float seconds)
     {
         float t = 0f;
         while (t < seconds)
         {
             t += Time.deltaTime;
-            DrawDemoWave(Mathf.SmoothStep(0f, 1f, t / seconds), amplitude);
+            float k = Mathf.SmoothStep(0f, 1f, t / seconds);
+            demoGamma = Mathf.Lerp(g0, g1, k);
+            demoBend = Mathf.Lerp(b0, b1, k);
+            DrawDemoWave();
             yield return null;
         }
 
-        DrawDemoWave(1f, amplitude);
+        demoGamma = g1;
+        demoBend = b1;
+        DrawDemoWave();
     }
 
     public void HideDemoWave()
     {
         if (waveMorph != null) StopCoroutine(waveMorph);
         waveDemoRoot.SetActive(false);
+    }
+
+    // ---- Zeno build-up: arrows grow one after another ------------------------------------------
+    public void ResetZeno()
+    {
+        foreach (GameObject a in zenoArrows) a.SetActive(false);
+        foreach (GameObject l in zenoLabels) l.SetActive(false);
+        zenoWall.SetActive(false);
+    }
+
+    public void BuildZeno(float seconds)
+    {
+        StartCoroutine(BuildZenoRoutine(seconds));
+    }
+
+    IEnumerator BuildZenoRoutine(float seconds)
+    {
+        ResetZeno();
+        float per = seconds / (zenoArrows.Count + 1);
+        for (int i = 0; i < zenoArrows.Count; i++)
+        {
+            GameObject arrow = zenoArrows[i];
+            LineRenderer seg = arrow.transform.GetChild(0).GetComponent<LineRenderer>();
+            LineRenderer head = arrow.transform.GetChild(1).GetComponent<LineRenderer>();
+            Vector3[] full = new Vector3[2];
+            seg.GetPositions(full);
+            arrow.SetActive(true);
+            head.enabled = false;
+            float t = 0f;
+            while (t < per * .8f)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.SmoothStep(0f, 1f, t / (per * .8f));
+                seg.SetPositions(new[] { full[0], Vector3.Lerp(full[0], full[1], k) });
+                yield return null;
+            }
+
+            seg.SetPositions(full);
+            head.enabled = true;
+            if (i < zenoLabels.Count) zenoLabels[i].SetActive(true);
+            yield return new WaitForSeconds(per * .2f);
+        }
+
+        zenoWall.SetActive(true);
+        StartCoroutine(Pulse(zenoWall.transform, 1f, 1.6f, 1.2f));
+    }
+
+    // ---- attention pulses: breathe the glow of an element for a while -----------------------------
+    public void PulseRenderers(IEnumerable<Renderer> renderers, float seconds, float strength = 0.7f)
+    {
+        foreach (Renderer r in renderers)
+        {
+            if (r == null) continue;
+            if (pulses.TryGetValue(r, out Coroutine running) && running != null) StopCoroutine(running);
+            pulses[r] = StartCoroutine(PulseGlow(r, seconds, strength));
+        }
+    }
+
+    IEnumerator PulseGlow(Renderer r, float seconds, float strength)
+    {
+        MaterialPropertyBlock block = new();
+        r.GetPropertyBlock(block);
+        float baseIntensity = block.GetFloat("_Intensity");
+        if (baseIntensity <= 0f) baseIntensity = Factory.NoGlow;
+        float t = 0f;
+        while (t < seconds && r != null)
+        {
+            t += Time.deltaTime;
+            float env = Mathf.Min(1f, Mathf.Min(t, seconds - t) / 0.6f); // ease in/out
+            float k = 0.5f + 0.5f * Mathf.Sin(t * 4.2f);
+            Factory.SetIntensity(r, baseIntensity * (1f + strength * k * env));
+            yield return null;
+        }
+
+        if (r != null) Factory.SetIntensity(r, baseIntensity);
+        pulses.Remove(r);
+    }
+
+    public IEnumerable<Renderer> RenderersOf(string element)
+    {
+        GameObject root = element switch
+        {
+            "strip" => stripRoot, "band78" => band78Root, "band18" => band18Root, "gap" => gapRoot,
+            "numbers" => numberLineRoot, "zeno" => zenoRoot, "wave" => waveDemoRoot, "dial" => dialRoot,
+            "center" => centerRoot, "tip" => tipRoot, "imaxis" => imAxisRoot, "outaxes" => outputAxesRoot, "ghost" => ghostRoot,
+            _ => null
+        };
+        if (root == null) yield break;
+        foreach (Renderer r in root.GetComponentsInChildren<Renderer>()) if (r is LineRenderer or MeshRenderer) yield return r;
     }
 
     /// <summary>Draw collision number <paramref name="index"/>'s wave by itself, before it joins the chorus.</summary>
@@ -633,6 +815,7 @@ public class Annotations : MonoBehaviour
         ShowPoleLabel(false);
         ShowZeno(false);
         HideDemoWave();
+        ShowDial(false);
         HideIncomingWave();
         ShowStrip(false);
         ShowOutputAxes(false);
