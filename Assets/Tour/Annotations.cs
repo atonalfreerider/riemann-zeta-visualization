@@ -461,7 +461,7 @@ public class Annotations : MonoBehaviour
             LineRenderer arc = Factory.NewLine("arc", .025f, new Color(1f, .5f, .9f), Factory.GlowIntensity);
             arc.transform.SetParent(anglesRoot.transform, false);
             angleArcs.Add(arc);
-            TextBox l = Label(anglesRoot.transform, "", Vector3.zero, 1.0f, new Color(1f, .6f, .95f), TextAlignmentOptions.Center);
+            TextBox l = Label(anglesRoot.transform, "", Vector3.zero, 0.85f, new Color(1f, .6f, .95f), TextAlignmentOptions.Center);
             l.gameObject.AddComponent<Billboard>();
             angleLabels.Add(l);
         }
@@ -764,6 +764,23 @@ public class Annotations : MonoBehaviour
     public void ShowTip(bool on) => tipRoot.SetActive(on);
     public void ShowZeno(bool on) => zenoRoot.SetActive(on);
 
+    TextBox landingLabel;
+
+    /// <summary>Callout at the centre when the tip lands: the dial value that closed the chain.</summary>
+    public void ShowLanding(bool on, string text = "")
+    {
+        if (landingLabel == null)
+        {
+            landingLabel = Label(transform, "", Vector3.zero, 1.4f, Factory.Palette.Zero, TextAlignmentOptions.Left);
+            landingLabel.gameObject.AddComponent<Billboard>();
+        }
+
+        landingLabel.gameObject.SetActive(on);
+        if (!on) return;
+        landingLabel.Text = text;
+        landingLabel.transform.position = new Vector3(.9f, (float)main.CurrentT * Graph.yScale + .05f, -1.6f);
+    }
+
     static bool IsPrime(int n)
     {
         if (n < 2) return false;
@@ -868,7 +885,7 @@ public class Annotations : MonoBehaviour
             angleArcs[i].SetPositions(arcBuffer);
             int n = i + 2; // the outgoing arrow is arrow n
             double turn = t * System.Math.Log((double)n / (n - 1)) * 180 / System.Math.PI;
-            if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"{turn:0}°";
+            if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"<color=#C8A0FF>t</color>·{System.Math.Log((double)n / (n - 1)):0.00} = {turn:0}°";
             float mid = a0 + delta * .5f;
             angleLabels[i].transform.position = j + new Vector3(Mathf.Cos(mid), 0, Mathf.Sin(mid)) * (r + .22f);
         }
@@ -1522,6 +1539,7 @@ public class Annotations : MonoBehaviour
         ShowNumberLine(false);
         ShowPoleLabel(false);
         ShowZeno(false);
+        ShowLanding(false);
         ShowPrimes(false);
         Sacks.Hide();
         ShowChainFeet(false);

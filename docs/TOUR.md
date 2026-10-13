@@ -105,6 +105,8 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `logseq:on` / `logseq:off` | bar panel of the bend sequence log(n/(n−1)) with live degrees |
 | `delay:S:<action>` | run an action S seconds into the line (e.g. `delay:3:sacks:sieve:22`) so the narration can catch up |
 | `sacks:sieve[:seconds]` | break the grid open into spiral positions, then draw the 2×, 3×, 5× axes through their products, striking each one |
+| `landing:on` / `landing:off` | callout at the centre explaining why the chain closed at this t |
+| `hypothesis:on` / `hypothesis:off` | the closing guess on the saddle: the √n spiral road plus the rings picked out by the logarithm rule at t = 14.13 and 21.02 |
 | `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers` `logseq` `floorgrid`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
@@ -135,7 +137,7 @@ Full video (real time, no narration yet; mux audio afterwards with `Tools/mux_re
 ZETA_OUT=/tmp/tour-render ZETA_MODE=record ~/Unity/Hub/Editor/6000.6.5f1/Editor/Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter StoryboardRenderTest -logFile /tmp/tour.log
 ```
 
-`ZETA_CHAPTER=<id>` starts from one chapter; `ZETA_NO_CAPTIONS=1` hides the caption layer (clean frames for thumbnails); `ZETA_FLIP=0/1` overrides the frame flip if a platform renders upside down.
+`ZETA_CHAPTER=<id>` starts from one chapter; `ZETA_END_CHAPTER=<id>` stops after a chapter; `ZETA_NO_CAPTIONS=1` hides the caption layer (clean frames for thumbnails); `ZETA_PROFILE=1` logs avg/max frame time per line (`ZETA_MODE=profile` runs in real time without capture); `ZETA_FLIP=0/1` overrides the frame flip if a platform renders upside down.
 
 ## What the scene shows
 
@@ -170,3 +172,15 @@ text), which trigger GC pauses. Those paths now reuse buffers; TextMesh Pro read
 when their text changes. Press **F** in Play mode: the hint line shows fps, the worst frame time in the last
 second, and GC collections per second. If the worst frame still spikes, open the Unity Profiler on that moment;
 the next suspects are TMP rebuilds of the caption line and the Billboard labels.
+
+Measured with `ZETA_MODE=profile` (real time, no capture): every line of the first four chapters averages
+0.3–0.7 ms of script+engine time per frame (max 5–14 ms), so the chain animation is not CPU-bound in a headless
+run. A frame-rate drop seen in the editor during the bend but not after the tail appears therefore points at
+something the editor adds in that state, most likely the dozens of TextMesh Pro labels (joint angles, log bars,
+readouts) being rebuilt while they change every frame, or the Scene view / Inspector repainting those objects.
+Press **F** for the in-game readout and use the Profiler with 'Deep Profile' off on that moment.
+
+## Chapter GIFs
+
+`python3 Tools/make_chapter_gifs.py Recordings/<run>` cuts one GIF per chapter from a recording using the
+chapter marks the recorder writes into `timeline.json` (`--seconds`, `--offset`, `--offsets hook=14,turn=58`).

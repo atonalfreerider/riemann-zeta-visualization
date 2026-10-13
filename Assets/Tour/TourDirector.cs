@@ -31,6 +31,8 @@ public class TourDirector : MonoBehaviour
     public float ChapterTitleSeconds = 3.2f;
 
     public bool Running { get; private set; }
+    /// <summary>Log wall-clock frame time per narration line (avg / max ms) to find slow lines.</summary>
+    public bool Profile;
     public Main Main { get; private set; }
     public Annotations Annotations { get; private set; }
     public CameraRig Rig { get; private set; }
@@ -117,6 +119,7 @@ public class TourDirector : MonoBehaviour
         Running = true;
         skipRequested = false;
         AudioTimeline.Clear();
+        Recorder.ChapterMarks.Clear();
         tourStartTime = Time.time;
         Captions.SetHint("");
 
@@ -289,6 +292,7 @@ public class TourDirector : MonoBehaviour
 
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
+            Recorder.ChapterMarks.Add((chapter.id, Recorder.FrameIndex));
 
             foreach (TourLine line in chapter.lines)
             {
@@ -370,6 +374,9 @@ public class TourDirector : MonoBehaviour
         }
 
         float start = Time.time;
+        float wallPrev = Time.realtimeSinceStartup, wallSum = 0f, wallMax = 0f;
+        int wallFrames = 0;
+        int gc0 = System.GC.CollectionCount(0);
         while (Time.time - start < duration + Mathf.Max(0f, line.pause))
         {
             if (skipRequested)
@@ -380,6 +387,17 @@ public class TourDirector : MonoBehaviour
 
             Captions.SetTime(Time.time - start);
             yield return null;
+            float now = Time.realtimeSinceStartup;
+            float dt = now - wallPrev;
+            wallPrev = now;
+            wallSum += dt;
+            wallMax = Mathf.Max(wallMax, dt);
+            wallFrames++;
+        }
+
+        if (Profile && wallFrames > 0)
+        {
+            Debug.Log($"[profile] {line.id,-12} avg {wallSum / wallFrames * 1000f,6:0.0} ms   max {wallMax * 1000f,5:0} ms   GC {System.GC.CollectionCount(0) - gc0,3}   frames {wallFrames}");
         }
     }
 
@@ -528,6 +546,11 @@ public class TourDirector : MonoBehaviour
                         else Annotations.Sacks.Hide();
                         break;
                     case "chainfeet": Annotations.ShowChainFeet(arg != "off"); break;
+                    case "landing":
+                        if (arg == "off") Annotations.ShowLanding(false);
+                        else Annotations.ShowLanding(true, $"<color=#C8A0FF>t = {Main.CurrentT:0.00}</color>\nevery joint turned t·log(n/(n−1))\nand the chain closed on the centre");
+                        break;
+                    case "hypothesis": Annotations.Sacks.ShowHypothesis(arg != "off"); break;
                     case "logseq": Annotations.ShowLogSequence(arg != "off"); break;
                     case "squares": Annotations.ShowSquaresLabel(arg != "off"); break;
                     case "primepowers": Annotations.ShowPrimePowers(arg != "off"); break;

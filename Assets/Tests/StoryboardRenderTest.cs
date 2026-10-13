@@ -34,6 +34,7 @@ public class StoryboardRenderTest
         TourDirector director = TourDirector.Instance;
         Assert.IsNotNull(director);
         director.Storyboard = mode == "storyboard";
+        if (mode == "profile") Time.captureFramerate = 0; // real time, no capture: frame times reflect script + engine cost
         director.StoryboardDirectory = outDir;
         director.RecordOnStart = mode == "record";
         director.RecordDirectory = outDir;
@@ -42,6 +43,7 @@ public class StoryboardRenderTest
         if (!string.IsNullOrEmpty(chapter)) director.StartChapter = chapter;
         string endChapter = Environment.GetEnvironmentVariable("ZETA_END_CHAPTER");
         if (!string.IsNullOrEmpty(endChapter)) director.EndChapter = endChapter;
+        director.Profile = Environment.GetEnvironmentVariable("ZETA_PROFILE") == "1";
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_FPS"), out int fps)) director.Recorder.Fps = fps;
 
         if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.GetComponent<Canvas>().enabled = false; // clean frames for thumbnails

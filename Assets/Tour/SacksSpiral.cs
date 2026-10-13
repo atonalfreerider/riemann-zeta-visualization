@@ -290,123 +290,184 @@ public class SacksSpiral : MonoBehaviour
         workDots.Clear();
     }
 
+    /// <summary>Fade a number's dot and label in or out.</summary>
+    IEnumerator FadeNumber(int n, float from, float to, float seconds)
+    {
+        Renderer r = dots[n - 1].GetComponent<Renderer>();
+        dots[n - 1].SetActive(true);
+        Color baseColor = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f);
+        Color labelColor = IsPrime(n) ? Factory.Palette.Zero : new Color(.5f, .5f, .58f);
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            float a = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / seconds));
+            Factory.SetColor(r, new Color(baseColor.r, baseColor.g, baseColor.b, a));
+            labels[n - 1].Color = new Color(labelColor.r, labelColor.g, labelColor.b, Mathf.Lerp(.35f, 1f, a));
+            yield return null;
+        }
+
+        Factory.SetColor(r, new Color(baseColor.r, baseColor.g, baseColor.b, to));
+        labels[n - 1].Color = new Color(labelColor.r, labelColor.g, labelColor.b, Mathf.Lerp(.35f, 1f, to));
+        if (to <= 0f) dots[n - 1].SetActive(false);
+    }
+
+    readonly HashSet<int> revealedPrimes = new();
+
+    /// <summary>Reveal every prime below n that is still hidden (the numbers the counting skipped).</summary>
+    IEnumerator RevealPrimesBelow(int n, float seconds)
+    {
+        for (int k = 2; k < n; k++)
+        {
+            if (!IsPrime(k) || revealedPrimes.Contains(k)) continue;
+            revealedPrimes.Add(k);
+            StartCoroutine(FadeNumber(k, 0f, 1f, seconds));
+            StartCoroutine(PulseScale(dots[k - 1].transform, .5f, 2.4f, seconds));
+            TextBox tag = TextBoxLabel($"{k} is prime", 1.3f, Factory.Palette.Zero);
+            tag.transform.SetParent(sieveRoot.transform, false);
+            tag.transform.position = Pos(k) + Vector3.back * .5f + Vector3.up * .95f;
+            sieveLabels.Add(tag);
+            yield return new WaitForSeconds(seconds * .4f);
+        }
+    }
+
     /// <summary>
-    /// One multiplication, drawn: p dots leave the number p along a horizontal axis, q dots leave q along a
-    /// vertical axis, the rectangle fills to p×q dots, then the dots count along the spiral road
-    /// (dot k travels to position k) and converge on p×q, which lights up.
+    /// One multiplication, drawn on the spiral itself:
+    ///   count p along the road (dots on 1..p), count q beside it,
+    ///   bend the q count off to the side, fill the rectangle to p×q dots,
+    ///   roll every dot along the road to p×q (skipping the numbers in between), light p×q.
     /// </summary>
     IEnumerator MultiplyRoutine(int p, int q, float seconds)
     {
         int n = p * q;
         bool square = p == q;
         Color cp = PrimeColor(p), cq = PrimeColor(q);
-        Vector3 stage = origin + new Vector3(-((p - 1) * .75f) * .5f, Extent30 + 2.2f, 0);
-        const float cell = .75f;
-        float tEmerge = seconds * .28f, tFill = seconds * .12f, tCount = seconds * .38f, tLand = seconds * .22f;
+        const float cell = .62f;
+        float tCount = seconds * .22f, tBend = seconds * .2f, tFill = seconds * .1f, tRoll = seconds * .33f, tLand = seconds * .15f;
 
-        // stage axes
+        Vector3 anchor = SpiralPos(1f, 0f) + Vector3.back * .3f;
+        Vector3 u = (SpiralPos(2f, 0f) - SpiralPos(1f, 0f)).normalized;
+        Vector3 v = new(-u.y, u.x, 0);          // perpendicular, in the spiral plane
+        Vector3 side = v * .5f;                   // the second count sits beside the first
+
         stageRoot.SetActive(true);
         LineRenderer ax = stageRoot.transform.GetChild(0).GetComponent<LineRenderer>();
         LineRenderer ay = stageRoot.transform.GetChild(1).GetComponent<LineRenderer>();
-        ax.startColor = cp; ax.endColor = cp;
-        ay.startColor = cq; ay.endColor = cq;
-        ax.SetPositions(new[] { stage + new Vector3(-.45f, -.45f, 0), stage + new Vector3((p - 1) * cell + .45f, -.45f, 0) });
-        ay.SetPositions(new[] { stage + new Vector3(-.45f, -.45f, 0), stage + new Vector3(-.45f, (q - 1) * cell + .45f, 0) });
-        stageLabel.Text = $"<color=#{ColorUtility.ToHtmlStringRGB(cp)}>{p}</color> × <color=#{ColorUtility.ToHtmlStringRGB(cq)}>{q}</color>";
-        stageLabel.transform.position = stage + new Vector3((p - 1) * cell * .5f, (q - 1) * cell + 1.5f, 0);
+        ax.enabled = false;
+        ay.enabled = false;
+        string hp = ColorUtility.ToHtmlStringRGB(cp), hq = ColorUtility.ToHtmlStringRGB(cq);
+        stageLabel.Text = $"count <color=#{hp}>{p}</color>, count <color=#{hq}>{q}</color>";
+        stageLabel.transform.position = origin + new Vector3(0, Extent30 + 2.0f, 0);
 
-        // phase A: p dots emerge from p along x, q dots from q along y
+        // phase A: two counts along the road
         List<GameObject> dots = new();
-        Vector3 fromP = Pos(p) + Vector3.back * .3f, fromQ = Pos(q) + Vector3.back * .3f;
-        Vector3[] targets = new Vector3[n];
-        for (int i = 0; i < p; i++) targets[i] = stage + new Vector3(i * cell, 0, 0);
-        for (int j = 1; j < q; j++) targets[p + j - 1] = stage + new Vector3(0, j * cell, 0);
-        int edgeCount = p + q - 1;
-        for (int k = 0; k < edgeCount; k++)
-        {
-            bool fromX = k < p;
-            GameObject d = MakeDot(fromX ? cp : cq, .3f);
-            d.transform.position = fromX ? fromP : fromQ;
-            dots.Add(d);
-        }
-
+        for (int k = 0; k < p; k++) { GameObject d = MakeDot(cp, .3f); d.transform.position = SpiralPos(k + 1f, 0f) + Vector3.back * .3f; d.transform.localScale = Vector3.zero; dots.Add(d); }
+        for (int k = 0; k < q; k++) { GameObject d = MakeDot(cq, .3f); d.transform.position = SpiralPos(k + 1f, 0f) + Vector3.back * .3f + side; d.transform.localScale = Vector3.zero; dots.Add(d); }
         float t = 0f;
-        while (t < tEmerge)
+        while (t < tCount)
         {
             t += Time.deltaTime;
-            for (int k = 0; k < edgeCount; k++)
+            for (int k = 0; k < dots.Count; k++)
             {
-                bool fromX = k < p;
-                float delay = (fromX ? k : k - p) * 0.12f;
-                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - delay) / (tEmerge * .7f)));
-                dots[k].transform.position = Vector3.Lerp(fromX ? fromP : fromQ, targets[k], u);
+                int idx = k < p ? k : k - p;
+                float delay = idx * (tCount * .5f / Mathf.Max(p, q)) + (k < p ? 0f : tCount * .1f);
+                float uu = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - delay) / (tCount * .35f)));
+                dots[k].transform.localScale = Vector3.one * (.3f * uu);
             }
 
             yield return null;
         }
 
-        // phase B: fill the rectangle
+        // phase B: straighten the p count along u, bend the q count off to the side along v
+        stageLabel.Text = $"<color=#{hp}>{p}</color> × <color=#{hq}>{q}</color>";
+        Vector3[] from = new Vector3[dots.Count];
+        Vector3[] to = new Vector3[dots.Count];
+        for (int k = 0; k < p; k++) { from[k] = dots[k].transform.position; to[k] = anchor + u * (k * cell); }
+        for (int k = 0; k < q; k++) { from[p + k] = dots[p + k].transform.position; to[p + k] = anchor + v * (k * cell); }
+        ax.enabled = true; ay.enabled = true;
+        ax.startColor = cp; ax.endColor = cp; ay.startColor = cq; ay.endColor = cq;
+        t = 0f;
+        while (t < tBend)
+        {
+            t += Time.deltaTime;
+            float k2 = Mathf.SmoothStep(0f, 1f, t / tBend);
+            for (int k = 0; k < dots.Count; k++)
+            {
+                if (k >= p)
+                {
+                    // the q count swings about the anchor from the road direction to the side direction
+                    float r = k - p == 0 ? 0f : (k - p) * cell;
+                    float a0 = Mathf.Atan2(u.y, u.x), a1 = Mathf.Atan2(v.y, v.x);
+                    float ang = Mathf.Lerp(a0, a1, k2);
+                    Vector3 swung = anchor + new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0) * r;
+                    dots[k].transform.position = Vector3.Lerp(from[k], swung, Mathf.Clamp01(k2 * 2.5f));
+                }
+                else dots[k].transform.position = Vector3.Lerp(from[k], to[k], k2);
+            }
+
+            ax.SetPositions(new[] { anchor - u * .3f, anchor + u * ((p - 1) * cell + .3f) });
+            Vector3 vEnd = anchor + v * ((q - 1) * cell + .3f);
+            ay.SetPositions(new[] { anchor - v * .3f, Vector3.Lerp(anchor + u * ((q - 1) * cell + .3f), vEnd, k2) });
+            yield return null;
+        }
+
+        // phase C: fill the rectangle with the missing dots
         for (int j = 1; j < q; j++)
         for (int i = 1; i < p; i++)
         {
-            GameObject d = MakeDot(new Color(1f, 1f, 1f), .26f);
-            d.transform.position = stage + new Vector3(i * cell, j * cell, 0);
+            GameObject d = MakeDot(Color.white, .26f);
+            d.transform.position = anchor + u * (i * cell) + v * (j * cell);
             d.transform.localScale = Vector3.zero;
             dots.Add(d);
         }
 
+        // the duplicated corner (dot 1 of both counts) merges: hide the q count's first dot
+        dots[p].SetActive(false);
         t = 0f;
         while (t < tFill)
         {
             t += Time.deltaTime;
-            float u = Mathf.SmoothStep(0f, 1f, t / tFill);
-            for (int k = edgeCount; k < dots.Count; k++) dots[k].transform.localScale = Vector3.one * (.26f * u);
+            float uu = Mathf.SmoothStep(0f, 1f, t / tFill);
+            for (int k = p + q; k < dots.Count; k++) dots[k].transform.localScale = Vector3.one * (.26f * uu);
             yield return null;
         }
 
-        stageLabel.Text = $"<color=#{ColorUtility.ToHtmlStringRGB(cp)}>{p}</color> × <color=#{ColorUtility.ToHtmlStringRGB(cq)}>{q}</color> = {n} dots";
+        stageLabel.Text = $"<color=#{hp}>{p}</color> × <color=#{hq}>{q}</color> = {n} dots";
 
-        // phase C: count along the spiral: dot k travels the road from the centre to position k
-        Vector3[] start = new Vector3[n];
-        for (int k = 0; k < n; k++) start[k] = dots[k].transform.position;
+        // phase D: every dot rolls along the road to n, passing the numbers in between
+        List<GameObject> rolling = new(dots); rolling.RemoveAt(p);
+        Vector3[] roadStart = new Vector3[rolling.Count];
+        for (int k = 0; k < rolling.Count; k++) roadStart[k] = rolling[k].transform.position;
+        ax.enabled = false; ay.enabled = false;
         t = 0f;
-        while (t < tCount)
+        while (t < tRoll)
         {
             t += Time.deltaTime;
-            for (int k = 0; k < n; k++)
+            for (int k = 0; k < rolling.Count; k++)
             {
-                float delay = k * (tCount * .5f / n);
-                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - delay) / (tCount * .5f)));
-                // fly to the start of the road, then roll along it to k+1
-                float road = Mathf.Lerp(0.6f, k + 1f, u);
+                float delay = k * (tRoll * .4f / rolling.Count);
+                float uu = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - delay) / (tRoll * .6f)));
+                float road = Mathf.Lerp(1f, n, uu);
                 Vector3 onRoad = SpiralPos(road, 0f) + Vector3.back * .3f;
-                dots[k].transform.position = Vector3.Lerp(start[k], onRoad, Mathf.Clamp01(u * 3f));
+                rolling[k].transform.position = Vector3.Lerp(roadStart[k], onRoad, Mathf.Clamp01(uu * 4f));
             }
 
             yield return null;
         }
 
-        stageLabel.Text = $"<color=#{ColorUtility.ToHtmlStringRGB(cp)}>{p}</color> × <color=#{ColorUtility.ToHtmlStringRGB(cq)}>{q}</color> = {n}";
-
-        // phase D: every dot rolls on to n and they merge there
+        // phase E: merge on n and light it
+        stageLabel.Text = $"<color=#{hp}>{p}</color> × <color=#{hq}>{q}</color> = {n}";
         t = 0f;
         while (t < tLand)
         {
             t += Time.deltaTime;
-            float u = Mathf.SmoothStep(0f, 1f, t / tLand);
-            for (int k = 0; k < n; k++)
-            {
-                float road = Mathf.Lerp(k + 1f, n, u);
-                dots[k].transform.position = SpiralPos(road, 0f) + Vector3.back * .3f;
-            }
-
+            float uu = Mathf.SmoothStep(0f, 1f, t / tLand);
+            for (int k = 0; k < rolling.Count; k++) rolling[k].transform.localScale = Vector3.one * (.3f * (1f - uu));
             yield return null;
         }
 
-        // light the number
         struck.Add(n);
         labels[n - 1].Color = square ? new Color(1f, .55f, .2f) : new Color(.55f, .55f, .62f);
-        dots[0].SetActive(false);
         this.dots[n - 1].SetActive(true);
         this.dots[n - 1].GetComponent<Renderer>().enabled = true;
         Factory.SetColor(this.dots[n - 1].GetComponent<Renderer>(), square ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f));
@@ -418,6 +479,9 @@ public class SacksSpiral : MonoBehaviour
         sieveLabels.Add(hit);
         ClearWorkDots();
         stageRoot.SetActive(false);
+
+        // the numbers the dots skipped over: the primes below n show up now
+        yield return RevealPrimesBelow(n, Mathf.Max(.6f, seconds * .12f));
     }
 
     float Extent30 => R * Mathf.Sqrt(GridCount);
@@ -475,14 +539,22 @@ public class SacksSpiral : MonoBehaviour
         sieveAxes.Clear();
         sieveLabels.Clear();
 
-        (int p, int q)[] shown = { (2, 2), (2, 3), (2, 5), (2, 7), (3, 3), (3, 5), (3, 7), (5, 5) };
-        float per = (seconds - flyTime) / (shown.Length + 1f);
+        // all the primes glow for a moment, then fade away except the 2
+        revealedPrimes.Clear();
+        revealedPrimes.Add(2);
+        yield return new WaitForSeconds(0.8f);
+        for (int k = 3; k <= GridCount; k++) if (IsPrime(k)) StartCoroutine(FadeNumber(k, 1f, 0f, 1.2f));
+        StartCoroutine(PulseScale(dots[1].transform, .5f, 2.4f, 1.2f));
+        yield return new WaitForSeconds(1.4f);
+
+        (int p, int q)[] shown = { (2, 2), (2, 3), (2, 5), (3, 3), (2, 7), (3, 5), (5, 5), (3, 7) };
+        float per = (seconds - flyTime - 2.2f) / (shown.Length + 1f);
         foreach ((int p, int q) in shown)
         {
             yield return MultiplyRoutine(p, q, per);
         }
 
-        // the rest of the composites ≤ 30 are struck quickly, in order
+        // the rest of the composites ≤ 30 are struck quickly, in order, and the last primes appear
         for (int n = 4; n <= GridCount; n++)
         {
             if (IsPrime(n) || struck.Contains(n)) continue;
@@ -490,10 +562,12 @@ public class SacksSpiral : MonoBehaviour
             labels[n - 1].Color = IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.55f, .55f, .62f);
             dots[n - 1].SetActive(true);
             dots[n - 1].GetComponent<Renderer>().enabled = true;
-            Factory.SetColor(dots[n - 1].GetComponent<Renderer>(), new Color(.6f, .6f, .7f));
+            Factory.SetColor(dots[n - 1].GetComponent<Renderer>(), IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f));
             StartCoroutine(PulseScale(dots[n - 1].transform, .26f, 2.2f, .5f));
             yield return new WaitForSeconds(per / 12f);
         }
+
+        yield return RevealPrimesBelow(GridCount + 1, .5f);
     }
 
     IEnumerator FadeSieve(float seconds)
@@ -728,6 +802,74 @@ public class SacksSpiral : MonoBehaviour
     }
 
     public void Hide() => gameObject.SetActive(false);
+
+    GameObject hypothesisRoot;
+
+    /// <summary>
+    /// A visual hypothesis for the ending: the two chain rules drawn on the saddle.
+    /// The square-root rule IS the spiral (radius √n ↔ arrow length 1/√n). For a dial value t, the numbers whose
+    /// arrows point the same way are n = e^(2πk/t); their spiral positions trace a curve. Two curves are drawn,
+    /// for the first two zeros (t = 14.13 and 21.02). Whether these curves mean anything is an open question.
+    /// </summary>
+    public void ShowHypothesis(bool on)
+    {
+        if (!on) { if (hypothesisRoot != null) hypothesisRoot.SetActive(false); return; }
+        if (hypothesisRoot == null)
+        {
+            hypothesisRoot = new GameObject("Hypothesis");
+            hypothesisRoot.transform.SetParent(transform, false);
+            // the square-root rule: the spiral road itself, from 1 outward
+            // only the inner turns, thin and dim: a guide for the eye, not a wall of yellow
+            LineRenderer road = Factory.NewLine("sqrt road", .04f, new Color(1f, .85f, .3f, .55f), Factory.NoGlow);
+            road.transform.SetParent(hypothesisRoot.transform, false);
+            const int roadPts = 900, roadMax = 400;
+            road.positionCount = roadPts;
+            Vector3[] pts = new Vector3[roadPts];
+            for (int i = 0; i < roadPts; i++) pts[i] = SpiralPos(1f + (roadMax - 1f) * i / (roadPts - 1f), 1f) + Vector3.back * .2f;
+            road.SetPositions(pts);
+            TextBox roadLabel = TextBoxLabel("the square-root rule: radius √n  (the chain's arrow 1/√n, inverted)", 2.4f, new Color(1f, .85f, .3f));
+            roadLabel.transform.SetParent(hypothesisRoot.transform, false);
+            roadLabel.transform.position = origin + new Vector3(0, -Extent - 4.5f, 0);
+
+            // The logarithm rule: arrow n turns by t·log n. Between numbers n and m the chain makes one full
+            // turn when log(m/n) = 2π/t, i.e. when the spiral radius grows by e^(π/t). So each collision's t
+            // picks out rings whose radii grow by a constant ratio; where a ring meets the spiral is one number.
+            float[] ts = { 14.134725f, 21.022040f };
+            Color[] cs = { new(.55f, .95f, 1f), new(1f, .45f, .95f) };
+            for (int z = 0; z < ts.Length; z++)
+            {
+                float tz = ts[z];
+                float ratio = Mathf.Exp(Mathf.PI / tz);
+                for (float r = 1f; r <= Mathf.Sqrt(Count); r *= ratio)
+                {
+                    LineRenderer ring = Factory.NewLine("ring " + tz, z == 0 ? .07f : .05f, cs[z], Factory.SoftGlowIntensity);
+                    ring.transform.SetParent(hypothesisRoot.transform, false);
+                    ring.loop = true;
+                    const int segs = 72;
+                    ring.positionCount = segs;
+                    Vector3[] rp = new Vector3[segs];
+                    for (int i = 0; i < segs; i++)
+                    {
+                        float a = i / (float)segs * Mathf.PI * 2f;
+                        float x = r * Mathf.Cos(a), y = r * Mathf.Sin(a);
+                        rp[i] = origin + new Vector3(x, y, SaddleK * (x * x - y * y)) + Vector3.back * (.2f + z * .05f);
+                    }
+
+                    ring.SetPositions(rp);
+                    float n = r * r;
+                    GameObject dot = Factory.NewSphere("ring dot", .4f, cs[z], Factory.GlowIntensity);
+                    dot.transform.SetParent(hypothesisRoot.transform, false);
+                    dot.transform.position = SpiralPos(n, 1f) + Vector3.back * .3f;
+                }
+
+                TextBox l = TextBoxLabel($"the logarithm rule at t = {tz:0.00}:  one full turn of the chain per ring, radii × e^(π/t) = {ratio:0.000}", 2.2f, cs[z]);
+                l.transform.SetParent(hypothesisRoot.transform, false);
+                l.transform.position = origin + new Vector3(0, -Extent - 7.5f - z * 3f, 0);
+            }
+        }
+
+        hypothesisRoot.SetActive(true);
+    }
 
     /// <summary>Show the complete spiral immediately (used when a chapter starts without the hook having built it).</summary>
     public void ShowFull()

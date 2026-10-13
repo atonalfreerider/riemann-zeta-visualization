@@ -7,16 +7,22 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *Building blocks with no pattern*
 
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
-  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:52`</sub>
+  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:64`</sub>
 
-**hook_02** — Break the grid open and let every number find its place on the spiral. Now multiply. Two dots leave the two along one axis, two more along the other: a square of four dots. Count them along the spiral road, and they land on four, a perfect square.
+**hook_02** — Break the grid open and let every number find its place on the spiral. The primes glow, then fade away, all but the two. Count two along the road, and count two again beside it.
   <sub>camera `sieve`</sub>
 
-**hook_02b** — Two dots from the two, three dots from the three: six dots in a rectangle, counted along the road to six. Then two by five makes ten dots, two by seven makes fourteen.
+**hook_02b** — Bend the second count off to the side. Two by two: the corner is missing, so fill it in: four dots. Now roll them along the road, past the gap, and they land on four. The number they skipped, three, is a prime.
   <sub>camera `sieve`</sub>
 
-**hook_03** — Three by three: nine dots, and the road ends on the next perfect square. Three by five, three by seven, then five by five. Every composite is a rectangle of dots; every square is a square of dots, in orange.
+**hook_02c** — Count two, count three beside it, bend the three to the side, fill in the rectangle: six dots. Roll them to six, and the number they skipped, five, is a prime. Then two by five: ten. Three by three: nine, a perfect square.
+  <sub>camera `sieve`</sub>
+
+**hook_03** — Two by seven, three by five, five by five, three by seven. Every composite is a rectangle of dots, every square is a square of dots, and whatever the counting skips is a prime.
   <sub>camera `sieve` · actions `pulse:primes`</sub>
+
+**hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
+  <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
 **hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
@@ -60,7 +66,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 4. Turn the Dial
 *The tip keeps finding the centre*
 
-**turn_01** — Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number.
+**turn_01** — Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading t times the log of its number. Watch the purple t in every angle climb with the dial.
   <sub>camera `spiral_angles` · actions `hide:polelabel angles:on speed:0.3 play pulse:angles`</sub>
 
 **turn_01b** — Here is that sequence of bends. Log of two over one, log of three over two, log of four over three. Each bend is smaller than the last, and all of them grow together as the dial turns.
@@ -76,13 +82,13 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `spiral_curl` · actions `show:tail flash:tail pulse:tail` · footnote: orange: Euler–Maclaurin tail N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms</sub>
 
 **turn_04** — Now the tip is exact. Keep turning. The tip wanders, then dives straight into the centre.
-  <sub>camera `tip_center` · actions `tailghost:off card:off show:tip speed:1.3`</sub>
+  <sub>camera `tip_center` · actions `tailghost:off card:off show:tip angles:on speed:1.3`</sub>
 
-**turn_05** — At a dial reading of fourteen point one three it hits dead centre. We drop a marker on the pole at that height and call it a collision.
-  <sub>camera `tip_center` · actions `pause jump:14.14 flash:zero pulse:zeros`</sub>
+**turn_05** — At a dial reading of fourteen point one three it hits dead centre. Nothing about the chain changed except t: at exactly this t, every joint's turn, t times its log, adds up so the whole chain closes on the centre. We drop a marker and call it a collision.
+  <sub>camera `tip_center` · actions `pause jump:14.14 flash:zero landing:on pulse:zeros`</sub>
 
-**turn_06** — Twenty one. Twenty five. Thirty point four. The collisions never stop. In 1914 Hardy proved there are infinitely many on this pole; ten thousand are loaded here.
-  <sub>camera `markers_axis` · actions `terms:auto trail:thin card:hardy speed:3 play`</sub>
+**turn_06** — Turn on and the chain opens again, then closes at the next natural landing, twenty one point zero two. Then twenty five. Thirty point four. The collisions never stop. In 1914 Hardy proved there are infinitely many on this pole; ten thousand are loaded here.
+  <sub>camera `markers_axis` · actions `landing:off angles:off terms:auto trail:thin card:hardy speed:3 play`</sub>
 
 **turn_07** — Here is the tip's whole path, threading the centre again and again. These collision heights are the famous zeros of the Riemann zeta function.
   <sub>camera `markers_axis_wide` · actions `trail:full card:riemann speed:6 pulse:trail`</sub>
@@ -178,8 +184,14 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **outro_02** — Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.
   <sub>camera `sacks_saddle` · actions `sacks:show sacks:routes pulse:sacks`</sub>
 
-**outro_03** — Prove the one half key, and we will have read one line of that instruction set.
+**outro_03** — One last picture, and this one is a guess, not a result. Lay the two chain rules on the saddle. The square-root rule is the spiral itself: radius root n, the arrow length turned upside down.
+  <sub>camera `sacks_routes` · actions `sacks:noroutes hypothesis:on` · footnote: a visual hypothesis, not a theorem</sub>
+
+**outro_04** — The logarithm rule, at the first collision's t, picks out rings. Between one ring and the next the chain makes exactly one full turn, so each ring is a fixed factor wider than the last. At the second collision's t the rings come tighter.
   <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
 
+**outro_05** — Do the rings know where the valleys are? Nobody knows. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
+  <sub>camera `sacks_saddle`</sub>
+
 ---
-1407 words ≈ 9.4 minutes of speech at 150 wpm, plus pauses and title cards.
+1626 words ≈ 10.8 minutes of speech at 150 wpm, plus pauses and title cards.

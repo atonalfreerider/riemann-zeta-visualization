@@ -19,32 +19,49 @@
             "hide:polelabel",
             "primes:on",
             "primes:build",
-            "delay:3:sacks:sieve:52"
+            "delay:3:sacks:sieve:64"
           ],
           "pause": 0.4
         },
         {
           "id": "hook_02",
-          "text": "Break the grid open and let every number find its place on the spiral. Now multiply. Two dots leave the two along one axis, two more along the other: a square of four dots. Count them along the spiral road, and they land on four, a perfect square.",
+          "text": "Break the grid open and let every number find its place on the spiral. The primes glow, then fade away, all but the two. Count two along the road, and count two again beside it.",
           "camera": "sieve",
           "actions": [],
           "pause": 0.3
         },
         {
           "id": "hook_02b",
-          "text": "Two dots from the two, three dots from the three: six dots in a rectangle, counted along the road to six. Then two by five makes ten dots, two by seven makes fourteen.",
+          "text": "Bend the second count off to the side. Two by two: the corner is missing, so fill it in: four dots. Now roll them along the road, past the gap, and they land on four. The number they skipped, three, is a prime.",
+          "camera": "sieve",
+          "actions": [],
+          "pause": 0.3
+        },
+        {
+          "id": "hook_02c",
+          "text": "Count two, count three beside it, bend the three to the side, fill in the rectangle: six dots. Roll them to six, and the number they skipped, five, is a prime. Then two by five: ten. Three by three: nine, a perfect square.",
           "camera": "sieve",
           "actions": [],
           "pause": 0.3
         },
         {
           "id": "hook_03",
-          "text": "Three by three: nine dots, and the road ends on the next perfect square. Three by five, three by seven, then five by five. Every composite is a rectangle of dots; every square is a square of dots, in orange.",
+          "text": "Two by seven, three by five, five by five, three by seven. Every composite is a rectangle of dots, every square is a square of dots, and whatever the counting skips is a prime.",
           "camera": "sieve",
           "actions": [
             "pulse:primes"
           ],
           "pause": 0.4
+        },
+        {
+          "id": "hook_04",
+          "text": "What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.",
+          "camera": "sacks_flat",
+          "actions": [
+            "sacks:spiral"
+          ],
+          "pause": 0.5,
+          "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
         },
         {
           "id": "hook_04",
@@ -205,7 +222,7 @@
       "lines": [
         {
           "id": "turn_01",
-          "text": "Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading times the log of its number.",
+          "text": "Two rules, side by side. The lengths follow square roots: one over root n. The bends follow logarithms: at every joint, the dial reading t times the log of its number. Watch the purple t in every angle climb with the dial.",
           "camera": "spiral_angles",
           "actions": [
             "hide:polelabel",
@@ -272,27 +289,31 @@
             "tailghost:off",
             "card:off",
             "show:tip",
+            "angles:on",
             "speed:1.3"
           ],
           "pause": 0.3
         },
         {
           "id": "turn_05",
-          "text": "At a dial reading of fourteen point one three it hits dead centre. We drop a marker on the pole at that height and call it a collision.",
+          "text": "At a dial reading of fourteen point one three it hits dead centre. Nothing about the chain changed except t: at exactly this t, every joint's turn, t times its log, adds up so the whole chain closes on the centre. We drop a marker and call it a collision.",
           "camera": "tip_center",
           "actions": [
             "pause",
             "jump:14.14",
             "flash:zero",
+            "landing:on",
             "pulse:zeros"
           ],
           "pause": 0.5
         },
         {
           "id": "turn_06",
-          "text": "Twenty one. Twenty five. Thirty point four. The collisions never stop. In 1914 Hardy proved there are infinitely many on this pole; ten thousand are loaded here.",
+          "text": "Turn on and the chain opens again, then closes at the next natural landing, twenty one point zero two. Then twenty five. Thirty point four. The collisions never stop. In 1914 Hardy proved there are infinitely many on this pole; ten thousand are loaded here.",
           "camera": "markers_axis",
           "actions": [
+            "landing:off",
+            "angles:off",
             "terms:auto",
             "trail:thin",
             "card:hardy",
@@ -680,11 +701,29 @@
         },
         {
           "id": "outro_03",
-          "text": "Prove the one half key, and we will have read one line of that instruction set.",
+          "text": "One last picture, and this one is a guess, not a result. Lay the two chain rules on the saddle. The square-root rule is the spiral itself: radius root n, the arrow length turned upside down.",
+          "camera": "sacks_routes",
+          "actions": [
+            "sacks:noroutes",
+            "hypothesis:on"
+          ],
+          "pause": 0.4,
+          "footnote": "a visual hypothesis, not a theorem"
+        },
+        {
+          "id": "outro_04",
+          "text": "The logarithm rule, at the first collision's t, picks out rings. Between one ring and the next the chain makes exactly one full turn, so each ring is a fixed factor wider than the last. At the second collision's t the rings come tighter.",
           "camera": "sacks_saddle",
           "actions": [
             "pulse:sacks"
           ],
+          "pause": 0.5
+        },
+        {
+          "id": "outro_05",
+          "text": "Do the rings know where the valleys are? Nobody knows. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
+          "camera": "sacks_saddle",
+          "actions": [],
           "pause": 3.0
         }
       ]

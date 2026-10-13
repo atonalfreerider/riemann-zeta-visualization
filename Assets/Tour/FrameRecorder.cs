@@ -33,6 +33,7 @@ public class FrameRecorder : MonoBehaviour
     Stream ffmpegInput;
     Thread writerThread;
     BlockingCollection<byte[]> frames;
+    readonly ConcurrentBag<byte[]> framePool = new();
     bool usePng;
     Coroutine captureLoop;
     int previousCaptureFramerate;
@@ -139,12 +140,23 @@ public class FrameRecorder : MonoBehaviour
         Debug.Log($"Recording stopped after {FrameIndex} frames → {OutputDirectory}");
     }
 
+    /// <summary>(chapter id, frame) marks, filled by the tour so chapter clips can be cut from the video.</summary>
+    public readonly List<(string id, int frame)> ChapterMarks = new();
+
     void WriteTimeline(List<(string id, float time, int frame)> audioTimeline)
     {
         StringBuilder sb = new();
         sb.Append("{\n  \"width\": ").Append(Width).Append(", \"height\": ").Append(Height)
           .Append(", \"fps\": ").Append(Fps).Append(", \"frames\": ").Append(FrameIndex)
-          .Append(", \"video\": \"").Append(usePng ? "frames/frame_%06d.png" : "video.mp4").Append("\",\n  \"audio\": [\n");
+          .Append(", \"video\": \"").Append(usePng ? "frames/frame_%06d.png" : "video.mp4").Append("\",\n  \"chapters\": [\n");
+        for (int i = 0; i < ChapterMarks.Count; i++)
+        {
+            sb.Append("    {\"id\": \"").Append(ChapterMarks[i].id).Append("\", \"frame\": ").Append(ChapterMarks[i].frame).Append('}');
+            if (i < ChapterMarks.Count - 1) sb.Append(',');
+            sb.Append('\n');
+        }
+
+        sb.Append("  ],\n  \"audio\": [\n");
         if (audioTimeline != null)
         {
             for (int i = 0; i < audioTimeline.Count; i++)
@@ -230,7 +242,9 @@ public class FrameRecorder : MonoBehaviour
         }
 
         if (frames == null || frames.IsAddingCompleted) return;
-        byte[] data = request.GetData<byte>().ToArray();
+        Unity.Collections.NativeArray<byte> native = request.GetData<byte>();
+        if (!framePool.TryTake(out byte[] data) || data.Length != native.Length) data = new byte[native.Length];
+        native.CopyTo(data);
         try
         {
             frames.Add(data);
@@ -257,6 +271,7 @@ public class FrameRecorder : MonoBehaviour
                 ffmpegInput.Write(frame, 0, frame.Length);
             }
 
+            if (framePool.Count < 64) framePool.Add(frame);
             written++;
         }
     }
