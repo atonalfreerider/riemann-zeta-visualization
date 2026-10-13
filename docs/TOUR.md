@@ -94,7 +94,14 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `stair:build` | morph the straight line y = x into the staircase |
 | `rootlabel:sqrt` / `rootlabel:0.9` / `rootlabel:off` | the shrink rule written beside the spiral |
 | `ghost:sweep:A:B[:pingpong]` | sweep the rogue exponent β from A to B while the red staircase and its formula follow |
-| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `angles` `dialstrip` `primearrows`) |
+| `sacks:spiral` / `sacks:saddle` / `sacks:flat` / `sacks:routes` / `sacks:noroutes` / `sacks:show` / `sacks:hide` | the primes grid morphs into the Sacks spiral, bends over a saddle, shows the prime routes |
+| `chainfeet:on` / `chainfeet:off` | footprints along the √n chain |
+| `rootlabel:chain` | the shrink rule written beside the flat chain |
+| `waveview:N` | widen the wave view for N collisions (done automatically by `cosine:build`) |
+| `squares:on` / `squares:off` | the muted-squares callout under the number line |
+| `primepowers:on` / `primepowers:off` | orange ticks at 4, 8, 9, 16, 25, 27 on the staircase |
+| `zeno_zoom` camera cue | follows the newest Zeno footprint and halves its distance each step |
+| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
