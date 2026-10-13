@@ -194,13 +194,13 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:zeta` · footnote: a visual hypothesis, not a theorem</sub>
 
 **outro_04** — Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.
-  <sub>camera `sacks_wave` · actions `hypothesis:wavestack:13`</sub>
+  <sub>camera `sacks_wave` · actions `hypothesis:wavestack:30`</sub>
 
-**outro_05** — Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes; the spikes find them. Saddle, trail and waves, one structure seen three ways.
+**outro_05** — Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes, the orange ticks are prime powers like four, eight and nine; the spikes find them all. Saddle, trail and waves, one structure seen three ways.
   <sub>camera `sacks_wave_close` · actions `pulse:sacks`</sub>
 
 **outro_06** — Do these three structures know about each other, or are we only seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
   <sub>camera `sacks_wave_close`</sub>
 
 ---
-1791 words ≈ 11.9 minutes of speech at 150 wpm, plus pauses and title cards.
+1803 words ≈ 12.0 minutes of speech at 150 wpm, plus pauses and title cards.

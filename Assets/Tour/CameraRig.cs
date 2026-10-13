@@ -216,7 +216,7 @@ public class CameraRig : MonoBehaviour
             float d = annotations.Sacks.Extent * 1.45f;
             float a = Time.time * 0.12f;
             Vector3 pos = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .62f);
-            return new CueState { Position = pos, LookAt = c + Vector3.back * 9f, Up = Vector3.back, Fov = 58 };
+            return new CueState { Position = pos, LookAt = c + Vector3.back * 11f, Up = Vector3.back, Fov = 60 };
         };
         cues["sacks_wave_close"] = () =>
         {

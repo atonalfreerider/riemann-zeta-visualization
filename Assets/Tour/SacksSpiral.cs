@@ -62,6 +62,19 @@ public class SacksSpiral : MonoBehaviour
         return true;
     }
 
+    static bool IsPrimePower(int n)
+    {
+        for (int p = 2; p <= n; p++)
+        {
+            if (!IsPrime(p) || n % p != 0) continue;
+            int m = n;
+            while (m % p == 0) m /= p;
+            return m == 1;
+        }
+
+        return false;
+    }
+
     static bool IsSquare(int n)
     {
         int r = Mathf.RoundToInt(Mathf.Sqrt(n));
@@ -794,8 +807,8 @@ public class SacksSpiral : MonoBehaviour
     GameObject hypothesisRoot;
     GameObject zeroDropsRoot, interferenceRoot;
     readonly List<GameObject> zeroMarkers = new();
-    const float ZetaTMax = 60f, ZetaT = 0.45f, ZetaXY = 1.4f;
-    static readonly double[] Zeros = { 14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073, 48.005151, 49.773832, 52.970321, 56.446248, 59.347044 };
+    const float ZetaTMax = 140f, ZetaT = 0.25f, ZetaXY = 1.4f;
+    static double[] Zeros => System.Array.FindAll(Main.Instance.zetaZeroValues, g => g <= ZetaTMax);
     readonly List<LineRenderer> fieldRings = new();
     readonly List<float> fieldN = new();
     const int FieldRings = 120, FieldSegs = 96;
@@ -930,7 +943,7 @@ public class SacksSpiral : MonoBehaviour
     GameObject waveStackRoot;
     LineRenderer masterWave;
     Coroutine waveRoutine;
-    const int WavePts = 720;
+    const int WavePts = 2400;
     const float WaveAmp = 2.2f;
 
     float WaveN(int i) => FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (WavePts - 1f));
@@ -950,11 +963,14 @@ public class SacksSpiral : MonoBehaviour
         // prime ticks standing on the saddle along the spiral, so the spikes can be read against them
         for (int n = 2; n <= (int)FieldNMax; n++)
         {
-            if (!IsPrime(n)) continue;
-            LineRenderer tick = Factory.NewLine("prime tick", .05f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+            bool prime = IsPrime(n);
+            bool primePower = !prime && IsPrimePower(n);
+            if (!prime && !primePower) continue;
+            Color c = prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f);
+            LineRenderer tick = Factory.NewLine(prime ? "prime tick" : "prime power tick", prime ? .05f : .04f, c, Factory.SoftGlowIntensity);
             tick.transform.SetParent(waveStackRoot.transform, false);
             tick.positionCount = 2;
-            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, 0.9f) });
+            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, prime ? 0.9f : 0.6f) });
         }
     }
 
@@ -1006,7 +1022,7 @@ public class SacksSpiral : MonoBehaviour
             wave.transform.SetParent(waveStackRoot.transform, false);
             wave.numCornerVertices = 3;
             Vector3[] pts = new Vector3[WavePts + 1];
-            float amp = WaveAmp / Mathf.Sqrt(k + 1);
+            float amp = WaveAmp / Mathf.Pow(k + 1, 0.85f);
             caption.gameObject.SetActive(true);
             caption.Text = $"collision {k + 1}:  γ = {g:0.00}  →  cos(γ · log n) follows the spiral at height γ, then sinks onto the saddle";
 

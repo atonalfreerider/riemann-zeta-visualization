@@ -741,13 +741,13 @@
           "text": "Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.",
           "camera": "sacks_wave",
           "actions": [
-            "hypothesis:wavestack:13"
+            "hypothesis:wavestack:30"
           ],
           "pause": 0.5
         },
         {
           "id": "outro_05",
-          "text": "Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes; the spikes find them. Saddle, trail and waves, one structure seen three ways.",
+          "text": "Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes, the orange ticks are prime powers like four, eight and nine; the spikes find them all. Saddle, trail and waves, one structure seen three ways.",
           "camera": "sacks_wave_close",
           "actions": [
             "pulse:sacks"
