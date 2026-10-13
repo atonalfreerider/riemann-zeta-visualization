@@ -103,6 +103,8 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `zeno_zoom` camera cue | follows the newest Zeno footprint and halves its distance each step |
 | `sacks:lattice` / `sacks:squares` / `sacks:composites` | build the 2×/3×/5× multiplication lattice; pulse squares / composites on the spiral or saddle |
 | `logseq:on` / `logseq:off` | bar panel of the bend sequence log(n/(n−1)) with live degrees |
+| `delay:S:<action>` | run an action S seconds into the line (e.g. `delay:3:sacks:sieve:22`) so the narration can catch up |
+| `sacks:sieve[:seconds]` | break the grid open into spiral positions, then draw the 2×, 3×, 5× axes through their products, striking each one |
 | `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers` `logseq` `floorgrid`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
@@ -133,7 +135,7 @@ Full video (real time, no narration yet; mux audio afterwards with `Tools/mux_re
 ZETA_OUT=/tmp/tour-render ZETA_MODE=record ~/Unity/Hub/Editor/6000.6.5f1/Editor/Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter StoryboardRenderTest -logFile /tmp/tour.log
 ```
 
-`ZETA_CHAPTER=<id>` starts from one chapter; `ZETA_FLIP=0/1` overrides the frame flip if a platform renders upside down.
+`ZETA_CHAPTER=<id>` starts from one chapter; `ZETA_NO_CAPTIONS=1` hides the caption layer (clean frames for thumbnails); `ZETA_FLIP=0/1` overrides the frame flip if a platform renders upside down.
 
 ## What the scene shows
 
@@ -158,3 +160,13 @@ statement was formalised in Lean (`riemannZeta s ≠ 0` for `7/8 < s.re`) and re
 party with an independent kernel. It is **not** the Riemann Hypothesis (which needs ½), human peer
 review is still in progress, and some commentators expect the method to stall near 3/4.
 The narration says exactly that.
+
+## Performance notes
+
+Measured with the bundled Mono: Meta.Numerics' `RiemannZeta` costs 4–100 µs per animation step, so the spiral
+math is not where frames go. What did cost frames during the chain animation was garbage: arrays, lists and
+strings allocated every frame (chain joints, trail copies, arrowheads, arcs, footprints, property blocks, label
+text), which trigger GC pauses. Those paths now reuse buffers; TextMesh Pro readouts refresh at 10 Hz and only
+when their text changes. Press **F** in Play mode: the hint line shows fps, the worst frame time in the last
+second, and GC collections per second. If the worst frame still spikes, open the Unity Profiler on that moment;
+the next suspects are TMP rebuilds of the caption line and the Billboard labels.
