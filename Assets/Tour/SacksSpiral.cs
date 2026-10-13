@@ -12,9 +12,9 @@ using UnityEngine;
 public class SacksSpiral : MonoBehaviour
 {
     public const int GridCount = 30;
-    const int Count = 520;
-    const float R = 2.1f;            // spiral radius scale
-    const float SaddleK = 1f / 85f;  // saddle curvature
+    const int Count = 1300;
+    const float R = 1.45f;           // spiral radius scale
+    const float SaddleK = 1f / 48f;  // saddle curvature
 
     readonly Vector3 origin = new(-34f, 18.5f, 0f);
     readonly Vector3 gridOrigin = new(-40f, 26f, 0f);
@@ -93,7 +93,7 @@ public class SacksSpiral : MonoBehaviour
         {
             bool prime = IsPrime(n), square = IsSquare(n);
             Color c = prime ? Factory.Palette.Zero : square ? new Color(1f, .55f, .2f) : new Color(.3f, .3f, .38f);
-            GameObject dot = Factory.NewSphere("n " + n, prime ? .5f : .32f, c, prime ? Factory.GlowIntensity : Factory.NoGlow);
+            GameObject dot = Factory.NewSphere("n " + n, prime ? .42f : .22f, c, prime ? Factory.GlowIntensity : Factory.NoGlow);
             dot.transform.SetParent(transform, false);
             dot.SetActive(n <= GridCount);
             dots.Add(dot);
@@ -110,9 +110,9 @@ public class SacksSpiral : MonoBehaviour
 
         routesRoot = new GameObject("Routes");
         routesRoot.transform.SetParent(transform, false);
-        AddRoute("squares", new Color(1f, .55f, .2f), k => k * k, 1f, 22.5f, "k²  — the squares: never a prime");
-        AddRoute("pronic", new Color(.55f, .6f, 1f), k => k * (k + 1), 1f, 22f, "k(k+1)  — never a prime either");
-        AddRoute("euler", new Color(.35f, 1f, .55f), k => k * k + k + 41, 0f, 21.4f, "k² + k + 41  — Euler's route: 40 primes in a row");
+        AddRoute("squares", new Color(1f, .55f, .2f), k => k * k, 1f, 36f, "k²  — the squares: never a prime");
+        AddRoute("pronic", new Color(.55f, .6f, 1f), k => k * (k + 1), 1f, 35f, "k(k+1)  — never a prime either");
+        AddRoute("euler", new Color(.35f, 1f, .55f), k => k * k + k + 41, 9f, 35f, "k² + k + 41  — Euler's route: 40 primes in a row");
         routesRoot.SetActive(false);
 
         caption = TextBoxLabel("", 2.4f, new Color(.85f, .85f, .95f));

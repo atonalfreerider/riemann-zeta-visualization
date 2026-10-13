@@ -496,7 +496,7 @@ public class Annotations : MonoBehaviour
 
         diffRoot.SetActive(false);
 
-        squaresLabel = Label(numberLineRoot.transform, "squares 4, 9, 16, 25 and cubes 8, 27:\nfaint spikes at first, muted as the waves pile up", new Vector3(14f, -5.2f, 0), 2.6f, new Color(1f, .6f, .25f), TextAlignmentOptions.Center);
+        squaresLabel = Label(numberLineRoot.transform, "squares 4, 9, 16, 25 and cubes 8, 27:\nfaint spikes at first, muted as the waves pile up", new Vector3(16f, -7.5f, 0), 4.6f, new Color(1f, .6f, .25f), TextAlignmentOptions.Center);
         squaresLabel.gameObject.AddComponent<Billboard>();
         squaresLabel.gameObject.SetActive(false);
 

@@ -183,8 +183,9 @@ public class CameraRig : MonoBehaviour
             // sway around the front of the saddle so its curvature reads in parallax
             Vector3 c = annotations.Sacks.Center;
             float a = Time.time * 0.25f;
-            float d = annotations.Sacks.Extent * 2.4f;
-            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .55f, Mathf.Cos(a * .7f) * d * .3f, -d * .8f), LookAt = c, Up = up, Fov = 60 };
+            float d = annotations.Sacks.Extent * 2.3f;
+            // swing well to the side and above so the saddle's rise and fall is unmistakable
+            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .85f, .45f * d + Mathf.Cos(a * .7f) * d * .25f, -Mathf.Abs(Mathf.Cos(a)) * d * .55f - d * .25f), LookAt = c, Up = up, Fov = 60 };
         };
         cues["sacks_routes"] = () =>
         {
