@@ -792,6 +792,167 @@ public class SacksSpiral : MonoBehaviour
     public void Hide() => gameObject.SetActive(false);
 
     GameObject hypothesisRoot;
+    GameObject zeroDropsRoot, interferenceRoot;
+    readonly List<GameObject> zeroMarkers = new();
+    const float ZetaTMax = 60f, ZetaT = 0.45f, ZetaXY = 1.4f;
+    static readonly double[] Zeros = { 14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073, 48.005151, 49.773832, 52.970321, 56.446248, 59.347044 };
+    readonly List<LineRenderer> fieldRings = new();
+    readonly List<float> fieldN = new();
+    const int FieldRings = 120, FieldSegs = 96;
+    const float FieldNMin = 1.5f, FieldNMax = 420f, FieldAmp = 1.6f;
+    Coroutine fieldRoutine, dropRoutine;
+
+    /// <summary>
+    /// Each zero spirals down from its height on the axis to the saddle surface. The guess: treat the height γ
+    /// as a number and let it land where γ would sit on the Sacks spiral (radius √γ, angle 2π√γ); the descent
+    /// is a helix that widens as it falls, and the trajectory stays drawn.
+    /// </summary>
+    public void DropZeros(float seconds)
+    {
+        if (dropRoutine != null) StopCoroutine(dropRoutine);
+        dropRoutine = StartCoroutine(DropZerosRoutine(seconds));
+    }
+
+    IEnumerator DropZerosRoutine(float seconds)
+    {
+        if (zeroDropsRoot == null) yield break;
+        foreach (Transform c in zeroDropsRoot.transform) Destroy(c.gameObject);
+        float per = seconds / Zeros.Length;
+        for (int z = 0; z < Zeros.Length; z++)
+        {
+            float g = (float)Zeros[z];
+            Vector3 top = origin + Vector3.back * (g * ZetaT);
+            Vector3 land = SpiralPos(g, 1f) + Vector3.back * .25f;
+            float a1 = 2f * Mathf.PI * Mathf.Sqrt(g);
+            float rLand = R * Mathf.Sqrt(g);
+            LineRenderer trail = Factory.NewLine("drop " + z, .05f, new Color(1f, .9f, .4f), Factory.SoftGlowIntensity);
+            trail.transform.SetParent(zeroDropsRoot.transform, false);
+            const int steps = 60;
+            Vector3[] pts = new Vector3[steps + 1];
+            for (int i = 0; i <= steps; i++)
+            {
+                float u = i / (float)steps;
+                float r = rLand * u;
+                float a = a1 - (1f - u) * 2f * Mathf.PI * 2f; // two extra turns on the way down
+                float x = r * Mathf.Cos(a), y = r * Mathf.Sin(a);
+                float surface = SaddleK * (x * x - y * y);
+                float h = Mathf.Lerp(g * ZetaT, 0f, Mathf.SmoothStep(0f, 1f, u));
+                pts[i] = origin + new Vector3(x, y, surface * u) + Vector3.back * (h + .25f);
+            }
+
+            GameObject runner = Factory.NewSphere("falling zero", .32f, Factory.Palette.Zero, Factory.GlowIntensity);
+            runner.transform.SetParent(zeroDropsRoot.transform, false);
+            float t = 0f;
+            float travel = per * .85f;
+            while (t < travel)
+            {
+                t += Time.deltaTime;
+                float u = Mathf.Clamp01(t / travel);
+                int shown = Mathf.Max(2, Mathf.CeilToInt(u * steps) + 1);
+                trail.positionCount = shown;
+                trail.SetPositions(pts[..shown]);
+                runner.transform.position = pts[Mathf.Min(steps, shown - 1)];
+                yield return null;
+            }
+
+            trail.positionCount = pts.Length;
+            trail.SetPositions(pts);
+            runner.transform.position = land;
+            GameObject mark = Factory.NewSphere("landing " + z, .42f, Factory.Palette.Zero, Factory.GlowIntensity);
+            mark.transform.SetParent(zeroDropsRoot.transform, false);
+            mark.transform.position = land;
+            StartCoroutine(PulseScale(mark.transform, .42f, 2.5f, .7f));
+            TextBox l = TextBoxLabel($"{g:0.00}", 1.4f, Factory.Palette.Zero);
+            l.transform.SetParent(zeroDropsRoot.transform, false);
+            l.transform.position = land + Vector3.back * .5f + Vector3.up * .8f;
+            Destroy(runner);
+            yield return new WaitForSeconds(per * .15f);
+        }
+    }
+
+    /// <summary>
+    /// Interference on the saddle: concentric rings (n = (r/R)²) displaced along the normal by the stacked
+    /// cosine waves −Σ cos(γ·log n) over the first k zeros, normalised. Ridges form on the circles r = √p
+    /// through the primes as the waves pile up.
+    /// </summary>
+    public void StartInterference(float seconds)
+    {
+        if (interferenceRoot == null)
+        {
+            interferenceRoot = new GameObject("Interference");
+            interferenceRoot.transform.SetParent(hypothesisRoot.transform, false);
+            for (int i = 0; i < FieldRings; i++)
+            {
+                float n = FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (FieldRings - 1f));
+                fieldN.Add(n);
+                LineRenderer ring = Factory.NewLine("field ring", .035f, Factory.Palette.Cosine, Factory.SoftGlowIntensity);
+                ring.transform.SetParent(interferenceRoot.transform, false);
+                ring.loop = true;
+                ring.positionCount = FieldSegs;
+                fieldRings.Add(ring);
+            }
+        }
+
+        interferenceRoot.SetActive(true);
+        if (fieldRoutine != null) StopCoroutine(fieldRoutine);
+        fieldRoutine = StartCoroutine(InterferenceRoutine(seconds));
+    }
+
+    public void HideInterference()
+    {
+        if (fieldRoutine != null) StopCoroutine(fieldRoutine);
+        if (interferenceRoot != null) interferenceRoot.SetActive(false);
+    }
+
+    IEnumerator InterferenceRoutine(float seconds)
+    {
+        int maxZeros = Mathf.Min(60, Main.Instance != null ? Main.Instance.zetaZeroValues.Length : 0);
+        float t = 0f;
+        int last = -1;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            int k = Mathf.Clamp(Mathf.FloorToInt(1 + (maxZeros - 1) * Mathf.Pow(t / seconds, 1.6f)), 1, maxZeros);
+            if (k != last)
+            {
+                last = k;
+                SetInterference(k);
+                caption.gameObject.SetActive(true);
+                caption.Text = $"interference on the saddle: {k} collision wave{(k > 1 ? "s" : "")} stacked, ridges on the circles through the primes";
+            }
+
+            yield return null;
+        }
+    }
+
+    readonly Vector3[] ringBuffer = new Vector3[FieldSegs];
+
+    void SetInterference(int k)
+    {
+        double[] zs = Main.Instance.zetaZeroValues;
+        float scale = FieldAmp / Mathf.Sqrt(k);
+        for (int i = 0; i < fieldRings.Count; i++)
+        {
+            float n = fieldN[i];
+            double sum = 0;
+            double logN = System.Math.Log(n);
+            for (int z = 0; z < k; z++) sum -= System.Math.Cos(zs[z] * logN);
+            float h = (float)sum * scale;
+            float r = R * Mathf.Sqrt(n);
+            for (int j = 0; j < FieldSegs; j++)
+            {
+                float a = j / (float)FieldSegs * Mathf.PI * 2f;
+                float x = r * Mathf.Cos(a), y = r * Mathf.Sin(a);
+                ringBuffer[j] = origin + new Vector3(x, y, SaddleK * (x * x - y * y)) + Vector3.back * (h + .15f);
+            }
+
+            fieldRings[i].SetPositions(ringBuffer);
+            float glow = Mathf.Clamp01(Mathf.Abs(h) / FieldAmp);
+            Color c = Color.Lerp(new Color(.15f, .35f, .4f), Factory.Palette.Cosine, glow);
+            fieldRings[i].startColor = c;
+            fieldRings[i].endColor = c;
+        }
+    }
 
     /// <summary>
     /// A visual hypothesis for the ending: the two chain rules drawn on the saddle.
@@ -801,7 +962,7 @@ public class SacksSpiral : MonoBehaviour
     /// </summary>
     public void ShowHypothesis(bool on)
     {
-        if (!on) { if (hypothesisRoot != null) hypothesisRoot.SetActive(false); return; }
+        if (!on) { HideInterference(); if (hypothesisRoot != null) hypothesisRoot.SetActive(false); return; }
         if (hypothesisRoot == null)
         {
             hypothesisRoot = new GameObject("Hypothesis");
@@ -903,42 +1064,36 @@ public class SacksSpiral : MonoBehaviour
         sl.transform.SetParent(squares.transform, false);
         sl.transform.position = origin + new Vector3(0, -Extent - 13.5f, 0);
 
-        // the zeta trail, t along the saddle normal: above the surface for +t, mirrored below for −t (ζ(conj s) = conj ζ(s))
+        // the zeta trail, rising from the origin along the saddle normal (t upward only)
         GameObject zeta = new("ZetaTrail");
         zeta.transform.SetParent(hypothesisRoot.transform, false);
-        const float tMax = 60f, tScale = 0.45f, xyScale = 2.6f;
-        List<Vector3> up = new(), down = new();
-        for (float tt = 0f; tt <= tMax; tt += 0.1f)
+        List<Vector3> up = new();
+        for (float tt = 0f; tt <= ZetaTMax; tt += 0.1f)
         {
             Meta.Numerics.Complex zv = ZetaMath.Exact(new Meta.Numerics.Complex(.5, tt));
-            Vector3 offset = new((float)zv.Re * xyScale, (float)zv.Im * xyScale, 0);
-            up.Add(origin + offset + Vector3.back * (tt * tScale));
-            down.Add(origin + new Vector3(offset.x, -offset.y, 0) + Vector3.forward * (tt * tScale));
+            up.Add(origin + new Vector3((float)zv.Re * ZetaXY, (float)zv.Im * ZetaXY, 0) + Vector3.back * (tt * ZetaT));
         }
 
-        foreach ((List<Vector3> pts, string name) in new[] { (up, "zeta up"), (down, "zeta down") })
-        {
-            LineRenderer line = Factory.NewLine(name, .06f, Factory.Palette.Zeta, Factory.SoftGlowIntensity);
-            line.transform.SetParent(zeta.transform, false);
-            line.positionCount = pts.Count;
-            line.SetPositions(pts.ToArray());
-        }
+        LineRenderer line = Factory.NewLine("zeta up", .06f, Factory.Palette.Zeta, Factory.SoftGlowIntensity);
+        line.transform.SetParent(zeta.transform, false);
+        line.positionCount = up.Count;
+        line.SetPositions(up.ToArray());
 
         LineRenderer axis = Factory.NewLine("zeta axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
         axis.transform.SetParent(zeta.transform, false);
         axis.positionCount = 2;
-        axis.SetPositions(new[] { origin + Vector3.forward * (tMax * tScale), origin + Vector3.back * (tMax * tScale) });
-        foreach (double g in new[] { 14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073, 48.005151, 49.773832, 52.970321, 56.446248, 59.347044 })
+        axis.SetPositions(new[] { origin, origin + Vector3.back * (ZetaTMax * ZetaT) });
+        zeroDropsRoot = new GameObject("ZeroDrops");
+        zeroDropsRoot.transform.SetParent(hypothesisRoot.transform, false);
+        foreach (double g in Zeros)
         {
-            foreach (float sign in new[] { 1f, -1f })
-            {
-                GameObject z = Factory.NewSphere("zero", .3f, Factory.Palette.Zero, Factory.GlowIntensity);
-                z.transform.SetParent(zeta.transform, false);
-                z.transform.position = origin + Vector3.back * ((float)g * tScale * sign);
-            }
+            GameObject z = Factory.NewSphere("zero", .3f, Factory.Palette.Zero, Factory.GlowIntensity);
+            z.transform.SetParent(zeta.transform, false);
+            z.transform.position = origin + Vector3.back * ((float)g * ZetaT);
+            zeroMarkers.Add(z);
         }
 
-        TextBox zl = TextBoxLabel("the zeta trail ζ(½ + it), t along the saddle's normal: zeros where it crosses the axis, above and below", 2.0f, Factory.Palette.Zeta);
+        TextBox zl = TextBoxLabel("the zeta trail ζ(½ + it) rising from the origin, t along the saddle's normal: a zero wherever it returns to the axis", 2.0f, Factory.Palette.Zeta);
         zl.transform.SetParent(zeta.transform, false);
         zl.transform.position = origin + new Vector3(0, -Extent - 16.5f, 0);
     }
@@ -961,6 +1116,7 @@ public class SacksSpiral : MonoBehaviour
 
         morph = 1f;
         reveal = 1f;
+        bend = 1f; // the final chapter always lives on the saddle
         caption.gameObject.SetActive(false);
         Layout();
     }

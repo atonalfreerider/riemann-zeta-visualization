@@ -203,11 +203,11 @@ public class CameraRig : MonoBehaviour
         };
         cues["sacks_3d"] = () =>
         {
-            // a slow orbit around the saddle normal so the zeta trail above and below reads in parallax
-            Vector3 c = annotations.Sacks.Center;
-            float a = Time.time * 0.2f;
-            float d = annotations.Sacks.Extent * 1.6f;
-            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d * .45f, -d * .75f), LookAt = c, Up = Vector3.back, Fov = 60 };
+            // a slow orbit around the saddle normal, looking slightly down at the surface and the trail rising from it
+            Vector3 c = annotations.Sacks.Center + Vector3.back * 6f;
+            float a = Time.time * 0.16f;
+            float d = annotations.Sacks.Extent * 1.5f;
+            return new CueState { Position = annotations.Sacks.Center + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .9f), LookAt = c, Up = Vector3.back, Fov = 60 };
         };
         cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
         cues["spiral_angles"] = () => new CueState { Position = new Vector3(-0.4f, TipY + 6.5f, -1.8f), LookAt = new Vector3(-0.4f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };

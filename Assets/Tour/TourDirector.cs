@@ -555,7 +555,12 @@ public class TourDirector : MonoBehaviour
                         if (arg == "off") Annotations.ShowLanding(false);
                         else Annotations.ShowLanding(true, $"<color=#C8A0FF>t = {Main.CurrentT:0.00}</color>\nevery joint turned t·log(n/(n−1))\nand the chain closed on the centre");
                         break;
-                    case "hypothesis": Annotations.Sacks.ShowHypothesis(arg != "off"); break;
+                    case "hypothesis":
+                        if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));
+                        else if (arg == "interference") Annotations.Sacks.StartInterference(Mathf.Max(4f, currentLineSeconds * 0.9f));
+                        else if (arg == "nointerference") Annotations.Sacks.HideInterference();
+                        else Annotations.Sacks.ShowHypothesis(arg != "off");
+                        break;
                     case "logseq": Annotations.ShowLogSequence(arg != "off"); break;
                     case "squares": Annotations.ShowSquaresLabel(arg != "off"); break;
                     case "primepowers": Annotations.ShowPrimePowers(arg != "off"); break;

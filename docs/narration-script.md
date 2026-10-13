@@ -188,16 +188,19 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `outro` · actions `hide:strip hide:gap show:spiral show:tail show:trail show:zeros show:prime show:imaxis speed:4 play`</sub>
 
 **outro_02** — Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.
-  <sub>camera `sacks_saddle` · actions `sacks:show sacks:routes pulse:sacks`</sub>
+  <sub>camera `sacks_saddle` · actions `sacks:show sacks:saddle sacks:routes pulse:sacks`</sub>
 
-**outro_03** — One last picture, and this one is a guess, not a result. Put everything on the saddle. The jumping-off points of the sieve: each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn.
+**outro_03** — One last picture, and this one is a guess, not a result. Keep everything on the saddle. The jumping-off points of the sieve, each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn. And the rings the logarithm rule picks out at the first two collisions.
   <sub>camera `sacks_routes` · actions `sacks:noroutes hypothesis:on` · footnote: a visual hypothesis, not a theorem</sub>
 
-**outro_04** — The logarithm rule at the first collision's t picks out rings, each a fixed factor wider than the last; at the second collision's t the rings come tighter. And the zeta trail itself, threaded through the saddle along its normal, above and below, crossing the axis at every collision.
-  <sub>camera `sacks_3d` · actions `pulse:sacks`</sub>
+**outro_04** — Now the zeta trail itself, rising from the centre of the saddle, with a collision wherever it returns to the axis. Let each collision spiral down to the surface, as if its height were a number on the spiral, and watch where it lands.
+  <sub>camera `sacks_3d` · actions `hypothesis:drop pulse:sacks`</sub>
 
-**outro_05** — Rings, squares, jumping-off points, and the trail of zeros, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
+**outro_05** — And the waves. Lay the collision waves over the saddle as rings, and dial the collisions in one at a time. As they stack, the interference settles into ridges, on the circles that pass through the primes.
+  <sub>camera `sacks_3d` · actions `hypothesis:interference`</sub>
+
+**outro_06** — Rings, squares, jumping-off points, landed zeros, and the interference of their waves, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
   <sub>camera `sacks_3d`</sub>
 
 ---
-1742 words ≈ 11.6 minutes of speech at 150 wpm, plus pauses and title cards.
+1790 words ≈ 11.9 minutes of speech at 150 wpm, plus pauses and title cards.

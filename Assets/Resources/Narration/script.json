@@ -711,6 +711,7 @@
           "camera": "sacks_saddle",
           "actions": [
             "sacks:show",
+            "sacks:saddle",
             "sacks:routes",
             "pulse:sacks"
           ],
@@ -718,7 +719,7 @@
         },
         {
           "id": "outro_03",
-          "text": "One last picture, and this one is a guess, not a result. Put everything on the saddle. The jumping-off points of the sieve: each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn.",
+          "text": "One last picture, and this one is a guess, not a result. Keep everything on the saddle. The jumping-off points of the sieve, each prime with its rows stacked above it. The squares, where the square-root spiral completes each turn. And the rings the logarithm rule picks out at the first two collisions.",
           "camera": "sacks_routes",
           "actions": [
             "sacks:noroutes",
@@ -729,16 +730,26 @@
         },
         {
           "id": "outro_04",
-          "text": "The logarithm rule at the first collision's t picks out rings, each a fixed factor wider than the last; at the second collision's t the rings come tighter. And the zeta trail itself, threaded through the saddle along its normal, above and below, crossing the axis at every collision.",
+          "text": "Now the zeta trail itself, rising from the centre of the saddle, with a collision wherever it returns to the axis. Let each collision spiral down to the surface, as if its height were a number on the spiral, and watch where it lands.",
           "camera": "sacks_3d",
           "actions": [
+            "hypothesis:drop",
             "pulse:sacks"
           ],
           "pause": 0.5
         },
         {
           "id": "outro_05",
-          "text": "Rings, squares, jumping-off points, and the trail of zeros, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
+          "text": "And the waves. Lay the collision waves over the saddle as rings, and dial the collisions in one at a time. As they stack, the interference settles into ridges, on the circles that pass through the primes.",
+          "camera": "sacks_3d",
+          "actions": [
+            "hypothesis:interference"
+          ],
+          "pause": 0.5
+        },
+        {
+          "id": "outro_06",
+          "text": "Rings, squares, jumping-off points, landed zeros, and the interference of their waves, all in one space. Do they know about each other? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
           "camera": "sacks_3d",
           "actions": [],
           "pause": 3.0
