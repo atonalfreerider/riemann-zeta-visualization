@@ -166,6 +166,7 @@ public class TourDirector : MonoBehaviour
             if (showEach)
             {
                 Annotations.ShowIncomingWave(n, amplitude, Main.CosineScale * 0.7f);
+                Annotations.AddStripDial(n, perStep * 0.4f);
                 yield return new WaitForSeconds(perStep * 0.45f);
                 Annotations.HideIncomingWave();
                 Main.SetCosineZeroLimitAnimated(n + 1, perStep * 0.5f);
@@ -473,11 +474,27 @@ public class TourDirector : MonoBehaviour
                         PulseElement(arg, Mathf.Max(1.5f, currentLineSeconds - 0.3f));
                         break;
                     case "tailghost": Main.Limit.SetTailGhostVisible(arg != "off"); break;
+                    case "primes":
+                        if (arg == "build") Annotations.BuildPrimes(Mathf.Max(3f, currentLineSeconds * 0.9f));
+                        else if (arg == "arrows") Annotations.ShowPrimeArrows(true);
+                        else if (arg == "noarrows") Annotations.ShowPrimeArrows(false);
+                        else if (arg == "highlight") Annotations.HighlightPrimes(Mathf.Max(3f, currentLineSeconds * 0.9f));
+                        else Annotations.ShowPrimes(arg == "on");
+                        break;
+                    case "axes": if (arg == "sprout") Annotations.SproutAxes(Mathf.Max(1.5f, currentLineSeconds * 0.6f)); break;
+                    case "angles": Annotations.ShowAngles(arg != "off"); break;
+                    case "dialstrip":
+                        if (arg == "clear") Annotations.ClearDialStrip();
+                        else Annotations.AddStripDial(int.Parse(arg, CultureInfo.InvariantCulture) - 1, 1.2f);
+                        break;
+                    case "stair": if (arg == "build") Main.BuildStaircase(Mathf.Max(2f, currentLineSeconds * 0.8f)); break;
+                    case "rootlabel": Annotations.ShowRootFormula(arg); break;
                     case "labels": Main.ZeroLabelLimit = arg == "all" ? -1 : int.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "ghost":
                         if (arg == "off") Annotations.SetGhostZero(false);
                         else if (arg == "on") Annotations.SetGhostZero(true);
                         else if (arg == "all") Annotations.SetGhostAllZeros(parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 0.9);
+                        else if (arg == "sweep") Annotations.SweepGhostBeta(float.Parse(parts[2], CultureInfo.InvariantCulture), float.Parse(parts[3], CultureInfo.InvariantCulture), Mathf.Max(2f, currentLineSeconds * 0.9f), parts.Length > 4 && parts[4] == "pingpong");
                         else Annotations.SetGhostZero(true, double.Parse(arg, CultureInfo.InvariantCulture), parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 14.134725);
                         break;
                     case "show":

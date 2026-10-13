@@ -507,8 +507,49 @@ public class Main : MonoBehaviour
             x += curveResolution;
         }
 
-        primeCurve.SetPositions(primeCurvePoints);
+        lastPrimePoints = primeCurvePoints;
+        if (primeBlendRoutine == null) primeCurve.SetPositions(primeCurvePoints);
         DrawDaggers(primeCurvePoints);
+    }
+
+    Vector3[] lastPrimePoints;
+    Coroutine primeBlendRoutine;
+
+    /// <summary>Animate the staircase into existence: start from the straight line y = x, then subtract the waves.</summary>
+    public void BuildStaircase(float seconds)
+    {
+        if (primeBlendRoutine != null) StopCoroutine(primeBlendRoutine);
+        primeBlendRoutine = StartCoroutine(BuildStaircaseRoutine(seconds));
+    }
+
+    IEnumerator BuildStaircaseRoutine(float seconds)
+    {
+        heavyUpdateDirty = true;
+        UpdatePrimeNumberTheorem();
+        Vector3[] to = lastPrimePoints;
+        Vector3[] line = new Vector3[NumPrimeCurvePoints];
+        Vector3[] blend = new Vector3[NumPrimeCurvePoints];
+        for (int i = 0; i < line.Length; i++)
+        {
+            float x = (float)PrimeCurveX(i);
+            line[i] = to[i] == Vector3.zero ? Vector3.zero : new Vector3(x, x, 0);
+        }
+
+        daggerContainer.SetActive(false);
+        primeCurve.enabled = true;
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / seconds);
+            for (int i = 0; i < blend.Length; i++) blend[i] = Vector3.Lerp(line[i], to[i], k);
+            primeCurve.SetPositions(blend);
+            yield return null;
+        }
+
+        primeCurve.SetPositions(to);
+        daggerContainer.SetActive(DaggersVisible);
+        primeBlendRoutine = null;
     }
 
     void DrawDaggers(Vector3[] primeCurvePoints)

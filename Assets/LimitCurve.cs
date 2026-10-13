@@ -356,7 +356,7 @@ public class LimitCurve : MonoBehaviour
         int count = Math.Min(joints.Length - 1, MaxLengthLabels);
         while (lengthLabels.Count < count)
         {
-            TextBox label = TextBox.Create("", 1.6f);
+            TextBox label = TextBox.Create("", 1.35f);
             label.transform.SetParent(lengthLabelContainer.transform, false);
             label.Alignment = TMPro.TextAlignmentOptions.Center;
             label.Color = new Color(1f, 1f, 1f, .85f);
@@ -370,9 +370,13 @@ public class LimitCurve : MonoBehaviour
             lengthLabels[i].gameObject.SetActive(active);
             if (!active) continue;
             double length = Math.Pow(i + 1, -s.Re);
-            lengthLabels[i].Text = i == 0 ? "1" : length.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            int n = i + 1;
+            string len = length.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            lengthLabels[i].Text = Math.Abs(s.Re - .5) < 1e-9
+                ? $"<size=70%>step {n}</size>\n1/√{n} = {len}"
+                : $"<size=70%>step {n}</size>\n1/{n}^{s.Re:0.0#} = {len}";
             Vector3 mid = (joints[i] + joints[i + 1]) * .5f;
-            lengthLabels[i].transform.position = mid + Vector3.up * .05f + Vector3.back * .4f;
+            lengthLabels[i].transform.position = mid + Vector3.up * .05f + Vector3.back * .75f;
         }
     }
 

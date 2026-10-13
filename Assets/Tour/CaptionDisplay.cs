@@ -165,6 +165,7 @@ public class CaptionDisplay : MonoBehaviour
         cardMedallion.sprite = CircleSprite();
         cardMedallion.color = new Color(0.1f, 0.1f, 0.16f, 1f);
         cardMedallion.raycastTarget = false;
+        medGo.AddComponent<Mask>().showMaskGraphic = true;
         RectTransform medRect = cardMedallion.rectTransform;
         medRect.anchorMin = new Vector2(0, 0.5f);
         medRect.anchorMax = new Vector2(0, 0.5f);
@@ -251,7 +252,14 @@ public class CaptionDisplay : MonoBehaviour
         Texture2D portrait = Resources.Load<Texture2D>("Portraits/" + id);
         cardPortrait.enabled = portrait != null;
         cardGlyph.enabled = portrait == null;
-        if (portrait != null) cardPortrait.texture = portrait;
+        if (portrait != null)
+        {
+            cardPortrait.texture = portrait;
+            float aspect = (float)portrait.width / portrait.height;
+            cardPortrait.uvRect = aspect > 1f
+                ? new Rect((1f - 1f / aspect) * .5f, 0f, 1f / aspect, 1f)
+                : new Rect(0f, (1f - aspect) * .5f + (1f - aspect) * .25f, 1f, aspect);
+        }
         if (cardRoutine != null) StopCoroutine(cardRoutine);
         cardRoutine = StartCoroutine(CardIn(id == "machine"));
     }

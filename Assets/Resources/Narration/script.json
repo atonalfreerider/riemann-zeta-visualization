@@ -2,14 +2,14 @@
   "title": "The Square-Root Key: a machine for manufacturing primes",
   "chapters": [
     {
-      "id": "zeno",
-      "title": "Zeno's Chain",
-      "subtitle": "and a gentler rule",
+      "id": "hook",
+      "title": "The Primes",
+      "subtitle": "Building blocks with no pattern",
       "lines": [
         {
-          "id": "zeno_01",
-          "text": "Zeno's old puzzle. Walk half way to the wall. Then half of what is left. Then half again. Infinitely many steps, and you never pass two.",
-          "camera": "zeno",
+          "id": "hook_01",
+          "text": "Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.",
+          "camera": "primes_grid",
           "actions": [
             "reset",
             "pause",
@@ -17,6 +17,43 @@
             "hide:outaxes",
             "hide:imaxis",
             "hide:polelabel",
+            "primes:on",
+            "primes:build"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "hook_02",
+          "text": "Every whole number is made of primes: twelve is two times two times three. But where the next prime will fall has puzzled us for more than two thousand years.",
+          "camera": "primes_grid",
+          "actions": [
+            "pulse:primes"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "hook_03",
+          "text": "Find their pattern, and you unlock one of the deepest secrets of the mathematical structure of the universe. This is the story of a square root, a dial, a spiral, and a staircase.",
+          "camera": "primes_grid",
+          "actions": [
+            "pulse:primes"
+          ],
+          "pause": 0.6
+        }
+      ]
+    },
+    {
+      "id": "zeno",
+      "title": "Zeno's Chain",
+      "subtitle": "and a gentler rule",
+      "lines": [
+        {
+          "id": "zeno_01",
+          "text": "Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. Infinitely many steps, and you never pass two.",
+          "camera": "zeno",
+          "actions": [
+            "primes:off",
+            "hide:spiral",
             "show:zeno",
             "zeno:reset",
             "zeno:build",
@@ -35,7 +72,7 @@
         },
         {
           "id": "zeno_03",
-          "text": "Now a gentler rule. The second arrow is one over the square root of two. The third, one over root three. Every arrow is one over the square root of its number.",
+          "text": "Now a gentler rule, step by step. Step one: length one. Step two: one over the square root of two. Step three: one over root three. Every arrow is one over the square root of its number.",
           "camera": "zeno",
           "actions": [
             "card:off",
@@ -84,16 +121,22 @@
             "show:outaxes",
             "show:imaxis",
             "show:polelabel",
+            "axes:sprout",
             "pulse:outaxes"
           ],
           "pause": 0.4
         },
         {
           "id": "stage_02",
-          "text": "The pole is a dial. Its reading is called t. Turn it, and every joint in the chain bends.",
+          "text": "The pole is a dial. Its reading is called t. Turn it, and watch: every joint in the chain begins to bend.",
           "camera": "stage",
           "actions": [
             "show:center",
+            "terms:24",
+            "show:spiral",
+            "hide:lengths",
+            "speed:0.25",
+            "play",
             "pulse:imaxis"
           ],
           "pause": 0.5
@@ -107,41 +150,41 @@
       "lines": [
         {
           "id": "turn_01",
-          "text": "Each joint bends by the dial reading times the log of its number. The straight chain curls into a spiral.",
-          "camera": "spiral_curl",
+          "text": "Each joint bends by the dial reading times the log of its number. At joint two, t times log two. At joint three, t times log of three over two. Turn the dial, and every angle grows together.",
+          "camera": "spiral_angles",
           "actions": [
-            "terms:24",
-            "show:spiral",
-            "show:center",
             "hide:polelabel",
-            "speed:0.35",
+            "angles:on",
+            "speed:0.3",
             "play"
           ],
-          "pause": 0.3
+          "pause": 0.4
         },
         {
           "id": "turn_02",
-          "text": "The chain is endless, so one orange arrow stands in for the whole rest of it.",
+          "text": "The chain is endless. Watch the arrows we skip: they wind up like a spring, orbiting one point. That point is where the endless chain truly ends.",
           "camera": "spiral_curl",
           "actions": [
-            "show:tail",
-            "flash:tail",
+            "angles:off",
             "tailghost:on",
             "card:euler",
             "speed:0.5",
             "pulse:tail"
           ],
-          "pause": 0.3,
-          "footnote": "faint line: the next 120 arrows we do not draw · orange: Euler–Maclaurin tail N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms"
+          "pause": 0.4,
+          "footnote": "faint spring: the next 120 arrows we do not draw"
         },
         {
           "id": "turn_03",
-          "text": "Why is one arrow enough? The arrows we skip all turn at nearly the same rate, so together they trace a small, predictable curl: the faint line. Euler and Maclaurin's formula pins that curl down exactly, to a trillionth.",
+          "text": "One orange arrow jumps straight to it. Euler and Maclaurin's formula pins that point down exactly, to a trillionth.",
           "camera": "spiral_curl",
           "actions": [
+            "show:tail",
+            "flash:tail",
             "pulse:tail"
           ],
-          "pause": 0.4
+          "pause": 0.4,
+          "footnote": "orange: Euler–Maclaurin tail N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms"
         },
         {
           "id": "turn_04",
@@ -201,7 +244,7 @@
       "lines": [
         {
           "id": "wave_01",
-          "text": "Start with an ordinary cosine wave, and a dial, gamma, that sets its speed.",
+          "text": "Start with an ordinary cosine wave, and a dial, gamma, that sets its speed. The yellow mark on the dial is the first collision height.",
           "camera": "wave",
           "actions": [
             "pause",
@@ -241,16 +284,17 @@
         },
         {
           "id": "wave_04",
-          "text": "Set the dial to the first collision height, fourteen point one three. This is the first collision's wave.",
+          "text": "Dial it up to fourteen point one three. This is the first collision's wave, and its dial goes on the shelf at the top.",
           "camera": "wave",
           "actions": [
-            "wave:dial:14.134725"
+            "wave:dial:14.134725",
+            "dialstrip:1"
           ],
           "pause": 0.4
         },
         {
           "id": "wave_05",
-          "text": "Take the second collision, twenty one point zero two, build its wave the same way, and add it on top. Watch the two merge: where they agree the peaks reinforce, where they disagree they cancel.",
+          "text": "Now the second collision, in magenta. Its own dial turns to twenty one point zero two and its wave lands on the same line. Watch them merge: where they agree the peaks reinforce, where they disagree they cancel.",
           "camera": "wave",
           "actions": [
             "cosine:1",
@@ -263,7 +307,7 @@
         },
         {
           "id": "wave_06",
-          "text": "Keep going. The third wave. The fourth. Ten waves. Watch the pattern cancel itself out, wave by wave.",
+          "text": "Keep going. Each new dial adds a wave, and each new wave cancels more of the pattern.",
           "camera": "wave",
           "actions": [
             "cosine:build:2:10"
@@ -283,9 +327,11 @@
         },
         {
           "id": "wave_08",
-          "text": "A map of where the primes are, built from nothing but collision heights.",
+          "text": "The spikes sit exactly on two, three, five, seven, eleven, thirteen. A map of the primes, built from nothing but collision heights.",
           "camera": "spikes",
           "actions": [
+            "primes:arrows",
+            "primes:highlight",
             "pulse:numbers"
           ],
           "pause": 0.6
@@ -299,17 +345,19 @@
       "lines": [
         {
           "id": "stair_01",
-          "text": "Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision.",
+          "text": "Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision. Watch the line bend into steps.",
           "camera": "staircase_close",
           "actions": [
             "pause",
-            "hide:cosine",
+            "primes:noarrows",
             "hide:numbers",
+            "dialstrip:clear",
+            "hide:cosine",
             "show:prime",
-            "card:riemann",
-            "pulse:prime"
+            "stair:build",
+            "card:riemann"
           ],
-          "pause": 0.3
+          "pause": 0.4
         },
         {
           "id": "stair_02",
@@ -386,7 +434,7 @@
       "lines": [
         {
           "id": "key_01",
-          "text": "Back to the key. Everything used the square root: exponent one half. Change it to zero point nine and watch.",
+          "text": "Back to the key. Every arrow was one over the square root of n: exponent one half.",
           "camera": "sigma_spiral",
           "actions": [
             "pause",
@@ -394,22 +442,24 @@
             "hide:cosine",
             "hide:trail",
             "hide:imaxis",
-            "jump:14.134725",
-            "sigma:0.9",
+            "jump:14.14",
             "terms:auto",
             "show:spiral",
             "show:tail",
             "show:tip",
             "show:center",
+            "rootlabel:sqrt",
             "pulse:spiral"
           ],
-          "pause": 0.3
+          "pause": 0.4
         },
         {
           "id": "key_02",
-          "text": "The spiral is tighter, and the tip never hits the centre. No collisions at all.",
+          "text": "Change the exponent to zero point nine and watch. The spiral is tighter, and the tip never hits the centre. No collisions at all.",
           "camera": "sigma_spiral",
           "actions": [
+            "sigma:0.9",
+            "rootlabel:0.9",
             "speed:2.5",
             "play"
           ],
@@ -422,6 +472,7 @@
           "actions": [
             "pause",
             "sigma:0.5",
+            "rootlabel:off",
             "hide:spiral",
             "hide:tail",
             "hide:tip",
@@ -433,16 +484,17 @@
         },
         {
           "id": "key_04",
-          "text": "Suppose a collision strayed off that line, out to zero point nine. Its wave would grow like x to the zero point nine, and the staircase would wobble off the rails.",
+          "text": "Suppose the collisions strayed off that line. Slide the exponent up toward zero point nine and back, and watch the staircase wobble off the rails.",
           "camera": "wobble",
           "actions": [
             "hide:strip",
             "show:prime",
             "ghost:all:0.9",
+            "ghost:sweep:0.55:0.95:pingpong",
             "pulse:ghost"
           ],
           "pause": 0.5,
-          "footnote": "red: the staircase if every collision had exponent 0.9 instead of ½"
+          "footnote": "red: the staircase if every collision had exponent β instead of ½"
         },
         {
           "id": "key_05",
@@ -511,12 +563,12 @@
     },
     {
       "id": "outro",
-      "title": "Watch the Spiral Climb",
+      "title": "Written Into the Universe",
       "subtitle": "",
       "lines": [
         {
           "id": "outro_01",
-          "text": "A chain that shrinks by the square root. A dial that turns. A tip that keeps striking the centre. And a staircase of primes that falls out of it.",
+          "text": "A square root. A dial. A spiral that keeps striking its centre. Waves that cancel into a map of the primes.",
           "camera": "outro",
           "actions": [
             "hide:strip",
@@ -534,9 +586,20 @@
         },
         {
           "id": "outro_02",
-          "text": "Watch the spiral climb.",
+          "text": "Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.",
           "camera": "outro",
-          "actions": [],
+          "actions": [
+            "pulse:zeros"
+          ],
+          "pause": 0.5
+        },
+        {
+          "id": "outro_03",
+          "text": "Prove the one half key, and we will have read one line of that instruction set. Watch the spiral climb.",
+          "camera": "outro",
+          "actions": [
+            "pulse:prime"
+          ],
           "pause": 3.0
         }
       ]
