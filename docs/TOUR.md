@@ -79,8 +79,10 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `build:A:B` | animate the arrow count from A to B across the line |
 | `sigma:S` | shrink rate / real part of s (½ is the critical line; nothing else drops markers) |
 | `cosine:N` / `cosine:all` | how many collisions the wave chorus sums |
+| `cosine:build:A:B` | add collision waves one at a time across the line (each previewed, then merged); B may be `all` |
+| `wave:plain` / `wave:morph` / `wave:off` | ordinary cosine, morph it into the first collision's wave, hide |
 | `labels:N` | numeric labels on the first N zero markers |
-| `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
+| `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
 | `ghost:all:β` | draw the staircase as if every collision had shrink rate β |
 | `ghost:β:γ`, `ghost:off` | a single hypothetical zero at β + iγ |
