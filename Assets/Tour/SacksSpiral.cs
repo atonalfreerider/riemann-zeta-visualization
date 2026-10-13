@@ -1066,7 +1066,7 @@ public class SacksSpiral : MonoBehaviour
     void SetInterference(int k)
     {
         double[] zs = Main.Instance.zetaZeroValues;
-        float scale = FieldAmp / Mathf.Sqrt(k);
+        float scale = FieldAmp / Mathf.Sqrt(Mathf.Max(1, k));
         for (int i = 0; i < fieldRings.Count; i++)
         {
             float n = fieldN[i];
