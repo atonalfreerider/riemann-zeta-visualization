@@ -92,10 +92,9 @@ public class FrameRecorder : MonoBehaviour
         {
             if (request.hasError) return;
             byte[] data = request.GetData<byte>().ToArray();
-            bool flip = NeedsFlip;
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                byte[] flipped = flip ? FlipVertically(data, w, h, 4) : data;
+                byte[] flipped = data; // PNG encoder consumes Unity's bottom-up layout directly
                 File.WriteAllBytes(path, ImageConversion.EncodeArrayToPNG(flipped, GraphicsFormat.R8G8B8A8_UNorm, (uint)w, (uint)h));
             });
         });
@@ -249,7 +248,7 @@ public class FrameRecorder : MonoBehaviour
         {
             if (usePng)
             {
-                byte[] flipped = needsFlip ? FlipVertically(frame, Width, Height, 4) : frame;
+                byte[] flipped = frame; // PNG encoder consumes Unity's bottom-up layout directly
                 byte[] png = ImageConversion.EncodeArrayToPNG(flipped, GraphicsFormat.R8G8B8A8_UNorm, (uint)Width, (uint)Height);
                 File.WriteAllBytes(Path.Combine(OutputDirectory, "frames", $"frame_{written:D6}.png"), png);
             }
@@ -263,9 +262,9 @@ public class FrameRecorder : MonoBehaviour
     }
 
     /// <summary>
-    /// Whether readback rows must be flipped before encoding. Verified on Linux/OpenGL (no flip needed);
-    /// APIs with top-left UV origin render the camera target upside down relative to that.
-    /// Override with the environment variable ZETA_FLIP=0/1 if a platform disagrees.
+    /// AsyncGPUReadback returns rows in Unity's texture order (bottom row first). ImageConversion's PNG
+    /// encoder expects exactly that, so PNGs need no flip; ffmpeg's raw input is top-down, so the video
+    /// stream is flipped with -vf vflip. Override with ZETA_FLIP=0/1 if a platform disagrees.
     /// </summary>
     static bool NeedsFlip
     {
@@ -274,7 +273,7 @@ public class FrameRecorder : MonoBehaviour
             string env = Environment.GetEnvironmentVariable("ZETA_FLIP");
             if (env == "0") return false;
             if (env == "1") return true;
-            return SystemInfo.graphicsUVStartsAtTop;
+            return true;
         }
     }
     bool needsFlip;

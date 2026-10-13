@@ -102,7 +102,7 @@
         },
         {
           "id": "chain_06",
-          "text": "The chain is endless, so we add one honest orange arrow standing in for every arrow too small to draw. Now the tip is exact.",
+          "text": "The chain is endless, so we add one orange arrow that stands in for the whole rest of the chain. Now the tip is exact.",
           "camera": "spiral_curl",
           "actions": [
             "show:tail",

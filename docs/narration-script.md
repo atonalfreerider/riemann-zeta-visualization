@@ -33,7 +33,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **chain_05** — Now turn the dial. At every joint, bend the chain by the dial reading times the log of the step number. The straight chain curls into a spiral.
   <sub>camera `spiral_curl` · actions `terms:24 show:center show:imaxis speed:0.35 play`</sub>
 
-**chain_06** — The chain is endless, so we add one honest orange arrow standing in for every arrow too small to draw. Now the tip is exact.
+**chain_06** — The chain is endless, so we add one orange arrow that stands in for the whole rest of the chain. Now the tip is exact.
   <sub>camera `spiral_curl` · actions `show:tail flash:tail speed:0.5` · footnote: the orange arrow is the Euler–Maclaurin tail: N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms</sub>
 
 **chain_07** — Here is the strange talent of the one half rule. Keep turning, and the tip wanders, then dives straight into the centre.
