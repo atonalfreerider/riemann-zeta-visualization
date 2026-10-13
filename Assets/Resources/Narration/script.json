@@ -9,7 +9,7 @@
         {
           "id": "hook_01",
           "text": "Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.",
-          "camera": "primes_grid",
+          "camera": "sieve",
           "actions": [
             "reset",
             "pause",
@@ -19,20 +19,27 @@
             "hide:polelabel",
             "primes:on",
             "primes:build",
-            "delay:3:sacks:sieve:22"
+            "delay:3:sacks:sieve:52"
           ],
           "pause": 0.4
         },
         {
           "id": "hook_02",
-          "text": "Break the grid open and let every number find its place on a spiral. Now start at two and draw an axis: two times two, two times three, two times five, two times seven. Each product is struck off.",
+          "text": "Break the grid open and let every number find its place on the spiral. Now multiply. Two dots leave the two along one axis, two more along the other: a square of four dots. Count them along the spiral road, and they land on four, a perfect square.",
           "camera": "sieve",
           "actions": [],
-          "pause": 0.4
+          "pause": 0.3
+        },
+        {
+          "id": "hook_02b",
+          "text": "Two dots from the two, three dots from the three: six dots in a rectangle, counted along the road to six. Then two by five makes ten dots, two by seven makes fourteen.",
+          "camera": "sieve",
+          "actions": [],
+          "pause": 0.3
         },
         {
           "id": "hook_03",
-          "text": "Start a new axis at three: three times three, three times five, three times seven. Then another at five: five times five. Axis by axis, the sieve strikes out every composite, and where a prime meets itself you get a perfect square, in orange.",
+          "text": "Three by three: nine dots, and the road ends on the next perfect square. Three by five, three by seven, then five by five. Every composite is a rectangle of dots; every square is a square of dots, in orange.",
           "camera": "sieve",
           "actions": [
             "pulse:primes"

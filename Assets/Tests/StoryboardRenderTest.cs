@@ -40,6 +40,8 @@ public class StoryboardRenderTest
         if (float.TryParse(Environment.GetEnvironmentVariable("ZETA_STORYBOARD_SECONDS"), out float seconds)) director.StoryboardSecondsPerLine = seconds;
         string chapter = Environment.GetEnvironmentVariable("ZETA_CHAPTER");
         if (!string.IsNullOrEmpty(chapter)) director.StartChapter = chapter;
+        string endChapter = Environment.GetEnvironmentVariable("ZETA_END_CHAPTER");
+        if (!string.IsNullOrEmpty(endChapter)) director.EndChapter = endChapter;
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_FPS"), out int fps)) director.Recorder.Fps = fps;
 
         if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.GetComponent<Canvas>().enabled = false; // clean frames for thumbnails

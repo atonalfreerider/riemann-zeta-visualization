@@ -64,3 +64,6 @@ crashlytics-build.properties
 
 .idea
 /Recordings/
+
+# Unity test runner scratch scenes
+/Assets/InitTestScene*

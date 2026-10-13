@@ -176,8 +176,8 @@ public class CameraRig : MonoBehaviour
         cues["lattice"] = () => new CueState { Position = new Vector3(-31f, 15.5f, -27f), LookAt = new Vector3(-31f, 15.5f, 0f), Up = up, Fov = 60 };
         cues["sieve"] = () =>
         {
-            Vector3 c = annotations.Sacks.Center;
-            return new CueState { Position = c + new Vector3(0, -0.5f, -19f), LookAt = c, Up = up, Fov = 60 };
+            Vector3 c = annotations.Sacks.Center + new Vector3(0, 2.4f, 0);
+            return new CueState { Position = c + new Vector3(0, 0, -27f), LookAt = c, Up = up, Fov = 60 };
         };
         cues["sacks_flat"] = () =>
         {

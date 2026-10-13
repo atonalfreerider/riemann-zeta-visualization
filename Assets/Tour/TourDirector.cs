@@ -26,6 +26,8 @@ public class TourDirector : MonoBehaviour
     public string RecordDirectory = "";
     public bool Portrait = true;
     public string StartChapter = "";
+    /// <summary>Stop after this chapter id (empty = play to the end).</summary>
+    public string EndChapter = "";
     public float ChapterTitleSeconds = 3.2f;
 
     public bool Running { get; private set; }
@@ -292,6 +294,8 @@ public class TourDirector : MonoBehaviour
             {
                 yield return PlayLine(line);
             }
+
+            if (!string.IsNullOrEmpty(EndChapter) && chapter.id == EndChapter) break;
         }
 
         Captions.Clear();
@@ -510,7 +514,12 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "saddle") StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f)));
                         else if (arg == "flat") StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f)));
                         else if (arg == "lattice") StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f)));
-                        else if (arg == "sieve") StartCoroutine(Annotations.Sacks.SieveRoutine(parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(8f, currentLineSeconds * 2f)));
+                        else if (arg == "sieve")
+                        {
+                            float seconds = parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(8f, currentLineSeconds * 2f);
+                            if (Storyboard) seconds *= StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f);
+                            Annotations.Sacks.StartSieve(seconds);
+                        }
                         else if (arg == "squares") Annotations.Sacks.PulseSquares(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "composites") Annotations.Sacks.PulseComposites(Mathf.Max(2f, currentLineSeconds * 0.8f));
                         else if (arg == "routes") Annotations.Sacks.ShowRoutes(true);

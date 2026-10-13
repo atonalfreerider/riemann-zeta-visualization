@@ -7,12 +7,15 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *Building blocks with no pattern*
 
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
-  <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:22`</sub>
+  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:52`</sub>
 
-**hook_02** — Break the grid open and let every number find its place on a spiral. Now start at two and draw an axis: two times two, two times three, two times five, two times seven. Each product is struck off.
+**hook_02** — Break the grid open and let every number find its place on the spiral. Now multiply. Two dots leave the two along one axis, two more along the other: a square of four dots. Count them along the spiral road, and they land on four, a perfect square.
   <sub>camera `sieve`</sub>
 
-**hook_03** — Start a new axis at three: three times three, three times five, three times seven. Then another at five: five times five. Axis by axis, the sieve strikes out every composite, and where a prime meets itself you get a perfect square, in orange.
+**hook_02b** — Two dots from the two, three dots from the three: six dots in a rectangle, counted along the road to six. Then two by five makes ten dots, two by seven makes fourteen.
+  <sub>camera `sieve`</sub>
+
+**hook_03** — Three by three: nine dots, and the road ends on the next perfect square. Three by five, three by seven, then five by five. Every composite is a rectangle of dots; every square is a square of dots, in orange.
   <sub>camera `sieve` · actions `pulse:primes`</sub>
 
 **hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
@@ -179,4 +182,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `sacks_saddle` · actions `pulse:sacks`</sub>
 
 ---
-1369 words ≈ 9.1 minutes of speech at 150 wpm, plus pauses and title cards.
+1407 words ≈ 9.4 minutes of speech at 150 wpm, plus pauses and title cards.
