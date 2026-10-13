@@ -15,6 +15,7 @@ public class TourSmokeTest
     public IEnumerator TourRunsThroughEveryLineWithoutErrors()
     {
         LogAssert.ignoreFailingMessages = false;
+        Time.captureFramerate = 30; // deterministic frame time (headless runs otherwise tick with ~0 deltaTime)
         SceneManager.LoadScene("zeta");
         yield return null;
         yield return null;
@@ -54,6 +55,7 @@ public class TourSmokeTest
 
         Assert.IsFalse(director.Running, "tour did not finish");
         Assert.Greater(main.CurrentT, 10, "animation did not advance during the tour");
+        Time.captureFramerate = 0;
     }
 }
 

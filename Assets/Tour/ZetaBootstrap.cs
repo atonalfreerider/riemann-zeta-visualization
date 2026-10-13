@@ -13,6 +13,19 @@ public static class ZetaBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Initialize()
     {
+        Ensure();
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    static void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        Ensure();
+    }
+
+    /// <summary>Adds bloom and the tour to the current scene if it contains the visualization and has no tour yet.</summary>
+    public static void Ensure()
+    {
         Main main = UnityEngine.Object.FindAnyObjectByType<Main>();
         if (main == null) return; // not the visualization scene
 
