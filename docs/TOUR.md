@@ -83,10 +83,18 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `wave:plain[:γ]` / `wave:dial:γ` / `wave:log` / `wave:off` | ordinary cosine; sweep the γ dial across the line; bend with the logarithm; hide |
 | `dial:on` / `dial:off` | the on-screen γ dial (needle follows the demo wave) |
 | `zeno:build` / `zeno:reset` | grow Zeno's halving chain arrow by arrow |
-| `card:<id>` / `card:off` | character card: `zeno` `euler` `riemann` `hardy` `machine` (portrait from `Resources/Portraits/<id>.png` if present, else a glyph medallion) |
+| `card:<id>` / `card:off` | character card: `zeno` `euler` `riemann` `hardy` `machine` (portraits for zeno/euler/riemann/hardy come from Wikimedia Commons, see `Assets/Resources/Portraits/CREDITS.md`; `machine` uses a glyph medallion) |
 | `trail:thin` / `trail:full` | the tip's path: barely visible, or grown to full width and glow |
 | `tailghost:on` / `tailghost:off` | faint path of the next 120 arrows the orange tail replaces |
-| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost`) |
+| `primes:on` / `primes:build` / `primes:off` | the 1..30 intro grid; `build` lights the primes one by one and shows factorisations |
+| `primes:arrows` / `primes:noarrows` / `primes:highlight` | red arrows over the spikes; highlight 2, 3, 5, 7, 11, 13 in sequence |
+| `axes:sprout` | grow the floor axes and the pole outward across the line |
+| `angles:on` / `angles:off` | arcs and degree labels at each joint, with the t·log(n/(n−1)) rule |
+| `dialstrip:N` / `dialstrip:clear` | add collision N's dial to the shelf at the top (also added automatically by `cosine:build`) |
+| `stair:build` | morph the straight line y = x into the staircase |
+| `rootlabel:sqrt` / `rootlabel:0.9` / `rootlabel:off` | the shrink rule written beside the spiral |
+| `ghost:sweep:A:B[:pingpong]` | sweep the rogue exponent β from A to B while the red staircase and its formula follow |
+| `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `angles` `dialstrip` `primearrows`) |
 | `labels:N` | numeric labels on the first N zero markers |
 | `show:X` / `hide:X` | `spiral` `tail` `arrows` `lengths` `tip` `center` `trail` `zeros` `grid` `equations` `cosine` `prime` `numbers` `polelabel` `zeno` `imaxis` `outaxes` `axes` `strip` `zcurve` `band78` `band18` `classic` `band1112` `gap` |
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
