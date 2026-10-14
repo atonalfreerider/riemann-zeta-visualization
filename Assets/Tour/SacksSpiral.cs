@@ -1545,6 +1545,7 @@ public class SacksSpiral : MonoBehaviour
         }
 
         FullWaveRunning = false;
+        Debug.Log($"FullMasterWave: {zeros} zeros × {fullSamples} samples ready after {t:0.0} s");
     }
 
     void UploadFullWave(double[] sums)
