@@ -796,7 +796,7 @@ public class SacksSpiral : MonoBehaviour
                 SetDecided(j, true);
                 open.startColor = open.endColor = MultiplierColor;
                 Tag($"{j} is prime", 2.1f, MultiplierColor, Outside(j, 2.0f));
-                Board(BoardText(pm + $" = {n}", $"no product ever lands on <color=#{hp}>{j}</color>: it is prime, and joins the multipliers", Tally()));
+                Board(BoardText(pm + $" = {n}", $"every product overshoots <color=#{hp}>{j}</color>: it is prime, and joins the multipliers", Tally()));
                 yield return new WaitForSeconds(per * .45f);
                 StartCoroutine(FadeRing(open, 0f, 1.2f)); // the circle has done its job; the prime's own dot stays
             }

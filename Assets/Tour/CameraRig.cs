@@ -139,10 +139,12 @@ public class CameraRig : MonoBehaviour
         cues["ghost"] = () => new CueState { Position = new Vector3(52, 46, -120), LookAt = new Vector3(52, 48, 0), Up = up, Fov = 60 };
 
         // ---- chapter 7: 7/8 --------------------------------------------------------------
-        cues["strip_band"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 1.0f, 9, -10), LookAt = new Vector3(Annotations.PanelCenterX + 1.0f, 9, 0), Up = up, Fov = 60 };
+        // the band labels reach about 5.6 units either side of the band's centre: back off far enough to keep them in a tall frame
+        float StripFit(float near) => Mathf.Max(near, 5.6f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
+        cues["strip_band"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 1.0f, 9, -StripFit(10f)), LookAt = new Vector3(Annotations.PanelCenterX + 1.0f, 9, 0), Up = up, Fov = 60 };
         cues["strip_band_sym"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX, 9, -11), LookAt = new Vector3(Annotations.PanelCenterX, 9, 0), Up = up, Fov = 60 };
         cues["strip_band_classic"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 1.2f, 16, -22), LookAt = new Vector3(Annotations.PanelCenterX + 1.2f, 18, 0), Up = up, Fov = 60 };
-        cues["strip_gap"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 0.75f, 6, -8), LookAt = new Vector3(Annotations.PanelCenterX + 0.75f, 6, 0), Up = up, Fov = 60 };
+        cues["strip_gap"] = () => new CueState { Position = new Vector3(Annotations.PanelCenterX + 0.75f, 6, -StripFit(8f)), LookAt = new Vector3(Annotations.PanelCenterX + 0.75f, 6, 0), Up = up, Fov = 60 };
 
         // ---- from-scratch narrative --------------------------------------------------------
         cues["stage"] = () => new CueState { Position = new Vector3(4.5f, 4.2f, -9f), LookAt = new Vector3(1.2f, 2.6f, 1.2f), Up = up, Fov = 60 };

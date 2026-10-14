@@ -197,7 +197,7 @@ public class StaircaseLab : MonoBehaviour
     static string Formula(string highlight)
     {
         string H(string id, string text) => id == highlight ? $"<color=#FFD400>{text}</color>" : $"<color=#B4B4C0>{text}</color>";
-        return H("x", "x") + " " + H("const", "− ln 2π") + " " + H("trivial", "− ½ ln(1 − x⁻²)") + " " + H("waves", "− Σ<sub>γ</sub> 4√x (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)");
+        return H("x", "x") + " " + H("const", "− ln 2π") + " " + H("trivial", "− ½ ln(1 − x<sup>−2</sup>)") + " " + H("waves", "− Σ<sub>γ</sub> 4√x (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)");
     }
 
     void BoardTerms(string highlight, string detail) => Board("ψ(x) = " + Formula(highlight) + (string.IsNullOrEmpty(detail) ? "" : "\n<size=62%>" + detail + "</size>"));
@@ -327,7 +327,7 @@ public class StaircaseLab : MonoBehaviour
         for (int i = 0; i < TermsSamples; i++) term[i] = tx[i] > 1.0001 ? -.5 * System.Math.Log(1 - 1 / (tx[i] * tx[i])) : 0;
         trivialAdded = true;
         BoardTerms("trivial", "the trivial zeros at −2, −4, −6 …: a nudge near the start that fades away");
-        Run(Apply(term, new Color(.6f, .8f, 1f), "− ½ ln(1 − x⁻²)   (the trivial zeros, ×2 in this strip)", seconds, true));
+        Run(Apply(term, new Color(.6f, .8f, 1f), "− ½ ln(1 − x<sup>−2</sup>)   (the trivial zeros, ×2 in this strip)", seconds, true));
     }
 
     /// <summary>Add the waves of zeros from … to (exclusive; −1 = 300): one at a time with time to see each, then faster and faster.</summary>

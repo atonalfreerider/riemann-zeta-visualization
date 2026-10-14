@@ -816,12 +816,12 @@ public class Annotations : MonoBehaviour
             closestLine.positionCount = 2;
             closestDot = Factory.NewSphere("closest tip", .12f, new Color(1f, .6f, .2f), Factory.GlowIntensity);
             closestDot.transform.SetParent(missRoot.transform, false);
-            missLabel = TextBox.Create("", 3.4f);
+            missLabel = TextBox.Create("", 1.7f);
             missLabel.transform.SetParent(missRoot.transform, false);
             missLabel.Alignment = TMPro.TextAlignmentOptions.Left;
             missLabel.Color = Factory.Palette.Ghost;
             missLabel.gameObject.AddComponent<Billboard>();
-            closestLabel = TextBox.Create("", 3f);
+            closestLabel = TextBox.Create("", 1.4f);
             closestLabel.transform.SetParent(missRoot.transform, false);
             closestLabel.Alignment = TMPro.TextAlignmentOptions.Left;
             closestLabel.Color = new Color(1f, .6f, .2f);
