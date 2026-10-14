@@ -132,49 +132,58 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 6. The Staircase
 *Riemann's exact recipe*
 
-**stair_01** — Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision. Watch the line bend into steps.
-  <sub>camera `staircase_close` · actions `pause primes:noarrows hide:numbers dialstrip:clear hide:cosine show:prime stair:build card:riemann`</sub>
+**stair_01** — Riemann's exact recipe turns the collisions into a count of the primes, one piece at a time. The first piece is the straight line y equals x.
+  <sub>camera `stair_terms` · actions `pause primes:noarrows hide:numbers dialstrip:clear hide:cosine hide:prime hide:zetacurve hide:zeros hide:spiral hide:tail hide:tip hide:center hide:imaxis hide:outaxes hide:equations card:riemann stairlab:terms`</sub>
 
-**stair_02** — Each weight is fixed by the recipe. Nothing is tuned by hand.
-  <sub>camera `staircase_close` · actions `show:equations pulse:prime` · footnote: ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)</sub>
+**stair_02** — Next, subtract the logarithm of two pi. It is a constant, about one point eight, and it shifts the whole line down.
+  <sub>camera `stair_terms` · actions `card:off stairlab:const`</sub>
 
-**stair_03** — The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own. The squares and cubes are here too, as small orange steps.
-  <sub>camera `staircase` · actions `hide:equations primepowers:on speed:8 play pulse:primepowers`</sub>
+**stair_03** — Then a small correction from the trivial zeros, at minus two, minus four, minus six. It only matters near the start, and it fades away.
+  <sub>camera `stair_terms` · actions `stairlab:trivial`</sub>
 
-**stair_04** — More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.
-  <sub>camera `staircase_wide` · actions `primepowers:off card:off pulse:prime`</sub>
+**stair_04** — Now the first collision. Its wave grows like the square root of x and oscillates with the logarithm of x. On its own it only bends the line, up where the wave dips and down where it rises.
+  <sub>camera `stair_terms` · actions `stairlab:waves:0:1`</sub>
+
+**stair_05** — Add the second collision's wave, then the third. Each is smaller and faster than the last. Where they agree the line steps up; where they disagree it flattens.
+  <sub>camera `stair_terms` · actions `stairlab:waves:1:3`</sub>
+
+**stair_06** — Keep adding waves: ten, a hundred, three hundred. The steps sharpen exactly on two, three, five, seven, eleven and thirteen, and smaller steps appear on four, eight, nine, sixteen, twenty five and twenty seven, the powers of primes.
+  <sub>camera `stair_terms` · actions `stairlab:waves:3:all`</sub>
+
+**stair_07** — With enough collisions the staircase lands on the exact count. Every step is a prime or a power of one, and its height is the logarithm of that prime.
+  <sub>camera `stair_terms`</sub>
 
 ## 7. The Whole Machine
 
 **machine_01** — Now see it all at once. The chain shrinks by the square root rule. The dial turns. The tip strikes the centre, and every strike drops a marker on the pole.
-  <sub>camera `machine` · actions `show:spiral show:tail show:trail show:zeros show:imaxis show:cosine cosine:all speed:4 play pulse:zeros`</sub>
+  <sub>camera `machine` · actions `stairlab:off show:spiral show:tail show:trail show:zeros show:imaxis show:cosine cosine:all speed:4 play pulse:zeros`</sub>
 
-**machine_02** — Every marker becomes a wave, the waves pile up on the primes, and the staircase counts them. A machine for manufacturing prime numbers.
+**machine_02** — Every marker becomes a wave, the waves pile up on the primes, and the staircase counts them.
   <sub>camera `machine` · actions `pulse:prime`</sub>
 
 ## 8. The Square-Root Key
 *Why one half, and nothing else*
 
 **key_01** — Back to the key. Every arrow was one over the square root of n: exponent one half.
-  <sub>camera `sigma_spiral` · actions `pause hide:prime hide:cosine hide:trail hide:imaxis jump:14.14 terms:auto show:spiral show:tail show:tip show:center rootlabel:sqrt pulse:spiral`</sub>
+  <sub>camera `sigma_spiral` · actions `pause hide:prime hide:cosine hide:trail hide:imaxis jump:14.14 terms:auto show:spiral show:tail show:tip show:center rootlabel:sqrt pulse:spiral miss:on`</sub>
 
 **key_02** — Change the exponent to zero point nine and watch. The spiral is tighter, and the tip never hits the centre. No collisions at all.
-  <sub>camera `sigma_spiral` · actions `sigma:0.9 rootlabel:0.9 speed:2.5 play`</sub>
+  <sub>camera `sigma_spiral` · actions `sigma:0.9 rootlabel:0.9 speed:2.5 play miss:on`</sub>
 
 **key_03** — Picture every possible exponent between zero and one as a strip. Our collisions all sit on the one half line, right down the middle.
-  <sub>camera `strip_panel` · actions `pause sigma:0.5 rootlabel:off hide:spiral hide:tail hide:tip hide:center show:strip pulse:strip`</sub>
+  <sub>camera `strip_panel` · actions `miss:off pause sigma:0.5 rootlabel:off hide:spiral hide:tail hide:tip hide:center show:strip pulse:strip`</sub>
 
 **key_04** — Suppose the collisions strayed off that line. Slide the exponent up toward zero point nine and back, and watch the staircase wobble off the rails.
-  <sub>camera `wobble` · actions `hide:strip show:prime ghost:all:0.9 ghost:sweep:0.55:0.95:pingpong pulse:ghost` · footnote: red: the staircase if every collision had exponent β instead of ½</sub>
+  <sub>camera `stair_wobble` · actions `hide:strip hide:cosine hide:prime hide:zetacurve hide:zeros hide:spiral hide:tail hide:tip hide:center hide:imaxis hide:outaxes hide:equations stairlab:wobble:40:0.5 stairlab:sweep:0.5:0.95:pingpong` · footnote: red: the staircase if every collision had exponent β instead of ½</sub>
 
 **key_05** — The Riemann Hypothesis says it never happens: every collision, forever, exactly on the one half line. That is why the square root is the magic key.
-  <sub>camera `wobble` · actions `ghost:off pulse:prime`</sub>
+  <sub>camera `stair_wobble` · actions `stairlab:beta:0.5`</sub>
 
 ## 9. 2026: A Wall at Seven Eighths
 *OpenAI's quasi-Riemann hypothesis claim*
 
 **qrh_01** — In October 2026, OpenAI published an AI generated proof that no collision can stray past seven eighths. They call it the quasi Riemann hypothesis.
-  <sub>camera `strip_band` · actions `hide:prime show:strip show:band78 card:machine pulse:band78` · footnote: openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026</sub>
+  <sub>camera `strip_band` · actions `stairlab:off hide:prime show:strip show:band78 card:machine pulse:band78` · footnote: openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026</sub>
 
 **qrh_02** — By symmetry, nothing below one eighth either. The blue bands are a wall: no collision can live there.
   <sub>camera `strip_band_sym` · actions `show:band18 pulse:band18`</sub>
@@ -188,10 +197,10 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 10. Written Into the Universe
 
 **outro_01** — A square root. A dial. A spiral that keeps striking its centre. Waves that cancel into a map of the primes.
-  <sub>camera `outro` · actions `hide:strip hide:gap show:spiral show:tail show:trail show:zeros show:prime show:imaxis speed:4 play`</sub>
+  <sub>camera `sacks_saddle` · actions `pause hide:strip hide:gap stairlab:off hide:cosine hide:prime hide:zetacurve hide:zeros hide:spiral hide:tail hide:tip hide:center hide:imaxis hide:outaxes hide:equations hide:trail sacks:show sacks:saddle`</sub>
 
 **outro_02** — Put the keys together and something strange appears. The primes, the most irregular objects in arithmetic, obey a rule written into the structure of numbers themselves, as if the mathematics of the universe came with these instructions built in.
-  <sub>camera `sacks_saddle` · actions `pause hide:prime hide:spiral hide:tail hide:trail hide:zeros hide:imaxis hide:cosine sacks:show sacks:saddle sacks:routes pulse:sacks`</sub>
+  <sub>camera `sacks_saddle` · actions `pause hide:prime hide:spiral hide:tail hide:trail hide:zeros hide:imaxis hide:cosine sacks:routes pulse:sacks`</sub>
 
 **outro_03** — One last picture, and this one is a guess, not a result. Keep the spiral on the saddle, and let the zeta trail rise from its centre, with a collision wherever the trail returns to the axis.
   <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:grow:101.5:28` · footnote: a visual hypothesis, not a theorem</sub>
@@ -209,4 +218,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `home_orbit` · actions `home:scene` · footnote: open the side menu (M) to explore this picture, pick a chapter or record</sub>
 
 ---
-1924 words ≈ 12.8 minutes of speech at 150 wpm, plus pauses and title cards.
+2032 words ≈ 13.5 minutes of speech at 150 wpm, plus pauses and title cards.

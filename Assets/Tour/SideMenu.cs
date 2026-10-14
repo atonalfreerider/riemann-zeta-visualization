@@ -7,8 +7,9 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 /// <summary>
-/// The desktop and phone interface: a panel that tucks into the left edge (tab or M to open and close).
-///   View      Home (the growing saddle) · Explore (fly around the final picture) · Graph (the original zeta / staircase graph)
+/// The desktop and phone interface: a panel that tucks into the left edge (the arrow at the middle of the edge, or M).
+///   View      Saddle (the graph view: the growing trail over the saddle, orbit camera) · XY graph (the original zeta / staircase graph)
+///   Layers    saddle or flat, master wave, zeta trail, chain, numbers, the three curves (k², k(k+1), k² + k + 41), trail height
 ///   Format    16:9 or 9:16: the tour's framing, caption layout and recording size
 ///   Tour      play the whole tour, or start at any chapter; stop
 ///   Record    record the whole tour or a single chapter (the ● on its row) in the chosen format
@@ -26,10 +27,12 @@ public class SideMenu : MonoBehaviour
     static readonly Color DimText = new(0.6f, 0.6f, 0.68f);
 
     TourDirector director;
-    RectTransform panel;
+    RectTransform panel, arrow;
+    readonly System.Collections.Generic.List<(Image image, System.Func<bool> on)> toggles = new();
+    TextMeshProUGUI heightLabel;
     bool open = true;
     float slide = 1f;
-    Image landscapeButton, portraitButton, homeButton, exploreButton, graphButton;
+    Image landscapeButton, portraitButton, homeButton, graphButton;
     TextMeshProUGUI status;
     readonly List<Image> chapterRows = new();
     Button stopRecordingButton;
@@ -77,25 +80,33 @@ public class SideMenu : MonoBehaviour
         panel.sizeDelta = new Vector2(PanelWidth, 0);
         panelGo.AddComponent<Image>().color = PanelColor;
 
-        // the tab hangs off the panel's right edge, so it stays on screen when the panel is tucked away
+        // the tab: a small arrow hanging off the panel's right edge at mid height, so it stays on screen when tucked away
         GameObject tabGo = new("Tab");
         tabGo.transform.SetParent(panel, false);
         RectTransform tab = tabGo.AddComponent<RectTransform>();
-        tab.anchorMin = tab.anchorMax = new Vector2(1, 1);
-        tab.pivot = new Vector2(0, 1);
-        tab.anchoredPosition = new Vector2(0, -24);
-        tab.sizeDelta = new Vector2(66, 66);
+        tab.anchorMin = tab.anchorMax = new Vector2(1, .5f);
+        tab.pivot = new Vector2(0, .5f);
+        tab.anchoredPosition = Vector2.zero;
+        tab.sizeDelta = new Vector2(30, 62);
         Image tabBg = tabGo.AddComponent<Image>();
         tabBg.color = PanelColor;
         tabGo.AddComponent<Button>().onClick.AddListener(() => open = !open);
-        for (int i = 0; i < 3; i++)
+        arrow = new GameObject("Arrow").AddComponent<RectTransform>();
+        arrow.SetParent(tab, false);
+        arrow.anchorMin = arrow.anchorMax = new Vector2(.5f, .5f);
+        arrow.sizeDelta = new Vector2(16, 28);
+        for (int i = 0; i < 2; i++)
         {
+            // a chevron from two short bars: '>' when tucked away, turned to '<' when open
             RectTransform bar = new GameObject("Bar").AddComponent<RectTransform>();
-            bar.SetParent(tab, false);
+            bar.SetParent(arrow, false);
             bar.anchorMin = bar.anchorMax = new Vector2(.5f, .5f);
-            bar.sizeDelta = new Vector2(32, 4);
-            bar.anchoredPosition = new Vector2(0, 11 - i * 11);
-            bar.gameObject.AddComponent<Image>().color = TextColor;
+            bar.sizeDelta = new Vector2(15, 3.5f);
+            bar.anchoredPosition = new Vector2(0, i == 0 ? 4.6f : -4.6f);
+            bar.localRotation = Quaternion.Euler(0, 0, i == 0 ? -45f : 45f);
+            Image img = bar.gameObject.AddComponent<Image>();
+            img.color = TextColor;
+            img.raycastTarget = false;
         }
 
         // scrolling content
@@ -137,9 +148,27 @@ public class SideMenu : MonoBehaviour
 
         Header(content, "VIEW");
         RectTransform viewRow = Row(content);
-        homeButton = Button(viewRow, "Home", () => { director.StopTour(); if (director.Explore.Active) director.Explore.Exit(); director.Home.Enter(); });
-        exploreButton = Button(viewRow, "Explore", () => { director.StopTour(); director.Explore.Enter(); open = false; });
-        graphButton = Button(viewRow, "Graph", ShowGraph);
+        homeButton = Button(viewRow, "Saddle", () => { director.StopTour(); if (director.Explore.Active) director.Explore.Exit(); director.Home.Enter(); });
+        graphButton = Button(viewRow, "XY graph", ShowGraph);
+
+        Header(content, "LAYERS   saddle view");
+        SacksSpiral sacks = director.Annotations.Sacks;
+        RectTransform layerRow = Row(content);
+        Toggle(layerRow, "Saddle / flat", () => !sacks.Flat, () => sacks.SetFlat(!sacks.Flat, 2f));
+        Toggle(layerRow, "Master wave", () => sacks.MasterWaveVisible, () => sacks.SetMasterWaveVisible(!sacks.MasterWaveVisible));
+        layerRow = Row(content);
+        Toggle(layerRow, "Zeta trail", () => !sacks.GrowthTrailHidden, () => sacks.SetGrowthTrailVisible(sacks.GrowthTrailHidden));
+        Toggle(layerRow, "Chain", () => sacks.ChainVisible, () => sacks.SetChainVisible(!sacks.ChainVisible));
+        Toggle(layerRow, "Numbers", () => sacks.DotsVisible, () => sacks.SetDotsVisible(!sacks.DotsVisible));
+        layerRow = Row(content);
+        Toggle(layerRow, "n = k²", () => sacks.RouteVisible("squares"), () => sacks.SetRouteVisible("squares", !sacks.RouteVisible("squares"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.SquareColor;
+        Toggle(layerRow, "k(k+1)", () => sacks.RouteVisible("pronic"), () => sacks.SetRouteVisible("pronic", !sacks.RouteVisible("pronic"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.PronicColor;
+        Toggle(layerRow, "k²+k+41", () => sacks.RouteVisible("euler"), () => sacks.SetRouteVisible("euler", !sacks.RouteVisible("euler"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.EulerColor;
+        layerRow = Row(content);
+        Button(layerRow, "−", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale / 1.25f), .6f);
+        heightLabel = Button(layerRow, "", () => sacks.SetTrailHeightScale(1f), 2.2f).GetComponentInChildren<TextMeshProUGUI>();
+        Button(layerRow, "+", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale * 1.25f), .6f);
+        Button(layerRow, "Reset view", () => { if (director.Orbit != null) director.Orbit.ResetView(); }, 1.8f);
 
         Header(content, "FORMAT");
         RectTransform formatRow = Row(content);
@@ -170,6 +199,7 @@ public class SideMenu : MonoBehaviour
         stopRecordingButton = Button(recordRow, "Stop", () => { if (director.Recorder.IsRecording) director.StopRecording(); }).GetComponent<Button>();
         status = Label(content, "", 22, FontStyles.Normal, DimText, 64);
         status.textWrappingMode = TextWrappingModes.Normal;
+        Label(content, "Saddle view:  drag or W A S D / arrows orbit and change altitude · wheel or Q E zoom · Shift + drag or Shift + W A S D move the centre", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 74).textWrappingMode = TextWrappingModes.Normal;
         Label(content, "Keys:  M menu   T tour   N next line   F9 record   P wide / tall   F frame rate", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 50).textWrappingMode = TextWrappingModes.Normal;
 
         director.ChapterStarted += (_, _) => open = false;
@@ -203,11 +233,14 @@ public class SideMenu : MonoBehaviour
         slide = Mathf.MoveTowards(slide, open ? 1f : 0f, Time.unscaledDeltaTime * 5f);
         float eased = Mathf.SmoothStep(0f, 1f, slide);
         panel.anchoredPosition = new Vector2(-PanelWidth * (1f - eased), 0f);
+        arrow.localRotation = Quaternion.Euler(0, 0, 180f * eased);
+        foreach ((Image image, System.Func<bool> on) in toggles) image.color = on() ? ButtonActive : ButtonColor;
+        string height = $"trail height ×{director.Annotations.Sacks.TrailHeightScale:0.##}";
+        if (heightLabel.text != height) heightLabel.text = height;
 
         landscapeButton.color = director.Portrait ? ButtonColor : ButtonActive;
         portraitButton.color = director.Portrait ? ButtonActive : ButtonColor;
         homeButton.color = director.Home.Active ? ButtonActive : ButtonColor;
-        exploreButton.color = director.Explore.Active ? ButtonActive : ButtonColor;
         graphButton.color = ButtonColor;
         for (int i = 0; i < chapterRows.Count; i++)
         {
@@ -223,6 +256,13 @@ public class SideMenu : MonoBehaviour
     }
 
     // ---- small builders ----------------------------------------------------------------------------
+
+    Image Toggle(Transform parent, string text, System.Func<bool> on, UnityEngine.Events.UnityAction onClick)
+    {
+        Image image = Button(parent, text, onClick);
+        toggles.Add((image, on));
+        return image;
+    }
 
     static TextMeshProUGUI Label(Transform parent, string text, float size, FontStyles style, Color color, float height)
     {

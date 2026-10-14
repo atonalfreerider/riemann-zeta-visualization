@@ -51,6 +51,25 @@ public class SacksSpiral : MonoBehaviour
         return s;
     }
 
+    // The last turns of the spiral shrink and fade through grey to black, so the saddle reads as going on for ever
+    // instead of stopping at a hard edge.
+    const int EdgeFadeStart = 760;
+
+    /// <summary>0 inside, rising to 1 at the last number drawn.</summary>
+    static float EdgeFade(float n) => Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(EdgeFadeStart, Count, n));
+
+    static Color Faded(Color c, float fade)
+    {
+        if (fade <= 0f) return c;
+        Color grey = new(.32f, .32f, .36f, c.a);
+        return Color.Lerp(Color.Lerp(c, grey, Mathf.Clamp01(fade * 2f)), new Color(0f, 0f, 0f, c.a), Mathf.Clamp01(fade * 2f - 1f));
+    }
+
+    static float FadedSize(float size, float fade) => size * Mathf.Lerp(1f, .3f, fade);
+
+    /// <summary>Resting size of number n's dot on the full spiral.</summary>
+    static float RestSize(int n) => n <= GridCount ? (IsPrime(n) ? .42f : IsSquare(n) ? .34f : .26f) : FadedSize(IsPrime(n) ? .42f : .22f, EdgeFade(n));
+
     static bool IsPrime(int n)
     {
         if (n < 2) return false;
@@ -112,8 +131,9 @@ public class SacksSpiral : MonoBehaviour
         for (int n = 1; n <= Count; n++)
         {
             bool prime = IsPrime(n), square = IsSquare(n);
-            Color c = prime ? Factory.Palette.Zero : square ? SquareColor : new Color(.3f, .3f, .38f);
-            GameObject dot = Factory.NewSphere("n " + n, prime ? .42f : .22f, c, prime ? Factory.GlowIntensity : Factory.NoGlow);
+            float fade = EdgeFade(n);
+            Color c = Faded(prime ? Factory.Palette.Zero : square ? SquareColor : new Color(.3f, .3f, .38f), fade);
+            GameObject dot = Factory.NewSphere("n " + n, FadedSize(prime ? .42f : .22f, fade), c, prime ? Mathf.Lerp(Factory.GlowIntensity, Factory.NoGlow, fade) : Factory.NoGlow);
             dot.transform.SetParent(transform, false);
             dot.SetActive(n <= GridCount);
             dots.Add(dot);
@@ -134,6 +154,7 @@ public class SacksSpiral : MonoBehaviour
         AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 35f, "n = k(k + 1)   neighbours multiplied: never prime");
         AddRoute("euler", EulerColor, k => k * k + k + 41, 13f, 35f, "n = k² + k + 41   Euler: 40 primes in a row");
         routesRoot.SetActive(false);
+        for (int r = 0; r < routes.Count; r++) StyleRoute(r, 1f, .14f, Factory.GlowIntensity);
 
         caption = TextBoxLabel("", 2.4f, new Color(.85f, .85f, .95f));
         caption.gameObject.SetActive(false);
@@ -335,7 +356,21 @@ public class SacksSpiral : MonoBehaviour
         }
 
         spiralPath.SetPositions(pts);
+        spiralPathPoints = pts;
         spiralPath.enabled = false;
+    }
+
+    Vector3[] spiralPathPoints;
+
+    /// <summary>Show the road from 1 out to fraction <paramref name="u"/> of its length (0 = nothing, 1 = out past 30).</summary>
+    void SetSpiralPathReach(float u)
+    {
+        if (spiralPath == null) return;
+        int count = Mathf.Clamp(Mathf.RoundToInt(u * (spiralPathPoints.Length - 1)) + 1, 0, spiralPathPoints.Length);
+        spiralPath.enabled = count >= 2;
+        if (count < 2) return;
+        spiralPath.positionCount = count;
+        for (int i = 0; i < count; i++) spiralPath.SetPosition(i, spiralPathPoints[i]);
     }
 
     void EnsureSieveRoot()
@@ -544,10 +579,11 @@ public class SacksSpiral : MonoBehaviour
         sievePrimes.Clear();
         sieveFrontier = 2;
 
-        // break the grid open into spiral positions (only the first 30 numbers)
+        // break the grid open into spiral positions (only the first 30 numbers), while the road draws itself out from 1
         float flyTime = Mathf.Max(1.2f, seconds * .45f);
         float t = 0f;
         float m0 = morph, b0 = bend;
+        SetSpiralPathReach(0f);
         while (t < flyTime)
         {
             t += Time.deltaTime;
@@ -555,13 +591,14 @@ public class SacksSpiral : MonoBehaviour
             morph = Mathf.Lerp(m0, 1f, k);
             bend = Mathf.Lerp(b0, 0f, k);
             Layout();
+            SetSpiralPathReach(Mathf.Clamp01(t / flyTime * 1.08f));
             yield return null;
         }
 
         morph = 1f;
         bend = 0f;
         Layout();
-        spiralPath.enabled = true;
+        SetSpiralPathReach(1f);
 
         // every prime glows for a moment (what we expect to find), then all but the 2 fade: the sieve has to earn them
         for (int n = 1; n <= GridCount; n++)
@@ -593,7 +630,7 @@ public class SacksSpiral : MonoBehaviour
         for (int j = sieveFrontier + 1; j < n; j++) if (!struck.Contains(j)) skipped++;
         float tSkip = skipped > 0 ? seconds * (detailed ? .2f : .16f) : 0f;
         float body = seconds - tSkip;
-        float tFocus = body * .14f, tCount = body * .2f, tCopy = body * .2f, tSlide = body * .28f, tLand = body * .18f;
+        float tFocus = body * .12f, tCount = body * .18f, tCopy = body * .18f, tSlide = body * .24f, tLand = body * .15f, tMark = body * .13f;
 
         // 1. the two numbers in the multiplication: the prime p (nearer the centre) and the number m it copies
         string copies = p == 2 ? "one level up" : $"{p - 1} levels up";
@@ -681,47 +718,66 @@ public class SacksSpiral : MonoBehaviour
 
         Destroy(beam.gameObject);
 
-        // 5. only the final dot drops: it lands on p × m; every other dot fades where it is
+        // 5. every dot drops onto the spiral where it stands, shrinking to a small counter; the final dot lands big on p × m
         GameObject final = rows[^1][^1];
-        Vector3 from = final.transform.position, to = Road(n) + Vector3.back * .05f;
+        List<(GameObject dot, Vector3 from, Vector3 to)> drops = new();
+        for (int k = 0; k < rows.Count; k++)
+        {
+            for (int i = 0; i < m; i++)
+            {
+                GameObject d = rows[k][i];
+                drops.Add((d, d.transform.position, Road(k * m + i + 1f) + Vector3.back * .05f));
+            }
+        }
+
         t = 0f;
         while (t < tLand)
         {
             t += Time.deltaTime;
             float u = Mathf.Clamp01(t / tLand);
-            float fade = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u * 1.6f));
-            foreach (List<GameObject> row in rows)
-            foreach (GameObject d in row)
+            float fall = u * u;
+            foreach ((GameObject d, Vector3 a, Vector3 b) in drops)
             {
-                if (d != final) d.transform.localScale = Vector3.one * (.4f * fade);
+                d.transform.position = Vector3.Lerp(a, b, fall);
+                d.transform.localScale = Vector3.one * (d == final ? Mathf.Lerp(.4f, .55f, u) : Mathf.Lerp(.4f, .14f, Mathf.SmoothStep(0f, 1f, u)));
             }
 
-            final.transform.position = Vector3.Lerp(from, to, u * u);
             yield return null;
         }
 
-        ClearWorkDots();
+        // the landing spot: the final dot becomes the number p × m, with a ring around it
         struck.Add(n);
         SetDecided(n, true);
+        final.SetActive(false);
+        LineRenderer landing = NewRing("landing " + n, square ? SquareColor : Color.white, .1f);
+        StartCoroutine(DrawRing(landing, Road(n), .9f, tMark * .35f));
+        StartCoroutine(PulseScale(dots[n - 1].transform, square ? .34f : .26f, 4f, tMark * .8f));
+        StartCoroutine(ScaleLabel(labels[n - 1], LabelScale * 1.8f, tMark * .3f));
         StartCoroutine(ScaleLabel(labels[m - 1], LabelScale, .4f));
         StartCoroutine(ScaleLabel(labels[p - 1], LabelScale, .4f));
         StartCoroutine(FadeRing(ringP, 0f, .6f));
         StartCoroutine(FadeRing(ringM, 0f, .6f));
         Tag($"{p}×{m}", 2.1f, square ? SquareColor : new Color(.75f, .75f, .85f), Outside(n, 1.5f));
-        Board(BoardText(pm + $" = {n}" + (square ? $"  <size=60%><color=#{Hex(SquareColor)}>a perfect square</color></size>" : ""), null, Tally()));
+        Board(BoardText(pm + $" = {n}" + (square ? $"  <size=60%><color=#{Hex(SquareColor)}>a perfect square</color></size>" : ""),
+            detailed ? $"the last dot lands on <b>{n}</b>" : null, Tally()));
+        yield return new WaitForSeconds(tMark);
+        StartCoroutine(ScaleLabel(labels[n - 1], LabelScale, .5f));
+        StartCoroutine(FadeRing(landing, 0f, .8f));
 
-        // 6. the spots the landing jumped over: nothing made them. An open circle, then a new prime
+        // 6. now look back from the landing: every spot between the last product and this one that no multiplication
+        //    landed on is a candidate. An open circle, then a new prime that joins the multipliers.
         if (skipped > 0)
         {
             float per = tSkip / skipped;
-            for (int j = sieveFrontier + 1; j < n; j++)
+            for (int j = n - 1; j > sieveFrontier; j--)
             {
                 if (struck.Contains(j)) continue;
                 LineRenderer open = NewRing("candidate " + j, Color.white, .08f);
+                Board(BoardText(pm + $" = {n}", $"back from {n}:  we skipped <color=#{hp}>{j}</color>, no multiplication lands there", Tally()));
                 yield return DrawRing(open, Road(j), .62f, per * .35f);
-                Board(BoardText(pm + $" = {n}", $"we skipped <color=#{hp}>{j}</color>:  no multiplication lands there", Tally()));
                 yield return new WaitForSeconds(per * .2f);
                 sievePrimes.Add(j);
+                sievePrimes.Sort();
                 SetDecided(j, true);
                 open.startColor = open.endColor = MultiplierColor;
                 Tag($"{j} is prime", 2.1f, MultiplierColor, Outside(j, 2.0f));
@@ -731,6 +787,14 @@ public class SacksSpiral : MonoBehaviour
             }
         }
 
+        // the small counters have done their job: they sink into the road
+        foreach ((GameObject d, Vector3 _, Vector3 _) in drops)
+        {
+            if (d != final && d != null) StartCoroutine(Shrink(d.transform, .14f, 0f, .5f));
+        }
+
+        yield return new WaitForSeconds(.5f);
+        ClearWorkDots();
         sieveFrontier = n;
     }
 
@@ -745,6 +809,8 @@ public class SacksSpiral : MonoBehaviour
     {
         if (sieveRoot == null) yield break;
         float t = 0f;
+        // the road uncoils back toward 1 and fades as the full spiral takes over
+        Color pathColor = spiralPath != null ? spiralPath.startColor : Color.clear;
         List<LineRenderer> lines = new();
         foreach (GameObject g in sieveMarks) if (g != null && g.TryGetComponent(out LineRenderer l)) lines.Add(l);
         while (t < seconds)
@@ -758,11 +824,21 @@ public class SacksSpiral : MonoBehaviour
                 l.startColor = l.endColor = new Color(c.r, c.g, c.b, Mathf.Min(c.a, a));
             }
 
+            if (spiralPath != null && spiralPath.enabled)
+            {
+                SetSpiralPathReach(1f - Mathf.SmoothStep(0f, 1f, t / seconds));
+                spiralPath.startColor = spiralPath.endColor = new Color(pathColor.r, pathColor.g, pathColor.b, pathColor.a * Mathf.Lerp(1f, .3f, t / seconds));
+            }
+
             yield return null;
         }
 
         sieveRoot.SetActive(false);
-        if (spiralPath != null) spiralPath.enabled = false;
+        if (spiralPath != null)
+        {
+            spiralPath.enabled = false;
+            spiralPath.startColor = spiralPath.endColor = pathColor;
+        }
     }
 
     /// <summary>Pulse the perfect squares (orange) on the spiral / saddle.</summary>
@@ -772,7 +848,7 @@ public class SacksSpiral : MonoBehaviour
         for (int i = 0; i < dots.Count; i++)
         {
             int n = i + 1;
-            if (IsSquare(n) && dots[i].activeSelf) StartCoroutine(PulseScale(dots[i].transform, n <= GridCount ? .32f : .22f, 3.2f, seconds));
+            if (IsSquare(n) && dots[i].activeSelf) StartCoroutine(PulseScale(dots[i].transform, RestSize(n), 3.2f, seconds));
         }
     }
 
@@ -786,7 +862,7 @@ public class SacksSpiral : MonoBehaviour
             if (!IsPrime(n) && !IsSquare(n))
             {
                 dots[i].SetActive(true);
-                StartCoroutine(PulseScale(dots[i].transform, .22f, 2.2f, seconds));
+                StartCoroutine(PulseScale(dots[i].transform, RestSize(n), 2.2f, seconds));
             }
         }
     }
@@ -975,33 +1051,77 @@ public class SacksSpiral : MonoBehaviour
 
     public void ShowRoutes(bool on)
     {
+        for (int r = 0; r < routeVisible.Length; r++) routeVisible[r] = on;
         routesRoot.SetActive(on);
         if (on) Layout();
-        if (!on) HighlightRoute("all");
+        HighlightRoute("all");
+    }
+
+    /// <summary>Show or hide one route ("squares", "pronic", "euler") on its own (the graph view's layer toggles).</summary>
+    public void SetRouteVisible(string name, bool on)
+    {
+        int r = System.Array.IndexOf(RouteNames, name);
+        if (r < 0) return;
+        routeVisible[r] = on;
+        bool any = false;
+        foreach (bool v in routeVisible) any |= v;
+        routesRoot.SetActive(any);
+        if (any) Layout();
+        HighlightRoute("all");
+    }
+
+    public bool RouteVisible(string name)
+    {
+        int r = System.Array.IndexOf(RouteNames, name);
+        return r >= 0 && routesRoot.activeSelf && routeVisible[r];
     }
 
     public static readonly Color PronicColor = new(.4f, .55f, 1f);
     public static readonly Color EulerColor = new(.35f, 1f, .55f);
     static readonly string[] RouteNames = { "squares", "pronic", "euler" };
+    static readonly Color[] RouteColors = { SquareColor, PronicColor, EulerColor };
+    readonly bool[] routeVisible = { true, true, true };
     Coroutine routeHighlight;
+    GameObject routeNumbersRoot;
+
+    /// <summary>A route line in its colour, fading through grey to black over the spiral's last turns like the dots.</summary>
+    void StyleRoute(int r, float alpha, float width, float intensity)
+    {
+        LineRenderer line = routes[r];
+        (System.Func<float, float> fn, float k0, float k1) = routeFns[r];
+        int kStart = Mathf.CeilToInt(k0), kEnd = Mathf.FloorToInt(k1);
+        float fadeFrom = 1f;
+        for (int k = kStart; k <= kEnd; k++)
+        {
+            if (fn(k) >= EdgeFadeStart) { fadeFrom = (k - kStart) / (float)Mathf.Max(1, kEnd - kStart); break; }
+        }
+
+        Color c = RouteColors[r];
+        Gradient g = new();
+        g.SetKeys(
+            new[] { new GradientColorKey(c, 0f), new GradientColorKey(c, fadeFrom), new GradientColorKey(Faded(c, .5f), Mathf.Lerp(fadeFrom, 1f, .5f)), new GradientColorKey(Color.black, 1f) },
+            new[] { new GradientAlphaKey(alpha, 0f), new GradientAlphaKey(alpha, fadeFrom), new GradientAlphaKey(alpha * .15f, 1f) });
+        line.colorGradient = g;
+        line.startWidth = line.endWidth = width;
+        Factory.SetIntensity(line, intensity);
+        line.enabled = routeVisible[r];
+    }
 
     /// <summary>
-    /// Make one route stand out and dim the other two ("all" shows them evenly). The numbers on the highlighted route
-    /// pulse: the squares (red), the products of neighbours k(k+1) (tinted blue), or Euler's primes k² + k + 41.
+    /// Make one route stand out and dim the other two ("all" shows them evenly). On the highlighted route every number
+    /// is written in large type at its spot and then shrinks to a small label, while its dot pulses: the squares k²
+    /// (red), the neighbour products k(k+1) (blue), or Euler's k² + k + 41 (green).
     /// </summary>
     public void HighlightRoute(string name)
     {
         if (routeHighlight != null) StopCoroutine(routeHighlight);
+        if (routeNumbersRoot != null) Destroy(routeNumbersRoot);
         int chosen = System.Array.IndexOf(RouteNames, name);
         for (int r = 0; r < routes.Count; r++)
         {
             bool on = chosen < 0 || r == chosen;
-            Color c = routes[r].startColor;
-            float w = chosen < 0 ? .14f : on ? .26f : .07f;
-            routes[r].startWidth = routes[r].endWidth = w;
-            routes[r].startColor = routes[r].endColor = new Color(c.r, c.g, c.b, on ? 1f : .25f);
-            Factory.SetIntensity(routes[r], on && chosen >= 0 ? Factory.GlowIntensity * 1.2f : Factory.GlowIntensity);
-            routeLabels[r].gameObject.SetActive(on);
+            StyleRoute(r, on ? 1f : .25f, chosen < 0 ? .14f : on ? .26f : .07f, on && chosen >= 0 ? Factory.GlowIntensity * 1.2f : Factory.GlowIntensity);
+            routeLabels[r].gameObject.SetActive(on && routeVisible[r]);
         }
 
         // pronic numbers are composites (grey dots): tint them blue while their route is highlighted, grey otherwise
@@ -1009,25 +1129,49 @@ public class SacksSpiral : MonoBehaviour
         {
             int n = k * (k + 1);
             Renderer rd = dots[n - 1].GetComponent<Renderer>();
-            Factory.SetColor(rd, name == "pronic" ? PronicColor : CompositeColor);
+            Factory.SetColor(rd, Faded(name == "pronic" ? PronicColor : new Color(.3f, .3f, .38f), EdgeFade(n)));
         }
 
-        if (chosen >= 0 && gameObject.activeInHierarchy) routeHighlight = StartCoroutine(PulseRouteNumbers(chosen));
+        if (chosen >= 0 && gameObject.activeInHierarchy)
+        {
+            routeNumbersRoot = new GameObject("RouteNumbers");
+            routeNumbersRoot.transform.SetParent(routesRoot.transform, false);
+            routeHighlight = StartCoroutine(DropRouteNumbers(chosen));
+        }
     }
 
-    IEnumerator PulseRouteNumbers(int route)
+    IEnumerator DropRouteNumbers(int route)
     {
         (System.Func<float, float> fn, float k0, float k1) = routeFns[route];
-        int kStart = route == 2 ? 0 : Mathf.CeilToInt(k0);
+        int kStart = route == 2 ? 0 : Mathf.CeilToInt(k0); // Euler's route starts at k = 0 (41), before its drawn line
+        Color c = RouteColors[route];
+        Camera cam = Camera.main;
         for (int k = kStart; k <= Mathf.FloorToInt(k1); k++)
         {
             int n = Mathf.RoundToInt(fn(k));
             if (n < 1 || n > Count) continue;
             GameObject d = dots[n - 1];
             d.SetActive(true);
-            float size = IsPrime(n) ? .42f : n > GridCount ? .22f : IsSquare(n) ? .34f : .26f;
-            StartCoroutine(PulseScale(d.transform, size, 2.6f, .9f));
-            yield return new WaitForSeconds(.12f);
+            StartCoroutine(PulseScale(d.transform, RestSize(n), 2.6f, .9f));
+            Vector3 at = SpiralPos(n, bend);
+            Vector3 toCamera = cam != null ? (cam.transform.position - at).normalized : Vector3.back;
+            TextBox label = TextBoxLabel(n.ToString(), 55f, Faded(c, EdgeFade(n) * .8f));
+            label.transform.SetParent(routeNumbersRoot.transform, false);
+            label.transform.position = at + toCamera * 1.2f;
+            StartCoroutine(ShrinkLabel(label, 1f, .26f, 1f));
+            yield return new WaitForSeconds(.22f);
+        }
+    }
+
+    static IEnumerator ShrinkLabel(TextBox label, float from, float to, float seconds)
+    {
+        float t = 0f;
+        while (t < seconds && label != null)
+        {
+            t += Time.deltaTime;
+            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - seconds * .35f) / (seconds * .65f)));
+            label.transform.localScale = Vector3.one * Mathf.Lerp(from, to, u);
+            yield return null;
         }
     }
 
@@ -1214,22 +1358,23 @@ public class SacksSpiral : MonoBehaviour
             t += Time.deltaTime;
             bend = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / seconds));
             Layout();
-            RefreshWaveGeometry();
+            RefreshWaveGeometry(false);
             yield return null;
         }
 
         bend = to;
         Layout();
-        RefreshWaveGeometry();
+        RefreshWaveGeometry(true);
         flattenRoutine = null;
     }
 
     /// <summary>Re-place everything that sits on the surface after the bend changed.</summary>
-    void RefreshWaveGeometry()
+    void RefreshWaveGeometry(bool rebuildTicks = true)
     {
         if (waveStackRoot == null) return;
         foreach (Transform c in waveStackRoot.transform)
         {
+            if (!rebuildTicks) break; // mid-animation: the tick mesh is rebuilt once, when the surface settles
             if (!c.name.StartsWith("ticks ")) continue;
             float nMax = float.Parse(c.name.Substring(6), System.Globalization.CultureInfo.InvariantCulture);
             c.gameObject.SetActive(false);
@@ -1239,17 +1384,9 @@ public class SacksSpiral : MonoBehaviour
             break;
         }
 
-        if (fullSums != null && fullPublishedZeros > 0)
+        if (lastUploadedSums != null && curtainRenderer != null && curtainRenderer.enabled)
         {
-            double[] local = new double[fullSamples];
-            int published;
-            lock (fullLock)
-            {
-                System.Array.Copy(fullSums, local, fullSamples);
-                published = fullPublishedZeros;
-            }
-
-            UploadFullWave(local, published);
+            UploadFullWave(lastUploadedSums, fullUploadedZeros);
         }
         else if (masterWave != null && masterWave.enabled && masterWave.positionCount == WavePts)
         {
@@ -1683,6 +1820,8 @@ public class SacksSpiral : MonoBehaviour
     Unity.Collections.NativeArray<Vector3> fullPositions;
     TextBox fullLabel;
     Vector3[] fullBase, fullNormal;   // per-sample surface point and normal for the current bend
+    Vector2[] fullFlat;               // per-sample spiral position before bending
+    double[] lastUploadedSums;
     // the full wave is drawn as a curtain mesh (base on the surface, top at the wave): no per-frame LineRenderer rebuild
     Mesh curtainMesh;
     MeshRenderer curtainRenderer;
@@ -1744,6 +1883,7 @@ public class SacksSpiral : MonoBehaviour
         fullBaseBend = -1f;
         fullUploadedZeros = -1;
         fullNMax = nMax;
+        fullFlat = null;
         fullLogN = new double[samples];
         for (int i = 0; i < samples; i++) fullLogN[i] = FullWaveLogN(i, samples, nMax);
         fullSums = new double[samples];
@@ -1817,6 +1957,7 @@ public class SacksSpiral : MonoBehaviour
         for (int i = 0; i < samples; i++) sums[i] = System.BitConverter.ToSingle(bytes, i * 4);
         fullSamples = samples;
         fullNMax = nMax;
+        fullFlat = null;
         fullLogN = new double[samples];
         for (int i = 0; i < samples; i++) fullLogN[i] = FullWaveLogN(i, samples, nMax);
         lock (fullLock)
@@ -1904,7 +2045,9 @@ public class SacksSpiral : MonoBehaviour
             curtainRenderer = go.AddComponent<MeshRenderer>();
             curtainRenderer.sharedMaterial = Factory.mainMat;
             curtainRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            Factory.SetIntensity(curtainRenderer, Factory.GlowIntensity);
+            // Below the bloom threshold on purpose: 160,000 samples make sub-pixel slivers whose coverage flickers as the
+            // camera moves; at HDR intensity each flickering pixel bloomed into a sparkle.
+            Factory.SetIntensity(curtainRenderer, Factory.NoGlow);
         }
 
         curtainRenderer.enabled = true;
@@ -1913,7 +2056,13 @@ public class SacksSpiral : MonoBehaviour
             curtainVerts = new Vector3[samples * 2];
             curtainColors = new Color[samples * 2];
             Color top = Factory.Palette.Cosine, bottom = new(Factory.Palette.Cosine.r, Factory.Palette.Cosine.g, Factory.Palette.Cosine.b, .12f);
-            for (int i = 0; i < samples; i++) { curtainColors[2 * i] = bottom; curtainColors[2 * i + 1] = top; }
+            for (int i = 0; i < samples; i++)
+            {
+                // the wave fades out with the spiral's last turns
+                float fade = EdgeFade((float)System.Math.Exp(FullWaveLogN(i, samples, fullNMax)));
+                curtainColors[2 * i] = Faded(bottom, fade);
+                curtainColors[2 * i + 1] = Faded(top, fade);
+            }
             int[] tris = new int[(samples - 1) * 6];
             int q = 0;
             for (int i = 0; i < samples - 1; i++)
@@ -1932,15 +2081,33 @@ public class SacksSpiral : MonoBehaviour
 
     void UploadFullWave(double[] sums, int zeros)
     {
-        if (fullBase == null || fullBase.Length != fullSamples || !Mathf.Approximately(fullBaseBend, bend))
+        using FrameProbe.Scope probe = FrameProbe.Measure("Sacks: full wave upload");
+        lastUploadedSums = sums;
+        if (fullFlat == null || fullFlat.Length != fullSamples)
         {
-            fullBase = new Vector3[fullSamples];
-            fullNormal = new Vector3[fullSamples];
+            // the spiral's flat (x, y) per sample, computed once; the surface height and normal follow from it for any bend
+            fullFlat = new Vector2[fullSamples];
             for (int i = 0; i < fullSamples; i++)
             {
                 float n = (float)System.Math.Exp(fullLogN[i]);
-                fullBase[i] = SpiralPos(n, bend);
-                fullNormal[i] = SurfaceNormalAt(n);
+                float r = R * Mathf.Sqrt(n), a = 2f * Mathf.PI * Mathf.Sqrt(n);
+                fullFlat[i] = new Vector2(r * Mathf.Cos(a), r * Mathf.Sin(a));
+            }
+
+            fullBaseBend = -1f;
+        }
+
+        if (fullBase == null || fullBase.Length != fullSamples || !Mathf.Approximately(fullBaseBend, bend))
+        {
+            fullBase ??= new Vector3[fullSamples];
+            fullNormal ??= new Vector3[fullSamples];
+            if (fullBase.Length != fullSamples) { fullBase = new Vector3[fullSamples]; fullNormal = new Vector3[fullSamples]; }
+            float k = bend * SaddleK;
+            for (int i = 0; i < fullSamples; i++)
+            {
+                float x = fullFlat[i].x, y = fullFlat[i].y;
+                fullBase[i] = origin + new Vector3(x, y, k * (x * x - y * y));
+                fullNormal[i] = new Vector3(2f * k * x, -2f * k * y, -1f).normalized;
             }
 
             fullBaseBend = bend;
@@ -1985,7 +2152,7 @@ public class SacksSpiral : MonoBehaviour
             bool prime = IsPrime(n);
             bool primePower = !prime && IsPrimePower(n);
             if (!prime && !primePower) continue;
-            Color c = prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f);
+            Color c = Faded(prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f), EdgeFade(n));
             Vector3 a = OnSpiral(n, 0f, -0.3f), b = OnSpiral(n, 0f, prime ? 0.9f : 0.6f);
             Vector3 normal = SurfaceNormalAt(n);
             Vector3 s1 = Vector3.Cross(normal, Vector3.right).normalized * (prime ? .03f : .022f);
@@ -2008,7 +2175,7 @@ public class SacksSpiral : MonoBehaviour
         MeshRenderer mr = root.AddComponent<MeshRenderer>();
         mr.sharedMaterial = Factory.mainMat;
         mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        Factory.SetIntensity(mr, Factory.SoftGlowIntensity);
+        Factory.SetIntensity(mr, Factory.NoGlow); // thin quads: no bloom, or they sparkle at a distance like the curtain
     }
 
     void LateUpdate()
@@ -2364,7 +2531,7 @@ public class SacksSpiral : MonoBehaviour
     public GrowthMode Mode { get; private set; }
     public float GrowthT { get; private set; }
     public float GrowthTMax { get; private set; } = HomeTMax;
-    public float GrowthHeight => GrowthT * ZetaT;
+    public float GrowthHeight => GrowthT * ZetaT * TrailHeightScale;
     /// <summary>Seconds the finished picture holds before the growth starts over (looping growth only).</summary>
     public float GrowthHold = 12f;
     /// <summary>Extra factor on the growth speed (the review test uses it to reach the top quickly).</summary>
@@ -2382,7 +2549,15 @@ public class SacksSpiral : MonoBehaviour
     const float GrowWaveOut = 1.7f, GrowWaveHold = .4f, GrowWaveSink = 1.6f;
 
     GameObject growRoot;
-    LineRenderer growMaster, growAxis;
+    LineRenderer growMaster, growAxis, growChain, growChainTail;
+    Meta.Numerics.Complex[] growChainSums = new Meta.Numerics.Complex[64];
+    Vector3[] growChainPts = new Vector3[64];
+    readonly Vector3[] growTailPts = new Vector3[3];
+    readonly List<float> growZeroGammas = new();
+    /// <summary>Vertical stretch of the growing trail (1 = t · 0.25 units).</summary>
+    public float TrailHeightScale { get; private set; } = 1f;
+    public bool ChainVisible { get; private set; } = true;
+    float GrowZetaT => ZetaT * TrailHeightScale;
     readonly List<LineRenderer> growTrailChunks = new();
     GameObject growTip;
     Unity.Collections.NativeArray<Vector3> growTrailPts;
@@ -2423,13 +2598,14 @@ public class SacksSpiral : MonoBehaviour
         growRoot.SetActive(true);
         SetGrowthTrailVisible(true);
         ResetGrowth();
-        growMaster.enabled = mode == GrowthMode.Waves;
+        growMaster.enabled = false; // Waves mode: it appears with the first zero that lands
         if (mode == GrowthMode.FullWave)
         {
             // the finished master wave, every zero in the table, waiting on the spiral before the trail starts
             StartFullMasterWave(Main.Instance.zetaZeroValues.Length, FullSamples, FullNMax, 0f, true);
             foreach (Transform c in hypothesisRoot.transform) c.gameObject.SetActive(c.name == "WaveStack");
             if (fullLabel != null) fullLabel.gameObject.SetActive(false);
+            if (!MasterWaveVisible) SetMasterWaveVisible(false);
         }
         else if (waveStackRoot != null)
         {
@@ -2454,12 +2630,14 @@ public class SacksSpiral : MonoBehaviour
         if (growRoot == null) return;
         foreach (LineRenderer chunk in growTrailChunks) chunk.enabled = on;
         growAxis.enabled = on;
+        growChain.enabled = growChainTail.enabled = on && ChainVisible;
         growTip.SetActive(on);
         foreach (GameObject d in growZeroDots) if (d != null) d.SetActive(on);
         growTrailHidden = !on;
     }
 
     bool growTrailHidden;
+    public bool GrowthTrailHidden => growTrailHidden;
 
     /// <summary>The waves stop coming and the growing master line steps aside (the full master wave is taking over).</summary>
     void HandGrowthToFullWave()
@@ -2484,6 +2662,16 @@ public class SacksSpiral : MonoBehaviour
             growAxis = Factory.NewLine("growing axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
             growAxis.transform.SetParent(growRoot.transform, false);
             growAxis.positionCount = 2;
+            growChain = Factory.NewLine("chain at the tip", .05f, Color.white, Factory.SoftGlowIntensity);
+            growChain.transform.SetParent(growRoot.transform, false);
+            Gradient chainColors = new();
+            chainColors.SetKeys(
+                new[] { new GradientColorKey(LimitCurve.ChainColor(0f), 0f), new GradientColorKey(LimitCurve.ChainColor(1f), 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+            growChain.colorGradient = chainColors;
+            growChainTail = Factory.NewLine("chain tail", .06f, Factory.Palette.Tail, Factory.GlowIntensity);
+            growChainTail.transform.SetParent(growRoot.transform, false);
+            growChainTail.positionCount = 3;
             growMaster = Factory.NewLine("growing master wave", .11f, Factory.Palette.Cosine, Factory.GlowIntensity);
             growMaster.transform.SetParent(growRoot.transform, false);
             growMaster.numCornerVertices = 2;
@@ -2544,11 +2732,13 @@ public class SacksSpiral : MonoBehaviour
         if (growSum != null) System.Array.Clear(growSum, 0, growSum.Length);
         foreach (GameObject d in growZeroDots) if (d != null) Destroy(d);
         growZeroDots.Clear();
+        growZeroGammas.Clear();
         foreach (GrowWave w in growWaves) ReleaseWave(w);
         growWaves.Clear();
         if (growRoot == null) return;
+        if (growMaster != null) growMaster.enabled = false; // the master wave appears when the first zero's wave lands
         foreach (LineRenderer chunk in growTrailChunks) chunk.positionCount = 0;
-        growTip.transform.position = TrailPoint(0f);
+        UpdateGrowChain();
         growAxis.SetPosition(0, origin);
         growAxis.SetPosition(1, origin);
         growBase = null; // re-place the road for whatever bend is current
@@ -2557,8 +2747,9 @@ public class SacksSpiral : MonoBehaviour
 
     Vector3 TrailPoint(float t)
     {
+        using FrameProbe.Scope probe = FrameProbe.Measure("Sacks: zeta value (Meta.Numerics)");
         Meta.Numerics.Complex z = ZetaMath.Exact(new Meta.Numerics.Complex(.5, t));
-        return origin + new Vector3((float)z.Re * ZetaXY, (float)z.Im * ZetaXY, 0f) + Vector3.back * (t * ZetaT);
+        return origin + new Vector3((float)z.Re * ZetaXY, (float)z.Im * ZetaXY, 0f) + Vector3.back * (t * GrowZetaT);
     }
 
     void UpdateGrowMaster()
@@ -2603,7 +2794,8 @@ public class SacksSpiral : MonoBehaviour
 
     void SpawnGrowZero(int k, float gamma)
     {
-        Vector3 onAxis = origin + Vector3.back * (gamma * ZetaT);
+        Vector3 onAxis = origin + Vector3.back * (gamma * GrowZetaT);
+        growZeroGammas.Add(gamma);
         float size = k < 100 ? .38f : .3f;
         GameObject dot = Factory.NewSphere("zero " + (k + 1), size, Factory.Palette.Zero, Factory.GlowIntensity);
         dot.transform.SetParent(growRoot.transform, false);
@@ -2614,7 +2806,7 @@ public class SacksSpiral : MonoBehaviour
         if (Mode != GrowthMode.Waves) return;
 
         GrowWave w = TakeWave();
-        w.Altitude = gamma * ZetaT;
+        w.Altitude = gamma * GrowZetaT;
         w.Amp = WaveAmp * 1.1f / Mathf.Pow(k + 1, .6f);
         w.Age = 0f;
         w.Computed = 0;
@@ -2656,7 +2848,7 @@ public class SacksSpiral : MonoBehaviour
                 }
             }
 
-            growTip.transform.position = TrailPoint(GrowthT);
+            UpdateGrowChain();
             growAxis.SetPosition(1, origin + Vector3.back * GrowthHeight);
             while (growNextZero < zs.Length && zs[growNextZero] <= GrowthT)
             {
@@ -2716,6 +2908,7 @@ public class SacksSpiral : MonoBehaviour
             {
                 for (int i = 0; i < WavePts; i++) growSum[i] += wave.Cos[i];
                 growMerged++;
+                growMaster.enabled = Mode == GrowthMode.Waves;
                 UpdateGrowMaster();
                 ReleaseWave(wave);
                 growWaves.RemoveAt(w);
@@ -2723,9 +2916,95 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The chain of arrows n^(−s) at the tip's height: it starts on the axis, spirals in, and its orange Euler–Maclaurin
+    /// tail lands exactly where the trail is being drawn (the trail is the path of the chain's end).
+    /// </summary>
+    void UpdateGrowChain()
+    {
+        float t = Mathf.Max(GrowthT, .01f);
+        Meta.Numerics.Complex s = new(.5, t);
+        int n = ZetaMath.TermCount(t);
+        if (growChainSums.Length < n) growChainSums = new Meta.Numerics.Complex[n * 2];
+        if (growChainPts.Length < n) growChainPts = new Vector3[n * 2];
+        ZetaMath.SpiralDecomposition d;
+        using (FrameProbe.Measure("Sacks: chain at the tip")) d = ZetaMath.Decompose(s, n, growChainSums);
+        Vector3 up = Vector3.back * (t * GrowZetaT);
+        Vector3 P(Meta.Numerics.Complex z) => origin + new Vector3((float)z.Re * ZetaXY, (float)z.Im * ZetaXY, 0f) + up;
+        for (int k = 0; k < n; k++) growChainPts[k] = P(d.PartialSums[k]);
+        growChain.positionCount = n;
+        growChain.SetPositions(growChainPts);
+        growTailPts[0] = P(d.SpiralEnd);
+        growTailPts[1] = P(d.AfterTail);
+        growTailPts[2] = P(d.Total);
+        growChainTail.SetPositions(growTailPts);
+        growChain.enabled = growChainTail.enabled = ChainVisible && !growTrailHidden;
+        growTip.transform.position = growTailPts[2];
+    }
+
+    public void SetChainVisible(bool on)
+    {
+        ChainVisible = on;
+        if (growChain != null) growChain.enabled = growChainTail.enabled = on && !growTrailHidden;
+    }
+
+    /// <summary>Show or hide the master wave riding the spiral (the full curtain and its prime ticks, or the growing line).</summary>
+    public void SetMasterWaveVisible(bool on)
+    {
+        MasterWaveVisible = on;
+        if (waveStackRoot != null) waveStackRoot.SetActive(on && (Mode == GrowthMode.FullWave || !Growing));
+        if (growMaster != null) growMaster.gameObject.SetActive(on);
+    }
+
+    public bool MasterWaveVisible { get; private set; } = true;
+
+    /// <summary>Show or hide the numbers' dots on the spiral.</summary>
+    public void SetDotsVisible(bool on)
+    {
+        DotsVisible = on;
+        foreach (GameObject d in dots) d.GetComponent<Renderer>().enabled = on;
+    }
+
+    public bool DotsVisible { get; private set; } = true;
+
+    /// <summary>Stretch the growing trail vertically (keeps every point already drawn, and its zero markers, in place in t).</summary>
+    public void SetTrailHeightScale(float scale)
+    {
+        scale = Mathf.Clamp(scale, .1f, 6f);
+        if (Mathf.Approximately(scale, TrailHeightScale)) return;
+        float old = ZetaT * TrailHeightScale, now = ZetaT * scale;
+        TrailHeightScale = scale;
+        if (growRoot == null) return;
+        for (int i = 0; i < growTrailCount; i++)
+        {
+            float t = i * GrowStep;
+            growTrailPts[i] += Vector3.back * (t * (now - old));
+        }
+
+        for (int c = 0; c * TrailChunk < growTrailCount; c++)
+        {
+            int start = c * TrailChunk;
+            int count = Mathf.Min(TrailChunk + 1, growTrailCount - start);
+            if (count < 2) continue;
+            TrailChunkLine(c).positionCount = count;
+            TrailChunkLine(c).SetPositions(growTrailPts.GetSubArray(start, count));
+        }
+
+        for (int k = 0; k < growZeroDots.Count && k < growZeroGammas.Count; k++)
+        {
+            if (growZeroDots[k] != null) growZeroDots[k].transform.position = origin + Vector3.back * (growZeroGammas[k] * now);
+        }
+
+        growAxis.SetPosition(1, origin + Vector3.back * GrowthHeight);
+        UpdateGrowChain();
+    }
+
     void Update()
     {
-        if (growRoot != null && growRoot.activeInHierarchy) StepGrowth(Time.deltaTime);
+        if (growRoot != null && growRoot.activeInHierarchy)
+        {
+            using (FrameProbe.Measure("Sacks: growth step")) StepGrowth(Time.deltaTime);
+        }
     }
 
     void DisposeGrowth()

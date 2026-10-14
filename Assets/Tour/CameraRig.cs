@@ -32,6 +32,7 @@ public class CameraRig : MonoBehaviour
     Vector3 positionVelocity;
     Vector3 lookVelocity;
     Vector3 currentLook;
+    Vector3 currentUp = Vector3.up;
     float fovVelocity;
 
     public bool Portrait = true;
@@ -190,6 +191,23 @@ public class CameraRig : MonoBehaviour
             float d = Mathf.Max(15f, 10.5f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
             Vector3 pos = c + toCamera * (d * Mathf.Sin(tilt)) + Vector3.back * (d * Mathf.Cos(tilt));
             return new CueState { Position = pos, LookAt = c, Up = Vector3.back, Fov = 60 };
+        };
+        cues["stair_terms"] = () =>
+        {
+            // the terms view: x = 1 … 30 with the strip of the wave being added above; the graph's foot stays clear of the captions
+            float halfHeight = Mathf.Max(22.5f, 16.5f / Aspect);
+            float lookY = halfHeight * .55f;
+            float d = halfHeight / Mathf.Tan(30f * Mathf.Deg2Rad);
+            float sway = Mathf.Sin(Time.time * .2f) * 1.2f;
+            return new CueState { Position = new Vector3(15.5f + sway, lookY, -d), LookAt = new Vector3(15.5f, lookY, 0f), Up = up, Fov = 60 };
+        };
+        cues["stair_wobble"] = () =>
+        {
+            float halfHeight = Mathf.Max(50f, 31f / Aspect);
+            float lookY = halfHeight * .55f;
+            float d = halfHeight / Mathf.Tan(30f * Mathf.Deg2Rad);
+            float sway = Mathf.Sin(Time.time * .2f) * 2f;
+            return new CueState { Position = new Vector3(31f + sway, lookY, -d), LookAt = new Vector3(31f, lookY, 0f), Up = up, Fov = 60 };
         };
         cues["home_orbit"] = () =>
         {
@@ -391,6 +409,7 @@ public class CameraRig : MonoBehaviour
         cam.transform.position = target.Position;
         currentLook = target.LookAt;
         Vector3 forward = target.LookAt - target.Position;
+        currentUp = target.Up;
         if (forward.sqrMagnitude > 1e-6f) cam.transform.rotation = Quaternion.LookRotation(forward, target.Up);
         cam.fieldOfView = target.Fov;
         positionVelocity = Vector3.zero;
@@ -403,6 +422,7 @@ public class CameraRig : MonoBehaviour
         Active = true;
         if (manualControl != null) manualControl.enabled = false;
         currentLook = cam.transform.position + cam.transform.forward * 10f;
+        currentUp = cam.transform.up;
         positionVelocity = Vector3.zero;
         lookVelocity = Vector3.zero;
     }
@@ -438,7 +458,10 @@ public class CameraRig : MonoBehaviour
         Vector3 forward = currentLook - t.position;
         if (forward.sqrMagnitude > 1e-6f)
         {
-            t.rotation = Quaternion.LookRotation(forward, target.Up);
+            // the up direction turns smoothly too: a cue with another 'up' (the saddle's normal instead of world up)
+            // tilts the picture over the transition instead of snapping its roll
+            currentUp = Vector3.Slerp(currentUp, target.Up, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(.05f, smoothTime * .8f))).normalized;
+            t.rotation = Quaternion.LookRotation(forward, currentUp);
         }
 
         cam.fieldOfView = Mathf.SmoothDamp(cam.fieldOfView, target.Fov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);

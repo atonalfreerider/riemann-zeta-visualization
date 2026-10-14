@@ -481,53 +481,80 @@
       "lines": [
         {
           "id": "stair_01",
-          "text": "Riemann's exact recipe turns the map into a count. Start from the straight line y equals x, and subtract one weighted wave per collision. Watch the line bend into steps.",
-          "camera": "staircase_close",
+          "text": "Riemann's exact recipe turns the collisions into a count of the primes, one piece at a time. The first piece is the straight line y equals x.",
+          "camera": "stair_terms",
           "actions": [
             "pause",
             "primes:noarrows",
             "hide:numbers",
             "dialstrip:clear",
             "hide:cosine",
-            "show:prime",
-            "stair:build",
-            "card:riemann"
+            "hide:prime",
+            "hide:zetacurve",
+            "hide:zeros",
+            "hide:spiral",
+            "hide:tail",
+            "hide:tip",
+            "hide:center",
+            "hide:imaxis",
+            "hide:outaxes",
+            "hide:equations",
+            "card:riemann",
+            "stairlab:terms"
           ],
           "pause": 0.4
         },
         {
           "id": "stair_02",
-          "text": "Each weight is fixed by the recipe. Nothing is tuned by hand.",
-          "camera": "staircase_close",
+          "text": "Next, subtract the logarithm of two pi. It is a constant, about one point eight, and it shifts the whole line down.",
+          "camera": "stair_terms",
           "actions": [
-            "show:equations",
-            "pulse:prime"
+            "card:off",
+            "stairlab:const"
           ],
-          "pause": 0.3,
-          "footnote": "ψ(x) = x − ln 2π − ½ ln(1 − x^-2) − 4√x Σ (cos(γ log x) + 2γ sin(γ log x)) / (1 + 4γ²)"
+          "pause": 0.3
         },
         {
           "id": "stair_03",
-          "text": "The result is a staircase. Every step is a prime: two, three, five, seven, eleven, thirteen. The red markers find them on their own. The squares and cubes are here too, as small orange steps.",
-          "camera": "staircase",
+          "text": "Then a small correction from the trivial zeros, at minus two, minus four, minus six. It only matters near the start, and it fades away.",
+          "camera": "stair_terms",
           "actions": [
-            "hide:equations",
-            "primepowers:on",
-            "speed:8",
-            "play",
-            "pulse:primepowers"
+            "stairlab:trivial"
+          ],
+          "pause": 0.3
+        },
+        {
+          "id": "stair_04",
+          "text": "Now the first collision. Its wave grows like the square root of x and oscillates with the logarithm of x. On its own it only bends the line, up where the wave dips and down where it rises.",
+          "camera": "stair_terms",
+          "actions": [
+            "stairlab:waves:0:1"
           ],
           "pause": 0.4
         },
         {
-          "id": "stair_04",
-          "text": "More collisions, sharper steps. With a few hundred of them the staircase counts the primes exactly.",
-          "camera": "staircase_wide",
+          "id": "stair_05",
+          "text": "Add the second collision's wave, then the third. Each is smaller and faster than the last. Where they agree the line steps up; where they disagree it flattens.",
+          "camera": "stair_terms",
           "actions": [
-            "primepowers:off",
-            "card:off",
-            "pulse:prime"
+            "stairlab:waves:1:3"
           ],
+          "pause": 0.4
+        },
+        {
+          "id": "stair_06",
+          "text": "Keep adding waves: ten, a hundred, three hundred. The steps sharpen exactly on two, three, five, seven, eleven and thirteen, and smaller steps appear on four, eight, nine, sixteen, twenty five and twenty seven, the powers of primes.",
+          "camera": "stair_terms",
+          "actions": [
+            "stairlab:waves:3:all"
+          ],
+          "pause": 0.4
+        },
+        {
+          "id": "stair_07",
+          "text": "With enough collisions the staircase lands on the exact count. Every step is a prime or a power of one, and its height is the logarithm of that prime.",
+          "camera": "stair_terms",
+          "actions": [],
           "pause": 0.6
         }
       ]
@@ -542,6 +569,7 @@
           "text": "Now see it all at once. The chain shrinks by the square root rule. The dial turns. The tip strikes the centre, and every strike drops a marker on the pole.",
           "camera": "machine",
           "actions": [
+            "stairlab:off",
             "show:spiral",
             "show:tail",
             "show:trail",
@@ -557,7 +585,7 @@
         },
         {
           "id": "machine_02",
-          "text": "Every marker becomes a wave, the waves pile up on the primes, and the staircase counts them. A machine for manufacturing prime numbers.",
+          "text": "Every marker becomes a wave, the waves pile up on the primes, and the staircase counts them.",
           "camera": "machine",
           "actions": [
             "pulse:prime"
@@ -588,7 +616,8 @@
             "show:tip",
             "show:center",
             "rootlabel:sqrt",
-            "pulse:spiral"
+            "pulse:spiral",
+            "miss:on"
           ],
           "pause": 0.4
         },
@@ -600,7 +629,8 @@
             "sigma:0.9",
             "rootlabel:0.9",
             "speed:2.5",
-            "play"
+            "play",
+            "miss:on"
           ],
           "pause": 0.4
         },
@@ -609,6 +639,7 @@
           "text": "Picture every possible exponent between zero and one as a strip. Our collisions all sit on the one half line, right down the middle.",
           "camera": "strip_panel",
           "actions": [
+            "miss:off",
             "pause",
             "sigma:0.5",
             "rootlabel:off",
@@ -624,13 +655,22 @@
         {
           "id": "key_04",
           "text": "Suppose the collisions strayed off that line. Slide the exponent up toward zero point nine and back, and watch the staircase wobble off the rails.",
-          "camera": "wobble",
+          "camera": "stair_wobble",
           "actions": [
             "hide:strip",
-            "show:prime",
-            "ghost:all:0.9",
-            "ghost:sweep:0.55:0.95:pingpong",
-            "pulse:ghost"
+            "hide:cosine",
+            "hide:prime",
+            "hide:zetacurve",
+            "hide:zeros",
+            "hide:spiral",
+            "hide:tail",
+            "hide:tip",
+            "hide:center",
+            "hide:imaxis",
+            "hide:outaxes",
+            "hide:equations",
+            "stairlab:wobble:40:0.5",
+            "stairlab:sweep:0.5:0.95:pingpong"
           ],
           "pause": 0.5,
           "footnote": "red: the staircase if every collision had exponent β instead of ½"
@@ -638,10 +678,9 @@
         {
           "id": "key_05",
           "text": "The Riemann Hypothesis says it never happens: every collision, forever, exactly on the one half line. That is why the square root is the magic key.",
-          "camera": "wobble",
+          "camera": "stair_wobble",
           "actions": [
-            "ghost:off",
-            "pulse:prime"
+            "stairlab:beta:0.5"
           ],
           "pause": 0.6
         }
@@ -657,6 +696,7 @@
           "text": "In October 2026, OpenAI published an AI generated proof that no collision can stray past seven eighths. They call it the quasi Riemann hypothesis.",
           "camera": "strip_band",
           "actions": [
+            "stairlab:off",
             "hide:prime",
             "show:strip",
             "show:band78",
@@ -708,18 +748,26 @@
         {
           "id": "outro_01",
           "text": "A square root. A dial. A spiral that keeps striking its centre. Waves that cancel into a map of the primes.",
-          "camera": "outro",
+          "camera": "sacks_saddle",
           "actions": [
+            "pause",
             "hide:strip",
             "hide:gap",
-            "show:spiral",
-            "show:tail",
-            "show:trail",
-            "show:zeros",
-            "show:prime",
-            "show:imaxis",
-            "speed:4",
-            "play"
+            "stairlab:off",
+            "hide:cosine",
+            "hide:prime",
+            "hide:zetacurve",
+            "hide:zeros",
+            "hide:spiral",
+            "hide:tail",
+            "hide:tip",
+            "hide:center",
+            "hide:imaxis",
+            "hide:outaxes",
+            "hide:equations",
+            "hide:trail",
+            "sacks:show",
+            "sacks:saddle"
           ],
           "pause": 0.4
         },
@@ -736,8 +784,6 @@
             "hide:zeros",
             "hide:imaxis",
             "hide:cosine",
-            "sacks:show",
-            "sacks:saddle",
             "sacks:routes",
             "pulse:sacks"
           ],

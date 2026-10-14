@@ -382,12 +382,15 @@ public class Main : MonoBehaviour
         // accumulate so slow speeds (less than one AnimStep per frame) still advance
         pendingAdvance += Speed * SpeedMultiplier * Time.deltaTime;
         int steps = 0;
-        while (pendingAdvance >= AnimStep && steps < MaxStepsPerFrame)
+        using (FrameProbe.Measure("Main: zeta steps"))
         {
-            pendingAdvance -= AnimStep;
-            currentIter += AnimStep;
-            RiemannZeta(currentIter);
-            steps++;
+            while (pendingAdvance >= AnimStep && steps < MaxStepsPerFrame)
+            {
+                pendingAdvance -= AnimStep;
+                currentIter += AnimStep;
+                RiemannZeta(currentIter);
+                steps++;
+            }
         }
 
         if (steps == MaxStepsPerFrame) pendingAdvance = 0; // drop backlog rather than stall
@@ -424,19 +427,19 @@ public class Main : MonoBehaviour
     {
         currentIter = iter;
 
-        limitCurve.RenderLimitCurve(iter, limitCurve.MovingLimitCurve, null);
+        using (FrameProbe.Measure("Main: chain")) limitCurve.RenderLimitCurve(iter, limitCurve.MovingLimitCurve, null);
         if (zetaCurvePoints.Count == 0)
         {
             RiemannZeta(iter);
         }
 
-        UpdateZetaCurves(iter);
+        using (FrameProbe.Measure("Main: new zeros (explicit terms, markers)")) UpdateZetaCurves(iter);
         if (heavyUpdateDirty)
         {
             // the prime staircase and the cosine chorus only change when a new zero joins the sum
             heavyUpdateDirty = false;
-            UpdatePrimeNumberTheorem();
-            DrawCosineWave(iter);
+            using (FrameProbe.Measure("Main: staircase + daggers")) UpdatePrimeNumberTheorem();
+            using (FrameProbe.Measure("Main: cosine chorus")) DrawCosineWave(iter);
         }
     }
 
@@ -444,7 +447,8 @@ public class Main : MonoBehaviour
     {
         // compute the actual Riemann Zeta function output (analytic continuation, Meta.Numerics)
         Complex input = new(Sigma, iter);
-        Complex output = ZetaMath.Exact(input);
+        Complex output;
+        using (FrameProbe.Measure("Main: zeta value (Meta.Numerics)")) output = ZetaMath.Exact(input);
         CurrentZeta = output;
 
         Vector3 point = new(
@@ -468,8 +472,11 @@ public class Main : MonoBehaviour
 
         trailBuffer[zetaCurvePoints.Count - 1] = point;
 
-        zetaCurve.positionCount = zetaCurvePoints.Count;
-        zetaCurve.SetPositions(trailBuffer.GetSubArray(0, zetaCurvePoints.Count));
+        using (FrameProbe.Measure("Main: trail upload"))
+        {
+            zetaCurve.positionCount = zetaCurvePoints.Count;
+            zetaCurve.SetPositions(trailBuffer.GetSubArray(0, zetaCurvePoints.Count));
+        }
     }
 
     void OnDestroy()
@@ -545,13 +552,9 @@ public class Main : MonoBehaviour
             double psi = ZetaMath.Psi(x, periodicSum);
             PsiValues[i] = (float)psi;
 
-            Vector3 point = new((float)x, (float)psi, 0f);
-            if (psi < 0)
-            {
-                point = Vector3.zero;
-            }
-
-            primeCurvePoints[i] = point;
+            // below x ≈ 2 the truncated formula dips under zero: hold the curve at 0 there (it used to jump back to
+            // the origin, drawing a stray line toward it)
+            primeCurvePoints[i] = new Vector3((float)x, Mathf.Max(0f, (float)psi), 0f);
             x += curveResolution;
         }
 
@@ -580,7 +583,7 @@ public class Main : MonoBehaviour
         for (int i = 0; i < line.Length; i++)
         {
             float x = (float)PrimeCurveX(i);
-            line[i] = to[i] == Vector3.zero ? Vector3.zero : new Vector3(x, x, 0);
+            line[i] = new Vector3(x, x, 0);
         }
 
         daggerContainer.SetActive(false);

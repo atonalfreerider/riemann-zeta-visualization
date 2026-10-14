@@ -54,17 +54,21 @@ public class HomeView : MonoBehaviour
 
     public void Enter()
     {
+        SacksSpiral sacks = director.Annotations.Sacks;
+        // coming from the tour's last line the animation is already running: carry on with the camera where it is
+        bool continuing = sacks.Growing && sacks.Mode == SacksSpiral.GrowthMode.FullWave && sacks.GrowthTMax >= SacksSpiral.HomeTMax;
         Active = true;
         PrepareScene();
         if (VRMode.Enabled) return; // the VR layer places the model itself
-        director.Rig.SetCue("home_orbit", 0.2f);
-        director.Rig.Snap();
+        director.Rig.Release();
+        director.Orbit.Begin(!continuing);
     }
 
     public void Exit()
     {
         if (!Active && !director.Annotations.Sacks.Growing) return;
         Active = false;
+        if (director.Orbit != null) director.Orbit.End();
         director.Annotations.Sacks.StopGrowth();
         if (!director.Running) director.Rig.Release();
     }

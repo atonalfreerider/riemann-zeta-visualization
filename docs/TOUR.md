@@ -19,8 +19,15 @@ run time takes minutes. Re-bake after changing `zetazeros.txt` or the sampling i
 The outro chapter shows the zeros one at a time instead (`hypothesis:grow`): every zero the growing trail passes sends
 its cosine wave out along the spiral at the zero's height, then the wave sinks onto the saddle and joins the master wave.
 
-A panel tucks into the left edge (the tab, **M** or **Tab** opens and closes it):
-**View** Home · Explore · Graph (the original zeta / staircase graph) — **Format** 16:9 / 9:16 —
+The saddle view's camera orbits the saddle's centre with the zeta axis up the screen. It opens very close to the
+centre, pulls back while the trail grows, then settles into a slow orbit. Drag (or W A S D / arrows) orbits and changes
+altitude, the wheel (or Q E) zooms, Shift + drag (or Shift + W A S D) moves the centre; on a phone one finger orbits,
+pinch zooms, two fingers move. The chain of arrows is drawn at the trail's tip as it grows. The saddle's last turns
+shrink and fade to black so it reads as going on for ever.
+
+A panel tucks into the left edge (the arrow at the middle of the edge, or **M** / **Tab**):
+**View** Saddle · XY graph (the original zeta / staircase graph) — **Layers** saddle or flat, master wave, zeta trail,
+chain, numbers, the red / blue / green curves, trail height, reset view — **Format** 16:9 / 9:16 —
 **Tour** play the whole tour or any chapter — **Record** the whole tour, or one chapter with the ● on its row,
 in the chosen format. The panel is a screen overlay, so it never appears in recordings; while recording, the
 window shows the frame being recorded, letterboxed.
@@ -143,6 +150,10 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `sacks:highlight:squares\|pronic\|euler\|all` | widen one route on the saddle and dim the others |
 | `equations:on` / `equations:squares\|pronic\|euler` / `equations:off` | on-screen legend of the saddle's routes (red n = k², blue n = k(k+1), green n = k² + k + 41), optionally highlighting one |
 | `hypothesis:grow:TMAX:SECONDS` | the trail grows from the saddle's centre to t = TMAX in SECONDS; each zero's wave runs out along the spiral at its height and sinks into the master wave |
+| `stairlab:terms` · `stairlab:const` · `stairlab:trivial` · `stairlab:waves:FROM:TO` | the staircase built from the explicit formula one piece at a time (y = x, − ln 2π, the trivial zeros, then each zero's wave shown alone in a strip and poured in); `TO` may be `all` (300) |
+| `stairlab:wobble:ZEROS:BETA` · `stairlab:sweep:FROM:TO[:pingpong]` · `stairlab:beta:B` · `stairlab:off` | the staircase from the first ZEROS zeros on the line (white) against the same zeros moved to Re(s) = β (red), orange bars for the difference |
+| `miss:on` / `miss:off` | a line from the pole to the chain's tip with its length, and the closest pass kept on screen |
+| `sacks:highlight:…` numbers | highlighting a route writes each of its numbers large at its spot, then shrinks it |
 | `home:scene` | the home view's content (saddle + growing trail and waves), without moving the camera (used by the VR Explore view) |
 | `landing:on` / `landing:off` | callout at the centre explaining why the chain closed at this t |
 | `hypothesis:on` / `hypothesis:off` | the closing guess on the saddle: the √n spiral road plus the rings picked out by the logarithm rule at t = 14.13 and 21.02 |

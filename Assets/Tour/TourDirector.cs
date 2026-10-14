@@ -41,6 +41,7 @@ public class TourDirector : MonoBehaviour
     public FrameRecorder Recorder { get; private set; }
     public ExploreMode Explore { get; private set; }
     public HomeView Home { get; private set; }
+    public OrbitCamera Orbit { get; private set; }
 
     /// <summary>(line id, tour clock seconds, recorder frame) for every narration clip started — used to mux audio.</summary>
     public readonly List<(string id, float time, int frame)> AudioTimeline = new();
@@ -86,6 +87,7 @@ public class TourDirector : MonoBehaviour
         Recorder = FrameRecorder.Create(cam);
         Explore = ExploreMode.Create(this);
         Home = HomeView.Create(this);
+        if (!VRMode.Enabled) Orbit = OrbitCamera.Create(cam, Annotations.Sacks);
         SetFormat(Portrait);
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -437,6 +439,8 @@ public class TourDirector : MonoBehaviour
         Main.SetEquationsVisible(false);
         Main.SetZetaCurveVisible(false);
         Main.SetGridVisible(false);
+        Main.SetZeroMarkersVisible(true); // the home view hides them; the tour drops a marker at every collision
+        Main.Limit.SetSpiralVisible(true);
 
         bool started = string.IsNullOrEmpty(StartChapter);
         int total = script.chapters.Length;
@@ -779,6 +783,22 @@ public class TourDirector : MonoBehaviour
                     case "explore":
                         exploreAfterTour = arg != "off";
                         break;
+                    case "stairlab":
+                    {
+                        // the staircase on its own: terms · const · trivial · waves:FROM:TO · wobble:ZEROS:BETA · sweep:FROM:TO[:pingpong] · beta:B · off
+                        StaircaseLab lab = Annotations.Lab;
+                        float line = Storyboard ? StoryboardSecondsPerLine : currentLineSeconds;
+                        if (arg == "terms") lab.BeginTerms(Mathf.Max(2f, line * .5f));
+                        else if (arg == "const") lab.AddConstant(Mathf.Max(2f, line * .8f));
+                        else if (arg == "trivial") lab.AddTrivial(Mathf.Max(2f, line * .8f));
+                        else if (arg == "waves") lab.AddWaves(int.Parse(parts[2], CultureInfo.InvariantCulture), parts[3] == "all" ? -1 : int.Parse(parts[3], CultureInfo.InvariantCulture), parts.Length > 4 ? float.Parse(parts[4], CultureInfo.InvariantCulture) : Mathf.Max(2f, line * .9f));
+                        else if (arg == "wobble") lab.BeginWobble(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : 40, parts.Length > 3 ? float.Parse(parts[3], CultureInfo.InvariantCulture) : .5f);
+                        else if (arg == "sweep") lab.SweepBeta(float.Parse(parts[2], CultureInfo.InvariantCulture), float.Parse(parts[3], CultureInfo.InvariantCulture), Mathf.Max(2f, line * .9f), parts.Length > 4 && parts[4] == "pingpong");
+                        else if (arg == "beta") lab.SweepBeta(lab.Beta, float.Parse(parts[2], CultureInfo.InvariantCulture), Mathf.Max(1.5f, line * .4f), false);
+                        else lab.Hide();
+                        break;
+                    }
+                    case "miss": Annotations.ShowMiss(arg != "off"); break;
                     case "equations":
                         // equations:on · equations:off · equations:squares|pronic|euler (highlight one route and its equation)
                         Captions.ShowEquations(arg);

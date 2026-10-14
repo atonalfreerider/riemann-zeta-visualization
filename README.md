@@ -22,13 +22,15 @@ The plain series does not converge on the critical line, so the spiral alone nev
 
 There are other tools built into this animation to help break down and visualize how these mysterious functions work.
 
-The app opens on the Sacks spiral bent on its saddle, slowly orbiting, with the zeta trail growing out of its
-centre; every zero it passes sends its wave along the spiral into the master wave. A side menu tucked into the left
-edge (tab, **M** or **Tab**) picks a view (Home, Explore, the original Graph), the format (16:9 or 9:16), plays the
-tour or any chapter, and records the whole tour or a single chapter in either format.
+The app opens on the Sacks spiral bent on its saddle, with the master wave of 10,000 zeros riding it and the zeta
+trail (with its chain of arrows at the tip) growing out of the centre. The camera starts close to the centre, pulls
+back and orbits; drag or W A S D to orbit and change altitude, wheel or Q E to zoom, Shift + drag to move the centre.
+A side menu tucked into the left edge (the arrow, **M** or **Tab**) switches views (Saddle, XY graph), toggles layers
+(saddle / flat, master wave, trail, chain, numbers, the k², k(k+1) and k² + k + 41 curves, trail height), picks the
+format (16:9 or 9:16), plays the tour or any chapter, and records the whole tour or a single chapter.
 
 Keys: **M** menu · **T** start/stop the narrated tour · **N** next line · **F9** record · **P** switch 16:9 / 9:16 ·
-**F** frame rate. In the Graph and Explore views: WASD QE move, right-drag look, Space play/pause.
+**F** frame rate.
 
 ## The guided tour, chapter by chapter
 

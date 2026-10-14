@@ -81,6 +81,7 @@ public class Annotations : MonoBehaviour
     GameObject rootFormulaRoot;
     TextBox ghostFormula;
     public SacksSpiral Sacks { get; private set; }
+    public StaircaseLab Lab { get; private set; }
     // zeno zoom: the camera follows the newest footprint and halves its distance each step
     public Vector3 ZenoFocus { get; private set; } = new(1f, 0f, 1.15f);
     public float ZenoZoom { get; private set; } = 9.5f;
@@ -122,6 +123,8 @@ public class Annotations : MonoBehaviour
         Annotations a = go.AddComponent<Annotations>();
         a.main = main;
         a.Build();
+        a.Lab = StaircaseLab.Create(main);
+        a.Lab.transform.SetParent(go.transform, false);
         main.ZeroPassed += a.OnZeroPassed;
         main.AnimationReset += a.OnAnimationReset;
         return a;
@@ -727,6 +730,8 @@ public class Annotations : MonoBehaviour
             Factory.SetColor(gapQuad, new Color(1f, .5f, .2f, pulse));
         }
 
+        if (missRoot != null && missRoot.activeSelf) UpdateMiss();
+
         if (tipRoot.activeSelf)
         {
             Vector3[] joints = main.Limit.LastJoints;
@@ -762,6 +767,76 @@ public class Annotations : MonoBehaviour
     }
 
     public void ShowTip(bool on) => tipRoot.SetActive(on);
+
+    // ---- miss distance: how far the chain's tip passes from the centre (the square-root key chapter) ----------------
+    GameObject missRoot;
+    LineRenderer missLine, closestLine;
+    TextBox missLabel, closestLabel;
+    GameObject closestDot;
+    double closestMiss = double.MaxValue, closestT;
+    float lastMissT = -1f;
+
+    /// <summary>
+    /// A line from the centre (the pole) to the chain's tip with its length, and the closest pass so far kept on screen:
+    /// on the ½ line the tip hits the centre (miss 0); at exponent 0.9 it always misses, by the amount shown.
+    /// </summary>
+    public void ShowMiss(bool on)
+    {
+        if (on && missRoot == null)
+        {
+            missRoot = new GameObject("Miss");
+            missRoot.transform.SetParent(transform, false);
+            missLine = Factory.NewLine("miss", .05f, Factory.Palette.Ghost, Factory.GlowIntensity);
+            missLine.transform.SetParent(missRoot.transform, false);
+            missLine.positionCount = 2;
+            closestLine = Factory.NewLine("closest miss", .04f, new Color(1f, .6f, .2f), Factory.SoftGlowIntensity);
+            closestLine.transform.SetParent(missRoot.transform, false);
+            closestLine.positionCount = 2;
+            closestDot = Factory.NewSphere("closest tip", .12f, new Color(1f, .6f, .2f), Factory.GlowIntensity);
+            closestDot.transform.SetParent(missRoot.transform, false);
+            missLabel = TextBox.Create("", 3.4f);
+            missLabel.transform.SetParent(missRoot.transform, false);
+            missLabel.Alignment = TMPro.TextAlignmentOptions.Left;
+            missLabel.Color = Factory.Palette.Ghost;
+            missLabel.gameObject.AddComponent<Billboard>();
+            closestLabel = TextBox.Create("", 3f);
+            closestLabel.transform.SetParent(missRoot.transform, false);
+            closestLabel.Alignment = TMPro.TextAlignmentOptions.Left;
+            closestLabel.Color = new Color(1f, .6f, .2f);
+            closestLabel.gameObject.AddComponent<Billboard>();
+        }
+
+        if (missRoot == null) return;
+        missRoot.SetActive(on);
+        closestMiss = double.MaxValue;
+        lastMissT = -1f;
+        if (on) UpdateMiss();
+    }
+
+    void UpdateMiss()
+    {
+        ZetaMath.SpiralDecomposition d = main.Limit.LastDecomposition;
+        if (d.PartialSums == null) return;
+        float y = (float)main.Limit.LastT * Graph.yScale;
+        Vector3 centre = new(0, y, 0);
+        Vector3 tip = LimitCurve.ToWorld(d.Total, y);
+        double miss = ComplexMath.Abs(d.Total);
+        if ((float)main.Limit.LastT < lastMissT) closestMiss = double.MaxValue; // the dial went back: start over
+        lastMissT = (float)main.Limit.LastT;
+        if (miss < closestMiss)
+        {
+            closestMiss = miss;
+            closestT = main.Limit.LastT;
+            closestDot.transform.position = tip;
+            closestLine.SetPositions(new[] { centre, tip });
+            closestLabel.Text = $"closest pass: {closestMiss:0.000}\nat t = {closestT:0.00}";
+            closestLabel.transform.position = tip + new Vector3(.25f, .05f, -.35f);
+        }
+
+        missLine.SetPositions(new[] { centre + Vector3.up * .01f, tip + Vector3.up * .01f });
+        missLabel.Text = $"miss = {miss:0.000}";
+        missLabel.transform.position = (centre + tip) * .5f + new Vector3(.1f, .06f, .12f);
+    }
     public void ShowZeno(bool on) => zenoRoot.SetActive(on);
 
     TextBox landingLabel;
@@ -1515,7 +1590,7 @@ public class Annotations : MonoBehaviour
                 psi = psiValues[i] - ZetaMath.OffLineZeroPairTerm(x, beta, gamma);
             }
 
-            pts[i] = x < 2 ? Vector3.zero : new Vector3((float)x, (float)System.Math.Max(psi, -40), -0.05f);
+            pts[i] = new Vector3((float)x, x < 2 ? 0f : (float)System.Math.Max(psi, -40), -0.05f);
         }
     }
 
@@ -1598,6 +1673,8 @@ public class Annotations : MonoBehaviour
 
     public void HideAll()
     {
+        Lab.Hide();
+        ShowMiss(false);
         ShowTip(false);
         ShowCenter(false);
         ShowNumberLine(false);
