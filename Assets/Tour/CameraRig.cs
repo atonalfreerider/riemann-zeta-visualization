@@ -226,6 +226,14 @@ public class CameraRig : MonoBehaviour
             Vector3 pos = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .75f);
             return new CueState { Position = pos, LookAt = c + Vector3.back * 1.5f, Up = Vector3.back, Fov = 55 };
         };
+        cues["sacks_sheet"] = () =>
+        {
+            // portrait framing of the fringe sheet standing on the ridge: front view, slight drift
+            Vector3 c = annotations.Sacks.Center;
+            Vector3 mid = c + new Vector3(1.45f * Mathf.Sqrt(60f) * .5f, 0f, 0f) + Vector3.back * 8.5f;
+            float sway = Mathf.Sin(Time.time * 0.25f) * 3f;
+            return new CueState { Position = mid + new Vector3(sway, -34f, -2f), LookAt = mid, Up = Vector3.back, Fov = 55 };
+        };
         cues["sacks_track"] = () =>
         {
             // tracking shot: ride outward along the spiral just above the master wave, looking ahead along the road

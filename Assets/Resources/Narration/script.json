@@ -737,18 +737,29 @@
           "footnote": "a visual hypothesis, not a theorem"
         },
         {
+          "id": "outro_03b",
+          "text": "Here is the whole machine on one sheet. Across: the numbers along the spiral. Up: the dial. Every row is a wave, every column is a chain arrow. Sum the columns and you get the zeta trail, in white, touching zero at the yellow rows. Sum the yellow rows and you get the prime map, in cyan, spiking on the primes.",
+          "camera": "sacks_sheet",
+          "actions": [
+            "hypothesis:sheet"
+          ],
+          "pause": 0.6,
+          "footnote": "the fringe sheet cos(t · log n): the explicit formula read in two directions"
+        },
+        {
           "id": "outro_04",
           "text": "Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.",
           "camera": "sacks_wave",
           "actions": [
+            "hypothesis:zeta",
             "hypothesis:wavestack:30"
           ],
           "pause": 0.5
         },
         {
           "id": "outro_05",
-          "text": "Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes, the orange ticks are prime powers like four, eight and nine; the spikes find them all. Saddle, trail and waves, one structure seen three ways.",
-          "camera": "sacks_wave_close",
+          "text": "Ride the spiral outward with the master wave. It spikes at every prime, two, three, five, seven, and on, and the orange ticks catch the prime powers. Saddle, trail and waves, one structure seen three ways.",
+          "camera": "sacks_track",
           "actions": [
             "pulse:sacks"
           ],

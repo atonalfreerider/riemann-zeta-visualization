@@ -558,6 +558,7 @@ public class TourDirector : MonoBehaviour
                     case "hypothesis":
                         if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "zeta") Annotations.Sacks.ShowZetaOnly();
+                        else if (arg == "sheet") { Annotations.Sacks.ShowZetaOnly(); Annotations.Sacks.ShowFringeSheet(60f, 62f, 13); Annotations.Sacks.ShowTrail(true); }
                         else if (arg == "wavestack") Annotations.Sacks.StartWaveStack(Mathf.Max(6f, currentLineSeconds * 0.95f), parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : 24);
                         else if (arg == "interference") Annotations.Sacks.StartInterference(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "nointerference") Annotations.Sacks.HideInterference();

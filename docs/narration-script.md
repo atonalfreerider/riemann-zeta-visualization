@@ -193,14 +193,17 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **outro_03** — One last picture, and this one is a guess, not a result. Keep the spiral on the saddle, and let the zeta trail rise from its centre, with a collision wherever the trail returns to the axis.
   <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:zeta` · footnote: a visual hypothesis, not a theorem</sub>
 
-**outro_04** — Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.
-  <sub>camera `sacks_wave` · actions `hypothesis:wavestack:30`</sub>
+**outro_03b** — Here is the whole machine on one sheet. Across: the numbers along the spiral. Up: the dial. Every row is a wave, every column is a chain arrow. Sum the columns and you get the zeta trail, in white, touching zero at the yellow rows. Sum the yellow rows and you get the prime map, in cyan, spiking on the primes.
+  <sub>camera `sacks_sheet` · actions `hypothesis:sheet` · footnote: the fringe sheet cos(t · log n): the explicit formula read in two directions</sub>
 
-**outro_05** — Down on the saddle, the stacked waves become one master wave riding the spiral, and it spikes at every prime. The yellow ticks are the primes, the orange ticks are prime powers like four, eight and nine; the spikes find them all. Saddle, trail and waves, one structure seen three ways.
-  <sub>camera `sacks_wave_close` · actions `pulse:sacks`</sub>
+**outro_04** — Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.
+  <sub>camera `sacks_wave` · actions `hypothesis:zeta hypothesis:wavestack:30`</sub>
+
+**outro_05** — Ride the spiral outward with the master wave. It spikes at every prime, two, three, five, seven, and on, and the orange ticks catch the prime powers. Saddle, trail and waves, one structure seen three ways.
+  <sub>camera `sacks_track` · actions `pulse:sacks`</sub>
 
 **outro_06** — Do these three structures know about each other, or are we only seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.
   <sub>camera `sacks_wave_close`</sub>
 
 ---
-1803 words ≈ 12.0 minutes of speech at 150 wpm, plus pauses and title cards.
+1849 words ≈ 12.3 minutes of speech at 150 wpm, plus pauses and title cards.
