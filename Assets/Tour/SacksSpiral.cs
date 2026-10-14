@@ -1155,6 +1155,221 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
+    // ---- connections: saddle wireframe, chain-arrow field, explicit-formula wave, fringe sheet ----
+
+    Vector3 Saddle(float x, float y) => origin + new Vector3(x, y, SaddleK * (x * x - y * y));
+
+    /// <summary>A dim polar wireframe of the saddle z = (x² − y²)/k, so the surface itself is visible.</summary>
+    public void ShowSaddleWire(float rMax, bool on)
+    {
+        Transform old = hypothesisRoot.transform.Find("SaddleWire");
+        if (old != null) old.gameObject.SetActive(on);
+        if (!on || old != null) return;
+        GameObject root = new("SaddleWire");
+        root.transform.SetParent(hypothesisRoot.transform, false);
+        Color c = new(.35f, .4f, .55f, .55f);
+        for (float r = 4f; r <= rMax; r += 4f)
+        {
+            LineRenderer ring = Factory.NewLine("wire ring", .03f, c);
+            ring.transform.SetParent(root.transform, false);
+            ring.loop = true;
+            ring.positionCount = 96;
+            Vector3[] pts = new Vector3[96];
+            for (int i = 0; i < 96; i++) { float a = i / 96f * Mathf.PI * 2f; pts[i] = Saddle(r * Mathf.Cos(a), r * Mathf.Sin(a)) + Vector3.back * .02f; }
+            ring.SetPositions(pts);
+        }
+
+        for (int s = 0; s < 24; s++)
+        {
+            float a = s / 24f * Mathf.PI * 2f;
+            bool ridge = s % 12 == 0, valley = s % 12 == 6;
+            LineRenderer spoke = Factory.NewLine("wire spoke", ridge || valley ? .06f : .025f, ridge ? new Color(1f, .55f, .2f) : valley ? new Color(.3f, .7f, 1f) : c, ridge || valley ? Factory.SoftGlowIntensity : Factory.NoGlow);
+            spoke.transform.SetParent(root.transform, false);
+            spoke.positionCount = 40;
+            Vector3[] pts = new Vector3[40];
+            for (int i = 0; i < 40; i++) { float r = rMax * i / 39f; pts[i] = Saddle(r * Mathf.Cos(a), r * Mathf.Sin(a)) + Vector3.back * .02f; }
+            spoke.SetPositions(pts);
+        }
+
+        TextBox l1 = TextBoxLabel("ridge (x axis): √n ≈ whole → squares k² and pronics k(k+1), never prime", 2.0f, new Color(1f, .55f, .2f));
+        l1.transform.SetParent(root.transform, false);
+        l1.transform.position = origin + new Vector3(0, -Extent - 4.5f, 0);
+        TextBox l2 = TextBoxLabel("valley (y axis): √n ≈ whole + ¼ or ¾", 2.0f, new Color(.3f, .7f, 1f));
+        l2.transform.SetParent(root.transform, false);
+        l2.transform.position = origin + new Vector3(0, -Extent - 7.5f, 0);
+    }
+
+    /// <summary>
+    /// The chain's arrows placed on the spiral: at number n, for dial t, arrow n of the chain has length 1/√n and
+    /// direction −t·log n. Its horizontal component IS cos(t·log n): the cosine wave and the chain are one object.
+    /// </summary>
+    public void ShowChainField(float t, int nMax)
+    {
+        ShowHypothesis(true);
+        ClearExploration();
+        for (int n = 1; n <= nMax; n++)
+        {
+            float ang = -t * Mathf.Log(n);
+            float len = 1.2f * Mathf.Pow(n, -0.5f) * 2.2f + .25f;
+            Vector3 p = SpiralPos(n, 1f) + Vector3.back * .3f;
+            Vector3 d = new(Mathf.Cos(ang), Mathf.Sin(ang), 0);
+            float cosv = Mathf.Cos(t * Mathf.Log(n));
+            Color c = Color.Lerp(new Color(.3f, .5f, 1f), new Color(1f, .9f, .3f), (cosv + 1f) * .5f);
+            LineRenderer arrow = Factory.NewLine("chain arrow " + n, .06f, c, Factory.GlowIntensity);
+            arrow.transform.SetParent(explorationRoot.transform, false);
+            arrow.positionCount = 2;
+            arrow.SetPositions(new[] { p, p + d * len });
+            Vector3 tip = p + d * len, side = new Vector3(-d.y, d.x, 0);
+            LineRenderer head = Factory.NewLine("head", .05f, c, Factory.GlowIntensity);
+            head.transform.SetParent(explorationRoot.transform, false);
+            head.positionCount = 3;
+            head.SetPositions(new[] { tip - d * .25f + side * .14f, tip, tip - d * .25f - side * .14f });
+        }
+
+        TextBox l = TextBoxLabel($"chain arrows at dial t = {t:0.00}: length 1/√n, turned by −t·log n.  Their x-components are the wave cos(t·log n)", 2.0f, Color.white);
+        l.transform.SetParent(explorationRoot.transform, false);
+        l.transform.position = origin + new Vector3(0, -R * Mathf.Sqrt(nMax) - 3f, 0);
+    }
+
+    /// <summary>
+    /// The explicit-formula weights instead of plain cosines: Σ_k 4√n·(cos(γ·log n) + 2γ·sin(γ·log n))/(1+4γ²)
+    /// = n − ψ(n) − ln 2π (the smooth part minus the staircase), riding the spiral: a sawtooth that drops by log p at each prime.
+    /// </summary>
+    public void ShowExplicitWave(int k, float nMax, float amp)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        waveStackRoot.SetActive(true);
+        double[] zs = Main.Instance.zetaZeroValues;
+        LineRenderer line = Factory.NewLine("explicit wave", .09f, new Color(1f, .5f, .9f), Factory.GlowIntensity);
+        line.transform.SetParent(explorationRoot.transform, false);
+        line.numCornerVertices = 3;
+        const int pts = 2400;
+        Vector3[] arr = new Vector3[pts];
+        for (int i = 0; i < pts; i++)
+        {
+            float n = FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (pts - 1f));
+            double sum = 0;
+            for (int z = 0; z < k; z++) sum += ZetaMath.ExplicitFormulaTerm(n, zs[z]);
+            float v = (float)(4.0 * System.Math.Sqrt(n) * sum); // = n − ψ(n) − ln2π − trivial term, up to the k-zero truncation
+            arr[i] = OnSpiral(n, 0f, v * amp);
+        }
+
+        line.positionCount = pts;
+        line.SetPositions(arr);
+        masterWave.enabled = false;
+        TextBox l = TextBoxLabel($"explicit-formula weights, {k} zeros: 4√n·Σ(cos + 2γ sin)/(1+4γ²) = n − ψ(n) − ln2π   (drops by log p at each prime)", 2.0f, new Color(1f, .5f, .9f));
+        l.transform.SetParent(explorationRoot.transform, false);
+        l.transform.position = origin + new Vector3(0, -R * Mathf.Sqrt(nMax) - 3f, 0);
+    }
+
+    public void RestoreMasterWave()
+    {
+        if (masterWave != null) masterWave.enabled = true;
+    }
+
+    /// <summary>
+    /// The fringe sheet cos(t·log n): a vertical heat-map standing on the saddle along the +x ridge, n along the
+    /// radius (position √n, so it matches the spiral), t up the axis. Yellow rows mark the zeros γ_k.
+    /// Summing the yellow rows gives the master wave (drawn along the bottom edge); summing each column over n with
+    /// weight 1/√n gives ζ(½ + it) (|ζ| drawn up the left edge, touching zero exactly at the yellow rows).
+    /// </summary>
+    public void ShowFringeSheet(float nMax, float tMax, int zeros)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        waveStackRoot.SetActive(false);
+        const int nRes = 420, tRes = 300;
+        Mesh mesh = new() { name = "fringe sheet", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        Vector3[] verts = new Vector3[nRes * tRes];
+        Color[] cols = new Color[nRes * tRes];
+        Color neg = new(.1f, .3f, 1f), pos = new(1f, .85f, .25f), mid = new(.02f, .02f, .05f);
+        for (int j = 0; j < tRes; j++)
+        {
+            float t = tMax * j / (tRes - 1f);
+            for (int i = 0; i < nRes; i++)
+            {
+                float n = 1f + (nMax - 1f) * i / (nRes - 1f);
+                float r = R * Mathf.Sqrt(n);
+                float v = Mathf.Cos(t * Mathf.Log(n));
+                verts[j * nRes + i] = Saddle(r, 0f) + Vector3.back * (t * ZetaT + .3f);
+                cols[j * nRes + i] = v >= 0 ? Color.Lerp(mid, pos, v) : Color.Lerp(mid, neg, -v);
+            }
+        }
+
+        int[] tris = new int[(nRes - 1) * (tRes - 1) * 6];
+        int q = 0;
+        for (int j = 0; j < tRes - 1; j++)
+        for (int i = 0; i < nRes - 1; i++)
+        {
+            int a = j * nRes + i, b = a + 1, c2 = a + nRes, d = c2 + 1;
+            tris[q++] = a; tris[q++] = d; tris[q++] = b; tris[q++] = a; tris[q++] = c2; tris[q++] = d;
+            // both sides visible: the shader culls nothing (Cull Off), so one winding is enough
+        }
+
+        mesh.vertices = verts; mesh.colors = cols; mesh.triangles = tris; mesh.RecalculateBounds();
+        GameObject go = new("FringeSheet");
+        go.transform.SetParent(explorationRoot.transform, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.sharedMaterial = Factory.mainMat;
+        Factory.SetIntensity(mr, 1.0f);
+
+        double[] zs = Main.Instance.zetaZeroValues;
+        for (int k = 0; k < zeros && k < zs.Length && zs[k] <= tMax; k++)
+        {
+            float g = (float)zs[k];
+            LineRenderer row = Factory.NewLine("zero row", .07f, Factory.Palette.Zero, Factory.GlowIntensity);
+            row.transform.SetParent(explorationRoot.transform, false);
+            row.positionCount = 2;
+            row.SetPositions(new[] { Saddle(R, 0f) + Vector3.back * (g * ZetaT + .35f), Saddle(R * Mathf.Sqrt(nMax), 0f) + Vector3.back * (g * ZetaT + .35f) });
+        }
+
+        // bottom edge: the master wave = sum of the yellow rows
+        LineRenderer master = Factory.NewLine("sheet master", .08f, Factory.Palette.Cosine, Factory.GlowIntensity);
+        master.transform.SetParent(explorationRoot.transform, false);
+        master.positionCount = nRes;
+        Vector3[] mpts = new Vector3[nRes];
+        int used = 0;
+        for (int k = 0; k < zeros && k < zs.Length && zs[k] <= tMax; k++) used++;
+        for (int i = 0; i < nRes; i++)
+        {
+            float n = 1f + (nMax - 1f) * i / (nRes - 1f);
+            double sum = 0;
+            for (int k = 0; k < used; k++) sum -= System.Math.Cos(zs[k] * System.Math.Log(n));
+            mpts[i] = Saddle(R * Mathf.Sqrt(n), 0f) + Vector3.back * .3f + Vector3.up * (float)(sum * 2.2 / System.Math.Sqrt(System.Math.Max(1, used)));
+        }
+
+        master.SetPositions(mpts);
+        for (int n = 2; n <= (int)nMax; n++)
+        {
+            if (!IsPrime(n)) continue;
+            LineRenderer tick = Factory.NewLine("sheet prime", .05f, Factory.Palette.Zero, Factory.SoftGlowIntensity);
+            tick.transform.SetParent(explorationRoot.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { Saddle(R * Mathf.Sqrt(n), 0f) + Vector3.back * .3f + Vector3.down * 1.0f, Saddle(R * Mathf.Sqrt(n), 0f) + Vector3.back * .3f + Vector3.down * 3.2f });
+        }
+
+        // left edge: |ζ(½ + it)| up the axis = the columns summed over n with weight 1/√n
+        LineRenderer mag = Factory.NewLine("sheet |zeta|", .08f, Factory.Palette.Zeta, Factory.GlowIntensity);
+        mag.transform.SetParent(explorationRoot.transform, false);
+        mag.positionCount = tRes;
+        Vector3[] zpts = new Vector3[tRes];
+        for (int j = 0; j < tRes; j++)
+        {
+            float t = tMax * j / (tRes - 1f);
+            double m = Meta.Numerics.ComplexMath.Abs(ZetaMath.Exact(new Meta.Numerics.Complex(.5, t)));
+            zpts[j] = Saddle(R, 0f) + Vector3.back * (t * ZetaT + .3f) + Vector3.left * (float)(1.0 + m * 2.0);
+        }
+
+        mag.SetPositions(zpts);
+        TextBox l = TextBoxLabel("the fringe sheet cos(t · log n)   —   rows: the waves (yellow rows = zeros, their sum is the cyan master wave below)\ncolumns: the chain arrows; summed over n with weight 1/√n they give ζ(½ + it)  (|ζ| in white on the left, touching zero at each yellow row)", 1.9f, Color.white);
+        l.transform.SetParent(explorationRoot.transform, false);
+        l.transform.position = origin + new Vector3(R * Mathf.Sqrt(nMax) * .5f, -5.5f, 0);
+    }
+
     public void HideWaveStack()
     {
         if (waveStackRoot != null) waveStackRoot.SetActive(false);

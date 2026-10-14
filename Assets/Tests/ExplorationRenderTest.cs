@@ -57,55 +57,44 @@ public class ExplorationRenderTest
             yield return null;
         }
 
-        // 1. master wave with 30 zeros: centre region (trail hidden for the top-down views)
-        sacks.ShowMasterStatic(30);
+        float Rr = 1.45f;
+        // A. the saddle itself, with the spiral on it: ridge and valley spokes
+        sacks.ShowSaddleWire(Rr * Mathf.Sqrt(420f), true);
         sacks.ShowTrail(false);
-        yield return Shot("01-master-center-top", c + back * 22f, c, Vector3.up, 50f);
-        yield return Shot("02-master-inner-top", c + back * 12f, c, Vector3.up, 50f);
-        yield return Shot("03-master-wide-top", c + back * 80f, c, Vector3.up, 55f);
+        yield return Shot("20-saddle-wire-top", c + back * 80f, c, Vector3.up, 55f);
+        yield return Shot("21-saddle-wire-oblique", c + new Vector3(-40f, -70f, -45f), c + back * 2f, back);
+        sacks.ShowSaddleWire(0f, false);
+
+        // B. the chain's arrows on the spiral at the first zero's dial
+        sacks.ShowChainField(14.134725f, 60);
+        yield return Shot("22-chain-field-t14-top", c + back * 24f, c, Vector3.up, 50f);
+        sacks.ShowChainField(21.022040f, 60);
+        yield return Shot("23-chain-field-t21-top", c + back * 24f, c, Vector3.up, 50f);
+        sacks.ShowChainField(3f, 60);
+        yield return Shot("24-chain-field-t3-top", c + back * 24f, c, Vector3.up, 50f);
+
+        // C. explicit-formula weights: the sawtooth n − ψ(n) riding the spiral
+        sacks.ShowExplicitWave(30, 60f, 0.45f);
+        yield return Shot("25-explicit-wave-center-top", c + back * 24f, c, Vector3.up, 50f);
+        sacks.ShowExplicitWave(100, 120f, 0.3f);
+        yield return Shot("26-explicit-wave-100zeros-top", c + back * 40f, c, Vector3.up, 50f);
+        yield return Shot("27-explicit-wave-oblique", c + new Vector3(-20f, -34f, -20f), c + back * 1f, back);
+        sacks.RestoreMasterWave();
+
+        // D. the fringe sheet: n along the ridge, t up the axis
+        sacks.ShowFringeSheet(60f, 62f, 13);
+        Vector3 sheetMid = c + new Vector3(Rr * Mathf.Sqrt(60f) * .5f, 0f, 0f) + back * (31f * .25f);
+        yield return Shot("28-fringe-sheet-front", sheetMid + new Vector3(0f, -30f, 0f), sheetMid, back, 55f);
+        yield return Shot("29-fringe-sheet-oblique", sheetMid + new Vector3(-14f, -26f, -8f), sheetMid, back, 55f);
+        yield return Shot("30-fringe-sheet-wide", sheetMid + new Vector3(-10f, -44f, -6f), sheetMid, back, 60f);
+        sacks.ShowFringeSheet(120f, 62f, 13);
+        Vector3 sheetMid2 = c + new Vector3(Rr * Mathf.Sqrt(120f) * .5f, 0f, 0f) + back * (31f * .25f);
+        yield return Shot("31-fringe-sheet-120", sheetMid2 + new Vector3(0f, -38f, 0f), sheetMid2, back, 55f);
+
+        // E. the whole picture: sheet standing on the saddle wire with the master wave and the trail
+        sacks.ShowSaddleWire(Rr * Mathf.Sqrt(420f), true);
         sacks.ShowTrail(true);
-        yield return Shot("04-master-center-oblique", c + new Vector3(-12f, -20f, -14f), c + back * 1f, back);
-        yield return Shot("05-master-wide-oblique", c + new Vector3(-40f, -70f, -45f), c + back * 2f, back);
-
-        // 2. ring field, centre, trail hidden
-        sacks.HideWaveStack();
-        sacks.ShowRingFieldStatic(30);
-        sacks.ShowTrail(false);
-        yield return Shot("06-ringfield-center-top", c + back * 22f, c, Vector3.up, 50f);
-        yield return Shot("07-ringfield-wide-top", c + back * 80f, c, Vector3.up, 55f);
-        sacks.ShowTrail(true);
-        sacks.HideInterference();
-
-        // 3. layer stack, each wave at its own height (n ≤ 60 so the crests resolve)
-        sacks.ShowLayerStack(30, 60f, 1.0f);
-        sacks.HideWaveStack();
-        yield return Shot("08-layers-side", c + new Vector3(0f, -46f, -16f), c + back * 17f, back, 60f);
-        yield return Shot("09-layers-oblique", c + new Vector3(-30f, -30f, -28f), c + back * 15f, back, 60f);
-
-        // 4. layer cross-sections along rays: cos(γ·log n) as a (log n, γ) fringe pattern
-        sacks.ShowLayerSection(30, 60f, 0.9f, new Vector3(1f, 1f, 0f));
-        yield return Shot("10-layersection-diagonal", c + new Vector3(24f, -24f, -17f), c + new Vector3(7f, 7f, 0f) + back * 17f, back, 60f);
-        sacks.ShowLayerSection(30, 60f, 0.9f, new Vector3(1f, 0f, 0f));
-        yield return Shot("11-layersection-x", c + new Vector3(8f, -34f, -17f), c + new Vector3(8f, 0f, 0f) + back * 17f, back, 60f);
-
-        // 5. cumulative-sum cross-sections: prime towers emerging with k
-        sacks.ShowCrossSection(30, 1.1f, 60f, 2.0f, new Vector3(1f, 1f, 0f));
-        yield return Shot("12-sumsection-diagonal", c + new Vector3(24f, -24f, -17f), c + new Vector3(7f, 7f, 0f) + back * 17f, back, 60f);
-        sacks.ShowCrossSection(30, 1.1f, 60f, 2.0f, new Vector3(1f, 0f, 0f));
-        yield return Shot("13-sumsection-x-ridge", c + new Vector3(8f, -34f, -17f), c + new Vector3(8f, 0f, 0f) + back * 17f, back, 60f);
-        sacks.ShowCrossSection(30, 1.1f, 60f, 2.0f, new Vector3(0f, 1f, 0f));
-        yield return Shot("14-sumsection-y-valley", c + new Vector3(34f, 8f, -17f), c + new Vector3(0f, 8f, 0f) + back * 17f, back, 60f);
-        sacks.ShowCrossSection(60, 0.6f, 120f, 2.0f, new Vector3(1f, 1f, 0f));
-        yield return Shot("15-sumsection-60zeros", c + new Vector3(34f, -34f, -18f), c + new Vector3(10f, 10f, 0f) + back * 18f, back, 60f);
-
-        // 6. partial-sum sheet along the spiral, inner turns only
-        sacks.ShowPartialSumSheet(30, 1.1f, 60f, 2.0f);
-        yield return Shot("16-partialsums-spiral-oblique", c + new Vector3(-22f, -30f, -26f), c + back * 16f, back, 60f);
-        yield return Shot("17-partialsums-spiral-top", c + back * 60f, c, Vector3.up, 55f);
-
-        // 7. trail + master wave together
-        sacks.ShowMasterStatic(30);
-        yield return Shot("18-trail-and-master", c + new Vector3(-30f, -75f, -30f), c + back * 14f, back);
+        yield return Shot("32-sheet-on-saddle", c + new Vector3(-26f, -62f, -30f), c + new Vector3(6f, 0f, 0f) + back * 8f, back, 60f);
 
         AsyncGPUReadback_WaitAll();
         yield return new WaitForSeconds(1f);
