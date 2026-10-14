@@ -1,3 +1,5 @@
+![the Sacks spiral bent on its saddle, with the master wave of 10,000 zeta zeros spiking at the primes](docs/gifs/00-saddle.gif)
+
 This is a Unity application for graphing the Riemann Zeta function along the critical strip at 1/2, and feeding the non-trivial Zeta Zero outputs into the Prime Counting function.
 
 The Riemann Zeta function is given by:  
