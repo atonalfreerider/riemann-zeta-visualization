@@ -146,7 +146,7 @@ public class SacksSpiral : MonoBehaviour
 
             if (n <= GridCount)
             {
-                TextBox label = TextBoxLabel(n.ToString(), prime ? 4.6f : 3.4f, new Color(.45f, .45f, .5f));
+                TextBox label = TextBoxLabel(n.ToString(), prime ? 6.4f : 5.8f, GridLabel);
                 labels.Add(label);
                 TextBox fac = TextBoxLabel(n > 1 && !prime ? Factorization(n) : "", 1.5f, new Color(.55f, .55f, .65f));
                 fac.gameObject.SetActive(false);
@@ -158,7 +158,12 @@ public class SacksSpiral : MonoBehaviour
         routesRoot.transform.SetParent(transform, false);
         AddRoute("squares", SquareColor, k => k * k, 1f, 40f, "n = k²   the squares: never prime");
         AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 39f, "n = k(k + 1)   neighbours multiplied: never prime");
-        AddRoute("euler", EulerColor, k => k * k + k + 41, 0f, 39f, "n = k² + k + 41   Euler: 40 primes in a row");
+        AddRoute("euler", EulerColor, k => k * k + k + 41, 6f, 39f, "n = k² + k + 41   Euler: 40 primes in a row");
+        // Robert Sacks's product curves: the neighbour line k(k + 1) moved out by a prime p (Michael M. Ross,
+        // naturalnumbers.org/sparticle.html). Each starts where its curve has settled into a smooth arc.
+        AddRoute("p17", FamilyColors[0], k => k * k + k + 17, 6f, 39f, "n = k² + k + 17");
+        AddRoute("p11", FamilyColors[1], k => k * k + k + 11, 5f, 39f, "n = k² + k + 11");
+        AddRoute("p5", FamilyColors[2], k => k * k + k + 5, 3f, 39f, "n = k² + k + 5");
         routesRoot.SetActive(false);
         for (int r = 0; r < routes.Count; r++) StyleRoute(r, 1f, .14f, Factory.GlowIntensity);
 
@@ -521,7 +526,8 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
-    float LabelScale => Mathf.Lerp(1f, .62f, morph);
+    float LabelScale => Mathf.Lerp(1f, .5f, morph);
+    static readonly Color GridLabel = new(.8f, .8f, .86f);
 
     void SetDecided(int n, bool animate)
     {
@@ -782,7 +788,7 @@ public class SacksSpiral : MonoBehaviour
             {
                 if (struck.Contains(j)) continue;
                 LineRenderer open = NewRing("candidate " + j, Color.white, .08f);
-                Board(BoardText(pm + $" = {n}", $"back from {n}:  we skipped <color=#{hp}>{j}</color>, no multiplication lands there", Tally()));
+                Board(BoardText(pm + $" = {n}", $"the product overshoots <color=#{hp}>{j}</color> and lands on {n}", Tally()));
                 yield return DrawRing(open, Road(j), .62f, per * .35f);
                 yield return new WaitForSeconds(per * .2f);
                 sievePrimes.Add(j);
@@ -790,7 +796,7 @@ public class SacksSpiral : MonoBehaviour
                 SetDecided(j, true);
                 open.startColor = open.endColor = MultiplierColor;
                 Tag($"{j} is prime", 2.1f, MultiplierColor, Outside(j, 2.0f));
-                Board(BoardText(pm + $" = {n}", $"<color=#{hp}>{j}</color> is prime, and joins the multipliers", Tally()));
+                Board(BoardText(pm + $" = {n}", $"no product ever lands on <color=#{hp}>{j}</color>: it is prime, and joins the multipliers", Tally()));
                 yield return new WaitForSeconds(per * .45f);
                 StartCoroutine(FadeRing(open, 0f, 1.2f)); // the circle has done its job; the prime's own dot stays
             }
@@ -941,8 +947,9 @@ public class SacksSpiral : MonoBehaviour
         {
             // on the spiral, beside the dot along the road: squares share a ray, so an offset along the ray would sit
             // next to the following square and read as the wrong number
-            labels[i].transform.position = Pos(i + 1) + RoadTangent(i + 1) * (.8f * morph) + Vector3.back * Mathf.Lerp(.4f, .2f, morph);
-            labels[i].transform.localScale = Vector3.one * Mathf.Lerp(1f, .62f, morph);
+            // in the grid, under the dot so the dot never covers it; on the spiral, beside it along the road
+            labels[i].transform.position = Pos(i + 1) + Vector3.down * (1.2f * (1f - morph)) + RoadTangent(i + 1) * (.8f * morph) + Vector3.back * Mathf.Lerp(.4f, .2f, morph);
+            labels[i].transform.localScale = Vector3.one * Mathf.Lerp(1f, .5f, morph);
             factorLabels[i].transform.position = GridPos(i + 1) + Vector3.down * 1.0f;
         }
 
@@ -953,27 +960,12 @@ public class SacksSpiral : MonoBehaviour
             // A smooth curve through the route's numbers: at k the number n(k) sits at radius R√n and angle 2π√n, which is the
             // same direction as 2π(√n − k) for whole k. Following 2π(√n − k) between them traces the route itself instead of
             // jumping a full turn of the spiral between neighbours (Euler's 41, 43, 47, 53 … are about one turn apart).
-            // Where neighbouring numbers are far apart around the spiral (Euler's first few: 41, 43, 47, 53 … the curve
-            // would loop most of a turn between them), the segment joins them directly instead.
             int kStart = Mathf.CeilToInt(k0), kEnd = Mathf.FloorToInt(k1);
             Vector3[] pts = new Vector3[(kEnd - kStart) * RouteSteps + 1];
             for (int i = 0; i < pts.Length; i++)
             {
-                int seg = Mathf.Min(i / RouteSteps, kEnd - kStart - 1);
-                float ka = kStart + seg, kb = ka + 1f;
                 float k = kStart + i / (float)RouteSteps;
-                float sweep = Mathf.Abs((Mathf.Sqrt(Mathf.Max(1f, fn(kb))) - kb) - (Mathf.Sqrt(Mathf.Max(1f, fn(ka))) - ka));
-                if (sweep > .2f)
-                {
-                    Vector3 a = RoutePoint(fn(ka), ka), b = RoutePoint(fn(kb), kb);
-                    Vector3 p = Vector3.Lerp(a, b, k - ka);
-                    float x = p.x - origin.x, y = p.y - origin.y;
-                    pts[i] = origin + new Vector3(x, y, bend * SaddleK * (x * x - y * y)) + Vector3.back * .15f;
-                }
-                else
-                {
-                    pts[i] = RoutePoint(fn(k), k) + Vector3.back * .15f;
-                }
+                pts[i] = RoutePoint(fn(k), k) + Vector3.back * .15f;
             }
 
             int shown = routeReveal[r] < 0 ? pts.Length : Mathf.Clamp((routeReveal[r] - 1) * RouteSteps + 1, 0, pts.Length);
@@ -1000,7 +992,7 @@ public class SacksSpiral : MonoBehaviour
         morph = 0f; bend = 0f; reveal = 0f;
         for (int i = 0; i < labels.Count; i++)
         {
-            labels[i].Color = new Color(.45f, .45f, .5f);
+            labels[i].Color = GridLabel;
             factorLabels[i].gameObject.SetActive(false);
             dots[i].SetActive(false);
         }
@@ -1027,7 +1019,7 @@ public class SacksSpiral : MonoBehaviour
             else
             {
                 // composites stay neutral until the lattice shows how they are made
-                labels[i].Color = new Color(.5f, .5f, .58f);
+                labels[i].Color = GridLabel;
                 dots[i].SetActive(false);
             }
 
@@ -1105,7 +1097,7 @@ public class SacksSpiral : MonoBehaviour
 
     public void ShowRoutes(bool on)
     {
-        for (int r = 0; r < routeVisible.Length; r++) routeVisible[r] = on;
+        for (int r = 0; r < routeVisible.Length; r++) routeVisible[r] = on && !IsFamily(r);
         routesRoot.SetActive(on);
         if (on) Layout();
         HighlightRoute("all");
@@ -1132,10 +1124,25 @@ public class SacksSpiral : MonoBehaviour
 
     public static readonly Color PronicColor = new(.4f, .55f, 1f);
     public static readonly Color EulerColor = new(.35f, 1f, .55f);
-    static readonly string[] RouteNames = { "squares", "pronic", "euler" };
-    static readonly Color[] RouteColors = { SquareColor, PronicColor, EulerColor };
-    readonly bool[] routeVisible = { true, true, true };
-    readonly int[] routeReveal = { -1, -1, -1 }; // points of each route drawn so far (−1: all)
+    public static readonly Color[] FamilyColors = { new(.3f, .95f, .85f), new(.35f, .8f, .95f), new(.55f, .7f, 1f) };
+    static readonly string[] RouteNames = { "squares", "pronic", "euler", "p17", "p11", "p5" };
+    static readonly Color[] RouteColors = { SquareColor, PronicColor, EulerColor, FamilyColors[0], FamilyColors[1], FamilyColors[2] };
+    readonly bool[] routeVisible = { true, true, true, false, false, false };
+    readonly int[] routeReveal = { -1, -1, -1, -1, -1, -1 }; // points of each route drawn so far (−1: all)
+    static bool IsFamily(int r) => r >= 3;
+
+    /// <summary>Show or hide Sacks's product curves n² + n + p (p = 17, 11, 5) beside Euler's.</summary>
+    public void SetFamilyVisible(bool on)
+    {
+        for (int r = 3; r < routeVisible.Length; r++) routeVisible[r] = on;
+        bool any = false;
+        foreach (bool v in routeVisible) any |= v;
+        routesRoot.SetActive(any);
+        if (any) Layout();
+        HighlightRoute(on ? "family" : "all");
+    }
+
+    public bool FamilyVisible => routesRoot.activeSelf && routeVisible[3];
 
     /// <summary>Where the number being written on a route is (the camera follows it); the centre before any.</summary>
     public Vector3 RouteFocus { get; private set; }
@@ -1177,12 +1184,13 @@ public class SacksSpiral : MonoBehaviour
         if (routeHighlight != null) StopCoroutine(routeHighlight);
         if (routeNumbersRoot != null) Destroy(routeNumbersRoot);
         int chosen = System.Array.IndexOf(RouteNames, name);
+        bool family = name == "family"; // Euler's route and the product curves together
         for (int r = 0; r < routeReveal.Length; r++) routeReveal[r] = -1;
         RouteFocus = origin;
         for (int r = 0; r < routes.Count; r++)
         {
-            bool on = chosen < 0 || r == chosen;
-            StyleRoute(r, on ? 1f : .25f, chosen < 0 ? .14f : on ? .26f : .07f, on && chosen >= 0 ? Factory.GlowIntensity * 1.2f : Factory.GlowIntensity);
+            bool on = family ? r >= 2 : chosen < 0 || r == chosen;
+            StyleRoute(r, on ? 1f : .25f, chosen < 0 && !family ? .14f : on ? .22f : .07f, on && (chosen >= 0 || family) ? Factory.GlowIntensity * 1.2f : Factory.GlowIntensity);
             routeLabels[r].gameObject.SetActive(on && routeVisible[r]);
         }
 
@@ -2761,7 +2769,7 @@ public class SacksSpiral : MonoBehaviour
     {
         if (growRoot == null) return;
         foreach (LineRenderer chunk in growTrailChunks) chunk.enabled = on;
-        growAxis.enabled = on;
+        growAxis.enabled = true; // the zeta axis itself stays: only the trail, its chain and its markers go
         growChain.enabled = growChainTail.enabled = on && ChainVisible;
         growTip.SetActive(on);
         foreach (GameObject d in growZeroDots) if (d != null) d.SetActive(on);

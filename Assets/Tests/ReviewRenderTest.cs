@@ -161,12 +161,13 @@ public class ReviewRenderTest
 
         (string chapter, (string line, float at)[] moments)[] chapters =
         {
-            ("hook", new[] { ("hook_01", .85f), ("hook_03", .72f), ("hook_04", .8f), ("hook_05", .95f) }),
-            ("sacks", new[] { ("sacks_01", .3f), ("sacks_01", .9f), ("sacks_02", .25f), ("sacks_02", .9f), ("sacks_03", .6f), ("sacks_04", .6f), ("sacks_05", .35f), ("sacks_05", .95f) }),
-            ("turn", new[] { ("turn_01", .7f), ("turn_04", .7f), ("turn_05", .95f) }),
-            ("staircase", new[] { ("stair_02", .9f), ("stair_03", .6f), ("stair_04", .95f) }),
+            ("hook", new[] { ("hook_01", .85f), ("hook_03", .8f) }),
+            ("sacks", new[] { ("sacks_01", .3f), ("sacks_05", .9f), ("sacks_06", .8f) }),
+            ("turn", new[] { ("turn_01", .6f), ("turn_05", .6f) }),
+            ("waves", new[] { ("wave_01", .5f), ("wave_04", .6f), ("wave_05", .7f) }),
+            ("staircase", new[] { ("stair_04", .95f) }),
             ("key", new[] { ("key_01", .9f), ("key_03", .6f) }),
-            ("outro", new[] { ("outro_01", .6f), ("outro_03", .6f), ("outro_04", .9f), ("outro_05", .5f) }),
+            ("outro", new[] { ("outro_02", .7f), ("outro_04", .8f) }),
         };
         foreach ((string chapter, (string line, float at)[] moments) in chapters)
         {

@@ -946,22 +946,19 @@ public class Annotations : MonoBehaviour
     }
 
     // ---- joint angles -----------------------------------------------------------------------------
+    /// <summary>The joint angles on or off; off also clears the stacked turns (the angles are not drawn again after them).</summary>
     public void ShowAngles(bool on)
+    {
+        SetJointAngles(on);
+        if (!on) HideAngleStack();
+    }
+
+    void SetJointAngles(bool on)
     {
         showAngles = on;
         anglesRoot.SetActive(on);
         if (on) UpdateAngles();
-        else HideAngleStackLater();
     }
-
-    // "angles:off" after the stack has been shown also clears the stack (the angles are never drawn again)
-    void HideAngleStackLater()
-    {
-        if (angleStackRoot != null && !stackJustMade) HideAngleStack();
-        stackJustMade = false;
-    }
-
-    bool stackJustMade;
 
     void UpdateAngles()
     {
@@ -1028,10 +1025,8 @@ public class Annotations : MonoBehaviour
     public void StackAngles(float seconds)
     {
         if (angleStackRoot != null) Destroy(angleStackRoot);
-        angleStackRoot = null;
-        ShowAngles(false);
+        SetJointAngles(false);
         angleStackRoot = new GameObject("AngleStack");
-        stackJustMade = true;
         angleStackRoot.transform.SetParent(transform, false);
         StartCoroutine(StackAnglesRoutine(seconds));
     }

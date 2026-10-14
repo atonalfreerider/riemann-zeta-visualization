@@ -166,6 +166,8 @@ public class SideMenu : MonoBehaviour
         Toggle(layerRow, "n = k(k+1)", () => sacks.RouteVisible("pronic"), () => sacks.SetRouteVisible("pronic", !sacks.RouteVisible("pronic")), Icon(VRIcons.Id.Equations), SacksSpiral.PronicColor);
         Toggle(layerRow, "k² + k + 41", () => sacks.RouteVisible("euler"), () => sacks.SetRouteVisible("euler", !sacks.RouteVisible("euler")), Icon(VRIcons.Id.Equations), SacksSpiral.EulerColor);
         layerRow = Row(content);
+        Toggle(layerRow, "Product curves (Sacks)", () => sacks.FamilyVisible, () => sacks.SetFamilyVisible(!sacks.FamilyVisible), Icon(VRIcons.Id.Equations), SacksSpiral.FamilyColors[0]);
+        layerRow = Row(content);
         // the trail's length: how many zeros it climbs past (each click × 1.5)
         Button(layerRow, "", () => sacks.SetGrowthZeroTarget(Mathf.RoundToInt(sacks.GrowthZeroTarget / 1.5f)), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Down));
         heightLabel = Button(layerRow, "", () => sacks.SetGrowthZeroTarget(649), 2f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Zeros)).GetComponentInChildren<TextMeshProUGUI>();
@@ -225,8 +227,12 @@ public class SideMenu : MonoBehaviour
         open = false;
     }
 
+    Canvas menuCanvas;
+
     void Update()
     {
+        menuCanvas ??= GetComponent<Canvas>();
+        menuCanvas.enabled = !director.Recorder.IsOffscreen; // recording: nothing over the frame but the frame
         Keyboard k = Keyboard.current;
         if (k != null && (k.mKey.wasPressedThisFrame || k.tabKey.wasPressedThisFrame)) open = !open;
 

@@ -184,6 +184,12 @@ public class CameraRig : MonoBehaviour
             float w = annotations.WaveViewMax;
             return new CueState { Position = new Vector3(w * .5f, 2f, -w * 1.5f), LookAt = new Vector3(w * .5f, 2f, 0f), Up = up, Fov = 60 };
         };
+        cues["spikes_close"] = () =>
+        {
+            // close in on x = 1 … 17: the spikes on 2, 3, 5, 7, 11, 13 and the faint ones on 4, 9, 16 are readable
+            float d = Mathf.Max(15f, 8.8f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
+            return new CueState { Position = new Vector3(9f, 1.5f, -d), LookAt = new Vector3(9f, 1.5f, 0f), Up = up, Fov = 60 };
+        };
         cues["staircase_close"] = () => new CueState { Position = new Vector3(9f, 7f, -24f), LookAt = new Vector3(9f, 7f, 0f), Up = up, Fov = 60 };
         cues["wobble"] = () => new CueState { Position = new Vector3(30f, 30f, -82f), LookAt = new Vector3(30f, 30f, 0f), Up = up, Fov = 60 };
         cues["primes_grid"] = () => new CueState { Position = new Vector3(-34f, 18.5f, -24f), LookAt = new Vector3(-34f, 18.5f, 0f), Up = up, Fov = 60 };

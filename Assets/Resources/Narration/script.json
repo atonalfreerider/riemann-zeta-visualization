@@ -4,59 +4,56 @@
     {
       "id": "hook",
       "title": "The Prime Sieve",
-      "subtitle": "Building blocks with no pattern",
+      "subtitle": "What are the primes hiding?",
+      "setup": [],
       "lines": [
         {
           "id": "hook_01",
-          "text": "Can a machine discover mathematics that humans have chased for over two thousand years? Start where every mathematician starts: the primes. Two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.",
+          "text": "This year, a machine produced a proof about the prime numbers, on a question mathematicians have chased since 1859. Can a machine see what we missed? Let's find out what the primes are hiding.",
           "camera": "primes_grid",
           "actions": [
             "reset",
             "pause",
-            "hide:spiral",
-            "hide:outaxes",
-            "hide:imaxis",
-            "hide:polelabel",
             "primes:on",
             "primes:build"
           ],
-          "pause": 0.4
+          "pause": 1.2
         },
         {
           "id": "hook_02",
-          "text": "In 1994 Robert Sacks, out of pure curiosity, sketched the counting numbers on his notepad as a spiral. Let's do the same: break the grid open and let every number find its place. Only the two stays lit, our first prime.",
+          "text": "In 1994, out of curiosity, Robert Sacks sketched the counting numbers on a notepad as a spiral. Let's do the same. Only the two stays lit: our first prime.",
           "camera": "sieve",
           "actions": [
             "sacks:sievebegin"
           ],
-          "pause": 0.3
+          "pause": 0.9
         },
         {
           "id": "hook_03",
-          "text": "Two times two. Count two dots. The two nearer the centre is the multiplier: it copies the row one level up, the copy slides along the Sacks spiral, and its final dot lands on four. Looking back, nothing landed on three, so three is prime.",
+          "text": "Two times two. Count two dots, and copy the row one level up. The copy slides along the spiral, and its last dot lands on four. The product overshoots three. No product will ever land there, so three is prime.",
           "camera": "sieve",
           "actions": [
             "sacks:sieveto:4"
           ],
-          "pause": 0.4
+          "pause": 1.0
         },
         {
           "id": "hook_04",
-          "text": "Two times three lands on six, so five is prime. Two times four lands on eight, so seven is prime. Three times three, three rows of three, lands on nine.",
+          "text": "Two times three lands on six, overshooting five. Two times four lands on eight, overshooting seven. Both are prime.",
           "camera": "sieve",
           "actions": [
             "sacks:sieveto:9"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "hook_05",
-          "text": "Every new prime joins the multipliers. On to thirty: eleven, thirteen, seventeen, nineteen, twenty three and twenty nine are never landed on. Whatever no multiplication reaches is a prime. Now let's see what Sacks saw.",
+          "text": "Every new prime joins the multipliers. Up to thirty, the products overshoot eleven, thirteen, seventeen, nineteen, twenty three and twenty nine. Those are the primes.",
           "camera": "sieve",
           "actions": [
             "sacks:sieveto:30"
           ],
-          "pause": 1.0
+          "pause": 1.2
         }
       ]
     },
@@ -64,20 +61,21 @@
       "id": "sacks",
       "title": "The Sacks Spiral",
       "subtitle": "Bent over a saddle",
+      "setup": [],
       "lines": [
         {
           "id": "sacks_01",
-          "text": "This is Sacks's spiral: every number n at a distance of root n from the centre, one full turn per square. Fill it in the way he did, and the primes stop looking random.",
+          "text": "Now fill in Sacks's whole spiral: every number at a distance of root n from the centre, one full turn per square.",
           "camera": "sacks_flat",
           "actions": [
             "sacks:spiral"
           ],
-          "pause": 0.5,
+          "pause": 1.0,
           "footnote": "Sacks spiral: n at radius √n, angle 2π√n"
         },
         {
           "id": "sacks_02",
-          "text": "Bend the Sacks spiral over a saddle. Composites fill the valleys, and whole routes from the centre appear: some with no primes at all, others crowded with them.",
+          "text": "Bend it over a saddle, and routes appear. Some never hold a prime. Others are crowded with them.",
           "camera": "sacks_saddle",
           "actions": [
             "sacks:saddle",
@@ -86,44 +84,45 @@
             "sacks:routes",
             "equations:on"
           ],
-          "pause": 0.5
+          "pause": 1.0
         },
         {
           "id": "sacks_03",
-          "text": "In red, the squares, n equals k squared. One lands at the end of every turn, all on one ray, and a square is never prime.",
+          "text": "In red, the squares: n equals k squared. All on one ray, and never prime.",
           "camera": "route_follow",
           "actions": [
             "equations:squares"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "sacks_04",
-          "text": "In blue, n equals k times k plus one: a number times its neighbour, always even, never prime. It runs out on the opposite side from the squares.",
+          "text": "In blue, n equals k times k plus one: a number times its neighbour. Always even, never prime.",
           "camera": "route_follow",
           "actions": [
             "equations:pronic"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "sacks_05",
-          "text": "In green, Euler's route, n equals k squared plus k plus forty one: forty primes in a row, every one of them on this saddle.",
+          "text": "In green, Euler's curve: n equals k squared plus k plus forty one. For forty steps in a row, it lands only on primes.",
           "camera": "route_follow",
           "actions": [
             "equations:euler"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "sacks_06",
-          "text": "Humans carried this search for twenty three centuries, from Euclid to Riemann. In the age of AI discovery, the last lock will be opened by humans and machines together.",
+          "text": "Robert Sacks saw that Euler's curve is one of a family: the blue line, shifted out by a number. When the shift is prime, the curve is rich in primes.",
           "camera": "sacks_routes",
           "actions": [
-            "equations:on",
-            "card:machine"
+            "equations:family",
+            "pulse:sacks"
           ],
-          "pause": 0.6
+          "pause": 1.2,
+          "footnote": "Product curves: Robert Sacks, numberspiral.com  ·  explained by Michael M. Ross, naturalnumbers.org/sparticle.html"
         }
       ]
     },
@@ -131,53 +130,48 @@
       "id": "zeno",
       "title": "Zeno's Chain",
       "subtitle": "and a gentler rule",
+      "setup": [],
       "lines": [
         {
           "id": "zeno_01",
-          "text": "Zeno's puzzle: walk half way to the wall, then half of what is left, then half again. The steps shrink so fast that you never pass two.",
+          "text": "Zeno's puzzle: walk half way to a wall, then half of what is left. The steps shrink so fast that you never pass two.",
           "camera": "zeno_zoom",
           "actions": [
-            "equations:off",
-            "card:off",
-            "sacks:hide",
-            "primes:off",
-            "hide:spiral",
             "show:zeno",
             "zeno:reset",
             "zeno:build",
             "card:zeno"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "zeno_02",
-          "text": "Now a gentler rule: every step is one over the square root of its number. One, one over root two, one over root three.",
+          "text": "Now a gentler rule. Each step is one over the square root of its number.",
           "camera": "zeno",
           "actions": [
             "card:off",
             "terms:1",
-            "hide:tail",
             "show:spiral",
             "show:lengths",
             "chainfeet:on",
             "rootlabel:chain",
-            "hide:center",
             "build:1:8"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "zeno_03",
-          "text": "Shrinking this slowly, the chain never stops: it runs off the floor forever. Hold on to that square root, exponent one half. It is the key to everything that follows.",
+          "text": "It shrinks so slowly that the chain never stops. Hold on to that square root: the exponent one half.",
           "camera": "chain_long",
           "actions": [
             "hide:zeno",
             "hide:lengths",
             "chainfeet:off",
             "rootlabel:off",
+            "show:spiral",
             "build:8:60"
           ],
-          "pause": 0.5
+          "pause": 1.2
         }
       ]
     },
@@ -185,13 +179,13 @@
       "id": "stage",
       "title": "The Stage",
       "subtitle": "A floor, a pole, and a dial",
+      "setup": [],
       "lines": [
         {
           "id": "stage_01",
-          "text": "The chain lives on a floor, the complex plane, with a pole going up. The pole is a dial, and its reading is called t. Turn it, and every joint of the chain begins to bend.",
+          "text": "The chain lives on a floor, the complex plane, with a pole going up. The pole is a dial called t. Turn it, and every joint begins to bend.",
           "camera": "stage",
           "actions": [
-            "hide:spiral",
             "show:outaxes",
             "show:imaxis",
             "show:polelabel",
@@ -204,7 +198,7 @@
             "delay:5:show:spiral",
             "delay:5:play"
           ],
-          "pause": 0.5
+          "pause": 1.2
         }
       ]
     },
@@ -212,47 +206,46 @@
       "id": "turn",
       "title": "Turn the Dial",
       "subtitle": "The tip keeps finding the centre",
+      "setup": [
+        "show:outaxes",
+        "show:imaxis",
+        "show:center",
+        "terms:24",
+        "show:spiral",
+        "hide:lengths",
+        "trail:thin",
+        "show:zeros"
+      ],
       "lines": [
         {
           "id": "turn_01",
-          "text": "Two rules. The lengths follow square roots. The bends follow logarithms: each arrow turns away from the leg before it by t times the log of n over n minus one. As the dial climbs, the turns keep winding.",
+          "text": "Each arrow turns away from the one before by t times the log of n over n minus one. As the dial climbs, the turns keep winding.",
           "camera": "spiral_angles",
           "actions": [
-            "hide:polelabel",
             "angles:on",
             "speed:0.3",
             "play"
           ],
-          "pause": 0.4
-        },
-        {
-          "id": "turn_02",
-          "text": "Why logarithms? Riemann, in 1859, let the power of n be a complex number, and a complex power does not stretch. It turns, by the logarithm of n.",
-          "camera": "spiral_angles",
-          "actions": [
-            "card:riemann"
-          ],
-          "pause": 0.4,
+          "pause": 1.0,
           "footnote": "n^(−s) = e^(−s · log n): a complex exponent rotates, and the rotation is proportional to log n"
         },
         {
-          "id": "turn_03",
-          "text": "The chain is endless, but the arrows we skip wind up like a spring around one centre, and one orange arrow, Euler and Maclaurin's, jumps straight to it.",
+          "id": "turn_02",
+          "text": "The arrows we leave out wind into a spring around one point, and one orange arrow jumps straight to it.",
           "camera": "spiral_curl",
           "actions": [
-            "card:off",
             "tailghost:on",
-            "card:euler",
             "show:tail",
             "flash:tail",
+            "card:euler",
             "speed:0.5"
           ],
-          "pause": 0.4,
+          "pause": 1.0,
           "footnote": "orange: Euler–Maclaurin tail N^(1−s)/(s−1) + N^−s/2 + Bernoulli terms"
         },
         {
-          "id": "turn_04",
-          "text": "Keep turning. The tip wanders, then dives straight into the centre.",
+          "id": "turn_03",
+          "text": "Keep turning. The tip wanders, then dives into the centre.",
           "camera": "tip_center",
           "actions": [
             "tailghost:off",
@@ -260,11 +253,11 @@
             "show:tip",
             "speed:1.3"
           ],
-          "pause": 0.3
+          "pause": 0.9
         },
         {
-          "id": "turn_05",
-          "text": "At fourteen point one three it hits dead centre: a collision. Stack the first twenty turns end to end: together they wind t times the log of twenty one, almost seven full turns.",
+          "id": "turn_04",
+          "text": "At fourteen point one three it hits dead centre: a collision. Laid end to end, the first twenty turns wind almost seven times around.",
           "camera": "tip_stack",
           "actions": [
             "pause",
@@ -273,22 +266,21 @@
             "landing:on",
             "angles:stack"
           ],
-          "pause": 0.6
+          "pause": 1.2
         },
         {
-          "id": "turn_06",
-          "text": "Turn on, and the collisions never stop: twenty one, twenty five, thirty. Hardy proved there are infinitely many. These heights are the famous zeros of the Riemann zeta function.",
+          "id": "turn_05",
+          "text": "The collisions never stop. These heights are the famous zeros of the Riemann zeta function.",
           "camera": "markers_axis_wide",
           "actions": [
             "landing:off",
             "angles:off",
             "terms:auto",
             "trail:full",
-            "card:hardy",
             "speed:4",
             "play"
           ],
-          "pause": 0.6
+          "pause": 1.2
         }
       ]
     },
@@ -296,44 +288,36 @@
       "id": "waves",
       "title": "Collisions Become Waves",
       "subtitle": "One wave per collision",
+      "setup": [
+        "atleast:120"
+      ],
       "lines": [
         {
           "id": "wave_01",
-          "text": "Start with an ordinary cosine wave and a dial, gamma, that sets its speed. Turn the dial up, and the ripples pack tighter.",
+          "text": "Every collision becomes a wave. Start with a cosine, and a dial that sets its speed.",
           "camera": "wave",
           "actions": [
-            "atleast:120",
-            "pause",
-            "card:off",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "hide:trail",
-            "hide:imaxis",
-            "hide:outaxes",
-            "hide:zeros",
             "show:numbers",
             "wave:plain:2.4",
             "dial:on",
-            "delay:4:wave:dial:6"
+            "delay:3:wave:dial:6"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "wave_02",
-          "text": "Put a logarithm inside, and the ripples bunch up near zero. Dial it to fourteen point one three: the first collision's wave.",
+          "text": "Bend it with a logarithm, and dial it to fourteen point one three: the first collision's wave.",
           "camera": "wave",
           "actions": [
             "wave:log",
             "delay:4:wave:dial:14.134725",
             "delay:4:dialstrip:1"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "wave_03",
-          "text": "The second collision is born as its own cosine, winds up, and sinks into the master wave. Where they agree the peaks reinforce; where they disagree they cancel.",
+          "text": "Each new collision adds its own wave. Where they agree, they reinforce. Where they disagree, they cancel.",
           "camera": "wave",
           "actions": [
             "cosine:1",
@@ -341,31 +325,31 @@
             "wave:off",
             "dial:off",
             "waveview:1",
-            "cosine:build:1:2"
+            "cosine:build:1:6"
           ],
-          "pause": 0.5
+          "pause": 0.9
         },
         {
           "id": "wave_04",
-          "text": "Wave after wave, hundreds of them. What survives are sharp spikes on two, three, five, seven, eleven and thirteen, and faint ones on the squares.",
+          "text": "Hundreds of waves later, what survives are sharp spikes.",
           "camera": "spikes",
           "actions": [
-            "cosine:build:2:all",
-            "squares:on",
+            "cosine:build:6:all",
             "speed:6",
             "play"
           ],
-          "pause": 0.5
+          "pause": 0.9
         },
         {
           "id": "wave_05",
-          "text": "A map of the primes, built from nothing but collision heights.",
-          "camera": "spikes",
+          "text": "They sit on two, three, five, seven, eleven and thirteen: the primes. Fainter spikes mark the squares, four, nine and sixteen.",
+          "camera": "spikes_close",
           "actions": [
+            "squares:on",
             "primes:arrows",
             "primes:highlight"
           ],
-          "pause": 0.6
+          "pause": 1.2
         }
       ]
     },
@@ -373,68 +357,47 @@
       "id": "staircase",
       "title": "The Staircase",
       "subtitle": "Riemann's exact recipe",
+      "setup": [],
       "lines": [
         {
           "id": "stair_01",
-          "text": "Riemann's recipe turns the collisions into a count of the primes, one piece at a time. Start with the straight line y equals x.",
+          "text": "Riemann's recipe turns the collisions into a count of the primes. Start with the line y equals x.",
           "camera": "stair_terms",
           "actions": [
-            "pause",
-            "primes:noarrows",
-            "hide:numbers",
-            "dialstrip:clear",
-            "hide:cosine",
-            "hide:prime",
-            "hide:zetacurve",
-            "hide:zeros",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "hide:imaxis",
-            "hide:outaxes",
-            "hide:equations",
             "card:riemann",
             "stairlab:terms"
           ],
-          "pause": 0.4
+          "pause": 1.0
         },
         {
           "id": "stair_02",
-          "text": "Subtract the logarithm of two pi, a constant shift, and a small correction from the trivial zeros that fades away.",
+          "text": "Shift it down by the log of two pi, and add a small correction that fades away.",
           "camera": "stair_terms",
           "actions": [
             "card:off",
             "stairlab:const:0.45",
             "stairlab:trivial:0.45"
           ],
-          "pause": 0.3
+          "pause": 0.9
         },
         {
           "id": "stair_03",
-          "text": "Now the first collision's wave. It grows like root x and oscillates with log x. On its own, it only bends the line.",
+          "text": "Now add the first collision's wave. On its own, it only bends the line.",
           "camera": "stair_terms",
           "actions": [
             "stairlab:waves:0:1"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "stair_04",
-          "text": "Add the second and third waves, then hundreds more. The steps sharpen on the primes, with smaller steps on the powers of primes.",
+          "text": "Add hundreds more, and the line breaks into steps: one at every prime.",
           "camera": "stair_terms",
           "actions": [
-            "stairlab:waves:1:3:0.4",
-            "stairlab:waves:3:all:0.55"
+            "stairlab:waves:1:3:0.35",
+            "stairlab:waves:3:all:0.6"
           ],
-          "pause": 0.4
-        },
-        {
-          "id": "stair_05",
-          "text": "With enough collisions the staircase lands on the exact count: a step at every prime, as tall as its logarithm.",
-          "camera": "stair_terms",
-          "actions": [],
-          "pause": 0.6
+          "pause": 1.4
         }
       ]
     },
@@ -442,17 +405,13 @@
       "id": "key",
       "title": "The Square-Root Key",
       "subtitle": "Why one half, and nothing else",
+      "setup": [],
       "lines": [
         {
           "id": "key_01",
-          "text": "Back to the key: every arrow was one over root n, exponent one half. Change it to zero point nine, and the tip never hits the centre. Watch the miss.",
+          "text": "Back to the square root: exponent one half. Change it to zero point nine, and the tip never reaches the centre. It misses.",
           "camera": "sigma_spiral",
           "actions": [
-            "pause",
-            "hide:prime",
-            "hide:cosine",
-            "hide:trail",
-            "hide:imaxis",
             "jump:14.14",
             "terms:auto",
             "show:spiral",
@@ -467,11 +426,11 @@
             "delay:5:play",
             "delay:5:miss:on"
           ],
-          "pause": 0.4
+          "pause": 1.0
         },
         {
           "id": "key_02",
-          "text": "Picture every exponent between zero and one as a strip. Our collisions all sit on the one half line.",
+          "text": "Every collision we know sits exactly on the one half line.",
           "camera": "strip_panel",
           "actions": [
             "miss:off",
@@ -484,39 +443,28 @@
             "hide:center",
             "show:strip"
           ],
-          "pause": 0.4
+          "pause": 0.9
         },
         {
           "id": "key_03",
-          "text": "Suppose they strayed off that line. Slide the exponent toward zero point nine, and the staircase wobbles off its rails.",
+          "text": "Move them off it, and the staircase wobbles away from the primes.",
           "camera": "stair_wobble",
           "actions": [
             "hide:strip",
-            "hide:cosine",
-            "hide:prime",
-            "hide:zetacurve",
-            "hide:zeros",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "hide:imaxis",
-            "hide:outaxes",
-            "hide:equations",
             "stairlab:wobble:40:0.5",
             "stairlab:sweep:0.5:0.95:pingpong"
           ],
-          "pause": 0.5,
+          "pause": 1.0,
           "footnote": "red: the staircase if every collision had exponent β instead of ½"
         },
         {
           "id": "key_04",
-          "text": "The Riemann Hypothesis says it never happens: every collision, forever, on the one half line.",
+          "text": "The Riemann Hypothesis says that never happens. Every collision, forever, on the one half line.",
           "camera": "stair_wobble",
           "actions": [
             "stairlab:beta:0.5"
           ],
-          "pause": 0.6
+          "pause": 1.2
         }
       ]
     },
@@ -524,42 +472,33 @@
       "id": "qrh",
       "title": "2026: A Wall at Seven Eighths",
       "subtitle": "OpenAI's quasi-Riemann hypothesis claim",
+      "setup": [
+        "show:strip"
+      ],
       "lines": [
         {
           "id": "qrh_01",
-          "text": "In October 2026, OpenAI published an AI generated proof that no collision can stray past seven eighths, and by symmetry none below one eighth: the quasi Riemann hypothesis.",
+          "text": "In October 2026, OpenAI published an AI generated proof that no collision strays past seven eighths, or below one eighth.",
           "camera": "strip_band",
           "actions": [
-            "stairlab:off",
-            "hide:prime",
-            "show:strip",
             "show:band78",
             "card:machine",
-            "delay:6:show:band18"
+            "delay:5:show:band18"
           ],
-          "pause": 0.4,
+          "pause": 1.0,
           "footnote": "openai/math, family 003 · manuscript Sept 30, 2026 · released Oct 6, 2026"
         },
         {
           "id": "qrh_02",
-          "text": "It is machine checked in Lean, but human peer review is still under way: a strong claim, not settled fact.",
-          "camera": "strip_band",
-          "actions": [
-            "show:band1112"
-          ],
-          "pause": 0.5,
-          "footnote": "Lean: riemannZeta s ≠ 0 for 7/8 < Re s · independently re-checked · not yet peer reviewed"
-        },
-        {
-          "id": "qrh_03",
-          "text": "The orange gap, from one half to seven eighths, is where the Riemann Hypothesis still lives.",
+          "text": "It is checked by machine, but not yet by human review. And the gap from one half to seven eighths is where the hypothesis still lives.",
           "camera": "strip_gap",
           "actions": [
-            "hide:band1112",
+            "show:band1112",
             "show:gap",
             "card:off"
           ],
-          "pause": 0.7
+          "pause": 1.2,
+          "footnote": "Lean: riemannZeta s ≠ 0 for 7/8 < Re s · independently re-checked · not yet peer reviewed"
         }
       ]
     },
@@ -567,65 +506,50 @@
       "id": "outro",
       "title": "Written Into the Universe",
       "subtitle": "",
+      "setup": [],
       "lines": [
         {
           "id": "outro_01",
-          "text": "Back to the Sacks spiral on its saddle. The primes, the most irregular objects in arithmetic, seem to follow a rule written into the numbers themselves.",
+          "text": "Back to Sacks's spiral on its saddle.",
           "camera": "sacks_saddle",
           "actions": [
-            "pause",
-            "hide:strip",
-            "hide:gap",
-            "stairlab:off",
-            "hide:cosine",
-            "hide:prime",
-            "hide:zetacurve",
-            "hide:zeros",
-            "hide:spiral",
-            "hide:tail",
-            "hide:tip",
-            "hide:center",
-            "hide:imaxis",
-            "hide:outaxes",
-            "hide:equations",
-            "hide:trail",
             "sacks:show",
             "sacks:saddle",
             "sacks:routes"
           ],
-          "pause": 0.5
+          "pause": 1.0
         },
         {
           "id": "outro_02",
-          "text": "One last picture, and this one is a guess, not a result. Let the zeta trail rise from the centre of the Sacks spiral, with a collision wherever it returns to the axis.",
+          "text": "One last picture: a guess, not a result. Let the zeta trail rise from the centre of the spiral.",
           "camera": "sacks_3d",
           "actions": [
             "sacks:noroutes",
-            "hypothesis:grow:101.5:26"
+            "hypothesis:grow:101.5:24"
           ],
-          "pause": 0.4,
+          "pause": 0.8,
           "footnote": "a visual hypothesis, not a theorem"
         },
         {
           "id": "outro_03",
-          "text": "Each collision's wave is born at its own height, runs out along the Sacks spiral, and sinks onto the saddle, building the master wave.",
+          "text": "Each collision sends its wave along the spiral, and the waves settle onto the saddle as one master wave.",
           "camera": "sacks_wave",
           "actions": [],
-          "pause": 0.5
+          "pause": 1.0
         },
         {
           "id": "outro_04",
-          "text": "From above, the master wave spikes at every prime. Dial in all ten thousand collisions, and the spikes sharpen, prime after prime.",
+          "text": "From above, the master wave spikes at every prime. With all ten thousand collisions, the spikes grow sharp.",
           "camera": "master_top_pull",
           "actions": [
             "hypothesis:notrail",
             "delay:6:hypothesis:full"
           ],
-          "pause": 0.8
+          "pause": 1.2
         },
         {
           "id": "outro_05",
-          "text": "Saddle, trail and waves: one structure seen three ways. Prove the one half key, and we will have read one line of the instruction set. The picture is yours now. Explore it.",
+          "text": "A machine may have pushed the wall to seven eighths. Proving one half is still open, to humans and machines alike. The picture is yours. Explore it.",
           "camera": "home_orbit",
           "actions": [
             "home:scene"

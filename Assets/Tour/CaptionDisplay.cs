@@ -258,7 +258,7 @@ public class CaptionDisplay : MonoBehaviour
 
         string Row(string id, Color c, string equation, string numbers, string note)
         {
-            bool dim = mode != "on" && mode != id;
+            bool dim = mode != "on" && mode != id && !(mode == "family" && (id == "euler" || id == "family"));
             string hex = ColorUtility.ToHtmlStringRGB(c);
             string row = $"<color=#{hex}>●  <b>{equation}</b></color>\n<size=78%><color=#C8C8D2>{numbers}</color>   {note}</size>";
             return dim ? "<alpha=#40>" + row + "<alpha=#FF>" : row;
@@ -267,7 +267,8 @@ public class CaptionDisplay : MonoBehaviour
         legendText.text =
             Row("squares", SacksSpiral.SquareColor, "n = k²", "1, 4, 9, 16, 25 …", "squares: never prime") + "\n" +
             Row("pronic", SacksSpiral.PronicColor, "n = k(k + 1)", "2, 6, 12, 20, 30 …", "neighbours multiplied: never prime") + "\n" +
-            Row("euler", SacksSpiral.EulerColor, "n = k² + k + 41", "41, 43, 47, 53 …", "Euler: prime for k = 0 to 39");
+            Row("euler", SacksSpiral.EulerColor, "n = k² + k + 41", "41, 43, 47, 53 …", "Euler: prime for k = 0 to 39")
+            + (mode == "family" ? "\n" + Row("family", SacksSpiral.FamilyColors[0], "n = k² + k + p", "p = 5, 11, 17, 41 …", "Robert Sacks's product curves: prime-rich when p is prime (after M. M. Ross)") : "");
         legend.gameObject.SetActive(true);
     }
 

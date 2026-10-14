@@ -124,10 +124,15 @@ public class LaunchTitle : MonoBehaviour
         Apply();
     }
 
+    int framesShown;
+
     void Update()
     {
         if (frozen) return;
-        time += Time.unscaledDeltaTime;
+        // The first frames after entering play mode can take seconds (loading, shader warm-up). Wait those out and cap each
+        // step, or the card's clock jumps past its end before it is ever seen.
+        if (++framesShown < 3) return;
+        time += Mathf.Min(Time.unscaledDeltaTime, 1f / 20f);
         Apply();
         if (time >= Duration) Destroy(gameObject);
     }

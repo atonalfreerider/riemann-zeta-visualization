@@ -18,6 +18,8 @@ public class TourChapter
     public string id;
     public string title;
     public string subtitle;
+    /// <summary>Actions applied when the chapter starts, after the stage is cleared: what is on screen when it opens.</summary>
+    public string[] setup;
     public TourLine[] lines;
 }
 

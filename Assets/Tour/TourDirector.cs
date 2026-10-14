@@ -94,7 +94,11 @@ public class TourDirector : MonoBehaviour
         audioSource.spatialBlend = 0f;
 
         script = TourScriptLoader.Load();
-        if (!VRMode.Enabled) SideMenu.Create(this);
+        if (!VRMode.Enabled)
+        {
+            SideMenu.Create(this);
+            TourScrubber.Create(this);
+        }
 
         if (AutoStart)
         {
@@ -212,6 +216,7 @@ public class TourDirector : MonoBehaviour
         if (!Running) return;
         Running = false;
         SetPaused(false);
+        if (seekTarget >= 0) EndSeek();
         if (tourRoutine != null) StopCoroutine(tourRoutine);
         tourRoutine = null;
         audioSource.Stop();
@@ -389,6 +394,7 @@ public class TourDirector : MonoBehaviour
 
     public void StartRecording()
     {
+        foreach (LaunchTitle card in FindObjectsByType<LaunchTitle>(FindObjectsSortMode.None)) Destroy(card.gameObject);
         string dir = string.IsNullOrEmpty(RecordDirectory)
             ? System.IO.Path.Combine(Application.dataPath, "..", "Recordings", DateTime.Now.ToString("yyyyMMdd-HHmmss"))
             : RecordDirectory;
@@ -457,17 +463,21 @@ public class TourDirector : MonoBehaviour
             CurrentChapterId = chapter.id;
             chapterStartedAt = Time.unscaledTime;
             ChapterStarted?.Invoke(c, chapter);
-            Captions.HideBoard();
-            Captions.ShowEquations("off");
+            // every chapter starts from a cleared stage plus its own setup, so it looks the same whether it follows the
+            // chapter before it or is started (or recorded) on its own
+            ResetStage();
+            ApplyActions(chapter.setup);
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
             Recorder.ChapterMarks.Add((chapter.id, Recorder.FrameIndex));
 
-            foreach (TourLine line in chapter.lines)
+            for (int li = 0; li < chapter.lines.Length; li++)
             {
-                yield return PlayLine(line);
+                CurrentLineIndex = li;
+                yield return PlayLine(chapter.lines[li]);
             }
 
+            if (seekTarget >= 0) EndSeek();
             if (!string.IsNullOrEmpty(EndChapter) && chapter.id == EndChapter) break;
         }
 
@@ -500,6 +510,87 @@ public class TourDirector : MonoBehaviour
             UnityEditor.EditorApplication.ExitPlaymode();
         }
 #endif
+    }
+
+    /// <summary>
+    /// Everything off and every setting back to its default (the dial's t is kept: later chapters build on the collisions
+    /// found so far). Used at the start of each chapter, before the chapter's own setup actions.
+    /// </summary>
+    void ResetStage()
+    {
+        Main.CancelAnimations();
+        Annotations.CancelAnimations();
+        Annotations.HideAll();
+        Main.Pause();
+        if (System.Math.Abs(Main.Sigma - .5d) > 1e-9) Main.SetSigma(.5d);
+        Main.Speed = 1.8d;
+        Main.ZeroLabelLimit = 6;
+        Main.CosineScale = 11f;
+        Main.SetCosineZeroLimit(-1);
+        Main.Limit.TermOverride = 0;
+        Main.Limit.TermFraction = 1f;
+        Main.Limit.SetArrowheadsVisible(true);
+        Main.Limit.SetLengthLabelsVisible(false);
+        Main.Limit.SetTailGhostVisible(false);
+        Main.Limit.SetTailVisible(false);
+        Main.Limit.SetSpiralVisible(false);
+        Main.SetTrailStyle(0.05f, Factory.SoftGlowIntensity, 0f);
+        Main.SetPrimeCurveVisible(false);
+        Main.SetCosineVisible(false);
+        Main.SetEquationsVisible(false);
+        Main.SetZetaCurveVisible(false);
+        Main.SetGridVisible(false);
+        Main.SetZeroMarkersVisible(false);
+        Captions.HideCard();
+        Captions.HideBoard();
+        Captions.ShowEquations("off");
+        Captions.SetFootnote("");
+    }
+
+    // ---- seeking within a chapter (the scrubber) ------------------------------------------------------
+    public int CurrentLineIndex { get; private set; } = -1;
+    int seekTarget = -1;
+    const float SeekSpeed = 24f;
+    public bool Seeking => seekTarget >= 0;
+
+    /// <summary>Seconds a line takes: its narration clip (or the estimate) plus its pause.</summary>
+    public static float LineSeconds(TourLine line)
+    {
+        AudioClip clip = TourScriptLoader.LoadAudio(line.id);
+        LineTiming timing = TourScriptLoader.LoadTiming(line.id);
+        float spoken = clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration;
+        return spoken + Mathf.Max(0f, line.pause);
+    }
+
+    /// <summary>
+    /// Jump to a line of the current chapter. Forward: the lines in between run quickly and silently so everything they
+    /// set up is in place. Back: the chapter starts again and runs quickly up to the line.
+    /// </summary>
+    public void SeekToLine(int index)
+    {
+        if (!Running || Recorder.IsRecording || index < 0 || index >= Chapters[CurrentChapterIndex].lines.Length) return;
+        if (index == CurrentLineIndex)
+        {
+            ReplayLine();
+            return;
+        }
+
+        if (index > CurrentLineIndex)
+        {
+            seekTarget = index;
+            skipRequested = true;
+            return;
+        }
+
+        GoToChapter(CurrentChapterIndex, ContinueIntoNextChapter);
+        seekTarget = index;
+    }
+
+    void EndSeek()
+    {
+        seekTarget = -1;
+        Time.timeScale = Paused ? 0f : 1f;
+        Captions.Visible = true;
     }
 
     /// <summary>Put the stage back the way the original free-roam visualization starts (everything on, no annotations).</summary>
@@ -544,6 +635,16 @@ public class TourDirector : MonoBehaviour
     {
         skipRequested = false;
         lineSerial++;
+        bool fast = seekTarget > CurrentLineIndex;
+        if (fast)
+        {
+            Time.timeScale = SeekSpeed;
+            Captions.Visible = false;
+        }
+        else if (seekTarget >= 0)
+        {
+            EndSeek();
+        }
         Rig.SetCue(line.camera);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
@@ -580,7 +681,7 @@ public class TourDirector : MonoBehaviour
             yield break;
         }
 
-        if (clip != null)
+        if (clip != null && !fast)
         {
             audioSource.PlayOneShot(clip);
             AudioTimeline.Add((line.id, Time.time - tourStartTime, Recorder.FrameIndex));
@@ -814,7 +915,8 @@ public class TourDirector : MonoBehaviour
                     case "equations":
                         // equations:on · equations:off · equations:squares|pronic|euler (highlight one route and its equation)
                         Captions.ShowEquations(arg);
-                        if (arg != "off") Annotations.Sacks.HighlightRoute(arg == "on" ? "all" : arg);
+                        if (arg == "family") Annotations.Sacks.SetFamilyVisible(true);
+                        else if (arg != "off") Annotations.Sacks.HighlightRoute(arg == "on" ? "all" : arg);
                         break;
                     case "home":
                         // home:scene — the saddle with the zeta trail growing from its centre (content only, the camera is left alone)

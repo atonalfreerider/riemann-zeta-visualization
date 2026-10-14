@@ -83,11 +83,12 @@ def words_from_alignment(text, alignment):
     return [{"w": sw, "s": tw["s"], "e": tw["e"]} for sw, tw in zip(script_words, words)]
 
 
-def synthesize(session, voice_id, text, model_id, previous_text, next_text):
+def synthesize(session, voice_id, text, model_id, previous_text, next_text, speed=1.0):
     body = {
         "text": text,
         "model_id": model_id,
-        "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True},
+        # speed < 1 slows the delivery (ElevenLabs accepts 0.7 to 1.2); a little more stability keeps the pacing even
+        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": speed},
     }
     if previous_text:
         body["previous_text"] = previous_text
@@ -110,11 +111,12 @@ def synthesize(session, voice_id, text, model_id, previous_text, next_text):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--voice", default="John V4", help="ElevenLabs voice name (default: John V4)")
+    parser.add_argument("--voice", default="JohnV4", help="ElevenLabs voice name (default: JohnV4)")
     parser.add_argument("--model", default="eleven_multilingual_v2")
     parser.add_argument("--only", help="chapter id or line id to generate")
     parser.add_argument("--force", action="store_true", help="regenerate existing files")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--speed", type=float, default=0.9, help="delivery speed, 0.7 to 1.2 (default 0.9: unhurried)")
     args = parser.parse_args()
 
     script = json.loads(SCRIPT.read_text(encoding="utf-8"))
@@ -158,7 +160,7 @@ def main():
         next_text = all_texts[idx + 1] if idx + 1 < len(all_texts) else None
 
         print(f"generating {l['id']} …", end=" ", flush=True)
-        result = synthesize(session, voice_id, l["text"], args.model, previous_text, next_text)
+        result = synthesize(session, voice_id, l["text"], args.model, previous_text, next_text, args.speed)
         mp3.write_bytes(base64.b64decode(result["audio_base64"]))
         alignment = result.get("alignment") or result.get("normalized_alignment")
         words = words_from_alignment(l["text"], alignment)
