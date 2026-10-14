@@ -281,6 +281,8 @@ public class VRRig : MonoBehaviour
         float yaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
         Vector3 gaze = Quaternion.Euler(Mathf.Clamp(-pitch, -10f, 14f) * 0.5f, yaw, 0f) * Vector3.forward;
 
+        // a gaze within ~15 degrees of straight up or down has no stable heading: keep the HUD where it is
+        if (forward.x * forward.x + forward.z * forward.z < 0.07f) gaze = hudDirection;
         float angle = Vector3.Angle(gaze, hudDirection);
         if (angle > 22f) hudMoving = true;
         if (hudMoving)

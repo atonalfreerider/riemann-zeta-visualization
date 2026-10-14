@@ -131,6 +131,19 @@ public static class VRBuildSetup
         Enable<HandInteractionProfile>(openXR);   // pinch / poke / aim poses without controllers
         Enable<OculusTouchControllerProfile>(openXR); // the Quest build validation insists on one Touch profile; the app itself only reads hands
 
+        // the Meta group switches on a lot this app never uses; each of these costs start-up work and several ask the
+        // user for permissions (spatial data) the first time the app runs
+        Disable<ARAnchorFeature>(openXR);
+        Disable<ARBoundingBoxFeature>(openXR);
+        Disable<ARMeshFeature>(openXR);
+        Disable<ARPlaneFeature>(openXR);
+        Disable<ARRaycastFeature>(openXR);
+        Disable<AROcclusionFeature>(openXR);
+        Disable<ColocationDiscoveryFeature>(openXR);
+        Disable<BoundaryVisibilityFeature>(openXR);
+        Disable<DisplayUtilitiesFeature>(openXR);
+        Disable<MetaSocialEyeGazeFeature>(openXR);
+
         openXR.renderMode = OpenXRSettings.RenderMode.SinglePassInstanced;
         openXR.depthSubmissionMode = OpenXRSettings.DepthSubmissionMode.None;
         EditorUtility.SetDirty(openXR);
@@ -138,6 +151,14 @@ public static class VRBuildSetup
         // Quest 2 only
         MetaQuestFeature quest = openXR.GetFeature<MetaQuestFeature>();
         if (quest != null) EditorUtility.SetDirty(quest);
+    }
+
+    static void Disable<T>(OpenXRSettings settings) where T : UnityEngine.XR.OpenXR.Features.OpenXRFeature
+    {
+        T feature = settings.GetFeature<T>();
+        if (feature == null || !feature.enabled) return;
+        feature.enabled = false;
+        EditorUtility.SetDirty(feature);
     }
 
     static void Enable<T>(OpenXRSettings settings) where T : UnityEngine.XR.OpenXR.Features.OpenXRFeature

@@ -13,7 +13,10 @@ The app writes lines like
 to the Android log; this tool filters and summarises them. Put the headset on (or it will sleep and pause the app).
 """
 import argparse
+import glob
+import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -22,8 +25,27 @@ from pathlib import Path
 PACKAGE = "com.primitive.zetavisualization"
 
 
+def adb_path():
+    """An adb.exe Python can start: on PATH, in ANDROID_HOME, or in the SDK that ships with a Unity editor."""
+    found = shutil.which("adb.exe") or shutil.which("adb")
+    if found and found.lower().endswith(".exe"):
+        return found
+    candidates = []
+    for root in (os.environ.get("ANDROID_HOME"), os.environ.get("ANDROID_SDK_ROOT")):
+        if root:
+            candidates.append(os.path.join(root, "platform-tools", "adb.exe"))
+    candidates += sorted(glob.glob("C:/Program Files/Unity/Hub/Editor/*/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe"), reverse=True)
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return found or "adb"
+
+
+ADB = adb_path()
+
+
 def adb(*args, check=True, capture=True):
-    return subprocess.run(["adb", *args], capture_output=capture, text=True, encoding="utf-8", errors="replace", check=check)
+    return subprocess.run([ADB, *args], capture_output=capture, text=True, encoding="utf-8", errors="replace", check=check)
 
 
 def device():
@@ -58,36 +80,33 @@ def cmd_stop(_):
 def start(args):
     adb("shell", "am", "force-stop", PACKAGE, check=False)
     adb("logcat", "-c", check=False)
-    cmd = ["shell", "am", "start", "-n", launch_component()]
     unity_args = []
+    if getattr(args, "tour", False) or getattr(args, "chapter", None):
+        unity_args.append("-tour")
     if getattr(args, "chapter", None):
-        unity_args += ["-tour", "-chapter", args.chapter]
+        unity_args += ["-chapter", args.chapter]
+    # `adb shell` joins its arguments into one string for the device's shell, so the extras need their own quotes
+    command = f"am start -n {launch_component()}"
     if unity_args:
-        cmd += ["-e", "unity", " ".join(unity_args)]
-    out = adb(*cmd)
+        command += f" -e unity '{' '.join(unity_args)}'"
+    out = adb("shell", command)
     print(out.stdout.strip())
 
 
 def watch(seconds, quiet=False):
-    proc = subprocess.Popen(["adb", "logcat", "-v", "time", "Unity:I", "AndroidRuntime:E", "CRASH:E", "DEBUG:F", "*:S"],
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
-    end = time.time() + seconds
+    """Wait, then read what the app logged meanwhile (a dump, so a sleeping headset cannot block the tool)."""
+    time.sleep(seconds)
+    out = adb("logcat", "-d", "-v", "time", "Unity:I", "AndroidRuntime:E", "CRASH:E", "DEBUG:F", "*:S", check=False).stdout
     perf, problems = [], []
-    try:
-        while time.time() < end:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            if "[VRPERF]" in line:
-                perf.append(line.strip())
-                if not quiet:
-                    print(line.strip().split("[VRPERF]")[-1].strip())
-            elif re.search(r"Exception|Error|error CS|FATAL|signal \d|Shader|failed", line, re.I) and "Unity" in line + "AndroidRuntime":
-                problems.append(line.strip())
-                if not quiet:
-                    print("!!", line.strip()[:240])
-    finally:
-        proc.terminate()
+    for line in out.splitlines():
+        if "[VRPERF]" in line:
+            perf.append(line.strip())
+            if not quiet:
+                print(line.strip().split("[VRPERF]")[-1].strip())
+        elif re.search(r"Exception|error CS|FATAL|signal \d|Shader error|failed to|Unable to", line, re.I):
+            problems.append(line.strip())
+            if not quiet:
+                print("!!", line.strip()[:240])
     return perf, problems
 
 
@@ -128,6 +147,7 @@ def main():
     p.set_defaults(func=cmd_install)
     p = sub.add_parser("run")
     p.add_argument("--chapter", help="start the narrated tour at this chapter id")
+    p.add_argument("--tour", action="store_true", help="start the narrated tour from the first chapter")
     p.add_argument("--seconds", type=int, default=0, help="watch the log for this long")
     p.set_defaults(func=cmd_run)
     p = sub.add_parser("log")

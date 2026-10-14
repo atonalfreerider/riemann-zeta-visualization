@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/zeta.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 1cd11b426bbb78d46a46a5ad97dd56c1, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: fbb78b34420f9864380c4917c017b1f8, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 0264660a2a2b47d46b27ef13303df375, type: 2}

@@ -1060,9 +1060,12 @@ public class Annotations : MonoBehaviour
     static float DialAngle(float gamma) => Mathf.Deg2Rad * (225f - Mathf.Clamp(gamma, 0f, 15f) / 15f * 270f);
 
     /// <summary>Demo wave: cos(γ·k·x) bent by <see cref="demoBend"/> toward cos(γ·log x); formula label and dial follow γ.</summary>
+    Vector3[] demoWaveBuffer;
+
     void DrawDemoWave()
     {
-        Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
+        // called every frame while the wave is dialled: reuse the buffer instead of allocating 12 to 48 KB each time
+        Vector3[] pts = demoWaveBuffer ??= new Vector3[Main.NumPrimeCurvePoints];
         for (int i = 0; i < pts.Length; i++)
         {
             float x = (float)Main.PrimeCurveX(i);
@@ -1466,6 +1469,21 @@ public class Annotations : MonoBehaviour
 
     void UpdateGhost()
     {
+        string beta = ghostBeta.ToString("0.##", CultureInfo.InvariantCulture);
+        ghostFormula.Text = $"wave n  ∝  x<sup><color=#FF5A6E>{beta}</color></sup>      exponent β = <color=#FF5A6E>{beta}</color>";
+        ghostLabel.Text = ghostAllZeros
+            ? $"every collision moved to a shrink rate of {beta}\neach wave now grows like x^{beta}"
+            : $"if a zero sat at Re(s) = {beta}\nits wave would grow like x^{beta}";
+
+        if (VRMode.Enabled)
+        {
+            // on a headset the curve is computed on a worker thread and picked up a frame or two later
+            // (the desktop recorder keeps the synchronous path so its frames stay exactly reproducible)
+            ghostDirty = true;
+            StartGhostWorker();
+            return;
+        }
+
         Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
         // use at least the first 40 zeros so the wobble is unmistakable even early in the tour
         IReadOnlyList<double> zeros = null;
@@ -1474,31 +1492,69 @@ public class Annotations : MonoBehaviour
             int count = System.Math.Max(main.PassedZeros.Count, 40);
             zeros = main.zetaZeroValues.Take(System.Math.Min(count, main.zetaZeroValues.Length)).ToList();
         }
-        string beta = ghostBeta.ToString("0.##", CultureInfo.InvariantCulture);
-        for (int i = 0; i < Main.NumPrimeCurvePoints; i++)
+
+        ComputeGhost(pts, ghostAllZeros, ghostBeta, ghostGamma, zeros, main.PsiValues);
+        ghostCurve.SetPositions(pts);
+    }
+
+    static void ComputeGhost(Vector3[] pts, bool allZeros, double beta, double gamma, IReadOnlyList<double> zeros, float[] psiValues)
+    {
+        for (int i = 0; i < pts.Length; i++)
         {
             double x = Main.PrimeCurveX(i);
             double psi;
-            if (ghostAllZeros)
+            if (allZeros)
             {
                 // every collision moved from ½ to β: ψ(x) = x − ln 2π − Σ 2·Re(x^ρ/ρ)
                 double sum = 0;
-                for (int z = 0; z < zeros.Count; z++) sum += ZetaMath.OffLineZeroPairTerm(x, ghostBeta, zeros[z]);
+                for (int z = 0; z < zeros.Count; z++) sum += ZetaMath.OffLineZeroPairTerm(x, beta, zeros[z]);
                 psi = x - System.Math.Log(2 * System.Math.PI) - sum;
             }
             else
             {
-                psi = main.PsiValues[i] - ZetaMath.OffLineZeroPairTerm(x, ghostBeta, ghostGamma);
+                psi = psiValues[i] - ZetaMath.OffLineZeroPairTerm(x, beta, gamma);
             }
 
             pts[i] = x < 2 ? Vector3.zero : new Vector3((float)x, (float)System.Math.Max(psi, -40), -0.05f);
         }
+    }
 
-        ghostCurve.SetPositions(pts);
-        ghostFormula.Text = $"wave n  ∝  x<sup><color=#FF5A6E>{beta}</color></sup>      exponent β = <color=#FF5A6E>{beta}</color>";
-        ghostLabel.Text = ghostAllZeros
-            ? $"every collision moved to a shrink rate of {beta}\neach wave now grows like x^{beta}"
-            : $"if a zero sat at Re(s) = {beta}\nits wave would grow like x^{beta}";
+    // ---- ghost curve on a worker thread (VR) ------------------------------------------------------------
+    volatile Vector3[] ghostResult;
+    volatile bool ghostBusy;
+    bool ghostDirty;
+
+    void StartGhostWorker()
+    {
+        if (ghostBusy || !ghostDirty) return;
+        ghostDirty = false;
+        ghostBusy = true;
+        bool all = ghostAllZeros;
+        double beta = ghostBeta, gamma = ghostGamma;
+        float[] psi = (float[])main.PsiValues.Clone();
+        List<double> zeros = null;
+        if (all)
+        {
+            int count = System.Math.Max(main.PassedZeros.Count, 40);
+            zeros = main.zetaZeroValues.Take(System.Math.Min(count, main.zetaZeroValues.Length)).ToList();
+        }
+
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            Vector3[] pts = new Vector3[Main.NumPrimeCurvePoints];
+            ComputeGhost(pts, all, beta, gamma, zeros, psi);
+            ghostResult = pts;
+            ghostBusy = false;
+        });
+    }
+
+    void LateUpdate()
+    {
+        Vector3[] ready = ghostResult;
+        if (ready == null) return;
+        ghostResult = null;
+        ghostCurve.SetPositions(ready);
+        if (ghostDirty) StartGhostWorker();
     }
 
     // ---- toggles used by the tour ------------------------------------------------------------

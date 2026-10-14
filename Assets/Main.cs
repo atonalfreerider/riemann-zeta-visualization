@@ -24,7 +24,12 @@ public class Main : MonoBehaviour
     readonly List<GameObject> zetaPoints = new();
     int passedZeroCount;
 
-    public const int NumPrimeCurvePoints = 10000;
+    /// <summary>
+    /// Samples of the staircase, the cosine chorus and the ghost curve over x = 0..100. A headset's mobile CPU cannot
+    /// recompute 10000 of them several times a second (the tour does, whenever a new collision joins), and 4000 is already
+    /// finer than the eye can tell at tabletop scale, so VR uses fewer.
+    /// </summary>
+    public static int NumPrimeCurvePoints { get; private set; } = 10000; // decided in Awake (Unity forbids EditorPrefs and friends in constructors)
     public const int PrimeCurveXLength = 100;
     const float PrimeFilterHeight = 1.5f;
     const double AnimStep = .03d;
@@ -103,7 +108,7 @@ public class Main : MonoBehaviour
     public Complex CurrentZeta { get; private set; }
     public IReadOnlyList<GameObject> ZeroMarkers => zetaPoints;
     public int ZeroCount => zetaPoints.Count;
-    public float[] PsiValues { get; } = new float[NumPrimeCurvePoints];
+    public float[] PsiValues { get; private set; } = new float[10000];
     public static double PrimeCurveX(int i) => (i + 1) * (1d / NumPrimeCurvePoints * PrimeCurveXLength);
     public bool DaggersVisible = true;
 
@@ -116,6 +121,8 @@ public class Main : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        NumPrimeCurvePoints = VRMode.Wanted(out _) ? 4000 : 10000;
+        PsiValues = new float[NumPrimeCurvePoints];
         limitCurve = GetComponent<LimitCurve>();
 
         // pull the actual zeta zeros for more precise rendering
@@ -210,6 +217,7 @@ public class Main : MonoBehaviour
         }
 
         daggerLines.Clear();
+        daggerPool.Clear();
         foreach (TextBox primeLabel in primeLabels)
         {
             Destroy(primeLabel.gameObject);
@@ -483,7 +491,7 @@ public class Main : MonoBehaviour
 
             Vector3[] primeCurvePoints = new Vector3[NumPrimeCurvePoints];
 
-            const double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
+            double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
             double x = curveResolution;
             for (int i = 0; i < NumPrimeCurvePoints; i++)
             {
@@ -521,7 +529,7 @@ public class Main : MonoBehaviour
         Vector3[] primeCurvePoints = new Vector3[NumPrimeCurvePoints];
         List<double>[] components = zetaCurvesByZero.Values.ToArray();
 
-        const double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
+        double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
         double x = curveResolution;
         for (int i = 0; i < NumPrimeCurvePoints; i++)
         {
@@ -589,29 +597,18 @@ public class Main : MonoBehaviour
         primeBlendRoutine = null;
     }
 
+    /// <summary>The red dagger and number for each prime found so far, keyed by the prime; they are moved, not rebuilt, every time a collision joins.</summary>
+    readonly Dictionary<int, (LineRenderer line, TextBox label)> daggerPool = new();
+
     void DrawDaggers(Vector3[] primeCurvePoints)
     {
-        foreach (LineRenderer lineRenderer in daggerLines)
-        {
-            Destroy(lineRenderer.gameObject);
-        }
-
-        daggerLines.Clear();
-
-        foreach (TextBox primeLabel in primeLabels)
-        {
-            Destroy(primeLabel.gameObject);
-        }
-
-        primeLabels.Clear();
-
         // Collect steep runs, then keep exactly one (the tallest) per integer so Gibbs ringing
         // around small primes cannot produce several red lines for the same step.
         Dictionary<int, (float height, Vector3 top)> best = new();
         bool verticalRun = false;
         Vector3 previousPoint = Vector3.zero;
         List<Vector3> verticalRunPoints = new();
-        const float primeFindingThreshold = 1f / NumPrimeCurvePoints * .5f;
+        float primeFindingThreshold = 1f / NumPrimeCurvePoints * .5f;
         foreach (Vector3 point in primeCurvePoints)
         {
             if (point.x < 1.6f)
@@ -649,10 +646,37 @@ public class Main : MonoBehaviour
             previousPoint = point;
         }
 
+        // Reuse the daggers that are still wanted and only create or retire the difference: rebuilding about 25 line
+        // renderers and TextMesh Pro labels on every new collision cost the headset more than everything else in the frame.
+        List<int> retired = null;
+        foreach (KeyValuePair<int, (LineRenderer line, TextBox label)> pooled in daggerPool)
+        {
+            if (!best.ContainsKey(pooled.Key)) (retired ??= new List<int>()).Add(pooled.Key);
+        }
+
+        if (retired != null)
+        {
+            foreach (int prime in retired)
+            {
+                (LineRenderer line, TextBox label) = daggerPool[prime];
+                daggerLines.Remove(line);
+                primeLabels.Remove(label);
+                Destroy(line.gameObject);
+                Destroy(label.gameObject);
+                daggerPool.Remove(prime);
+            }
+        }
+
         foreach (KeyValuePair<int, (float height, Vector3 top)> entry in best)
         {
             int estPrime = entry.Key;
             Vector3 halfwayPoint = entry.Value.top;
+            if (daggerPool.TryGetValue(estPrime, out (LineRenderer line, TextBox label) existing))
+            {
+                existing.line.SetPosition(0, new Vector3(estPrime, halfwayPoint.y, 0));
+                continue;
+            }
+
             LineRenderer daggerLine = Factory.NewLine("dagger", .08f, Factory.Palette.Dagger, Factory.GlowIntensity);
             daggerLine.transform.SetParent(daggerContainer.transform, false);
             daggerLine.positionCount = 2;
@@ -665,6 +689,7 @@ public class Main : MonoBehaviour
             primeLabel.transform.localPosition = new Vector3(estPrime, -.5f, 0);
             primeLabel.Color = Factory.Palette.Dagger;
             primeLabels.Add(primeLabel);
+            daggerPool[estPrime] = (daggerLine, primeLabel);
         }
     }
 
@@ -714,7 +739,7 @@ public class Main : MonoBehaviour
         List<double> zetaZeros = zetaZeroValues.TakeWhile(t => !(t > iter)).ToList();
         if (CosineZeroLimit >= 0 && zetaZeros.Count > CosineZeroLimit) zetaZeros = zetaZeros.Take(CosineZeroLimit).ToList();
         Vector3[] cosineWavePoints = new Vector3[NumPrimeCurvePoints];
-        const double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
+        double curveResolution = 1d / NumPrimeCurvePoints * PrimeCurveXLength;
         float x = (float)curveResolution;
 
         float scale = CosineScale > 0f && zetaZeros.Count > 0 ? CosineScale / zetaZeros.Count : 1f;

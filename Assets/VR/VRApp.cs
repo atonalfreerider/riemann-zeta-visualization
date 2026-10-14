@@ -110,9 +110,17 @@ public partial class VRApp : MonoBehaviour
         Dock.SetOpen(true);
         Ready = true;
 
-        // start with something alive in front of the user: the chain of arrows, turning
-        ApplyView("chain");
+        // start with something alive in front of the user: the chain of arrows, turning (unless the command line started the tour)
+        if (!tour.Running) ApplyView("chain");
         Toast("Touch a chapter to begin. Pinch and drag in the air to move the model", 7f);
+
+        // launch options for testing from the command line (adb shell am start ... -e unity "-vrview waves -vrdark")
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "-vrview" && i + 1 < args.Length) ApplyView(args[++i]);
+            else if (args[i] == "-vrdark") SetRoom(false);
+        }
     }
 
     // ---- per-frame --------------------------------------------------------------------------------
@@ -126,6 +134,7 @@ public partial class VRApp : MonoBehaviour
         UpdateDock(dt);
         UpdateToast();
         UpdateButtonsAvailability();
+        LoopExplore();
 
         if (Rig.Headset)
         {
@@ -136,6 +145,17 @@ public partial class VRApp : MonoBehaviour
                 Toast("No hand tracking. In Quest Settings turn on Movement tracking > Hand tracking", 8f);
             }
         }
+    }
+
+    /// <summary>
+    /// The views run the dial on their own; left alone it would climb for ever, and the trail it draws (and the work to
+    /// redraw it every frame) grows with it. Past t = 100 the animation starts over from where the view began.
+    /// </summary>
+    void LoopExplore()
+    {
+        if (tour.Running || !main.IsPlaying || main.CurrentT < ExploreLoopEnd) return;
+        main.JumpTo(exploreLoopStart);
+        main.Play(); // going back to an earlier t resets the animation, which pauses it
     }
 
     // ---- toast ------------------------------------------------------------------------------------
@@ -226,8 +246,10 @@ public partial class VRApp : MonoBehaviour
         Vector3 head = Rig.Cam.transform.localPosition;
         Vector3 forward = Rig.Cam.transform.localRotation * Vector3.forward;
         forward.y = 0f;
-        forward = forward.sqrMagnitude > 1e-4f ? forward.normalized : Rig.YawHome * Vector3.forward;
-        position = head + forward * 0.5f + Vector3.down * 0.32f;
+        // looking almost straight up or down leaves no usable "forward": fall back to the way the user was facing
+        forward = forward.sqrMagnitude > 0.07f ? forward.normalized : Rig.YawHome * Vector3.forward;
+        // low enough that its top edge sits below the captions (about 24 degrees below eye level)
+        position = head + forward * 0.5f + Vector3.down * 0.42f;
         rotation = Quaternion.LookRotation(position - head, Vector3.up);
     }
 

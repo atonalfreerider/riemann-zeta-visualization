@@ -520,15 +520,24 @@ public class CaptionDisplay : MonoBehaviour
             if (index >= pages[p].start) pageIndex = p;
         }
 
+        // rebuild the highlighted string only when the spoken word (or the page) changes, not on every frame
+        if (pageIndex == shownPage && index == shownWord && ReferenceEquals(current, shownTiming)) return;
+        shownPage = pageIndex;
+        shownWord = index;
+        shownTiming = current;
         (int start, int end) = pages[pageIndex];
         caption.text = TourScriptLoader.Highlight(words, start, end, index, highlightHex, dimHex);
     }
+
+    int shownPage = -1, shownWord = -2;
+    LineTiming shownTiming;
 
     public void Clear()
     {
         if (cardRoutine != null) StopCoroutine(cardRoutine);
         if (cardGroup != null) cardGroup.alpha = 0f;
         current = null;
+        shownTiming = null;
         pages.Clear();
         caption.text = "";
         captionBackdrop.enabled = false;

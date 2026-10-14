@@ -22,6 +22,7 @@ public class VRPerf : MonoBehaviour
     FrameTiming[] timings = new FrameTiming[1];
     double gpuSum, cpuSum;
     int gpuSamples;
+    int leftSeen, rightSeen;
 
     public static VRPerf Create(VRRig rig)
     {
@@ -45,6 +46,12 @@ public class VRPerf : MonoBehaviour
         sum += dt;
         if (dt > worst) worst = dt;
         if (dt > 0.0145f) slow++;
+        VRHands hands = VRMode.App != null ? VRMode.App.Hands : null;
+        if (hands != null)
+        {
+            if (hands.Left.Tracked) leftSeen++;
+            if (hands.Right.Tracked) rightSeen++;
+        }
 
         FrameTimingManager.CaptureFrameTimings();
         if (FrameTimingManager.GetLatestTimings(1, timings) > 0)
@@ -71,6 +78,12 @@ public class VRPerf : MonoBehaviour
           .Append(" fps)  worst ").Append((worst * 1000f).ToString("0.0")).Append(" ms  >14.5ms ").Append((100f * slow / frames).ToString("0")).Append('%');
         if (gpuSamples > 0) sb.Append("  gpu ").Append((gpuSum / gpuSamples).ToString("0.0")).Append(" ms  cpu ").Append((cpuSum / gpuSamples).ToString("0.0")).Append(" ms");
         sb.Append("  gc ").Append(System.GC.CollectionCount(0) - gc0);
+        if (VRMode.App != null && VRMode.App.Hands != null)
+        {
+            sb.Append("  hands ").Append(VRMode.App.Hands.Available ? "subsystem-up" : "NO-subsystem")
+              .Append(" L ").Append((100f * leftSeen / frames).ToString("0")).Append("% R ").Append((100f * rightSeen / frames).ToString("0")).Append('%');
+        }
+
         if (VRMode.Rig != null) sb.Append("  scale ").Append(VRMode.Rig.Scale.ToString("0.0")).Append("  passthrough ").Append(VRMode.Rig.Passthrough);
         sb.Append("  eye ").Append(XRSettings.eyeTextureWidth).Append('x').Append(XRSettings.eyeTextureHeight);
         Debug.Log(sb.ToString());
@@ -79,7 +92,7 @@ public class VRPerf : MonoBehaviour
 
     void Reset()
     {
-        frames = slow = gpuSamples = 0;
+        frames = slow = gpuSamples = leftSeen = rightSeen = 0;
         sum = worst = 0f;
         gpuSum = cpuSum = 0;
         gc0 = System.GC.CollectionCount(0);

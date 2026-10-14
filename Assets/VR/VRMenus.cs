@@ -30,6 +30,8 @@ public partial class VRApp
     TextMeshProUGUI nowLabel;
     VRButton replayButton, skipButton, prevChapterButton, nextChapterButton;
     bool autoNextChapter = true;
+    const double ExploreLoopEnd = 100d;
+    double exploreLoopStart;
     int nowKey = -2;
 
     class Layers
@@ -174,6 +176,7 @@ public partial class VRApp
 
         string cue = "machine";
         double jump = -1d;
+        bool play = true;
         string[] actions = System.Array.Empty<string>();
         string name = id;
         switch (id)
@@ -201,38 +204,44 @@ public partial class VRApp
             case "waves":
                 layers.Stairs = layers.Chain = layers.Tail = layers.Trail = layers.Equations = false;
                 cue = "cosine_wave";
-                jump = 150d;
+                jump = 100d;
+                play = false; // a still picture: replaying it would redraw the chorus every time a collision passes
                 name = "One cosine wave per collision, added together";
                 break;
             case "stairs":
                 layers.Waves = layers.Chain = layers.Tail = layers.Trail = layers.Equations = false;
                 cue = "staircase";
-                jump = 150d;
+                jump = 100d;
+                play = false;
                 name = "The prime staircase from Riemann's formula";
                 break;
             case "primes":
                 layers.All(false);
                 actions = new[] { "sacks:show" };
                 cue = "sacks_flat";
+                play = false;
                 name = "The primes on the Sacks spiral";
                 break;
             case "saddle":
                 layers.All(false);
                 actions = new[] { "sacks:show", "sacks:saddle", "sacks:routes" };
                 cue = "sacks_saddle";
+                play = false;
                 name = "The spiral bent over a saddle";
                 break;
             default:
-                jump = 60d;
+                jump = 40d;
                 name = "The whole machine";
                 break;
         }
 
         ApplyLayers();
+        exploreLoopStart = System.Math.Max(0d, jump);
         if (jump >= 0d) main.JumpTo(jump);
         else main.ResetAnimation();
         tour.RunActions(actions);
-        main.Play();
+        if (play) main.Play();
+        else main.Pause();
 
         Guide.ResetOffsets();
         Guide.SetFollow(true, true);
