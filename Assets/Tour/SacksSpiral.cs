@@ -9,7 +9,7 @@ using UnityEngine;
 /// onto a saddle z = (x² − y²)/k. Routes from the origin show where primes cluster
 /// (Euler's k²+k+41 curve) and where they never appear (the squares ray, the pronic ray).
 /// </summary>
-public class SacksSpiral : MonoBehaviour
+public partial class SacksSpiral : MonoBehaviour
 {
     public const int GridCount = 30;
     /// <summary>Numbers drawn: up to Euler's 40th prime, 39² + 39 + 41 = 1601, so his whole route is on the Sacks spiral.</summary>
