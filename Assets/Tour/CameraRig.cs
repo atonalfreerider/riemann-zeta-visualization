@@ -226,6 +226,21 @@ public class CameraRig : MonoBehaviour
             Vector3 pos = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .75f);
             return new CueState { Position = pos, LookAt = c + Vector3.back * 1.5f, Up = Vector3.back, Fov = 55 };
         };
+        cues["sacks_track"] = () =>
+        {
+            // tracking shot: ride outward along the spiral just above the master wave, looking ahead along the road
+            Vector3 c = annotations.Sacks.Center;
+            float u = Mathf.Clamp01((Time.time - cueStartTime) / 18f);
+            float n = Mathf.Lerp(3f, 330f, u * u);
+            float r = 1.45f * Mathf.Sqrt(n), a = 2f * Mathf.PI * Mathf.Sqrt(n);
+            float nAhead = n * 1.25f + 2f;
+            float r2 = 1.45f * Mathf.Sqrt(nAhead), a2 = 2f * Mathf.PI * Mathf.Sqrt(nAhead);
+            const float k = 1f / 48f;
+            Vector3 here = c + new Vector3(r * Mathf.Cos(a), r * Mathf.Sin(a), k * (r * r * Mathf.Cos(2 * a)));
+            Vector3 ahead = c + new Vector3(r2 * Mathf.Cos(a2), r2 * Mathf.Sin(a2), k * (r2 * r2 * Mathf.Cos(2 * a2)));
+            Vector3 pos = here + Vector3.back * (3.5f + r * .12f) - (ahead - here).normalized * 4f;
+            return new CueState { Position = pos, LookAt = ahead + Vector3.back * .6f, Up = Vector3.back, Fov = 60 };
+        };
         cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
         cues["spiral_angles"] = () => new CueState { Position = new Vector3(-0.4f, TipY + 6.5f, -1.8f), LookAt = new Vector3(-0.4f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
         cues["zeno"] = () => new CueState { Position = new Vector3(2.4f, 9.5f, 0.3f), LookAt = new Vector3(2.4f, 0f, 0.55f), Up = Vector3.right, Fov = 60 };

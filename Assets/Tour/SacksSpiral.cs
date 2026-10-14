@@ -974,6 +974,192 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
+    // ---- exploration layers (static views of the interference, used by ExplorationRenderTest) ----
+    GameObject explorationRoot;
+
+    void ClearExploration()
+    {
+        if (explorationRoot != null) Destroy(explorationRoot);
+        explorationRoot = new GameObject("Exploration");
+        explorationRoot.transform.SetParent(hypothesisRoot.transform, false);
+    }
+
+    Vector3[] WaveCurve(System.Func<float, double> value, float altitude, float amp, int pts, float nMax)
+    {
+        Vector3[] arr = new Vector3[pts];
+        for (int i = 0; i < pts; i++)
+        {
+            float n = FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (pts - 1f));
+            arr[i] = OnSpiral(n, altitude, (float)value(n) * amp);
+        }
+
+        return arr;
+    }
+
+    /// <summary>Every wave kept at its own height γ·ZetaT above the saddle: the stack as a static object.</summary>
+    public void ShowLayerStack(int count, float nMax, float amp)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        double[] zs = Main.Instance.zetaZeroValues;
+        for (int k = 0; k < Mathf.Min(count, zs.Length); k++)
+        {
+            double g = zs[k];
+            LineRenderer line = Factory.NewLine("layer " + k, .06f, Annotations.CollisionColor(k), Factory.GlowIntensity);
+            line.transform.SetParent(explorationRoot.transform, false);
+            line.numCornerVertices = 3;
+            Vector3[] pts = WaveCurve(n => -System.Math.Cos(g * System.Math.Log(n)), (float)g * ZetaT, amp, 1600, nMax);
+            line.positionCount = pts.Length;
+            line.SetPositions(pts);
+        }
+    }
+
+    /// <summary>Cumulative sums S_k = −Σ_{j≤k} cos(γ_j·log n), each at altitude k·dz: how the spikes converge with k.</summary>
+    public void ShowPartialSumSheet(int count, float dz, float nMax, float amp)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        double[] zs = Main.Instance.zetaZeroValues;
+        for (int k = 1; k <= Mathf.Min(count, zs.Length); k++)
+        {
+            int kk = k;
+            float t = (k - 1f) / Mathf.Max(1, count - 1);
+            Color c = Color.Lerp(new Color(.2f, .5f, 1f), new Color(1f, .9f, .3f), t);
+            LineRenderer line = Factory.NewLine("partial " + k, .05f, c, Factory.SoftGlowIntensity);
+            line.transform.SetParent(explorationRoot.transform, false);
+            line.numCornerVertices = 2;
+            float scale = amp / Mathf.Sqrt(kk);
+            Vector3[] pts = WaveCurve(n =>
+            {
+                double logN = System.Math.Log(n), sum = 0;
+                for (int j = 0; j < kk; j++) sum -= System.Math.Cos(zs[j] * logN);
+                return sum;
+            }, k * dz, scale, 1600, nMax);
+            line.positionCount = pts.Length;
+            line.SetPositions(pts);
+        }
+    }
+
+    /// <summary>Same cumulative sums, but along a straight ray from the centre (a cross-section plane through the saddle).</summary>
+    public void ShowCrossSection(int count, float dz, float nMax, float amp, Vector3 rayDir)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        double[] zs = Main.Instance.zetaZeroValues;
+        rayDir.Normalize();
+        for (int k = 1; k <= Mathf.Min(count, zs.Length); k++)
+        {
+            int kk = k;
+            float t = (k - 1f) / Mathf.Max(1, count - 1);
+            Color c = Color.Lerp(new Color(.2f, .5f, 1f), new Color(1f, .9f, .3f), t);
+            LineRenderer line = Factory.NewLine("section " + k, .05f, c, Factory.SoftGlowIntensity);
+            line.transform.SetParent(explorationRoot.transform, false);
+            const int pts = 1200;
+            Vector3[] arr = new Vector3[pts];
+            float scale = amp / Mathf.Sqrt(kk);
+            for (int i = 0; i < pts; i++)
+            {
+                float n = FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (pts - 1f));
+                double logN = System.Math.Log(n), sum = 0;
+                for (int j = 0; j < kk; j++) sum -= System.Math.Cos(zs[j] * logN);
+                float r = R * Mathf.Sqrt(n);
+                float x = r * rayDir.x, y = r * rayDir.y;
+                float surface = SaddleK * (x * x - y * y);
+                arr[i] = origin + new Vector3(x, y, surface) + Vector3.back * (k * dz + (float)sum * scale + .15f);
+            }
+
+            line.positionCount = pts;
+            line.SetPositions(arr);
+        }
+
+        // prime ticks along the ray
+        for (int n = 2; n <= (int)nMax; n++)
+        {
+            if (!IsPrime(n)) continue;
+            float r = R * Mathf.Sqrt(n);
+            float x = r * rayDir.x, y = r * rayDir.y;
+            float surface = SaddleK * (x * x - y * y);
+            LineRenderer tick = Factory.NewLine("ray prime", .05f, Factory.Palette.Zero, Factory.GlowIntensity);
+            tick.transform.SetParent(explorationRoot.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { origin + new Vector3(x, y, surface) + Vector3.back * .1f, origin + new Vector3(x, y, surface) + Vector3.back * (count * dz + 1.5f) });
+        }
+    }
+
+    /// <summary>Static master wave with k zeros on the saddle (plus ticks), no animation.</summary>
+    public void ShowMasterStatic(int k)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        waveStackRoot.SetActive(true);
+        SetMasterWave(k);
+    }
+
+    public void ShowRingFieldStatic(int k)
+    {
+        ShowHypothesis(true);
+        if (interferenceRoot == null) StartInterference(0.01f);
+        if (fieldRoutine != null) StopCoroutine(fieldRoutine);
+        interferenceRoot.SetActive(true);
+        SetInterference(k);
+    }
+
+    public void ShowTrail(bool on)
+    {
+        Transform t = hypothesisRoot != null ? hypothesisRoot.transform.Find("ZetaTrail") : null;
+        if (t != null) t.gameObject.SetActive(on);
+    }
+
+    /// <summary>Each wave by itself at height γ·ZetaT, along a straight ray: the (log n, γ) fringe pattern of cos(γ·log n).</summary>
+    public void ShowLayerSection(int count, float nMax, float amp, Vector3 rayDir)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        double[] zs = Main.Instance.zetaZeroValues;
+        rayDir.Normalize();
+        for (int k = 0; k < Mathf.Min(count, zs.Length); k++)
+        {
+            double g = zs[k];
+            LineRenderer line = Factory.NewLine("layer section " + k, .05f, Annotations.CollisionColor(k), Factory.SoftGlowIntensity);
+            line.transform.SetParent(explorationRoot.transform, false);
+            const int pts = 900;
+            Vector3[] arr = new Vector3[pts];
+            for (int i = 0; i < pts; i++)
+            {
+                float n = FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (pts - 1f));
+                float r = R * Mathf.Sqrt(n);
+                float x = r * rayDir.x, y = r * rayDir.y;
+                float surface = SaddleK * (x * x - y * y);
+                arr[i] = origin + new Vector3(x, y, surface) + Vector3.back * ((float)g * ZetaT - amp * Mathf.Cos((float)g * Mathf.Log(n)) + .15f);
+            }
+
+            line.positionCount = pts;
+            line.SetPositions(arr);
+        }
+
+        for (int n = 2; n <= (int)nMax; n++)
+        {
+            if (!IsPrime(n)) continue;
+            float r = R * Mathf.Sqrt(n);
+            float x = r * rayDir.x, y = r * rayDir.y;
+            float surface = SaddleK * (x * x - y * y);
+            LineRenderer tick = Factory.NewLine("ray prime", .06f, Factory.Palette.Zero, Factory.GlowIntensity);
+            tick.transform.SetParent(explorationRoot.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { origin + new Vector3(x, y, surface) + Vector3.back * .1f, origin + new Vector3(x, y, surface) + Vector3.back * ((float)zs[Mathf.Min(count, zs.Length) - 1] * ZetaT + 2f) });
+        }
+    }
+
+    public void HideWaveStack()
+    {
+        if (waveStackRoot != null) waveStackRoot.SetActive(false);
+    }
+
     void SetMasterWave(int k)
     {
         double[] zs = Main.Instance.zetaZeroValues;
