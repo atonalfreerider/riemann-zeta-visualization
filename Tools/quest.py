@@ -22,7 +22,7 @@ import sys
 import time
 from pathlib import Path
 
-PACKAGE = "com.primitive.zetavisualization"
+PACKAGE = "com.metavirtuoso.zetaviewer"
 
 
 def adb_path():

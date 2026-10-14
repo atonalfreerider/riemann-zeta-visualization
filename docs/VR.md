@@ -20,8 +20,8 @@ On a Quest 2 the passthrough image is black and white (the colour passthrough ca
    python Tools/quest.py run
    ```
 
-   `VRBuildSetup` first applies the Quest project settings (Android, IL2CPP, ARM64, Vulkan, API 32–34, GameActivity,
-   OpenXR with the Meta Quest feature group, hand tracking, passthrough). The app is `com.primitive.zetavisualization`
+   `VRBuildSetup` first applies the Quest project settings (Android, IL2CPP, ARM64, Vulkan, API 32–36, GameActivity,
+   OpenXR with the Meta Quest feature group, hand tracking, passthrough). The app is `com.metavirtuoso.zetaviewer`
    and appears under **Unknown Sources** in the headset's library.
 3. Put the headset on. The menu is already in front of you.
 
@@ -114,7 +114,7 @@ buttons, turn your left palm toward your face, and pinch-drag the model. If a th
 `VRHand.PinchStart/PinchEnd` (pinch) and `VRPoker.PressDepth/ReleaseDepth` (button press) in `Assets/VR`.
 
 Everything is in `Assets/VR`; `Assets/Editor/VRBuildSetup.cs` configures OpenXR (Meta Quest feature group, hand tracking,
-hand interaction profile, passthrough) and the Android player settings (IL2CPP, ARM64, Vulkan, API 29–34).
+hand interaction profile, passthrough) and the Android player settings (IL2CPP, ARM64, Vulkan, API 32–36).
 
 ## Narration and recordings
 

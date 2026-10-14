@@ -27,7 +27,7 @@ using UnityEngine.XR.OpenXR.Features.MetaQuestSupport;
 public static class VRBuildSetup
 {
     const BuildTargetGroup Android = BuildTargetGroup.Android;
-    public const string ApplicationId = "com.primitive.zetavisualization";
+    public const string ApplicationId = "com.metavirtuoso.zetaviewer";
     const string MetaFeatureSetId = "com.unity.openxr.featureset.meta";
 
     [MenuItem("Zeta/VR/Configure Quest Project Settings")]
@@ -72,7 +72,7 @@ public static class VRBuildSetup
         PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel32; // the passthrough camera feature needs Android 12L
-        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel36; // same target level as the other Quest apps built here
         PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.GameActivity; // required by the OpenXR Quest validation on Unity 6
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
         PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
