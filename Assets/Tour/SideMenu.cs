@@ -30,8 +30,8 @@ public class SideMenu : MonoBehaviour
     RectTransform panel, arrow;
     readonly System.Collections.Generic.List<(Image image, System.Func<bool> on)> toggles = new();
     TextMeshProUGUI heightLabel;
-    bool open = true;
-    float slide = 1f;
+    bool open; // starts tucked away: the arrow on the left edge opens it
+    float slide;
     Image landscapeButton, portraitButton, homeButton, graphButton;
     TextMeshProUGUI status;
     readonly List<Image> chapterRows = new();
@@ -148,55 +148,54 @@ public class SideMenu : MonoBehaviour
 
         Header(content, "VIEW");
         RectTransform viewRow = Row(content);
-        homeButton = Button(viewRow, "Saddle", () => { director.StopTour(); if (director.Explore.Active) director.Explore.Exit(); director.Home.Enter(); });
-        graphButton = Button(viewRow, "XY graph", ShowGraph);
+        homeButton = Button(viewRow, "Saddle", () => { director.StopTour(); if (director.Explore.Active) director.Explore.Exit(); director.Home.Enter(); }, 1f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Saddle));
+        graphButton = Button(viewRow, "XY graph", ShowGraph, 1f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Grid));
 
         Header(content, "LAYERS   saddle view");
         SacksSpiral sacks = director.Annotations.Sacks;
         RectTransform layerRow = Row(content);
-        Toggle(layerRow, "Saddle / flat", () => !sacks.Flat, () => sacks.SetFlat(!sacks.Flat, 2f));
-        Toggle(layerRow, "Master wave", () => sacks.MasterWaveVisible, () => sacks.SetMasterWaveVisible(!sacks.MasterWaveVisible));
+        Toggle(layerRow, "Saddle", () => !sacks.Flat, () => sacks.SetFlat(!sacks.Flat, 2f), Icon(VRIcons.Id.Saddle));
+        Toggle(layerRow, "Master wave", () => sacks.MasterWaveVisible, () => sacks.SetMasterWaveVisible(!sacks.MasterWaveVisible), Icon(VRIcons.Id.Waves));
         layerRow = Row(content);
-        Toggle(layerRow, "Zeta trail", () => !sacks.GrowthTrailHidden, () => sacks.SetGrowthTrailVisible(sacks.GrowthTrailHidden));
-        Toggle(layerRow, "Chain", () => sacks.ChainVisible, () => sacks.SetChainVisible(!sacks.ChainVisible));
-        Toggle(layerRow, "Numbers", () => sacks.DotsVisible, () => sacks.SetDotsVisible(!sacks.DotsVisible));
+        Toggle(layerRow, "Zeta trail", () => !sacks.GrowthTrailHidden, () => sacks.SetGrowthTrailVisible(sacks.GrowthTrailHidden), Icon(VRIcons.Id.Trail));
+        Toggle(layerRow, "Chain", () => sacks.ChainVisible, () => sacks.SetChainVisible(!sacks.ChainVisible), Icon(VRIcons.Id.Chain));
         layerRow = Row(content);
-        Toggle(layerRow, "n = k²", () => sacks.RouteVisible("squares"), () => sacks.SetRouteVisible("squares", !sacks.RouteVisible("squares"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.SquareColor;
-        Toggle(layerRow, "k(k+1)", () => sacks.RouteVisible("pronic"), () => sacks.SetRouteVisible("pronic", !sacks.RouteVisible("pronic"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.PronicColor;
-        Toggle(layerRow, "k²+k+41", () => sacks.RouteVisible("euler"), () => sacks.SetRouteVisible("euler", !sacks.RouteVisible("euler"))).GetComponentInChildren<TextMeshProUGUI>().color = SacksSpiral.EulerColor;
+        Toggle(layerRow, "Numbers", () => sacks.DotsVisible, () => sacks.SetDotsVisible(!sacks.DotsVisible), Icon(VRIcons.Id.Sacks));
+        Toggle(layerRow, "n = k²", () => sacks.RouteVisible("squares"), () => sacks.SetRouteVisible("squares", !sacks.RouteVisible("squares")), Icon(VRIcons.Id.Equations), SacksSpiral.SquareColor);
         layerRow = Row(content);
-        Button(layerRow, "−", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale / 1.25f), .6f);
-        heightLabel = Button(layerRow, "", () => sacks.SetTrailHeightScale(1f), 2.2f).GetComponentInChildren<TextMeshProUGUI>();
-        Button(layerRow, "+", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale * 1.25f), .6f);
-        Button(layerRow, "Reset view", () => { if (director.Orbit != null) director.Orbit.ResetView(); }, 1.8f);
+        Toggle(layerRow, "n = k(k+1)", () => sacks.RouteVisible("pronic"), () => sacks.SetRouteVisible("pronic", !sacks.RouteVisible("pronic")), Icon(VRIcons.Id.Equations), SacksSpiral.PronicColor);
+        Toggle(layerRow, "k² + k + 41", () => sacks.RouteVisible("euler"), () => sacks.SetRouteVisible("euler", !sacks.RouteVisible("euler")), Icon(VRIcons.Id.Equations), SacksSpiral.EulerColor);
+        layerRow = Row(content);
+        Button(layerRow, "", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale / 1.25f), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Down));
+        heightLabel = Button(layerRow, "", () => sacks.SetTrailHeightScale(1f), 2f, TextAlignmentOptions.Center).GetComponentInChildren<TextMeshProUGUI>();
+        Button(layerRow, "", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale * 1.25f), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Up));
+        Button(layerRow, "Reset", () => { if (director.Orbit != null) director.Orbit.ResetView(); }, 1.3f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Reset));
 
         Header(content, "FORMAT");
         RectTransform formatRow = Row(content);
-        landscapeButton = Button(formatRow, "16:9 wide", () => director.SetFormat(false));
-        portraitButton = Button(formatRow, "9:16 tall", () => director.SetFormat(true));
+        landscapeButton = Button(formatRow, "16:9 wide", () => director.SetFormat(false), 1f, TextAlignmentOptions.Left, FrameIcon(true));
+        portraitButton = Button(formatRow, "9:16 tall", () => director.SetFormat(true), 1f, TextAlignmentOptions.Left, FrameIcon(false));
 
         Header(content, "TOUR");
         RectTransform tourRow = Row(content);
-        Button(tourRow, "Play whole tour", () => { director.GoToChapter(0, true); open = false; }, 2f);
-        Button(tourRow, "Stop", () => director.StopTour());
+        Button(tourRow, "Play whole tour", () => { director.GoToChapter(0, true); open = false; }, 2f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Play));
+        Button(tourRow, "Stop", () => director.StopTour(), 1f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Pause));
 
-        Header(content, "CHAPTERS   tap to play  ·  ● to record one");
+        Header(content, "CHAPTERS   tap to play  ·  red dot records one");
         TourChapter[] chapters = director.Chapters;
         for (int i = 0; i < chapters.Length; i++)
         {
             int index = i;
             RectTransform row = Row(content);
-            Image play = Button(row, $"{i + 1}.  {chapters[i].title}", () => { director.GoToChapter(index, true); open = false; }, 5.2f, TextAlignmentOptions.Left);
+            Image play = Button(row, $"{i + 1}.  {chapters[i].title}", () => { director.GoToChapter(index, true); open = false; }, 5.2f, TextAlignmentOptions.Left, Icon(VRApp.ChapterIconFor(i)));
             chapterRows.Add(play);
-            Image rec = Button(row, "●", () => { director.RecordTour(director.Chapters[index].id, false, director.Portrait); open = false; }, 1f);
-            rec.GetComponentInChildren<TextMeshProUGUI>().color = RecordColor;
+            Button(row, "", () => { director.RecordTour(director.Chapters[index].id, false, director.Portrait); open = false; }, 1f, TextAlignmentOptions.Center, VRIcons.Circle(), RecordColor);
         }
 
         Header(content, "RECORD");
         RectTransform recordRow = Row(content);
-        Image recordAll = Button(recordRow, "●  Record whole tour", () => { director.RecordTour("", true, director.Portrait); open = false; }, 2f);
-        recordAll.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, .55f, .55f);
-        stopRecordingButton = Button(recordRow, "Stop", () => { if (director.Recorder.IsRecording) director.StopRecording(); }).GetComponent<Button>();
+        Button(recordRow, "Record whole tour", () => { director.RecordTour("", true, director.Portrait); open = false; }, 2f, TextAlignmentOptions.Left, VRIcons.Circle(), RecordColor);
+        stopRecordingButton = Button(recordRow, "Stop", () => { if (director.Recorder.IsRecording) director.StopRecording(); }, 1f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Pause)).GetComponent<Button>();
         status = Label(content, "", 22, FontStyles.Normal, DimText, 64);
         status.textWrappingMode = TextWrappingModes.Normal;
         Label(content, "Saddle view:  drag or W A S D / arrows orbit and change altitude · wheel or Q E zoom · Shift + drag or Shift + W A S D move the centre", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 74).textWrappingMode = TextWrappingModes.Normal;
@@ -257,11 +256,38 @@ public class SideMenu : MonoBehaviour
 
     // ---- small builders ----------------------------------------------------------------------------
 
-    Image Toggle(Transform parent, string text, System.Func<bool> on, UnityEngine.Events.UnityAction onClick)
+    Image Toggle(Transform parent, string text, System.Func<bool> on, UnityEngine.Events.UnityAction onClick, Sprite icon = null, Color? iconColor = null)
     {
-        Image image = Button(parent, text, onClick);
+        Image image = Button(parent, text, onClick, 1f, TextAlignmentOptions.Left, icon, iconColor);
         toggles.Add((image, on));
         return image;
+    }
+
+    /// <summary>The same icons as the VR menus.</summary>
+    static Sprite Icon(VRIcons.Id id) => VRIcons.Get(id);
+
+    static Sprite wideFrame, tallFrame;
+
+    /// <summary>A frame outline in the shape of the format (16:9 or 9:16).</summary>
+    static Sprite FrameIcon(bool wide)
+    {
+        ref Sprite cached = ref wide ? ref wideFrame : ref tallFrame;
+        if (cached != null) return cached;
+        const int n = 64;
+        Texture2D tex = new(n, n, TextureFormat.RGBA32, false);
+        float hw = wide ? 30f : 17f, hh = wide ? 17f : 30f;
+        for (int y = 0; y < n; y++)
+        for (int x = 0; x < n; x++)
+        {
+            float dx = Mathf.Abs(x + .5f - n * .5f), dy = Mathf.Abs(y + .5f - n * .5f);
+            bool inside = dx <= hw && dy <= hh;
+            bool border = inside && (dx >= hw - 4f || dy >= hh - 4f);
+            tex.SetPixel(x, y, border ? Color.white : Color.clear);
+        }
+
+        tex.Apply();
+        cached = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(.5f, .5f), 100f);
+        return cached;
     }
 
     static TextMeshProUGUI Label(Transform parent, string text, float size, FontStyles style, Color color, float height)
@@ -278,6 +304,9 @@ public class SideMenu : MonoBehaviour
         t.alignment = TextAlignmentOptions.MidlineLeft;
         t.textWrappingMode = TextWrappingModes.NoWrap;
         t.overflowMode = TextOverflowModes.Ellipsis;
+        t.enableAutoSizing = true; // long labels shrink to fit instead of being cut off
+        t.fontSizeMax = size;
+        t.fontSizeMin = Mathf.Min(size, 13f);
         go.AddComponent<LayoutElement>().preferredHeight = height;
         return t;
     }
@@ -304,7 +333,7 @@ public class SideMenu : MonoBehaviour
         return rect;
     }
 
-    static Image Button(Transform parent, string text, UnityEngine.Events.UnityAction onClick, float weight = 1f, TextAlignmentOptions alignment = TextAlignmentOptions.Center)
+    static Image Button(Transform parent, string text, UnityEngine.Events.UnityAction onClick, float weight = 1f, TextAlignmentOptions alignment = TextAlignmentOptions.Center, Sprite icon = null, Color? iconColor = null)
     {
         GameObject go = new("Button " + text);
         go.transform.SetParent(parent, false);
@@ -325,12 +354,31 @@ public class SideMenu : MonoBehaviour
         RectTransform lr = labelGo.AddComponent<RectTransform>();
         lr.anchorMin = Vector2.zero;
         lr.anchorMax = Vector2.one;
-        lr.offsetMin = new Vector2(16, 0);
-        lr.offsetMax = new Vector2(-16, 0);
+        lr.offsetMin = new Vector2(icon != null && !string.IsNullOrEmpty(text) ? 52 : 14, 0);
+        lr.offsetMax = new Vector2(-12, 0);
+        if (icon != null)
+        {
+            RectTransform ir = new GameObject("Icon").AddComponent<RectTransform>();
+            ir.SetParent(go.transform, false);
+            bool alone = string.IsNullOrEmpty(text);
+            ir.anchorMin = ir.anchorMax = new Vector2(alone ? .5f : 0f, .5f);
+            ir.pivot = new Vector2(alone ? .5f : 0f, .5f);
+            ir.anchoredPosition = new Vector2(alone ? 0f : 14f, 0f);
+            ir.sizeDelta = new Vector2(30, 30);
+            Image img = ir.gameObject.AddComponent<Image>();
+            img.sprite = icon;
+            img.color = iconColor ?? TextColor;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
         TextMeshProUGUI t = labelGo.AddComponent<TextMeshProUGUI>();
         t.font = TMP_Settings.defaultFontAsset;
         t.text = text;
         t.fontSize = 24;
+        t.enableAutoSizing = true; // long labels shrink to fit the button instead of being cut off
+        t.fontSizeMax = 24;
+        t.fontSizeMin = 13;
         t.color = TextColor;
         t.alignment = alignment;
         t.raycastTarget = false;

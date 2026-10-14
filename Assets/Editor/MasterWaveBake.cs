@@ -14,7 +14,7 @@ using UnityEngine;
 /// </summary>
 public static class MasterWaveBake
 {
-    const float NMax = 1300f;
+    const float NMax = SacksSpiral.FullNMax;
     static readonly int[] SampleCounts = { 160000, 60000 }; // desktop, and the Quest's budget
 
     [MenuItem("Zeta/Bake Master Wave")]

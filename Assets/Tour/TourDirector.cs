@@ -734,7 +734,10 @@ public class TourDirector : MonoBehaviour
                         else Annotations.ShowPrimes(arg == "on");
                         break;
                     case "axes": if (arg == "sprout") Annotations.SproutAxes(Mathf.Max(1.5f, currentLineSeconds * 0.6f)); break;
-                    case "angles": Annotations.ShowAngles(arg != "off"); break;
+                    case "angles":
+                        if (arg == "stack") Annotations.StackAngles(Mathf.Max(3f, currentLineSeconds * .6f));
+                        else Annotations.ShowAngles(arg != "off");
+                        break;
                     case "dialstrip":
                         if (arg == "clear") Annotations.ClearDialStrip();
                         else Annotations.AddStripDial(int.Parse(arg, CultureInfo.InvariantCulture) - 1, 1.2f);
@@ -788,10 +791,12 @@ public class TourDirector : MonoBehaviour
                         // the staircase on its own: terms · const · trivial · waves:FROM:TO · wobble:ZEROS:BETA · sweep:FROM:TO[:pingpong] · beta:B · off
                         StaircaseLab lab = Annotations.Lab;
                         float line = Storyboard ? StoryboardSecondsPerLine : currentLineSeconds;
-                        if (arg == "terms") lab.BeginTerms(Mathf.Max(2f, line * .5f));
-                        else if (arg == "const") lab.AddConstant(Mathf.Max(2f, line * .8f));
-                        else if (arg == "trivial") lab.AddTrivial(Mathf.Max(2f, line * .8f));
-                        else if (arg == "waves") lab.AddWaves(int.Parse(parts[2], CultureInfo.InvariantCulture), parts[3] == "all" ? -1 : int.Parse(parts[3], CultureInfo.InvariantCulture), parts.Length > 4 ? float.Parse(parts[4], CultureInfo.InvariantCulture) : Mathf.Max(2f, line * .9f));
+                        // the optional last number is the share of the line the step takes (steps queue one after another)
+                        float Share(int index, float fallback) => Mathf.Max(1.5f, line * (parts.Length > index ? float.Parse(parts[index], CultureInfo.InvariantCulture) : fallback));
+                        if (arg == "terms") lab.BeginTerms(Share(2, .5f));
+                        else if (arg == "const") lab.AddConstant(Share(2, .8f));
+                        else if (arg == "trivial") lab.AddTrivial(Share(2, .8f));
+                        else if (arg == "waves") lab.AddWaves(int.Parse(parts[2], CultureInfo.InvariantCulture), parts[3] == "all" ? -1 : int.Parse(parts[3], CultureInfo.InvariantCulture), Share(4, .9f));
                         else if (arg == "wobble") lab.BeginWobble(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : 40, parts.Length > 3 ? float.Parse(parts[3], CultureInfo.InvariantCulture) : .5f);
                         else if (arg == "sweep") lab.SweepBeta(float.Parse(parts[2], CultureInfo.InvariantCulture), float.Parse(parts[3], CultureInfo.InvariantCulture), Mathf.Max(2f, line * .9f), parts.Length > 4 && parts[4] == "pingpong");
                         else if (arg == "beta") lab.SweepBeta(lab.Beta, float.Parse(parts[2], CultureInfo.InvariantCulture), Mathf.Max(1.5f, line * .4f), false);
@@ -812,7 +817,7 @@ public class TourDirector : MonoBehaviour
                         if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "zeta") Annotations.Sacks.ShowZetaOnly();
                         else if (arg == "sheet") { Annotations.Sacks.ShowZetaOnly(); Annotations.Sacks.ShowFringeSheet(60f, 62f, 13); Annotations.Sacks.ShowTrail(true); }
-                        else if (arg == "full") Annotations.Sacks.StartFullMasterWave(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : Main.zetaZeroValues.Length, 160000, 1300f, Mathf.Max(6f, currentLineSeconds * 0.9f));
+                        else if (arg == "full") Annotations.Sacks.StartFullMasterWave(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : Main.zetaZeroValues.Length, 160000, SacksSpiral.FullNMax, Mathf.Max(6f, currentLineSeconds * 0.9f));
                         else if (arg == "notrail" || arg == "trail") Annotations.Sacks.SetGrowthTrailVisible(arg == "trail");
                         else if (arg == "grow")
                         {

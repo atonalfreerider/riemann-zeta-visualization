@@ -11,7 +11,8 @@ using UnityEngine;
 public class BloomEffect : MonoBehaviour
 {
     [Range(0f, 4f)] public float Threshold = 1.05f;
-    [Range(0f, 1f)] public float SoftKnee = 0.5f;
+    // a narrow knee: only things drawn above the threshold glow (a wide knee let the ~1.0 master wave bloom and sparkle)
+    [Range(0f, 1f)] public float SoftKnee = 0.15f;
     [Range(0f, 4f)] public float Intensity = 0.55f;
     [Range(1, 8)] public int Iterations = 5;
     [Range(0.5f, 2f)] public float Diffusion = 1.0f;

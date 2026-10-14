@@ -151,6 +151,15 @@ public class CameraRig : MonoBehaviour
         cues["chain_long"] = () => new CueState { Position = new Vector3(6.5f, 16f, -1f), LookAt = new Vector3(6.5f, 0f, 0f), Up = Vector3.right, Fov = 60 };
         cues["spiral_curl"] = () => new CueState { Position = new Vector3(0.6f, TipY + 7.5f, -1.6f), LookAt = new Vector3(0.6f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
         cues["sigma_spiral"] = () => new CueState { Position = new Vector3(0.3f, TipY + 4.2f, -1.0f), LookAt = new Vector3(0.3f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
+        cues["tip_stack"] = () =>
+        {
+            // the top-down view of the chain, widened to take in the stacked turns beside (wide) or below (tall) it
+            Vector3 stack = annotations.AngleStackCentre;
+            Vector3 chain = new(0.2f, TipY, 0.1f);
+            Vector3 mid = Vector3.Lerp(chain, stack.sqrMagnitude > 0f ? stack : chain, .5f);
+            float d = Aspect >= 1f ? 6.4f : 8.5f;
+            return new CueState { Position = mid + new Vector3(0, d, -0.4f), LookAt = mid, Up = Vector3.forward, Fov = 58 };
+        };
         cues["tip_center"] = () => new CueState { Position = new Vector3(0.25f, TipY + 4.6f, -1.1f), LookAt = new Vector3(0.2f, TipY, 0.1f), Up = Vector3.forward, Fov = 58 };
         cues["markers_axis"] = () =>
         {
@@ -191,6 +200,21 @@ public class CameraRig : MonoBehaviour
             float d = Mathf.Max(15f, 10.5f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
             Vector3 pos = c + toCamera * (d * Mathf.Sin(tilt)) + Vector3.back * (d * Mathf.Cos(tilt));
             return new CueState { Position = pos, LookAt = c, Up = Vector3.back, Fov = 60 };
+        };
+        cues["route_follow"] = () =>
+        {
+            // ride along a route on the saddle while its numbers are written: above the surface on the side the ridge
+            // rises toward (+Z), set back toward the centre so the route runs away from the camera into the frame
+            SacksSpiral s = annotations.Sacks;
+            Vector3 f = s.RouteFocus;
+            Vector3 radial = f - s.Center;
+            radial.z = 0f;
+            float r = radial.magnitude;
+            Vector3 outward = r > .5f ? radial / r : new Vector3(s.RouteHeading.x, s.RouteHeading.y, 0f).normalized;
+            if (outward.sqrMagnitude < .1f) outward = Vector3.right;
+            float d = (Aspect >= 1f ? 20f : 30f) + r * .3f;
+            Vector3 pos = f + Vector3.forward * (d * .72f) - outward * (d * .6f);
+            return new CueState { Position = pos, LookAt = f + outward * 3f, Up = Vector3.forward, Fov = 60 };
         };
         cues["stair_terms"] = () =>
         {

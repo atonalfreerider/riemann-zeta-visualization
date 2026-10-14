@@ -11,8 +11,8 @@ using UnityEngine.TestTools;
 ///   ZETA_OUT=/path [ZETA_PORTRAIT=1] [ZETA_REVIEW=home,menu,hook,outro] Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ReviewRenderTest
 ///   home   the home view: master wave ready, then the trail at t ≈ 150, 500 and 1000
 ///   menu   the side menu, open and tucked away
-///   hook   one frame each from the sieve and the saddle routes
-///   outro  one frame each from the per-zero waves, the full master wave and the closing home animation
+///   splash the launch card held still (also the Quest's system splash image)
+///   hook, sacks, turn, staircase, key, outro   a few frames from each of those chapters
 /// </summary>
 public class ReviewRenderTest
 {
@@ -30,7 +30,7 @@ public class ReviewRenderTest
         }
 
         string parts = Environment.GetEnvironmentVariable("ZETA_REVIEW");
-        if (string.IsNullOrEmpty(parts)) parts = "home,menu,hook,outro";
+        if (string.IsNullOrEmpty(parts)) parts = "home,menu,splash,hook,sacks,turn,staircase,key,outro";
         bool portrait = Environment.GetEnvironmentVariable("ZETA_PORTRAIT") == "1";
 
         SceneManager.LoadScene("zeta");
@@ -93,14 +93,50 @@ public class ReviewRenderTest
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
 
-        if (parts.Contains("hook"))
+        if (parts.Contains("splash"))
         {
-            yield return ChapterFrames(director, "hook", new[] { ("hook_02c", .55f), ("hook_02d", .75f), ("hook_03b", .9f), ("hook_06", .6f), ("hook_06b", .6f), ("hook_06c", .6f) }, Shot);
+            // the launch card over the saddle, held fully drawn: the still used as the Quest's system splash
+            director.Home.Enter();
+            for (int i = 0; i < 90; i++) yield return null;
+            foreach (LaunchTitle old in UnityEngine.Object.FindObjectsByType<LaunchTitle>(FindObjectsSortMode.None)) UnityEngine.Object.Destroy(old.gameObject);
+            LaunchTitle card = LaunchTitle.Create(false);
+            Canvas canvas = card.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = cam;
+            canvas.planeDistance = 0.4f;
+            UnityEngine.UI.CanvasScaler scaler = card.GetComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
+            scaler.scaleFactor = Mathf.Min(director.Recorder.Width, director.Recorder.Height) / 1080f;
+            card.Freeze(4.2f);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("splash");
+            UnityEngine.Object.Destroy(card.gameObject);
+            card = LaunchTitle.Create(false);
+            canvas = card.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = cam;
+            canvas.planeDistance = 0.4f;
+            scaler = card.GetComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
+            scaler.scaleFactor = Mathf.Min(director.Recorder.Width, director.Recorder.Height) / 1080f;
+            card.Freeze(1.4f);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("splash_drawing");
+            UnityEngine.Object.Destroy(card.gameObject);
         }
 
-        if (parts.Contains("outro"))
+        (string chapter, (string line, float at)[] moments)[] chapters =
         {
-            yield return ChapterFrames(director, "outro", new[] { ("outro_04", .55f), ("outro_05", .5f), ("outro_06", .85f), ("outro_07", .6f) }, Shot);
+            ("hook", new[] { ("hook_03", .72f), ("hook_04", .8f), ("hook_05", .95f) }),
+            ("sacks", new[] { ("sacks_01", .8f), ("sacks_02", .7f), ("sacks_03", .6f), ("sacks_04", .6f), ("sacks_05", .7f) }),
+            ("turn", new[] { ("turn_01", .7f), ("turn_04", .7f), ("turn_05", .95f) }),
+            ("staircase", new[] { ("stair_02", .9f), ("stair_03", .6f), ("stair_04", .95f) }),
+            ("key", new[] { ("key_01", .9f), ("key_03", .6f) }),
+            ("outro", new[] { ("outro_01", .6f), ("outro_03", .6f), ("outro_04", .9f), ("outro_05", .5f) }),
+        };
+        foreach ((string chapter, (string line, float at)[] moments) in chapters)
+        {
+            if (parts.Contains(chapter)) yield return ChapterFrames(director, chapter, moments, Shot);
         }
 
         Time.timeScale = 1f;

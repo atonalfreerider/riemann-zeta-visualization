@@ -17,12 +17,15 @@ public partial class VRApp
     const float DockWidth = 600f, DockHeight = 450f;
     const float PageTop = 70f, PageHeight = 296f;
 
-    static readonly string[] ChapterShort = { "Primes", "Zeno", "Stage", "Dial", "Waves", "Steps", "Machine", "Key", "2026", "Saddle" };
+    static readonly string[] ChapterShort = { "Sieve", "Sacks", "Zeno", "Stage", "Dial", "Waves", "Steps", "Key", "2026", "Saddle" };
     static readonly VRIcons.Id[] ChapterIcon =
     {
-        VRIcons.Id.Sacks, VRIcons.Id.Zeno, VRIcons.Id.Stage, VRIcons.Id.Dial, VRIcons.Id.Waves,
-        VRIcons.Id.Stairs, VRIcons.Id.Machine, VRIcons.Id.Key, VRIcons.Id.Strip, VRIcons.Id.Saddle
+        VRIcons.Id.Grid, VRIcons.Id.Sacks, VRIcons.Id.Zeno, VRIcons.Id.Stage, VRIcons.Id.Dial,
+        VRIcons.Id.Waves, VRIcons.Id.Stairs, VRIcons.Id.Key, VRIcons.Id.Strip, VRIcons.Id.Saddle
     };
+
+    /// <summary>A chapter's icon, shared with the desktop side menu.</summary>
+    public static VRIcons.Id ChapterIconFor(int index) => index >= 0 && index < ChapterIcon.Length ? ChapterIcon[index] : VRIcons.Id.Play;
 
     readonly List<RectTransform> pages = new();
     readonly List<VRButton> tabs = new();

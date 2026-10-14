@@ -12,7 +12,8 @@ using UnityEngine;
 public class SacksSpiral : MonoBehaviour
 {
     public const int GridCount = 30;
-    const int Count = 1300;
+    /// <summary>Numbers drawn: up to Euler's 40th prime, 39² + 39 + 41 = 1601, so his whole route is on the Sacks spiral.</summary>
+    public const int Count = 1601;
     const float R = 1.45f;           // spiral radius scale
     const float SaddleK = 1f / 48f;  // saddle curvature
 
@@ -53,19 +54,21 @@ public class SacksSpiral : MonoBehaviour
 
     // The last turns of the spiral shrink and fade through grey to black, so the saddle reads as going on for ever
     // instead of stopping at a hard edge.
-    const int EdgeFadeStart = 760;
+    const int EdgeFadeStart = 700;
 
     /// <summary>0 inside, rising to 1 at the last number drawn.</summary>
-    static float EdgeFade(float n) => Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(EdgeFadeStart, Count, n));
+    static float EdgeFade(float n) => Mathf.Pow(Mathf.Clamp01(Mathf.InverseLerp(EdgeFadeStart, Count, n)), .8f);
 
     static Color Faded(Color c, float fade)
     {
         if (fade <= 0f) return c;
-        Color grey = new(.32f, .32f, .36f, c.a);
-        return Color.Lerp(Color.Lerp(c, grey, Mathf.Clamp01(fade * 2f)), new Color(0f, 0f, 0f, c.a), Mathf.Clamp01(fade * 2f - 1f));
+        // toward grey first, then darker and darker (never quite black: the last ones are still there, just far away)
+        Color grey = new(.34f, .34f, .38f, c.a);
+        Color greyed = Color.Lerp(c, grey, Mathf.Clamp01(fade * 1.6f));
+        return Color.Lerp(greyed, new Color(.05f, .05f, .06f, c.a), Mathf.Clamp01((fade - .5f) / .5f) * .7f);
     }
 
-    static float FadedSize(float size, float fade) => size * Mathf.Lerp(1f, .3f, fade);
+    static float FadedSize(float size, float fade) => size * Mathf.Lerp(1f, .22f, fade);
 
     /// <summary>Resting size of number n's dot on the full spiral.</summary>
     static float RestSize(int n) => n <= GridCount ? (IsPrime(n) ? .42f : IsSquare(n) ? .34f : .26f) : FadedSize(IsPrime(n) ? .42f : .22f, EdgeFade(n));
@@ -150,9 +153,9 @@ public class SacksSpiral : MonoBehaviour
 
         routesRoot = new GameObject("Routes");
         routesRoot.transform.SetParent(transform, false);
-        AddRoute("squares", SquareColor, k => k * k, 1f, 36f, "n = k²   the squares: never prime");
-        AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 35f, "n = k(k + 1)   neighbours multiplied: never prime");
-        AddRoute("euler", EulerColor, k => k * k + k + 41, 13f, 35f, "n = k² + k + 41   Euler: 40 primes in a row");
+        AddRoute("squares", SquareColor, k => k * k, 1f, 40f, "n = k²   the squares: never prime");
+        AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 39f, "n = k(k + 1)   neighbours multiplied: never prime");
+        AddRoute("euler", EulerColor, k => k * k + k + 41, 0f, 39f, "n = k² + k + 41   Euler: 40 primes in a row");
         routesRoot.SetActive(false);
         for (int r = 0; r < routes.Count; r++) StyleRoute(r, 1f, .14f, Factory.GlowIntensity);
 
@@ -270,7 +273,8 @@ public class SacksSpiral : MonoBehaviour
     static readonly Color CompositeLabel = new(.55f, .55f, .62f);
     static readonly Color UndecidedLabel = new(.4f, .4f, .46f);
     /// <summary>The dots of the number being copied (the farther one, m).</summary>
-    static readonly Color RowColor = new(.3f, .85f, 1f);
+    static readonly Color RowColor = new(.95f, .95f, 1f);
+    static readonly Color LandedColor = new(.5f, .5f, .56f);
     static Color MultiplierColor => Factory.Palette.Zero;
     static string Hex(Color c) => ColorUtility.ToHtmlStringRGB(c);
 
@@ -428,12 +432,13 @@ public class SacksSpiral : MonoBehaviour
     Vector3 Road(float n) => SpiralPos(n, 0f);
 
     /// <summary>A spot just outside number n on the flat spiral (radially outward), for its small tags.</summary>
-    Vector3 Outside(int n, float distance)
+    Vector3 Outside(int n, float distance) => Road(n) - RoadTangent(n) * distance + Vector3.back * .3f;
+
+    /// <summary>Direction along the spiral road at n (toward n + 1), in the spiral's plane.</summary>
+    static Vector3 RoadTangent(float n)
     {
-        Vector3 p = Road(n);
-        Vector3 radial = p - origin;
-        radial.z = 0f;
-        return p + radial.normalized * distance + Vector3.back * .3f;
+        float a = 2f * Mathf.PI * Mathf.Sqrt(Mathf.Max(n, .25f));
+        return new Vector3(-Mathf.Sin(a), Mathf.Cos(a), 0f);
     }
 
     static int SmallestPrimeFactor(int n)
@@ -740,6 +745,7 @@ public class SacksSpiral : MonoBehaviour
             {
                 d.transform.position = Vector3.Lerp(a, b, fall);
                 d.transform.localScale = Vector3.one * (d == final ? Mathf.Lerp(.4f, .55f, u) : Mathf.Lerp(.4f, .14f, Mathf.SmoothStep(0f, 1f, u)));
+                if (d != final) Factory.SetColor(d.GetComponent<Renderer>(), Color.Lerp(RowColor, LandedColor, u));
             }
 
             yield return null;
@@ -921,7 +927,9 @@ public class SacksSpiral : MonoBehaviour
 
         for (int i = 0; i < labels.Count; i++)
         {
-            labels[i].transform.position = Pos(i + 1) + Vector3.back * Mathf.Lerp(.4f, .75f, morph);
+            // on the spiral, beside the dot along the road: squares share a ray, so an offset along the ray would sit
+            // next to the following square and read as the wrong number
+            labels[i].transform.position = Pos(i + 1) + RoadTangent(i + 1) * (.8f * morph) + Vector3.back * Mathf.Lerp(.4f, .2f, morph);
             labels[i].transform.localScale = Vector3.one * Mathf.Lerp(1f, .62f, morph);
             factorLabels[i].transform.position = GridPos(i + 1) + Vector3.down * 1.0f;
         }
@@ -930,14 +938,16 @@ public class SacksSpiral : MonoBehaviour
         {
             (System.Func<float, float> fn, float k0, float k1) = routeFns[r];
             // sample at integer k only: the route is the polyline through the actual numbers n(k)
-            Vector3[] pts = new Vector3[routes[r].positionCount];
             int kStart = Mathf.CeilToInt(k0);
+            Vector3[] pts = new Vector3[Mathf.FloorToInt(k1) - kStart + 1];
             for (int i = 0; i < pts.Length; i++)
             {
                 pts[i] = SpiralPos(Mathf.Max(1f, fn(kStart + i)), bend) + Vector3.back * .15f;
             }
 
-            routes[r].SetPositions(pts);
+            int shown = routeReveal[r] < 0 ? pts.Length : Mathf.Clamp(routeReveal[r], 0, pts.Length);
+            routes[r].positionCount = shown;
+            if (shown > 0) routes[r].SetPositions(shown == pts.Length ? pts : pts[..shown]);
             routeLabels[r].transform.position = pts[^1] + Vector3.back * .6f + Vector3.up * 1.6f;
         }
 
@@ -1007,10 +1017,19 @@ public class SacksSpiral : MonoBehaviour
     /// <summary>Grid → spiral: the 30 numbers fly to their spiral places while the rest of the spiral fills in.</summary>
     public IEnumerator MorphToSpiral(float seconds)
     {
+        bool fresh = !gameObject.activeSelf && struck.Count == 0; // the chapter started on its own, without the sieve
         gameObject.SetActive(true);
         bool sieveStarted = sieveWorker != null || struck.Count > 0;
         CancelSieve();
-        if (sieveStarted) CompleteSieveColors();
+        if (sieveStarted || fresh) CompleteSieveColors();
+        if (fresh)
+        {
+            // start from the sieve's finished picture: 1 … 30 on the flat spiral, the rest still to come
+            morph = 1f;
+            bend = 0f;
+            reveal = 0f;
+            Layout();
+        }
         HideLattice();
         foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
         for (int i = 0; i < GridCount; i++) dots[i].SetActive(true);
@@ -1081,6 +1100,12 @@ public class SacksSpiral : MonoBehaviour
     static readonly string[] RouteNames = { "squares", "pronic", "euler" };
     static readonly Color[] RouteColors = { SquareColor, PronicColor, EulerColor };
     readonly bool[] routeVisible = { true, true, true };
+    readonly int[] routeReveal = { -1, -1, -1 }; // points of each route drawn so far (−1: all)
+
+    /// <summary>Where the number being written on a route is (the camera follows it); the centre before any.</summary>
+    public Vector3 RouteFocus { get; private set; }
+    /// <summary>Direction the route is heading at <see cref="RouteFocus"/>.</summary>
+    public Vector3 RouteHeading { get; private set; } = Vector3.right;
     Coroutine routeHighlight;
     GameObject routeNumbersRoot;
 
@@ -1117,6 +1142,8 @@ public class SacksSpiral : MonoBehaviour
         if (routeHighlight != null) StopCoroutine(routeHighlight);
         if (routeNumbersRoot != null) Destroy(routeNumbersRoot);
         int chosen = System.Array.IndexOf(RouteNames, name);
+        for (int r = 0; r < routeReveal.Length; r++) routeReveal[r] = -1;
+        RouteFocus = origin;
         for (int r = 0; r < routes.Count; r++)
         {
             bool on = chosen < 0 || r == chosen;
@@ -1143,24 +1170,37 @@ public class SacksSpiral : MonoBehaviour
     IEnumerator DropRouteNumbers(int route)
     {
         (System.Func<float, float> fn, float k0, float k1) = routeFns[route];
-        int kStart = route == 2 ? 0 : Mathf.CeilToInt(k0); // Euler's route starts at k = 0 (41), before its drawn line
+        int kStart = Mathf.CeilToInt(k0);
         Color c = RouteColors[route];
         Camera cam = Camera.main;
+        routeReveal[route] = 0;
+        Layout();
+        Vector3 previous = origin;
         for (int k = kStart; k <= Mathf.FloorToInt(k1); k++)
         {
             int n = Mathf.RoundToInt(fn(k));
             if (n < 1 || n > Count) continue;
+            // the route draws itself up to this number, and the camera follows the number being written
+            routeReveal[route] = k - kStart + 1;
+            Layout();
+            Vector3 here = SpiralPos(n, bend);
+            if ((here - previous).sqrMagnitude > 1e-4f) RouteHeading = (here - previous).normalized;
+            previous = here;
+            RouteFocus = here;
             GameObject d = dots[n - 1];
             d.SetActive(true);
             StartCoroutine(PulseScale(d.transform, RestSize(n), 2.6f, .9f));
             Vector3 at = SpiralPos(n, bend);
             Vector3 toCamera = cam != null ? (cam.transform.position - at).normalized : Vector3.back;
-            TextBox label = TextBoxLabel(n.ToString(), 55f, Faded(c, EdgeFade(n) * .8f));
+            TextBox label = TextBoxLabel(n.ToString(), 18f, Faded(c, EdgeFade(n) * .25f));
             label.transform.SetParent(routeNumbersRoot.transform, false);
             label.transform.position = at + toCamera * 1.2f;
             StartCoroutine(ShrinkLabel(label, 1f, .26f, 1f));
-            yield return new WaitForSeconds(.22f);
+            yield return new WaitForSeconds(.24f);
         }
+
+        routeReveal[route] = -1;
+        Layout();
     }
 
     static IEnumerator ShrinkLabel(TextBox label, float from, float to, float seconds)
@@ -2047,29 +2087,32 @@ public class SacksSpiral : MonoBehaviour
             curtainRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             // Below the bloom threshold on purpose: 160,000 samples make sub-pixel slivers whose coverage flickers as the
             // camera moves; at HDR intensity each flickering pixel bloomed into a sparkle.
-            Factory.SetIntensity(curtainRenderer, Factory.NoGlow);
+            Factory.SetIntensity(curtainRenderer, .82f);
         }
 
         curtainRenderer.enabled = true;
-        if (curtainVerts == null || curtainVerts.Length != samples * 2)
+        int columns = (samples + CurtainBucket - 1) / CurtainBucket;
+        if (curtainVerts == null || curtainVerts.Length != columns * 2)
         {
-            curtainVerts = new Vector3[samples * 2];
-            curtainColors = new Color[samples * 2];
+            curtainVerts = new Vector3[columns * 2];
+            curtainColors = new Color[columns * 2];
             Color top = Factory.Palette.Cosine, bottom = new(Factory.Palette.Cosine.r, Factory.Palette.Cosine.g, Factory.Palette.Cosine.b, .12f);
-            for (int i = 0; i < samples; i++)
+            for (int c = 0; c < columns; c++)
             {
-                // the wave fades out with the spiral's last turns
+                // the wave fades out with the Sacks spiral's last turns
+                int i = Mathf.Min(samples - 1, c * CurtainBucket + CurtainBucket / 2);
                 float fade = EdgeFade((float)System.Math.Exp(FullWaveLogN(i, samples, fullNMax)));
-                curtainColors[2 * i] = Faded(bottom, fade);
-                curtainColors[2 * i + 1] = Faded(top, fade);
+                curtainColors[2 * c] = Faded(bottom, fade);
+                curtainColors[2 * c + 1] = Faded(top, fade);
             }
-            int[] tris = new int[(samples - 1) * 6];
+
+            int[] tris = new int[(columns - 1) * 6];
             int q = 0;
-            for (int i = 0; i < samples - 1; i++)
+            for (int c = 0; c < columns - 1; c++)
             {
-                int a = 2 * i, b = a + 1, c = a + 2, d = a + 3;
-                tris[q++] = a; tris[q++] = c; tris[q++] = b;
-                tris[q++] = b; tris[q++] = c; tris[q++] = d;
+                int v0 = 2 * c, v1 = v0 + 1, v2 = v0 + 2, v3 = v0 + 3;
+                tris[q++] = v0; tris[q++] = v2; tris[q++] = v1;
+                tris[q++] = v1; tris[q++] = v2; tris[q++] = v3;
             }
 
             curtainMesh.Clear();
@@ -2078,6 +2121,13 @@ public class SacksSpiral : MonoBehaviour
             curtainMesh.triangles = tris;
         }
     }
+
+    /// <summary>
+    /// Samples per drawn column of the full master wave. The sum of 10,000 cosines changes sign from one sample to the next;
+    /// drawn sample by sample it became sub-pixel slivers whose coverage flickered as the camera moved (the sparkle).
+    /// Each column instead spans the lowest to the highest value in its bucket: the band an anti-aliased drawing would fill.
+    /// </summary>
+    const int CurtainBucket = 8;
 
     void UploadFullWave(double[] sums, int zeros)
     {
@@ -2116,10 +2166,20 @@ public class SacksSpiral : MonoBehaviour
         double max = 1e-9;
         for (int i = 0; i < fullSamples; i++) if (System.Math.Abs(sums[i]) > max) max = System.Math.Abs(sums[i]);
         float scale = (float)(FullWaveAmplitude / max);
-        for (int i = 0; i < fullSamples; i++)
+        int columns = curtainVerts.Length / 2;
+        for (int c = 0; c < columns; c++)
         {
-            curtainVerts[2 * i] = fullBase[i] + fullNormal[i] * .1f;
-            curtainVerts[2 * i + 1] = fullBase[i] + fullNormal[i] * ((float)sums[i] * scale + .15f);
+            int i0 = c * CurtainBucket, i1 = Mathf.Min(fullSamples, i0 + CurtainBucket);
+            double lo = 0, hi = 0;
+            for (int i = i0; i < i1; i++)
+            {
+                if (sums[i] < lo) lo = sums[i];
+                if (sums[i] > hi) hi = sums[i];
+            }
+
+            int mid = Mathf.Min(fullSamples - 1, i0 + CurtainBucket / 2);
+            curtainVerts[2 * c] = fullBase[mid] + fullNormal[mid] * ((float)lo * scale + .1f);
+            curtainVerts[2 * c + 1] = fullBase[mid] + fullNormal[mid] * ((float)hi * scale + .15f);
         }
 
         curtainMesh.vertices = curtainVerts;
@@ -2175,7 +2235,7 @@ public class SacksSpiral : MonoBehaviour
         MeshRenderer mr = root.AddComponent<MeshRenderer>();
         mr.sharedMaterial = Factory.mainMat;
         mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        Factory.SetIntensity(mr, Factory.NoGlow); // thin quads: no bloom, or they sparkle at a distance like the curtain
+        Factory.SetIntensity(mr, .8f); // thin quads: kept under the bloom knee, or they sparkle at a distance like the curtain
     }
 
     void LateUpdate()
@@ -2542,7 +2602,7 @@ public class SacksSpiral : MonoBehaviour
 
     /// <summary>The home view's practical stand-in for infinity: t = 1000 (about 650 zeros on the axis).</summary>
     public const float HomeTMax = 1000f;
-    const float FullNMax = 1300f;
+    public const float FullNMax = Count;
     const int FullSamples = 160000;
     const float GrowStep = 0.05f;
     const int TrailChunk = 1024;
@@ -2662,12 +2722,12 @@ public class SacksSpiral : MonoBehaviour
             growAxis = Factory.NewLine("growing axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
             growAxis.transform.SetParent(growRoot.transform, false);
             growAxis.positionCount = 2;
-            growChain = Factory.NewLine("chain at the tip", .05f, Color.white, Factory.SoftGlowIntensity);
+            growChain = Factory.NewLine("chain at the tip", .03f, Color.white, Factory.NoGlow);
             growChain.transform.SetParent(growRoot.transform, false);
             Gradient chainColors = new();
             chainColors.SetKeys(
                 new[] { new GradientColorKey(LimitCurve.ChainColor(0f), 0f), new GradientColorKey(LimitCurve.ChainColor(1f), 1f) },
-                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+                new[] { new GradientAlphaKey(.55f, 0f), new GradientAlphaKey(.8f, 1f) });
             growChain.colorGradient = chainColors;
             growChainTail = Factory.NewLine("chain tail", .06f, Factory.Palette.Tail, Factory.GlowIntensity);
             growChainTail.transform.SetParent(growRoot.transform, false);

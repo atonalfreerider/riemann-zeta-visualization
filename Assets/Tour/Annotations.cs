@@ -66,6 +66,19 @@ public class Annotations : MonoBehaviour
     // joint angles
     GameObject anglesRoot;
     readonly List<LineRenderer> angleArcs = new();
+    readonly List<LineRenderer> legExtensions = new();
+    const int AngleCount = 20, AngleLabelCount = 8;
+    Vector3[] angleSpiralBuffer = new Vector3[512];
+
+    /// <summary>Alternating opaque and clear stretches (a gradient in fixed mode): a dotted line in one LineRenderer.</summary>
+    static Gradient Dotted(Color c)
+    {
+        Gradient g = new() { mode = GradientMode.Fixed };
+        GradientAlphaKey[] alpha = new GradientAlphaKey[8];
+        for (int k = 0; k < 8; k++) alpha[k] = new GradientAlphaKey(k % 2 == 0 ? .95f : 0f, (k + 1) / 8f);
+        g.SetKeys(new[] { new GradientColorKey(c, 0f), new GradientColorKey(c, 1f) }, alpha);
+        return g;
+    }
     readonly List<TextBox> angleLabels = new();
     TextBox angleFormula;
     bool showAngles;
@@ -459,13 +472,22 @@ public class Annotations : MonoBehaviour
         // ---- joint angle arcs ------------------------------------------------------------------
         anglesRoot = new GameObject("JointAngles");
         anglesRoot.transform.SetParent(transform, false);
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < AngleCount; i++)
         {
             LineRenderer arc = Factory.NewLine("arc", .025f, new Color(1f, .5f, .9f), Factory.GlowIntensity);
             arc.transform.SetParent(anglesRoot.transform, false);
+            arc.numCornerVertices = 1;
             angleArcs.Add(arc);
+            // the previous leg carried on past the joint, dotted: the purple turn is measured from it to the next leg
+            LineRenderer leg = Factory.NewLine("leg extension", .014f, Color.white, Factory.NoGlow);
+            leg.transform.SetParent(anglesRoot.transform, false);
+            leg.positionCount = 2;
+            leg.textureMode = LineTextureMode.Stretch;
+            leg.colorGradient = Dotted(new Color(.85f, .85f, .95f));
+            legExtensions.Add(leg);
             TextBox l = Label(anglesRoot.transform, "", Vector3.zero, 0.85f, new Color(1f, .6f, .95f), TextAlignmentOptions.Center);
             l.gameObject.AddComponent<Billboard>();
+            l.gameObject.SetActive(false);
             angleLabels.Add(l);
         }
 
@@ -929,7 +951,17 @@ public class Annotations : MonoBehaviour
         showAngles = on;
         anglesRoot.SetActive(on);
         if (on) UpdateAngles();
+        else HideAngleStackLater();
     }
+
+    // "angles:off" after the stack has been shown also clears the stack (the angles are never drawn again)
+    void HideAngleStackLater()
+    {
+        if (angleStackRoot != null && !stackJustMade) HideAngleStack();
+        stackJustMade = false;
+    }
+
+    bool stackJustMade;
 
     void UpdateAngles()
     {
@@ -940,30 +972,40 @@ public class Annotations : MonoBehaviour
         {
             bool active = i < count;
             angleArcs[i].enabled = active;
-            angleLabels[i].gameObject.SetActive(active);
+            legExtensions[i].enabled = active;
+            angleLabels[i].gameObject.SetActive(active && i < AngleLabelCount);
             if (!active) continue;
-            // arc at joint i+1 between the incoming arrow (i → i+1) and the outgoing arrow (i+1 → i+2)
+            // the joint between arrow n − 1 (incoming) and arrow n (outgoing)
             Vector3 j = joints[i + 1];
             Vector3 a = joints[i + 1] - joints[i];
             Vector3 b = joints[i + 2] - joints[i + 1];
-            if (a.sqrMagnitude < 1e-6f || b.sqrMagnitude < 1e-6f) { angleArcs[i].enabled = false; continue; }
+            if (a.sqrMagnitude < 1e-6f || b.sqrMagnitude < 1e-6f) { angleArcs[i].enabled = false; legExtensions[i].enabled = false; continue; }
             float r = Mathf.Clamp(Mathf.Min(a.magnitude, b.magnitude) * .45f, .05f, .3f);
-            float a0 = Mathf.Atan2(a.z, a.x), a1 = Mathf.Atan2(b.z, b.x);
-            float delta = Mathf.DeltaAngle(a0 * Mathf.Rad2Deg, a1 * Mathf.Rad2Deg) * Mathf.Deg2Rad;
-            const int segs = 12;
+            float a0 = Mathf.Atan2(a.z, a.x);
+            int n = i + 2;
+            // the whole turn t·log(n / (n−1)), not folded into ±180°: as the dial climbs it keeps winding round the joint,
+            // spiralling outward a little each full turn (the arrows turn clockwise: arg n^−s = −t·log n)
+            float turn = (float)(t * System.Math.Log((double)n / (n - 1)));
+            int segs = Mathf.Clamp(Mathf.CeilToInt(Mathf.Abs(turn) / (2f * Mathf.PI) * 48f), 8, angleSpiralBuffer.Length - 1);
             for (int k = 0; k <= segs; k++)
             {
-                float ang = a0 + delta * k / segs;
-                arcBuffer[k] = j + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * r + Vector3.up * .02f;
+                float u = k / (float)segs;
+                float ang = a0 - turn * u;
+                float rr = r * (1f + .22f * turn * u / (2f * Mathf.PI));
+                angleSpiralBuffer[k] = j + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * rr + Vector3.up * .02f;
             }
 
-            angleArcs[i].positionCount = arcBuffer.Length;
-            angleArcs[i].SetPositions(arcBuffer);
-            int n = i + 2; // the outgoing arrow is arrow n
-            double turn = t * System.Math.Log((double)n / (n - 1)) * 180 / System.Math.PI;
-            if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"<color=#C8A0FF>t</color>·{System.Math.Log((double)n / (n - 1)):0.00} = {turn:0}°";
-            float mid = a0 + delta * .5f;
-            angleLabels[i].transform.position = j + new Vector3(Mathf.Cos(mid), 0, Mathf.Sin(mid)) * (r + .22f);
+            angleArcs[i].positionCount = segs + 1;
+            angleArcs[i].SetPositions(angleSpiralBuffer);
+            legExtensions[i].SetPosition(0, j + Vector3.up * .015f);
+            legExtensions[i].SetPosition(1, j + a.normalized * (r * 1.9f) + Vector3.up * .015f);
+            if (i < AngleLabelCount)
+            {
+                double degrees = turn * 180 / System.Math.PI;
+                if (Time.time >= nextReadoutTime) angleLabels[i].Text = $"<color=#C8A0FF>t</color>·{System.Math.Log((double)n / (n - 1)):0.00} = {degrees:0}°";
+                float mid = a0 - Mathf.Min(Mathf.Abs(turn), Mathf.PI) * .5f * Mathf.Sign(turn);
+                angleLabels[i].transform.position = j + new Vector3(Mathf.Cos(mid), 0, Mathf.Sin(mid)) * (r * (1f + .22f * Mathf.Abs(turn) / (2f * Mathf.PI)) + .22f);
+            }
         }
 
         if (Time.time >= nextReadoutTime)
@@ -972,6 +1014,81 @@ public class Annotations : MonoBehaviour
             if (text != lastAngleText) { lastAngleText = text; angleFormula.Text = text; }
         }
         angleFormula.transform.position = new Vector3(-3.7f, (float)t * Graph.yScale + .05f, 3.3f);
+    }
+
+    // ---- the first twenty turns stacked end to end: what they add up to --------------------------------------
+    GameObject angleStackRoot;
+    public Vector3 AngleStackCentre { get; private set; }
+
+    /// <summary>
+    /// At the first collision: the turns at joints 2 … 21 leave their joints and are laid end to end as one spiral beside the
+    /// chain, each in its own colour, with their sum. The sum telescopes: t·(log 2/1 + log 3/2 + … + log 21/20) = t·log 21.
+    /// The joint angles are not drawn again after this.
+    /// </summary>
+    public void StackAngles(float seconds)
+    {
+        if (angleStackRoot != null) Destroy(angleStackRoot);
+        angleStackRoot = null;
+        ShowAngles(false);
+        angleStackRoot = new GameObject("AngleStack");
+        stackJustMade = true;
+        angleStackRoot.transform.SetParent(transform, false);
+        StartCoroutine(StackAnglesRoutine(seconds));
+    }
+
+    public void HideAngleStack()
+    {
+        if (angleStackRoot != null) Destroy(angleStackRoot);
+        angleStackRoot = null;
+    }
+
+    IEnumerator StackAnglesRoutine(float seconds)
+    {
+        double t = main.Limit.LastT;
+        float y = (float)t * Graph.yScale;
+        Camera cam = Camera.main;
+        bool tall = cam != null && cam.aspect < 1f;
+        // beside the chain in a wide frame, below it in a tall one (the top-down shot has +z as screen-up)
+        AngleStackCentre = tall ? new Vector3(.2f, y, -2.3f) : new Vector3(-3.1f, y, .1f);
+        Vector3 c = AngleStackCentre + Vector3.up * .02f;
+        float per = seconds * .75f / AngleCount;
+        float cumulative = 0f;
+        for (int i = 0; i < AngleCount; i++)
+        {
+            int n = i + 2;
+            float turn = (float)(t * System.Math.Log((double)n / (n - 1)));
+            Color col = Color.HSVToRGB(Mathf.Repeat(.78f - i * .045f, 1f), .55f, 1f);
+            LineRenderer seg = Factory.NewLine("turn " + n, .035f, col, Factory.GlowIntensity);
+            seg.transform.SetParent(angleStackRoot.transform, false);
+            int segs = Mathf.Clamp(Mathf.CeilToInt(turn / (2f * Mathf.PI) * 64f), 6, 256);
+            Vector3[] pts = new Vector3[segs + 1];
+            for (int k = 0; k <= segs; k++)
+            {
+                float ang = Mathf.PI * .5f - (cumulative + turn * k / segs);
+                float rr = .32f + .075f * (cumulative + turn * k / segs) / (2f * Mathf.PI);
+                pts[k] = c + new Vector3(Mathf.Cos(ang), 0, Mathf.Sin(ang)) * rr;
+            }
+
+            // the segment draws itself on, in order
+            float e = 0f;
+            while (e < per)
+            {
+                e += Time.deltaTime;
+                int shown = Mathf.Clamp(Mathf.CeilToInt(e / per * segs) + 1, 2, segs + 1);
+                seg.positionCount = shown;
+                for (int k = 0; k < shown; k++) seg.SetPosition(k, pts[k]);
+                yield return null;
+            }
+
+            seg.positionCount = pts.Length;
+            seg.SetPositions(pts);
+            cumulative += turn;
+        }
+
+        double total = t * System.Math.Log(AngleCount + 1);
+        TextBox sum = Label(angleStackRoot.transform, $"the first {AngleCount} turns, end to end\n<color=#C8A0FF>t</color> · log 21 = {total:0.0} radians = {total / (2 * System.Math.PI):0.0} full turns",
+            c + (tall ? new Vector3(0, 0, -1.25f) : new Vector3(0, 0, -1.15f)), .8f, new Color(1f, .75f, .97f), TextAlignmentOptions.Center);
+        sum.gameObject.AddComponent<Billboard>();
     }
 
     // ---- logarithm sequence ---------------------------------------------------------------------------
@@ -1674,6 +1791,7 @@ public class Annotations : MonoBehaviour
     public void HideAll()
     {
         Lab.Hide();
+        HideAngleStack();
         ShowMiss(false);
         ShowTip(false);
         ShowCenter(false);

@@ -105,6 +105,7 @@ public class OrbitCamera : MonoBehaviour
         if (freeFly != null && freeFly.enabled) freeFly.enabled = false;
         float dt = Time.unscaledDeltaTime;
         HandleInput(dt);
+        dt = Time.deltaTime; // the automatic moves run on game time, so recordings and pauses see them right
 
         float h = sacks.GrowthHeight;
         float target = FrameDistance(h);

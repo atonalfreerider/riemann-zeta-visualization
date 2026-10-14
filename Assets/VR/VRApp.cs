@@ -109,6 +109,7 @@ public partial class VRApp : MonoBehaviour
         PlaceDock(true);
         Dock.SetOpen(true);
         Ready = true;
+        LaunchTitle.Play(); // the launch card, floating in front of the user
 
         // start with something alive in front of the user: the chain of arrows, turning (unless the command line started the tour)
         if (!tour.Running) ApplyView("explore"); // default: standing on the saddle, the zeta trail rising from its centre

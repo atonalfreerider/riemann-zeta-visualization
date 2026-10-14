@@ -150,8 +150,25 @@ public static class VRBuildSetup
 
         // Quest 2 only
         MetaQuestFeature quest = openXR.GetFeature<MetaQuestFeature>();
-        if (quest != null) EditorUtility.SetDirty(quest);
+        if (quest != null)
+        {
+            // the headset's own splash while the app loads: a still of the launch card (Assets/VR/Splash, rendered by
+            // ReviewRenderTest with ZETA_REVIEW=splash)
+            Texture2D splash = AssetDatabase.LoadAssetAtPath<Texture2D>(SplashPath);
+            SerializedObject so = new(quest);
+            SerializedProperty prop = so.FindProperty("systemSplashScreen");
+            if (prop != null && splash != null)
+            {
+                prop.objectReferenceValue = splash;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+            else if (splash == null) Debug.LogWarning($"VRBuildSetup: no splash image at {SplashPath}");
+
+            EditorUtility.SetDirty(quest);
+        }
     }
+
+    public const string SplashPath = "Assets/VR/Splash/zeta-splash.png";
 
     static void Disable<T>(OpenXRSettings settings) where T : UnityEngine.XR.OpenXR.Features.OpenXRFeature
     {

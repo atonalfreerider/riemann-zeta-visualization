@@ -62,8 +62,7 @@ public class StaircaseLab : MonoBehaviour
 
     public void Hide()
     {
-        if (routine != null) StopCoroutine(routine);
-        routine = null;
+        Stop();
         if (termsRoot != null) termsRoot.SetActive(false);
         if (wobbleRoot != null) wobbleRoot.SetActive(false);
         Board(null);
@@ -93,6 +92,8 @@ public class StaircaseLab : MonoBehaviour
         label.transform.position = position;
         label.Alignment = alignment;
         label.Color = color;
+        label.TextField.rectTransform.sizeDelta = new Vector2(400f, label.TextField.rectTransform.sizeDelta.y);
+        label.TextField.textWrappingMode = TextWrappingModes.NoWrap;
         return label;
     }
 
@@ -207,6 +208,7 @@ public class StaircaseLab : MonoBehaviour
         EnsureTerms();
         if (wobbleRoot != null) wobbleRoot.SetActive(false);
         termsRoot.SetActive(true);
+        Stop();
         wavesAdded = 0;
         constantAdded = trivialAdded = false;
         for (int i = 0; i < TermsSamples; i++) sum[i] = tx[i];
@@ -217,10 +219,26 @@ public class StaircaseLab : MonoBehaviour
         Run(DrawIn(seconds));
     }
 
+    // steps run one after another, so one narration line can add several pieces in order
+    readonly Queue<IEnumerator> queue = new();
+
     void Run(IEnumerator r)
     {
+        queue.Enqueue(r);
+        if (routine == null) routine = StartCoroutine(Runner());
+    }
+
+    IEnumerator Runner()
+    {
+        while (queue.Count > 0) yield return queue.Dequeue();
+        routine = null;
+    }
+
+    void Stop()
+    {
         if (routine != null) StopCoroutine(routine);
-        routine = StartCoroutine(r);
+        routine = null;
+        queue.Clear();
     }
 
     IEnumerator DrawIn(float seconds)
@@ -469,7 +487,7 @@ public class StaircaseLab : MonoBehaviour
         EnsureWobble(Mathf.Clamp(zeros, 1, main.zetaZeroValues.Length));
         if (termsRoot != null) termsRoot.SetActive(false);
         wobbleRoot.SetActive(true);
-        if (routine != null) StopCoroutine(routine);
+        Stop();
         beta = startBeta;
         shownBeta = -1f;
         Board(null);
@@ -478,6 +496,7 @@ public class StaircaseLab : MonoBehaviour
     public void SweepBeta(float from, float to, float seconds, bool pingPong)
     {
         if (wobbleRoot == null) BeginWobble(40, from);
+        Stop();
         Run(Sweep(from, to, seconds, pingPong));
     }
 

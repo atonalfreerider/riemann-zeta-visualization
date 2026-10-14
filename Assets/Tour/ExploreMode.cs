@@ -46,7 +46,7 @@ public class ExploreMode : MonoBehaviour
         sacks.ShowZetaOnly();
         if (!sacks.FullWaveRunning && sacks.FullWaveZerosShown == 0)
         {
-            sacks.StartFullMasterWave(main.zetaZeroValues.Length, 160000, 1300f, 0f);
+            sacks.StartFullMasterWave(main.zetaZeroValues.Length, 160000, SacksSpiral.FullNMax, 0f);
         }
     }
 
