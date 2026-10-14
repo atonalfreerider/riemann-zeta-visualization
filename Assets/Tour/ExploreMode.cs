@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 /// Free exploration of the final picture: the Sacks spiral on the saddle, the zeta trail rising from its centre,
 /// and the master wave with every zero in the table riding the spiral.
 ///
-/// Desktop: WASD / QE move, right-drag look, scroll changes speed, E exits. Starts above the saddle looking down.
+/// Desktop: WASD / QE move, right-drag look, scroll changes speed, X flat / saddle; leave from the side menu. Starts above the saddle looking down.
 /// VR: hands over to the VR layer's "Explore" view (VRMenus), which stands the user at the saddle centre with the
 ///     saddle as the floor and the trail rising overhead.
 /// </summary>
@@ -39,6 +39,7 @@ public class ExploreMode : MonoBehaviour
         main.SetPrimeCurveVisible(false); main.SetCosineVisible(false); main.SetEquationsVisible(false);
         main.SetZetaCurveVisible(false); main.SetGridVisible(false); main.SetZeroMarkersVisible(false);
         main.Limit.SetSpiralVisible(false);
+        if (director.Home != null) director.Home.Exit();
         director.Annotations.HideAll();
         SacksSpiral sacks = director.Annotations.Sacks;
         sacks.ShowFull();
@@ -73,7 +74,7 @@ public class ExploreMode : MonoBehaviour
         cam.transform.rotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
         cam.fieldOfView = 55f;
         sacks.FullWaveAmplitude = 2.4f;
-        director.Captions.SetHint("EXPLORE   WASD / QE move   right-drag look   scroll speed   X flat / saddle   E exit");
+        director.Captions.SetHint("");
     }
 
     public void Exit()
@@ -84,7 +85,7 @@ public class ExploreMode : MonoBehaviour
         cam.transform.rotation = savedCamRot;
         manual.enabled = true;
         manual.Speed = 10f;
-        director.Captions.SetHint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait     E  explore");
+        director.Captions.SetHint("");
     }
 
     void Update()
@@ -103,6 +104,5 @@ public class ExploreMode : MonoBehaviour
         float d = Vector3.Distance(cam.transform.position, sacks.Center);
         sacks.FullWaveAmplitude = Mathf.Clamp(d * 0.17f, 1.5f, 14f);
         if (k != null && k.xKey.wasPressedThisFrame) sacks.SetFlat(!sacks.Flat);
-        if (k != null && k.eKey.wasPressedThisFrame) Exit();
     }
 }

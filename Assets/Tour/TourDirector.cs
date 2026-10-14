@@ -10,7 +10,7 @@ using UnityEngine.InputSystem;
 /// For each line: moves the camera to its cue, applies its actions to the visualization,
 /// plays the narration clip (if generated) and runs the karaoke captions off the tour clock.
 ///
-/// Keys:  T start/stop tour · N skip to next line · F9 start/stop recording · P toggle portrait
+/// Keys:  T start/stop tour · N skip to next line · F9 start/stop recording · P toggle portrait · M side menu
 /// </summary>
 public class TourDirector : MonoBehaviour
 {
@@ -24,6 +24,7 @@ public class TourDirector : MonoBehaviour
     public string StoryboardDirectory = "";
     /// <summary>Where full recordings go (empty = Recordings/&lt;timestamp&gt; next to the project).</summary>
     public string RecordDirectory = "";
+    /// <summary>9:16 framing (phones, Shorts) instead of 16:9. Defaults to the shape of the screen.</summary>
     public bool Portrait = true;
     public string StartChapter = "";
     /// <summary>Stop after this chapter id (empty = play to the end).</summary>
@@ -39,6 +40,7 @@ public class TourDirector : MonoBehaviour
     public CaptionDisplay Captions { get; private set; }
     public FrameRecorder Recorder { get; private set; }
     public ExploreMode Explore { get; private set; }
+    public HomeView Home { get; private set; }
 
     /// <summary>(line id, tour clock seconds, recorder frame) for every narration clip started — used to mux audio.</summary>
     public readonly List<(string id, float time, int frame)> AudioTimeline = new();
@@ -68,9 +70,9 @@ public class TourDirector : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        // a monitor stays landscape, a phone held upright is portrait (the command line and VR can still override)
+        Portrait = Screen.height > Screen.width;
     }
-
-    void Hint(string text) => Captions.SetHint(VRMode.Enabled ? "" : text);
 
     void Start()
     {
@@ -83,18 +85,55 @@ public class TourDirector : MonoBehaviour
         Captions = CaptionDisplay.Create(cam);
         Recorder = FrameRecorder.Create(cam);
         Explore = ExploreMode.Create(this);
-        if (!Portrait && !VRMode.Enabled && Recorder.Width < Recorder.Height) (Recorder.Width, Recorder.Height) = (Recorder.Height, Recorder.Width); // -landscape records 1920x1080
+        Home = HomeView.Create(this);
+        SetFormat(Portrait);
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
 
         script = TourScriptLoader.Load();
-        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        if (!VRMode.Enabled) SideMenu.Create(this);
 
         if (AutoStart)
         {
             StartTour();
         }
+        else if (!VRMode.Enabled)
+        {
+            // the first thing on screen: the saddle, slowly orbiting, with the zeta trail growing out of its centre
+            Home.Enter();
+        }
+    }
+
+    /// <summary>16:9 or 9:16: the preview framing, the caption layout and the recording size follow it.</summary>
+    public void SetFormat(bool portrait)
+    {
+        Portrait = portrait;
+        if (Rig != null) Rig.Portrait = portrait;
+        if (Recorder != null && !Recorder.IsOffscreen && !VRMode.Enabled)
+        {
+            Recorder.Width = portrait ? 1080 : 1920;
+            Recorder.Height = portrait ? 1920 : 1080;
+        }
+
+        if (Captions != null) Captions.SetLayout(!portrait);
+    }
+
+    /// <summary>Record the tour from a chapter (the whole tour when <paramref name="chapterId"/> is empty) in the given format.</summary>
+    public void RecordTour(string chapterId, bool continueOn, bool portrait)
+    {
+        if (Recorder.IsRecording) StopRecording();
+        if (Running)
+        {
+            jumping = true;
+            StopTour();
+            jumping = false;
+        }
+
+        SetFormat(portrait);
+        RecordOnStart = true;
+        if (string.IsNullOrEmpty(chapterId)) chapterId = Chapters.Length > 0 ? Chapters[0].id : "";
+        GoToChapter(chapterId, continueOn);
     }
 
     void Update()
@@ -119,21 +158,15 @@ public class TourDirector : MonoBehaviour
             else StartRecording();
         }
 
-        if (keyboard.pKey.wasPressedThisFrame)
+        if (keyboard.pKey.wasPressedThisFrame && !Recorder.IsOffscreen)
         {
-            Portrait = !Portrait;
-            Rig.Portrait = Portrait;
-        }
-
-        if (keyboard.eKey.wasPressedThisFrame && !Explore.Active)
-        {
-            Explore.Enter();
+            SetFormat(!Portrait);
         }
 
         if (keyboard.fKey.wasPressedThisFrame)
         {
             Captions.ShowFps = !Captions.ShowFps;
-            if (!Captions.ShowFps) Hint(Running ? "" : "T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait     F  fps");
+            if (!Captions.ShowFps) Captions.SetHint("");
         }
     }
 
@@ -148,9 +181,11 @@ public class TourDirector : MonoBehaviour
         AudioTimeline.Clear();
         Recorder.ChapterMarks.Clear();
         tourStartTime = Time.time;
-        Hint("");
-        // captions follow the shape of the recording (the editor preview keeps the tall layout)
-        if (RecordOnStart || Storyboard || Recorder.IsOffscreen) Captions.SetLayout(Recorder.Width > Recorder.Height);
+        exploreAfterTour = false;
+        if (Home != null) Home.Exit();
+        if (Explore != null && Explore.Active) Explore.Exit();
+        // captions follow the shape of the recording, or of the chosen format
+        Captions.SetLayout(RecordOnStart || Storyboard || Recorder.IsOffscreen ? Recorder.Width > Recorder.Height : !Portrait);
 
         if (Storyboard)
         {
@@ -165,6 +200,8 @@ public class TourDirector : MonoBehaviour
             StartRecording();
         }
 
+        RecordOnStart = false; // one recording per request; the next plain start just plays
+
         tourRoutine = StartCoroutine(RunTour());
     }
 
@@ -177,13 +214,16 @@ public class TourDirector : MonoBehaviour
         tourRoutine = null;
         audioSource.Stop();
         Captions.Clear();
-        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
         Rig.Release();
         if (Recorder.IsRecording) StopRecording();
         CurrentChapterId = "";
         CurrentChapterIndex = -1;
         CurrentLineId = "";
-        if (!jumping) TourEnded?.Invoke();
+        if (!jumping)
+        {
+            TourEnded?.Invoke();
+            if (!VRMode.Enabled && !Explore.Active) Home.Enter();
+        }
     }
 
     bool jumping;
@@ -413,6 +453,8 @@ public class TourDirector : MonoBehaviour
             CurrentChapterId = chapter.id;
             chapterStartedAt = Time.unscaledTime;
             ChapterStarted?.Invoke(c, chapter);
+            Captions.HideBoard();
+            Captions.ShowEquations("off");
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
             Recorder.ChapterMarks.Add((chapter.id, Recorder.FrameIndex));
@@ -429,16 +471,17 @@ public class TourDirector : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         Running = false;
         Rig.Release();
-        RestoreFreeRoam();
+        bool explore = exploreAfterTour && !Storyboard && !Recorder.IsOffscreen;
         if (Recorder.IsRecording) StopRecording();
         else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
         Main.SpeedMultiplier = 1d;
-        Hint("T  start tour     Space  play / pause     R  component spirals     F9  record     P  portrait");
+        if (VRMode.Enabled || explore) RestoreFreeRoam();
+        else Home.Enter();
         CurrentChapterId = "";
         CurrentChapterIndex = -1;
         CurrentLineId = "";
         TourEnded?.Invoke();
-        if (exploreAfterTour && !Storyboard && !Recorder.IsOffscreen)
+        if (explore)
         {
             exploreAfterTour = false;
             Explore.Enter();
@@ -475,6 +518,7 @@ public class TourDirector : MonoBehaviour
         Main.CosineScale = -1f;
         Main.SetCosineZeroLimit(-1);
         Main.SetTrailStyle(0.05f, Factory.SoftGlowIntensity, 0f);
+        Annotations.Sacks.StopGrowth();
         Annotations.HideAll();
     }
 
@@ -696,6 +740,22 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "saddle") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.SetFlat(false, Mathf.Max(2.5f, currentLineSeconds * 0.8f)); }
                         else if (arg == "flat") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.SetFlat(true, Mathf.Max(2f, currentLineSeconds * 0.6f)); }
                         else if (arg == "lattice") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f))); }
+                        else if (arg == "sievebegin")
+                        {
+                            // sacks:sievebegin[:seconds] — the grid breaks open onto the spiral, only the 2 stays lit
+                            float seconds = parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(3f, currentLineSeconds * 0.85f);
+                            if (Storyboard) seconds *= StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f);
+                            Annotations.Sacks.BeginSieve(seconds);
+                        }
+                        else if (arg == "sieveto")
+                        {
+                            // sacks:sieveto:N[:seconds] — make every composite up to N as p × m (p its smallest prime), revealing the skipped primes
+                            int upTo = int.Parse(parts[2], CultureInfo.InvariantCulture);
+                            float seconds = parts.Length > 3 ? float.Parse(parts[3], CultureInfo.InvariantCulture) : Mathf.Max(2f, currentLineSeconds * 0.92f);
+                            if (Storyboard) seconds *= StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f);
+                            Annotations.Sacks.QueueSieve(upTo, seconds);
+                        }
+                        else if (arg == "highlight") Annotations.Sacks.HighlightRoute(parts.Length > 2 ? parts[2].Trim().ToLowerInvariant() : "all");
                         else if (arg == "sieve")
                         {
                             float seconds = parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : Mathf.Max(8f, currentLineSeconds * 2f);
@@ -716,6 +776,15 @@ public class TourDirector : MonoBehaviour
                         break;
                     case "explore":
                         exploreAfterTour = arg != "off";
+                        break;
+                    case "equations":
+                        // equations:on · equations:off · equations:squares|pronic|euler (highlight one route and its equation)
+                        Captions.ShowEquations(arg);
+                        if (arg != "off") Annotations.Sacks.HighlightRoute(arg == "on" ? "all" : arg);
+                        break;
+                    case "home":
+                        // home:scene — the saddle with the zeta trail growing from its centre (content only, the camera is left alone)
+                        Home.PrepareScene();
                         break;
                     case "hypothesis":
                         if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));

@@ -22,12 +22,13 @@ The plain series does not converge on the critical line, so the spiral alone nev
 
 There are other tools built into this animation to help break down and visualize how these mysterious functions work.
 
-Keyboard Commands:  
-- WASD QE: navigation  
-- Spacebar: play/pause animation  
-- Escape: reset animation  
-- R key:  toggle additional limit curves  
-- T: start/stop the narrated guided tour (N: next line, F9: record 1080×1920, P: toggle 9:16)  
+The app opens on the Sacks spiral bent on its saddle, slowly orbiting, with the zeta trail growing out of its
+centre; every zero it passes sends its wave along the spiral into the master wave. A side menu tucked into the left
+edge (tab, **M** or **Tab**) picks a view (Home, Explore, the original Graph), the format (16:9 or 9:16), plays the
+tour or any chapter, and records the whole tour or a single chapter in either format.
+
+Keys: **M** menu · **T** start/stop the narrated tour · **N** next line · **F9** record · **P** switch 16:9 / 9:16 ·
+**F** frame rate. In the Graph and Explore views: WASD QE move, right-drag look, Space play/pause.
 
 ## The guided tour, chapter by chapter
 

@@ -1,7 +1,21 @@
 # The guided tour
 
-A narrated, chaptered camera fly-through of the visualization, laid out for vertical
-(9:16, 1080×1920) recording with karaoke-style captions.
+A narrated, chaptered camera fly-through of the visualization with karaoke-style captions, framed for
+16:9 (1920×1080, monitors) or 9:16 (1080×1920, phones and Shorts). The format follows the screen's shape and
+can be switched in the side menu.
+
+## Starting screen and side menu
+
+The app opens on the **home view**: the Sacks spiral bent on its saddle, slowly orbiting, with the zeta trail
+growing out of the saddle's centre from t = 0 (up the screen on desktop and phones, from the floor up in VR).
+Each zero the trail passes sends its cosine wave out along the spiral at the zero's height; the wave sinks onto
+the saddle and joins the master wave. At t = 140 the picture holds, then grows again.
+
+A panel tucks into the left edge (the tab, **M** or **Tab** opens and closes it):
+**View** Home · Explore · Graph (the original zeta / staircase graph) — **Format** 16:9 / 9:16 —
+**Tour** play the whole tour or any chapter — **Record** the whole tour, or one chapter with the ● on its row,
+in the chosen format. The panel is a screen overlay, so it never appears in recordings; while recording, the
+window shows the frame being recorded, letterboxed.
 
 ## Running it
 
@@ -10,17 +24,18 @@ A narrated, chaptered camera fly-through of the visualization, laid out for vert
 | Unity editor | menu **Zeta ▸ Play Tour** (or enter Play mode and press **T**) |
 | Editor, one chapter | **Zeta ▸ Play Tour from Chapter…** |
 | Editor, record | **Zeta ▸ Play Tour and Record 1080x1920** |
-| Player build | `./zeta-visualization -tour`, `-record`, `-chapter qrh`, `-landscape` |
+| Player build | `./zeta-visualization -tour`, `-record`, `-chapter qrh`, `-landscape` / `-portrait` |
 
-Keys in Play mode: **T** start/stop tour · **N** skip to the next line · **F9** start/stop recording ·
-**P** toggle the 9:16 pillarbox · **F** fps readout · Space / Esc / R / WASD as before.
+Keys in Play mode: **M** side menu · **T** start/stop tour · **N** skip to the next line · **F9** start/stop
+recording · **P** switch 16:9 / 9:16 · **F** fps readout.
 
-The tour pillarboxes the camera to 9:16 so the editor preview matches the recording.
+When the tour's format differs from the screen's shape (a 9:16 tour on a monitor, a 16:9 tour on an upright
+phone) the camera is pillarboxed or letterboxed so the preview matches the recording.
 **Zeta ▸ Game View – Portrait 1080x1920** adds and selects a matching Game view size.
 
 ## Recording
 
-`FrameRecorder` renders the camera into an offscreen 1080×1920 texture at a fixed 30 fps
+`FrameRecorder` renders the camera into an offscreen 1080×1920 or 1920×1080 texture at a fixed 30 fps
 (`Time.captureFramerate`), so the output is frame-accurate regardless of machine speed, and streams
 raw frames to `ffmpeg` (H.264, CRF 18). Without ffmpeg on PATH it writes a PNG sequence instead.
 
@@ -114,7 +129,12 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `sacks:lattice` / `sacks:squares` / `sacks:composites` | build the 2×/3×/5× multiplication lattice; pulse squares / composites on the spiral or saddle |
 | `logseq:on` / `logseq:off` | bar panel of the bend sequence log(n/(n−1)) with live degrees |
 | `delay:S:<action>` | run an action S seconds into the line (e.g. `delay:3:sacks:sieve:22`) so the narration can catch up |
-| `sacks:sieve[:seconds]` | break the grid open into spiral positions, then draw the 2×, 3×, 5× axes through their products, striking each one |
+| `sacks:sievebegin[:seconds]` | break the grid open onto the spiral; every prime glows, then only the 2 stays lit |
+| `sacks:sieveto:N[:seconds]` | make every composite up to N, in order, as p × m (p its smallest prime, nearer the centre; m the number copied, farther out): count m dots, p copies the row up a level at a time, the copies slide up the spiral and only the final dot lands on p × m. A spot the landing jumped over gets an open circle and becomes the next prime. Queued requests run one after another |
+| `sacks:sieve[:seconds]` | both of the above in one go, up to 30 |
+| `sacks:highlight:squares\|pronic\|euler\|all` | widen one route on the saddle and dim the others |
+| `equations:on` / `equations:squares\|pronic\|euler` / `equations:off` | on-screen legend of the saddle's routes (red n = k², blue n = k(k+1), green n = k² + k + 41), optionally highlighting one |
+| `home:scene` | the home view's content (saddle + growing trail and waves), without moving the camera (used by the VR Explore view) |
 | `landing:on` / `landing:off` | callout at the centre explaining why the chain closed at this t |
 | `hypothesis:on` / `hypothesis:off` | the closing guess on the saddle: the √n spiral road plus the rings picked out by the logarithm rule at t = 14.13 and 21.02 |
 | `pulse:<element>` | breathe the glow of an element for the line (`spiral` `tail` `zeros` `prime` `cosine` `trail` `strip` `band78` `band18` `gap` `numbers` `zeno` `wave` `dial` `center` `tip` `imaxis` `outaxes` `ghost` `primes` `sacks` `angles` `dialstrip` `primearrows` `chainfeet` `primepowers` `logseq` `floorgrid`) |
@@ -208,12 +228,12 @@ Press **F** for the in-game readout and use the Profiler with 'Deep Profile' off
 `python3 Tools/make_chapter_gifs.py Recordings/<run>` cuts one GIF per chapter from a recording using the
 chapter marks the recorder writes into `timeline.json` (`--seconds`, `--offset`, `--offsets hook=14,turn=58`).
 
-## Explore mode (after the tour, or press E)
+## Explore mode (after the tour, or from the side menu)
 
 The final picture, free to walk around: the Sacks spiral on the saddle, the zeta trail rising from its centre and
 the master wave with every zero in the table (10,000) riding the spiral, computed on a background thread.
 Desktop: WASD / QE move, right-drag look, scroll changes speed, **X** flattens the saddle to a plane and back
-(saddle is the default), **E** exits. The wave is displaced along the local surface normal, so it stands on the
+(saddle is the default); the side menu's **Home** leaves. The wave is displaced along the local surface normal, so it stands on the
 saddle in saddle mode and on the plane in flat mode. In VR the dock's Views page has an **Explore** view (you stand
-at the saddle's centre with the saddle as the floor and the trail overhead) and a **Flat** toggle.
+at the saddle's centre with the saddle as the floor and the trail growing from the floor up) and a **Flat** toggle.
 Actions: `hypothesis:full[:zeros]` dials every zero into the master wave; `explore:on` enters explore mode when the tour ends.

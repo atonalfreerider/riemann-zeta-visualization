@@ -7,40 +7,49 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *Building blocks with no pattern*
 
 **hook_01** — Prime numbers. Two, three, five, seven, eleven. They are the building blocks of every other number, yet they arrive with no pattern anyone can predict.
-  <sub>camera `sieve` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build delay:3:sacks:sieve:70`</sub>
+  <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build`</sub>
 
 **hook_02** — Break the grid open and let every number find its place on the spiral. The primes glow, then draw back to just the two; the number one is skipped. Two is our jumping-off point.
-  <sub>camera `sieve`</sub>
+  <sub>camera `sieve` · actions `sacks:sievebegin`</sub>
 
-**hook_02b** — Count one, two along the spiral. Now build a second row of two, one unit above the first. It slides along the spiral at that altitude to the next free spots and drops onto three and four. Four is a perfect square. Three was only passed over, never produced: a prime.
-  <sub>camera `sieve`</sub>
+**hook_02b** — Two times two: the same prime twice. Count two dots, one and two. The two nearer the centre is the multiplier, and it copies that row one level up. The copy slides up the spiral and drops, and only its final dot lands: on four, a perfect square. We jumped over three. Nothing made it, so an open circle marks the spot, and three is our next prime.
+  <sub>camera `sieve` · actions `sacks:sieveto:4`</sub>
 
-**hook_02c** — Count one, two, three. Stack a row of three above it, let it slide on and drop onto four, five, six. Six is our first composite that is not a square. Five was passed over: a prime.
-  <sub>camera `sieve`</sub>
+**hook_02c** — Two times three. The number farther out is the one that gets copied: count three dots, from one up to three. The two, nearer the centre, copies that row one level up. It slides up the spiral, and its last dot lands on six. We skipped five: an open circle, and a new prime.
+  <sub>camera `sieve` · actions `sacks:sieveto:6`</sub>
 
-**hook_02d** — Now three times three: a row of three, a second row one unit up, a third row two units up. They uncoil in turn, landing on four, five, six, then seven, eight, nine. Nine is a perfect square, and seven was passed over: a prime.
-  <sub>camera `sieve`</sub>
+**hook_02d** — Two times four lands on eight, and seven is skipped: a prime. Then three times three: a row of three, copied two levels up, so three rows. The last dot lands on nine, our second square.
+  <sub>camera `sieve` · actions `sacks:sieveto:9`</sub>
 
-**hook_03** — Then five times two, seven times two, five times three, five times five, seven times three. A new prime is multiplied, or an old one is squared, back and forth. Every composite is a stack of rows dropped onto the spiral, and every number the rows pass over without producing is a prime.
-  <sub>camera `sieve` · actions `pulse:primes`</sub>
+**hook_03** — Every new prime joins the multipliers, and every composite is made by its smallest prime. Two times five is ten, and eleven is skipped. Two times six is twelve, and thirteen is skipped. Then fourteen, fifteen and sixteen.
+  <sub>camera `sieve` · actions `sacks:sieveto:16`</sub>
+
+**hook_03b** — On to thirty. Seventeen, nineteen, twenty three and twenty nine are never landed on. Every composite is a stack of rows dropped onto the spiral, and every spot the rows jump over is a prime.
+  <sub>camera `sieve` · actions `sacks:sieveto:30`</sub>
 
 **hook_04** — What survives the sieve is the primes. Now fill in the whole spiral, each number a little farther out, one full turn per square, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
 **hook_05** — Bend that spiral over a saddle. The composites fill the valleys, the squares line up along one ridge, and the pattern leaps out: whole routes from the centre with no primes at all, and other routes crowded with them.
-  <sub>camera `sacks_saddle` · actions `sacks:saddle sacks:composites sacks:squares sacks:routes pulse:sacks`</sub>
+  <sub>camera `sacks_saddle` · actions `sacks:saddle sacks:composites sacks:squares sacks:routes equations:on pulse:sacks`</sub>
 
-**hook_06** — Along the squares, never a prime. Along Euler's route, forty primes in a row. Humans carried this search for twenty three centuries: Euclid, Euler, Riemann, Hardy.
-  <sub>camera `sacks_routes` · actions `pulse:sacks`</sub>
+**hook_06** — In red, the perfect squares: n equals k squared. One, four, nine, sixteen. One square ends every full turn of the spiral, so they line up along one ray, and a square is never prime.
+  <sub>camera `sacks_routes` · actions `equations:squares`</sub>
+
+**hook_06b** — In blue, n equals k times k plus one: two, six, twelve, twenty, thirty. Each is a number times its neighbour, so it is always even and never prime. Its square root sits almost exactly halfway between two whole numbers, so the blue line runs out on the opposite side of the spiral from the squares.
+  <sub>camera `sacks_routes` · actions `equations:pronic`</sub>
+
+**hook_06c** — In green, Euler's route: n equals k squared plus k plus forty one. It is the blue line moved out by forty one, and it gives forty primes in a row. Humans carried this search for twenty three centuries: Euclid, Euler, Riemann, Hardy.
+  <sub>camera `sacks_routes` · actions `equations:euler pulse:sacks`</sub>
 
 **hook_07** — Now we are in the age of agentic AI mathematical discovery. The last lock will be opened by humans and machines working together. This is the story of a square root, a dial, a spiral, and a staircase.
-  <sub>camera `sacks_routes` · actions `card:machine`</sub>
+  <sub>camera `sacks_routes` · actions `equations:on card:machine`</sub>
 
 ## 2. Zeno's Chain
 *and a gentler rule*
 
 **zeno_01** — Zeno's old puzzle. Step one: walk half way to the wall. Step two: half of what is left. Step three: half again. The footsteps keep their shape, only the scale shrinks, forever, and you never pass two.
-  <sub>camera `zeno_zoom` · actions `card:off sacks:hide primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
+  <sub>camera `zeno_zoom` · actions `equations:off card:off sacks:hide primes:off hide:spiral show:zeno zeno:reset zeno:build card:zeno`</sub>
 
 **zeno_02** — Lay the steps out as arrows: one, a half, a quarter, an eighth. The chain shrinks fast and stops dead at two.
   <sub>camera `zeno` · actions `pulse:zeno`</sub>
@@ -200,4 +209,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `master_top_pull` · actions `explore:on` · footnote: after the tour: WASD / QE move, right-drag look, E exit · VR: the Explore view on the dock</sub>
 
 ---
-1771 words ≈ 11.8 minutes of speech at 150 wpm, plus pauses and title cards.
+1924 words ≈ 12.8 minutes of speech at 150 wpm, plus pauses and title cards.

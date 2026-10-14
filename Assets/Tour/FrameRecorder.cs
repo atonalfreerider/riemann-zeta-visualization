@@ -12,7 +12,7 @@ using UnityEngine.Rendering;
 using Debug = UnityEngine.Debug;
 
 /// <summary>
-/// Deterministic portrait (1080×1920) recorder. Renders the camera into an offscreen texture at a fixed
+/// Deterministic recorder, portrait (1080×1920) or landscape (1920×1080). Renders the camera into an offscreen texture at a fixed
 /// capture framerate and streams raw frames to ffmpeg (H.264 mp4). If ffmpeg is not on PATH it falls back
 /// to a PNG sequence. Narration audio is muxed afterwards with Tools/mux_recording.py using timeline.json.
 /// </summary>
@@ -66,13 +66,58 @@ public class FrameRecorder : MonoBehaviour
         Time.captureFramerate = Fps;
         QualitySettings.vSyncCount = 0;
         IsOffscreen = true;
+        if (!Application.isBatchMode) ShowPreview(true);
         captureLoop = StartCoroutine(CaptureLoop());
+    }
+
+    // ---- on-screen preview while the camera renders offscreen: the frame, letterboxed, under the side menu ----
+    GameObject previewRoot;
+    UnityEngine.UI.RawImage previewImage;
+    UnityEngine.UI.AspectRatioFitter previewFitter;
+
+    void ShowPreview(bool on)
+    {
+        if (on && previewRoot == null)
+        {
+            previewRoot = new GameObject("RecordingPreview");
+            Canvas canvas = previewRoot.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 900; // above the world, below the side menu
+            UnityEngine.UI.Image black = new GameObject("Black").AddComponent<UnityEngine.UI.Image>();
+            black.transform.SetParent(previewRoot.transform, false);
+            black.color = Color.black;
+            black.raycastTarget = false;
+            Stretch(black.rectTransform);
+            previewImage = new GameObject("Frame").AddComponent<UnityEngine.UI.RawImage>();
+            previewImage.transform.SetParent(previewRoot.transform, false);
+            previewImage.raycastTarget = false;
+            Stretch(previewImage.rectTransform);
+            previewFitter = previewImage.gameObject.AddComponent<UnityEngine.UI.AspectRatioFitter>();
+            previewFitter.aspectMode = UnityEngine.UI.AspectRatioFitter.AspectMode.FitInParent;
+        }
+
+        if (previewRoot == null) return;
+        previewRoot.SetActive(on);
+        if (on)
+        {
+            previewImage.texture = target;
+            previewFitter.aspectRatio = (float)Width / Height;
+        }
+    }
+
+    static void Stretch(RectTransform r)
+    {
+        r.anchorMin = Vector2.zero;
+        r.anchorMax = Vector2.one;
+        r.offsetMin = Vector2.zero;
+        r.offsetMax = Vector2.zero;
     }
 
     public void EndOffscreen()
     {
         if (!IsOffscreen) return;
         IsOffscreen = false;
+        ShowPreview(false);
         if (captureLoop != null) StopCoroutine(captureLoop);
         AsyncGPUReadback.WaitAllRequests();
         cam.targetTexture = null;
@@ -218,12 +263,6 @@ public class FrameRecorder : MonoBehaviour
             if (batch) yield return null;
             else yield return endOfFrame;
             if (target == null) yield break;
-
-            if (!batch)
-            {
-                // show the portrait frame on screen as well (the camera is rendering offscreen)
-                Graphics.Blit(target, (RenderTexture)null);
-            }
 
             int index = FrameIndex++;
             if (IsRecording)

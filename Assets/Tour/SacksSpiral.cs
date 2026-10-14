@@ -34,10 +34,6 @@ public class SacksSpiral : MonoBehaviour
     readonly Vector3 latticeOrigin = new(-40f, 7.6f, 0f);
     const float LatticeCell = 1.5f, LatticeRow = 2.6f;
 
-    // sieve axes drawn in spiral space: from each prime p a glowing polyline through p×q
-    GameObject sieveRoot;
-    readonly List<LineRenderer> sieveAxes = new();
-    readonly List<TextBox> sieveLabels = new();
 
     float morph;   // 0 = grid, 1 = spiral
     float bend;    // 0 = flat, 1 = saddle
@@ -116,7 +112,7 @@ public class SacksSpiral : MonoBehaviour
         for (int n = 1; n <= Count; n++)
         {
             bool prime = IsPrime(n), square = IsSquare(n);
-            Color c = prime ? Factory.Palette.Zero : square ? new Color(1f, .55f, .2f) : new Color(.3f, .3f, .38f);
+            Color c = prime ? Factory.Palette.Zero : square ? SquareColor : new Color(.3f, .3f, .38f);
             GameObject dot = Factory.NewSphere("n " + n, prime ? .42f : .22f, c, prime ? Factory.GlowIntensity : Factory.NoGlow);
             dot.transform.SetParent(transform, false);
             dot.SetActive(n <= GridCount);
@@ -134,9 +130,9 @@ public class SacksSpiral : MonoBehaviour
 
         routesRoot = new GameObject("Routes");
         routesRoot.transform.SetParent(transform, false);
-        AddRoute("squares", new Color(1f, .55f, .2f), k => k * k, 1f, 36f, "k²  — the squares: never a prime");
-        AddRoute("pronic", new Color(.55f, .6f, 1f), k => k * (k + 1), 1f, 35f, "k(k+1)  — never a prime either");
-        AddRoute("euler", new Color(.35f, 1f, .55f), k => k * k + k + 41, 13f, 35f, "k² + k + 41  — Euler's route: 40 primes in a row");
+        AddRoute("squares", SquareColor, k => k * k, 1f, 36f, "n = k²   the squares: never prime");
+        AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 35f, "n = k(k + 1)   neighbours multiplied: never prime");
+        AddRoute("euler", EulerColor, k => k * k + k + 41, 13f, 35f, "n = k² + k + 41   Euler: 40 primes in a row");
         routesRoot.SetActive(false);
 
         caption = TextBoxLabel("", 2.4f, new Color(.85f, .85f, .95f));
@@ -169,7 +165,7 @@ public class SacksSpiral : MonoBehaviour
                 TextBox t = TextBox.Create($"{n}", square ? 3.4f : 2.8f);
                 t.transform.SetParent(cell.transform, false);
                 t.Alignment = TextAlignmentOptions.Center;
-                t.Color = square ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f);
+                t.Color = square ? SquareColor : new Color(.6f, .6f, .7f);
                 t.gameObject.AddComponent<Billboard>();
                 TextBox sub = TextBox.Create($"{p}·{m}", 1.4f);
                 sub.transform.SetParent(cell.transform, false);
@@ -177,7 +173,7 @@ public class SacksSpiral : MonoBehaviour
                 sub.transform.localPosition = Vector3.down * 1.05f;
                 sub.Color = new Color(.45f, .45f, .55f);
                 sub.gameObject.AddComponent<Billboard>();
-                LineRenderer link = Factory.NewLine("link", .035f, square ? new Color(1f, .55f, .2f) : new Color(.5f, .5f, .6f), Factory.SoftGlowIntensity);
+                LineRenderer link = Factory.NewLine("link", .035f, square ? SquareColor : new Color(.5f, .5f, .6f), Factory.SoftGlowIntensity);
                 link.transform.SetParent(cell.transform, false);
                 link.positionCount = 2;
                 link.enabled = false;
@@ -221,7 +217,7 @@ public class SacksSpiral : MonoBehaviour
 
             // strike the grid cell
             bool square = m == p;
-            labels[n - 1].Color = square ? new Color(1f, .55f, .2f) : new Color(.28f, .28f, .34f);
+            labels[n - 1].Color = square ? SquareColor : new Color(.28f, .28f, .34f);
             dots[n - 1].SetActive(square);
             if (square) StartCoroutine(Shrink(dots[n - 1].transform, 1.6f, .32f, .5f));
             StartCoroutine(FadeLink(link, .6f));
@@ -244,32 +240,84 @@ public class SacksSpiral : MonoBehaviour
 
     public void HideLattice() => latticeRoot.SetActive(false);
 
-    static readonly int[] SievePrimes = { 2, 3, 5 };
     static readonly Color[] SieveColors = { new(.35f, 1f, .55f), new(.55f, .6f, 1f), new(1f, .55f, .2f) };
     static Color PrimeColor(int p) => p == 2 ? SieveColors[0] : p == 3 ? SieveColors[1] : p == 5 ? SieveColors[2] : new Color(1f, .4f, .9f);
 
+    /// <summary>Perfect squares: red everywhere on the spiral and the saddle.</summary>
+    public static readonly Color SquareColor = new(1f, .28f, .22f);
+    static readonly Color CompositeColor = new(.6f, .6f, .7f);
+    static readonly Color CompositeLabel = new(.55f, .55f, .62f);
+    static readonly Color UndecidedLabel = new(.4f, .4f, .46f);
+    /// <summary>The dots of the number being copied (the farther one, m).</summary>
+    static readonly Color RowColor = new(.3f, .85f, 1f);
+    static Color MultiplierColor => Factory.Palette.Zero;
+    static string Hex(Color c) => ColorUtility.ToHtmlStringRGB(c);
+
+    // ---- the sieve on the spiral -------------------------------------------------------------------
+    // Every composite n is made as p × m: p is its smallest prime (the multiplier, nearer the centre) and m = n / p is
+    // the number that gets copied (farther out). A row of m dots is counted along the road from 1 to m, the prime p
+    // copies that row up one level at a time until there are p rows, the copies slide out along the road at their
+    // height, and only the final dot drops: it lands on p × m. Whatever the landing jumped over was never made by any
+    // multiplication: an open circle marks the spot, then a new prime is drawn there and joins the multipliers.
+    // Composites are made in increasing order, exactly like a sieve walking up the numbers.
+
     LineRenderer spiralPath;
-    GameObject stageRoot;
-    TextBox stageLabel;
+    GameObject sieveRoot;
+    readonly List<GameObject> sieveMarks = new();
     readonly List<GameObject> workDots = new();
     readonly HashSet<int> struck = new();
-    Coroutine sieveCoroutine;
+    readonly List<int> sievePrimes = new();
+    readonly Queue<(int upTo, float seconds)> sieveQueue = new();
+    int sieveFrontier = 2;
+    Coroutine sieveWorker;
 
-    /// <summary>Start the sieve as a tracked coroutine so a later phase can cancel it safely.</summary>
+    public bool SieveBusy => sieveWorker != null && (sieveQueue.Count > 0 || sieveStepRunning);
+    bool sieveStepRunning;
+
+    /// <summary>The whole sieve in one go (VR view, older scripts): break the grid open, then make every composite up to 30.</summary>
     public void StartSieve(float seconds)
+    {
+        BeginSieve(Mathf.Clamp(seconds * .15f, 2.5f, 6f));
+        QueueSieve(GridCount, seconds * .85f);
+    }
+
+    /// <summary>Break the grid open onto the spiral; all primes glow, then only 2 stays. Multiplications queue after it.</summary>
+    public void BeginSieve(float seconds)
     {
         CancelSieve();
         gameObject.SetActive(true);
-        sieveCoroutine = StartCoroutine(SieveRoutine(seconds));
+        sieveWorker = StartCoroutine(SieveWorker(seconds));
+    }
+
+    /// <summary>Make every composite up to <paramref name="upTo"/> across <paramref name="seconds"/> (runs after whatever is already queued).</summary>
+    public void QueueSieve(int upTo, float seconds)
+    {
+        if (sieveWorker == null) BeginSieve(2.5f);
+        sieveQueue.Enqueue((upTo, seconds));
     }
 
     void CancelSieve()
     {
-        if (sieveCoroutine != null) StopCoroutine(sieveCoroutine);
-        sieveCoroutine = null;
+        if (sieveWorker != null) StopCoroutine(sieveWorker);
+        sieveWorker = null;
+        sieveStepRunning = false;
+        sieveQueue.Clear();
         ClearWorkDots();
-        if (stageRoot != null) stageRoot.SetActive(false);
+        Board(null);
     }
+
+    static void Board(string text)
+    {
+        CaptionDisplay captions = TourDirector.Instance != null ? TourDirector.Instance.Captions : null;
+        if (captions == null) return;
+        if (string.IsNullOrEmpty(text)) captions.HideBoard();
+        else captions.ShowBoard(text);
+    }
+
+    string Tally() => "<size=60%><color=#9A9AA8>primes so far:</color>  <color=#" + Hex(MultiplierColor) + ">" + string.Join("  ", sievePrimes) + "</color></size>";
+
+    static string BoardText(string head, string detail, string tally) =>
+        head + (string.IsNullOrEmpty(detail) ? "" : "\n<size=58%>" + detail + "</size>") + (string.IsNullOrEmpty(tally) ? "" : "\n" + tally);
 
     /// <summary>The thin spiral path through continuous n (so the dots have a road to count along).</summary>
     void EnsureSpiralPath()
@@ -290,6 +338,19 @@ public class SacksSpiral : MonoBehaviour
         spiralPath.enabled = false;
     }
 
+    void EnsureSieveRoot()
+    {
+        if (sieveRoot != null) return;
+        sieveRoot = new GameObject("SieveMarks");
+        sieveRoot.transform.SetParent(transform, false);
+    }
+
+    void ClearSieveMarks()
+    {
+        foreach (GameObject g in sieveMarks) if (g != null) Destroy(g);
+        sieveMarks.Clear();
+    }
+
     GameObject MakeDot(Color c, float size)
     {
         GameObject d = Factory.NewSphere("work dot", size, c, Factory.GlowIntensity);
@@ -300,288 +361,400 @@ public class SacksSpiral : MonoBehaviour
 
     void ClearWorkDots()
     {
-        foreach (GameObject d in workDots) Destroy(d);
+        foreach (GameObject d in workDots) if (d != null) Destroy(d);
         workDots.Clear();
     }
 
-    /// <summary>Fade a number's dot and label in or out.</summary>
+    /// <summary>Fade a number's dot in or out (its label follows).</summary>
     IEnumerator FadeNumber(int n, float from, float to, float seconds)
     {
         Renderer r = dots[n - 1].GetComponent<Renderer>();
         dots[n - 1].SetActive(true);
-        Color baseColor = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f);
-        Color labelColor = IsPrime(n) ? Factory.Palette.Zero : new Color(.5f, .5f, .58f);
+        Color baseColor = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? SquareColor : CompositeColor;
+        Color labelColor = IsPrime(n) ? Factory.Palette.Zero : UndecidedLabel;
         float t = 0f;
         while (t < seconds)
         {
             t += Time.deltaTime;
             float a = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / seconds));
             Factory.SetColor(r, new Color(baseColor.r, baseColor.g, baseColor.b, a));
-            labels[n - 1].Color = new Color(labelColor.r, labelColor.g, labelColor.b, Mathf.Lerp(.35f, 1f, a));
+            labels[n - 1].Color = Color.Lerp(UndecidedLabel, labelColor, a);
             yield return null;
         }
 
         Factory.SetColor(r, new Color(baseColor.r, baseColor.g, baseColor.b, to));
-        labels[n - 1].Color = new Color(labelColor.r, labelColor.g, labelColor.b, Mathf.Lerp(.35f, 1f, to));
+        labels[n - 1].Color = Color.Lerp(UndecidedLabel, labelColor, to);
         if (to <= 0f) dots[n - 1].SetActive(false);
     }
 
-    readonly HashSet<int> revealedPrimes = new();
+    /// <summary>Altitude: rows of dots stack up off the spiral (−Z, the spiral's 'up'), one unit per row.</summary>
+    static Vector3 Alt(float row) => Vector3.back * (0.45f + row * 1.3f);
 
-    /// <summary>Reveal every prime below n that is still hidden (the numbers the counting skipped).</summary>
-    IEnumerator RevealPrimesBelow(int n, float seconds)
+    Vector3 Road(float n) => SpiralPos(n, 0f);
+
+    /// <summary>A spot just outside number n on the flat spiral (radially outward), for its small tags.</summary>
+    Vector3 Outside(int n, float distance)
     {
-        for (int k = 2; k < n; k++)
-        {
-            if (!IsPrime(k) || revealedPrimes.Contains(k)) continue;
-            revealedPrimes.Add(k);
-            StartCoroutine(FadeNumber(k, 0f, 1f, seconds));
-            StartCoroutine(PulseScale(dots[k - 1].transform, .5f, 2.4f, seconds));
-            TextBox tag = TextBoxLabel($"{k} is prime", 1.3f, Factory.Palette.Zero);
-            tag.transform.SetParent(sieveRoot.transform, false);
-            tag.transform.position = Pos(k) + Vector3.back * .5f + Vector3.up * .95f;
-            sieveLabels.Add(tag);
-            yield return new WaitForSeconds(seconds * .4f);
-        }
+        Vector3 p = Road(n);
+        Vector3 radial = p - origin;
+        radial.z = 0f;
+        return p + radial.normalized * distance + Vector3.back * .3f;
     }
 
-    /// <summary>Altitude: rows of dots stack toward the camera (−Z), one unit per row.</summary>
-    static Vector3 Alt(int row) => Vector3.back * (0.3f + row * 1.0f);
-
-    /// <summary>
-    /// One multiplication, len × rows, built from the spiral itself:
-    ///   row 0: dots on road positions 1..len;
-    ///   rows 1..rows−1: the same len dots stacked one altitude unit above the previous row;
-    ///   then each stacked row uncoils along the road to the next free stretch (k·len+1 .. k·len+len)
-    ///   and drops onto the spiral. The last dot lands on len·rows, which lights up (orange if a square).
-    ///   Every prime the rows landed on along the way is revealed: it was passed over, never produced.
-    /// </summary>
-    IEnumerator MultiplyRoutine(int len, int rows, float seconds)
+    static int SmallestPrimeFactor(int n)
     {
-        int n = len * rows;
-        bool square = len == rows;
-        Color cLen = PrimeColor(len);
-        string h = ColorUtility.ToHtmlStringRGB(cLen);
-        float tBase = seconds * .18f, tStack = seconds * .22f, tUncoil = seconds * .45f, tLand = seconds * .15f;
-        float perRow = tStack / Mathf.Max(1, rows - 1);
+        for (int d = 2; d * d <= n; d++) if (n % d == 0) return d;
+        return n;
+    }
 
-        stageRoot.SetActive(true);
-        stageLabel.Text = $"count <color=#{h}>{len}</color>";
-        stageLabel.transform.position = origin + new Vector3(0, Extent30 + 2.0f, 0);
-
-        // row 0 on the road
-        List<List<GameObject>> rowDots = new();
-        List<GameObject> baseRow = new();
-        for (int i = 0; i < len; i++)
+    /// <summary>A circle lying on the spiral's plane around a number, drawn in over <paramref name="seconds"/>.</summary>
+    IEnumerator DrawRing(LineRenderer ring, Vector3 center, float radius, float seconds)
+    {
+        const int segs = 48;
+        Vector3[] pts = new Vector3[segs + 1];
+        for (int i = 0; i <= segs; i++)
         {
-            GameObject d = MakeDot(cLen, .3f);
-            d.transform.position = SpiralPos(i + 1f, 0f) + Alt(0);
-            d.transform.localScale = Vector3.zero;
-            baseRow.Add(d);
+            float a = i / (float)segs * Mathf.PI * 2f + Mathf.PI * .5f;
+            pts[i] = center + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * radius + Vector3.back * .06f;
         }
 
-        rowDots.Add(baseRow);
         float t = 0f;
-        while (t < tBase)
+        while (t < seconds && ring != null)
         {
             t += Time.deltaTime;
-            for (int i = 0; i < len; i++)
-            {
-                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - i * tBase * .5f / len) / (tBase * .4f)));
-                baseRow[i].transform.localScale = Vector3.one * (.3f * u);
-            }
-
+            int shown = Mathf.Clamp(Mathf.CeilToInt(Mathf.SmoothStep(0f, 1f, t / seconds) * segs) + 1, 2, segs + 1);
+            ring.positionCount = shown;
+            for (int i = 0; i < shown; i++) ring.SetPosition(i, pts[i]);
             yield return null;
         }
 
-        // stacked rows, one altitude unit each
-        for (int k = 1; k < rows; k++)
-        {
-            stageLabel.Text = $"<color=#{h}>{len}</color> × {k + 1}";
-            List<GameObject> row = new();
-            for (int i = 0; i < len; i++)
-            {
-                GameObject d = MakeDot(new Color(1f, 1f, 1f), .28f);
-                d.transform.position = SpiralPos(i + 1f, 0f) + Alt(k - 1);
-                row.Add(d);
-            }
-
-            rowDots.Add(row);
-            t = 0f;
-            while (t < perRow)
-            {
-                t += Time.deltaTime;
-                float u = Mathf.SmoothStep(0f, 1f, t / perRow);
-                for (int i = 0; i < len; i++) row[i].transform.position = SpiralPos(i + 1f, 0f) + Vector3.Lerp(Alt(k - 1), Alt(k), u);
-                yield return null;
-            }
-        }
-
-        // uncoil: row k slides along the road to positions k·len+1 .. k·len+len, then drops
-        float perUncoil = tUncoil / Mathf.Max(1, rows - 1);
-        for (int k = 1; k < rows; k++)
-        {
-            List<GameObject> row = rowDots[k];
-            t = 0f;
-            while (t < perUncoil)
-            {
-                t += Time.deltaTime;
-                float u = Mathf.SmoothStep(0f, 1f, t / perUncoil);
-                for (int i = 0; i < len; i++)
-                {
-                    float road = Mathf.Lerp(i + 1f, k * len + i + 1f, u);
-                    float drop = Mathf.Clamp01((u - .75f) / .25f);
-                    row[i].transform.position = SpiralPos(road, 0f) + Vector3.Lerp(Alt(k), Alt(0), drop);
-                }
-
-                yield return null;
-            }
-
-            // the numbers this row landed on: primes among them were passed over, never produced
-            for (int i = 0; i < len; i++)
-            {
-                int m = k * len + i + 1;
-                if (m == n) continue;
-                if (IsPrime(m) && !revealedPrimes.Contains(m))
-                {
-                    revealedPrimes.Add(m);
-                    StartCoroutine(FadeNumber(m, 0f, 1f, .6f));
-                    StartCoroutine(PulseScale(dots[m - 1].transform, .5f, 2.4f, .8f));
-                    TextBox tag = TextBoxLabel($"{m}: passed over → prime", 1.2f, Factory.Palette.Zero);
-                    tag.transform.SetParent(sieveRoot.transform, false);
-                    tag.transform.position = Pos(m) + Vector3.back * .5f + Vector3.up * .95f;
-                    sieveLabels.Add(tag);
-                }
-            }
-        }
-
-        // land: the last dot is the product
-        stageLabel.Text = $"<color=#{h}>{len}</color> × {rows} = {n}" + (square ? "   a perfect square" : "");
-        t = 0f;
-        while (t < tLand)
-        {
-            t += Time.deltaTime;
-            float u = Mathf.SmoothStep(0f, 1f, t / tLand);
-            foreach (List<GameObject> row in rowDots) foreach (GameObject d in row) d.transform.localScale = Vector3.one * (.3f * (1f - u));
-            yield return null;
-        }
-
-        struck.Add(n);
-        labels[n - 1].Color = square ? new Color(1f, .55f, .2f) : new Color(.55f, .55f, .62f);
-        this.dots[n - 1].SetActive(true);
-        this.dots[n - 1].GetComponent<Renderer>().enabled = true;
-        Factory.SetColor(this.dots[n - 1].GetComponent<Renderer>(), square ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f));
-        Factory.SetIntensity(this.dots[n - 1].GetComponent<Renderer>(), square ? Factory.GlowIntensity : Factory.SoftGlowIntensity);
-        StartCoroutine(PulseScale(this.dots[n - 1].transform, square ? .34f : .26f, 3.2f, .8f));
-        TextBox hit = TextBoxLabel($"{len}×{rows}", 1.3f, square ? new Color(1f, .55f, .2f) : new Color(.75f, .75f, .85f));
-        hit.transform.SetParent(sieveRoot.transform, false);
-        hit.transform.position = Pos(n) + Vector3.back * .5f + Vector3.down * .85f;
-        sieveLabels.Add(hit);
-        ClearWorkDots();
-        stageRoot.SetActive(false);
-        yield return new WaitForSeconds(seconds * .05f);
+        if (ring == null) yield break;
+        ring.positionCount = segs + 1;
+        ring.SetPositions(pts);
     }
 
-    float Extent30 => R * Mathf.Sqrt(GridCount);
+    LineRenderer NewRing(string name, Color c, float width)
+    {
+        LineRenderer ring = Factory.NewLine(name, width, c, Factory.GlowIntensity);
+        ring.transform.SetParent(sieveRoot.transform, false);
+        ring.numCornerVertices = 2;
+        ring.positionCount = 0;
+        sieveMarks.Add(ring.gameObject);
+        return ring;
+    }
 
-    /// <summary>
-    /// The sieve in spiral space: the 30 numbers fly to their spiral places, then from 2 an axis runs through
-    /// 2×2, 2×3, 2×5, 2×7 …, from 3 through 3×3, 3×5, 3×7, and from 5 through 5×5, striking each product.
-    /// </summary>
-    public IEnumerator SieveRoutine(float seconds)
+    TextBox Tag(string text, float size, Color color, Vector3 position)
+    {
+        TextBox tag = TextBoxLabel(text, size, color);
+        tag.transform.SetParent(sieveRoot.transform, false);
+        tag.transform.position = position;
+        sieveMarks.Add(tag.gameObject);
+        return tag;
+    }
+
+    static IEnumerator FadeRing(LineRenderer ring, float to, float seconds)
+    {
+        if (ring == null) yield break;
+        Color c0 = ring.startColor;
+        float t = 0f;
+        while (t < seconds && ring != null)
+        {
+            t += Time.deltaTime;
+            float a = Mathf.Lerp(c0.a, to, t / seconds);
+            ring.startColor = ring.endColor = new Color(c0.r, c0.g, c0.b, a);
+            yield return null;
+        }
+    }
+
+    static IEnumerator ScaleLabel(TextBox label, float to, float seconds)
+    {
+        if (label == null) yield break;
+        float from = label.transform.localScale.x, t = 0f;
+        while (t < seconds && label != null)
+        {
+            t += Time.deltaTime;
+            label.transform.localScale = Vector3.one * Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / seconds));
+            yield return null;
+        }
+    }
+
+    float LabelScale => Mathf.Lerp(1f, .62f, morph);
+
+    void SetDecided(int n, bool animate)
+    {
+        bool prime = IsPrime(n), square = IsSquare(n);
+        GameObject d = dots[n - 1];
+        d.SetActive(true);
+        Renderer r = d.GetComponent<Renderer>();
+        r.enabled = true;
+        Factory.SetColor(r, prime ? Factory.Palette.Zero : square ? SquareColor : CompositeColor);
+        Factory.SetIntensity(r, prime || square ? Factory.GlowIntensity : Factory.SoftGlowIntensity);
+        labels[n - 1].Color = prime ? Factory.Palette.Zero : square ? SquareColor : CompositeLabel;
+        float size = prime ? .42f : square ? .34f : .26f;
+        if (animate) StartCoroutine(PulseScale(d.transform, size, prime ? 2.6f : 3.2f, .8f));
+        else d.transform.localScale = Vector3.one * size;
+    }
+
+    IEnumerator SieveWorker(float introSeconds)
+    {
+        yield return SieveIntro(introSeconds);
+        while (true)
+        {
+            if (sieveQueue.Count == 0)
+            {
+                yield return null;
+                continue;
+            }
+
+            sieveStepRunning = true;
+            (int upTo, float seconds) = sieveQueue.Dequeue();
+            List<int> todo = new();
+            for (int n = sieveFrontier + 1; n <= Mathf.Min(upTo, GridCount); n++)
+            {
+                if (!IsPrime(n)) todo.Add(n);
+            }
+
+            // the first multiplications of a request take a little longer, the rest speed up
+            float[] weights = new float[todo.Count];
+            float sum = 0f;
+            for (int i = 0; i < todo.Count; i++) sum += weights[i] = Mathf.Lerp(1.35f, .8f, todo.Count > 1 ? i / (todo.Count - 1f) : 0f);
+            for (int i = 0; i < todo.Count; i++)
+            {
+                // when more is queued behind this request, hurry so the picture keeps up with the narration
+                float hurry = sieveQueue.Count > 0 ? .7f : 1f;
+                yield return Multiply(todo[i], Mathf.Max(.9f, seconds * weights[i] / sum * hurry));
+            }
+
+            sieveStepRunning = false;
+        }
+    }
+
+    IEnumerator SieveIntro(float seconds)
     {
         gameObject.SetActive(true);
         HideLattice();
         foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
-        caption.gameObject.SetActive(true);
-        caption.Text = "each number n sits at distance √n from the centre, one full turn per square";
+        caption.gameObject.SetActive(false);
+        EnsureSieveRoot();
+        sieveRoot.SetActive(true);
+        ClearSieveMarks();
+        ClearWorkDots();
+        EnsureSpiralPath();
+        struck.Clear();
+        sievePrimes.Clear();
+        sieveFrontier = 2;
 
-        // phase A: break the grid open into spiral positions (only the first 30 numbers)
-        float flyTime = Mathf.Min(2.5f, seconds * .25f);
+        // break the grid open into spiral positions (only the first 30 numbers)
+        float flyTime = Mathf.Max(1.2f, seconds * .45f);
         float t = 0f;
-        float m0 = morph;
+        float m0 = morph, b0 = bend;
         while (t < flyTime)
         {
             t += Time.deltaTime;
-            morph = Mathf.Lerp(m0, 1f, Mathf.SmoothStep(0f, 1f, t / flyTime));
+            float k = Mathf.SmoothStep(0f, 1f, t / flyTime);
+            morph = Mathf.Lerp(m0, 1f, k);
+            bend = Mathf.Lerp(b0, 0f, k);
             Layout();
             yield return null;
         }
 
         morph = 1f;
+        bend = 0f;
         Layout();
-
-        // phase B: the multiplications, drawn one by one as dot rectangles that count along the spiral road
-        if (sieveRoot == null)
-        {
-            sieveRoot = new GameObject("SieveAxes");
-            sieveRoot.transform.SetParent(transform, false);
-            stageRoot = new GameObject("MultiplyStage");
-            stageRoot.transform.SetParent(transform, false);
-            LineRenderer ax = Factory.NewLine("stage x", .05f, Color.white, Factory.SoftGlowIntensity);
-            ax.transform.SetParent(stageRoot.transform, false);
-            ax.positionCount = 2;
-            LineRenderer ay = Factory.NewLine("stage y", .05f, Color.white, Factory.SoftGlowIntensity);
-            ay.transform.SetParent(stageRoot.transform, false);
-            ay.positionCount = 2;
-            stageLabel = TextBoxLabel("", 2.6f, Color.white);
-            stageLabel.transform.SetParent(stageRoot.transform, false);
-        }
-
-        EnsureSpiralPath();
         spiralPath.enabled = true;
-        sieveRoot.SetActive(true);
-        stageRoot.SetActive(false);
-        foreach (LineRenderer a in sieveAxes) Destroy(a.gameObject);
-        foreach (TextBox l in sieveLabels) Destroy(l.gameObject);
-        sieveAxes.Clear();
-        sieveLabels.Clear();
 
-        // all the primes glow for a moment, then fade away except the 2
-        revealedPrimes.Clear();
-        revealedPrimes.Add(2);
-        yield return new WaitForSeconds(0.8f);
-        for (int k = 3; k <= GridCount; k++) if (IsPrime(k)) StartCoroutine(FadeNumber(k, 1f, 0f, 1.2f));
-        labels[0].Color = new Color(.3f, .3f, .36f); // 1 is skipped: neither prime nor a jumping-off point
-        StartCoroutine(PulseScale(dots[1].transform, .5f, 2.4f, 1.2f));
-        yield return new WaitForSeconds(1.4f);
-
-        (int p, int q)[] shown = { (2, 2), (3, 2), (3, 3), (5, 2), (7, 2), (5, 3), (5, 5), (7, 3) };
-        float per = (seconds - flyTime - 2.2f) / (shown.Length + 1f);
-        foreach ((int len, int rows) in shown)
+        // every prime glows for a moment (what we expect to find), then all but the 2 fade: the sieve has to earn them
+        for (int n = 1; n <= GridCount; n++)
         {
-            yield return MultiplyRoutine(len, rows, per);
+            if (IsPrime(n)) { dots[n - 1].SetActive(true); Factory.SetColor(dots[n - 1].GetComponent<Renderer>(), Factory.Palette.Zero); }
+            else dots[n - 1].SetActive(false);
         }
 
-        // the rest of the composites ≤ 30 are struck quickly, in order, and the last primes appear
-        for (int n = 4; n <= GridCount; n++)
+        float rest = Mathf.Max(1f, seconds - flyTime);
+        yield return new WaitForSeconds(rest * .3f);
+        for (int k = 3; k <= GridCount; k++) if (IsPrime(k)) StartCoroutine(FadeNumber(k, 1f, 0f, rest * .45f));
+        for (int k = 4; k <= GridCount; k++) if (!IsPrime(k)) labels[k - 1].Color = UndecidedLabel;
+        labels[0].Color = new Color(.3f, .3f, .36f); // 1 is skipped: neither prime nor a multiplier
+        sievePrimes.Add(2);
+        SetDecided(2, true);
+        Board(BoardText("<color=#" + Hex(MultiplierColor) + ">2</color> is our first prime", "every number after it is either made by multiplying, or skipped", Tally()));
+        yield return new WaitForSeconds(rest * .7f);
+    }
+
+    /// <summary>One multiplication p × m = n on the spiral, followed by any primes the landing skipped.</summary>
+    IEnumerator Multiply(int n, float seconds)
+    {
+        int p = SmallestPrimeFactor(n), m = n / p;
+        bool square = p == m;
+        bool detailed = seconds >= 3.2f;
+        string hp = Hex(MultiplierColor), hm = Hex(RowColor);
+        string pm = $"<color=#{hp}>{p}</color> × <color=#{hm}>{m}</color>";
+        int skipped = 0;
+        for (int j = sieveFrontier + 1; j < n; j++) if (!struck.Contains(j)) skipped++;
+        float tSkip = skipped > 0 ? seconds * (detailed ? .2f : .16f) : 0f;
+        float body = seconds - tSkip;
+        float tFocus = body * .14f, tCount = body * .2f, tCopy = body * .2f, tSlide = body * .28f, tLand = body * .18f;
+
+        // 1. the two numbers in the multiplication: the prime p (nearer the centre) and the number m it copies
+        string copies = p == 2 ? "one level up" : $"{p - 1} levels up";
+        Board(BoardText(pm, detailed ? $"count <color=#{hm}>{m}</color> dots, from 1 up to {m};  the prime <color=#{hp}>{p}</color> copies that row {copies}" : null, Tally()));
+        LineRenderer ringM = NewRing("ring m", RowColor, .07f);
+        LineRenderer ringP = NewRing("ring p", MultiplierColor, .09f);
+        StartCoroutine(DrawRing(ringM, Road(m), .78f, tFocus));
+        StartCoroutine(DrawRing(ringP, Road(p), square ? 1.02f : .78f, tFocus));
+        StartCoroutine(ScaleLabel(labels[m - 1], LabelScale * 1.7f, tFocus));
+        StartCoroutine(ScaleLabel(labels[p - 1], LabelScale * 1.7f, tFocus));
+        yield return new WaitForSeconds(tFocus);
+
+        // 2. count m dots along the road, 1..m, just above the spiral
+        List<List<GameObject>> rows = new();
+        List<GameObject> baseRow = new();
+        for (int i = 0; i < m; i++)
         {
-            if (IsPrime(n) || struck.Contains(n)) continue;
-            struck.Add(n);
-            labels[n - 1].Color = IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.55f, .55f, .62f);
-            dots[n - 1].SetActive(true);
-            dots[n - 1].GetComponent<Renderer>().enabled = true;
-            Factory.SetColor(dots[n - 1].GetComponent<Renderer>(), IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.6f, .6f, .7f));
-            StartCoroutine(PulseScale(dots[n - 1].transform, .26f, 2.2f, .5f));
-            yield return new WaitForSeconds(per / 12f);
+            GameObject d = MakeDot(RowColor, .4f);
+            d.transform.position = Road(i + 1f) + Alt(0);
+            d.transform.localScale = Vector3.zero;
+            baseRow.Add(d);
         }
 
-        yield return RevealPrimesBelow(GridCount + 1, .5f);
+        rows.Add(baseRow);
+        float t = 0f;
+        while (t < tCount)
+        {
+            t += Time.deltaTime;
+            for (int i = 0; i < m; i++)
+            {
+                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - i * tCount * .7f / m) / (tCount * .3f)));
+                baseRow[i].transform.localScale = Vector3.one * (.4f * u);
+            }
+
+            yield return null;
+        }
+
+        // 3. the prime p copies the row up one level at a time: a beam rises from p through the stack
+        LineRenderer beam = Factory.NewLine("multiplier beam", .07f, MultiplierColor, Factory.GlowIntensity);
+        beam.transform.SetParent(sieveRoot.transform, false);
+        beam.positionCount = 2;
+        sieveMarks.Add(beam.gameObject);
+        float perCopy = tCopy / Mathf.Max(1, p - 1);
+        for (int k = 1; k < p; k++)
+        {
+            if (detailed) Board(BoardText(pm, $"<color=#{hp}>{p}</color> rows of <color=#{hm}>{m}</color>:  row {k + 1} of {p}", Tally()));
+            List<GameObject> row = new();
+            for (int i = 0; i < m; i++)
+            {
+                GameObject d = MakeDot(RowColor, .38f);
+                d.transform.position = Road(i + 1f) + Alt(k - 1);
+                row.Add(d);
+            }
+
+            rows.Add(row);
+            StartCoroutine(PulseScale(dots[p - 1].transform, .42f, 2.2f, perCopy));
+            t = 0f;
+            while (t < perCopy)
+            {
+                t += Time.deltaTime;
+                float u = Mathf.SmoothStep(0f, 1f, t / perCopy);
+                for (int i = 0; i < m; i++) row[i].transform.position = Road(i + 1f) + Vector3.Lerp(Alt(k - 1), Alt(k), u);
+                beam.SetPosition(0, Road(p) + Vector3.back * .05f);
+                beam.SetPosition(1, Road(p) + Vector3.Lerp(Alt(k - 1), Alt(k), u));
+                yield return null;
+            }
+        }
+
+        // 4. the copies slide up the spiral at their own height, each to the next free stretch: k·m+1 .. k·m+m
+        if (detailed) Board(BoardText(pm, "the copies slide up the spiral and drop:  only the final dot lands", Tally()));
+        StartCoroutine(FadeRing(ringM, .15f, tSlide * .5f));
+        t = 0f;
+        while (t < tSlide)
+        {
+            t += Time.deltaTime;
+            float u = Mathf.SmoothStep(0f, 1f, t / tSlide);
+            for (int k = 1; k < rows.Count; k++)
+            {
+                for (int i = 0; i < m; i++) rows[k][i].transform.position = Road(Mathf.Lerp(i + 1f, k * m + i + 1f, u)) + Alt(k);
+            }
+
+            beam.SetPosition(1, Road(p) + Alt(p - 1) * (1f - u));
+            yield return null;
+        }
+
+        Destroy(beam.gameObject);
+
+        // 5. only the final dot drops: it lands on p × m; every other dot fades where it is
+        GameObject final = rows[^1][^1];
+        Vector3 from = final.transform.position, to = Road(n) + Vector3.back * .05f;
+        t = 0f;
+        while (t < tLand)
+        {
+            t += Time.deltaTime;
+            float u = Mathf.Clamp01(t / tLand);
+            float fade = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u * 1.6f));
+            foreach (List<GameObject> row in rows)
+            foreach (GameObject d in row)
+            {
+                if (d != final) d.transform.localScale = Vector3.one * (.4f * fade);
+            }
+
+            final.transform.position = Vector3.Lerp(from, to, u * u);
+            yield return null;
+        }
+
+        ClearWorkDots();
+        struck.Add(n);
+        SetDecided(n, true);
+        StartCoroutine(ScaleLabel(labels[m - 1], LabelScale, .4f));
+        StartCoroutine(ScaleLabel(labels[p - 1], LabelScale, .4f));
+        StartCoroutine(FadeRing(ringP, 0f, .6f));
+        StartCoroutine(FadeRing(ringM, 0f, .6f));
+        Tag($"{p}×{m}", 2.1f, square ? SquareColor : new Color(.75f, .75f, .85f), Outside(n, 1.5f));
+        Board(BoardText(pm + $" = {n}" + (square ? $"  <size=60%><color=#{Hex(SquareColor)}>a perfect square</color></size>" : ""), null, Tally()));
+
+        // 6. the spots the landing jumped over: nothing made them. An open circle, then a new prime
+        if (skipped > 0)
+        {
+            float per = tSkip / skipped;
+            for (int j = sieveFrontier + 1; j < n; j++)
+            {
+                if (struck.Contains(j)) continue;
+                LineRenderer open = NewRing("candidate " + j, Color.white, .08f);
+                yield return DrawRing(open, Road(j), .62f, per * .35f);
+                Board(BoardText(pm + $" = {n}", $"we skipped <color=#{hp}>{j}</color>:  no multiplication lands there", Tally()));
+                yield return new WaitForSeconds(per * .2f);
+                sievePrimes.Add(j);
+                SetDecided(j, true);
+                open.startColor = open.endColor = MultiplierColor;
+                Tag($"{j} is prime", 2.1f, MultiplierColor, Outside(j, 2.0f));
+                Board(BoardText(pm + $" = {n}", $"<color=#{hp}>{j}</color> is prime, and joins the multipliers", Tally()));
+                yield return new WaitForSeconds(per * .45f);
+            }
+        }
+
+        sieveFrontier = n;
+    }
+
+    /// <summary>Colour every number up to 30 as the finished sieve leaves it (used when a later line cuts the sieve short).</summary>
+    void CompleteSieveColors()
+    {
+        for (int n = 2; n <= GridCount; n++) SetDecided(n, false);
+        labels[0].Color = new Color(.3f, .3f, .36f);
     }
 
     IEnumerator FadeSieve(float seconds)
     {
         if (sieveRoot == null) yield break;
         float t = 0f;
+        List<LineRenderer> lines = new();
+        foreach (GameObject g in sieveMarks) if (g != null && g.TryGetComponent(out LineRenderer l)) lines.Add(l);
         while (t < seconds)
         {
             t += Time.deltaTime;
             float a = 1f - t / seconds;
-            foreach (LineRenderer axis in sieveAxes)
+            foreach (LineRenderer l in lines)
             {
-                Color c = axis.startColor;
-                axis.startColor = new Color(c.r, c.g, c.b, a);
-                axis.endColor = new Color(c.r, c.g, c.b, a);
+                if (l == null) continue;
+                Color c = l.startColor;
+                l.startColor = l.endColor = new Color(c.r, c.g, c.b, Mathf.Min(c.a, a));
             }
 
             yield return null;
@@ -589,7 +762,6 @@ public class SacksSpiral : MonoBehaviour
 
         sieveRoot.SetActive(false);
         if (spiralPath != null) spiralPath.enabled = false;
-        if (stageRoot != null) stageRoot.SetActive(false);
     }
 
     /// <summary>Pulse the perfect squares (orange) on the spiral / saddle.</summary>
@@ -672,8 +844,8 @@ public class SacksSpiral : MonoBehaviour
 
         for (int i = 0; i < labels.Count; i++)
         {
-            labels[i].transform.position = Pos(i + 1) + Vector3.back * .4f;
-            labels[i].transform.localScale = Vector3.one * Mathf.Lerp(1f, .35f, morph);
+            labels[i].transform.position = Pos(i + 1) + Vector3.back * Mathf.Lerp(.4f, .75f, morph);
+            labels[i].transform.localScale = Vector3.one * Mathf.Lerp(1f, .62f, morph);
             factorLabels[i].transform.position = GridPos(i + 1) + Vector3.down * 1.0f;
         }
 
@@ -757,7 +929,9 @@ public class SacksSpiral : MonoBehaviour
     public IEnumerator MorphToSpiral(float seconds)
     {
         gameObject.SetActive(true);
+        bool sieveStarted = sieveWorker != null || struck.Count > 0;
         CancelSieve();
+        if (sieveStarted) CompleteSieveColors();
         HideLattice();
         foreach (TextBox f in factorLabels) f.gameObject.SetActive(false);
         for (int i = 0; i < GridCount; i++) dots[i].SetActive(true);
@@ -800,6 +974,58 @@ public class SacksSpiral : MonoBehaviour
     {
         routesRoot.SetActive(on);
         if (on) Layout();
+        if (!on) HighlightRoute("all");
+    }
+
+    public static readonly Color PronicColor = new(.4f, .55f, 1f);
+    public static readonly Color EulerColor = new(.35f, 1f, .55f);
+    static readonly string[] RouteNames = { "squares", "pronic", "euler" };
+    Coroutine routeHighlight;
+
+    /// <summary>
+    /// Make one route stand out and dim the other two ("all" shows them evenly). The numbers on the highlighted route
+    /// pulse: the squares (red), the products of neighbours k(k+1) (tinted blue), or Euler's primes k² + k + 41.
+    /// </summary>
+    public void HighlightRoute(string name)
+    {
+        if (routeHighlight != null) StopCoroutine(routeHighlight);
+        int chosen = System.Array.IndexOf(RouteNames, name);
+        for (int r = 0; r < routes.Count; r++)
+        {
+            bool on = chosen < 0 || r == chosen;
+            Color c = routes[r].startColor;
+            float w = chosen < 0 ? .14f : on ? .26f : .07f;
+            routes[r].startWidth = routes[r].endWidth = w;
+            routes[r].startColor = routes[r].endColor = new Color(c.r, c.g, c.b, on ? 1f : .25f);
+            Factory.SetIntensity(routes[r], on && chosen >= 0 ? Factory.GlowIntensity * 1.2f : Factory.GlowIntensity);
+            routeLabels[r].gameObject.SetActive(on);
+        }
+
+        // pronic numbers are composites (grey dots): tint them blue while their route is highlighted, grey otherwise
+        for (int k = 1; k * (k + 1) <= Count; k++)
+        {
+            int n = k * (k + 1);
+            Renderer rd = dots[n - 1].GetComponent<Renderer>();
+            Factory.SetColor(rd, name == "pronic" ? PronicColor : CompositeColor);
+        }
+
+        if (chosen >= 0 && gameObject.activeInHierarchy) routeHighlight = StartCoroutine(PulseRouteNumbers(chosen));
+    }
+
+    IEnumerator PulseRouteNumbers(int route)
+    {
+        (System.Func<float, float> fn, float k0, float k1) = routeFns[route];
+        int kStart = route == 2 ? 0 : Mathf.CeilToInt(k0);
+        for (int k = kStart; k <= Mathf.FloorToInt(k1); k++)
+        {
+            int n = Mathf.RoundToInt(fn(k));
+            if (n < 1 || n > Count) continue;
+            GameObject d = dots[n - 1];
+            d.SetActive(true);
+            float size = IsPrime(n) ? .42f : n > GridCount ? .22f : IsSquare(n) ? .34f : .26f;
+            StartCoroutine(PulseScale(d.transform, size, 2.6f, .9f));
+            yield return new WaitForSeconds(.12f);
+        }
     }
 
     public void Hide() => gameObject.SetActive(false);
@@ -1245,7 +1471,7 @@ public class SacksSpiral : MonoBehaviour
         {
             float a = s / 24f * Mathf.PI * 2f;
             bool ridge = s % 12 == 0, valley = s % 12 == 6;
-            LineRenderer spoke = Factory.NewLine("wire spoke", ridge || valley ? .06f : .025f, ridge ? new Color(1f, .55f, .2f) : valley ? new Color(.3f, .7f, 1f) : c, ridge || valley ? Factory.SoftGlowIntensity : Factory.NoGlow);
+            LineRenderer spoke = Factory.NewLine("wire spoke", ridge || valley ? .06f : .025f, ridge ? SquareColor : valley ? new Color(.3f, .7f, 1f) : c, ridge || valley ? Factory.SoftGlowIntensity : Factory.NoGlow);
             spoke.transform.SetParent(root.transform, false);
             spoke.positionCount = 40;
             Vector3[] pts = new Vector3[40];
@@ -1253,7 +1479,7 @@ public class SacksSpiral : MonoBehaviour
             spoke.SetPositions(pts);
         }
 
-        TextBox l1 = TextBoxLabel("ridge (x axis): √n ≈ whole → squares k² and pronics k(k+1), never prime", 2.0f, new Color(1f, .55f, .2f));
+        TextBox l1 = TextBoxLabel("ridge (x axis): √n ≈ whole → squares k² and pronics k(k+1), never prime", 2.0f, SquareColor);
         l1.transform.SetParent(root.transform, false);
         l1.transform.position = origin + new Vector3(0, -Extent - 4.5f, 0);
         TextBox l2 = TextBoxLabel("valley (y axis): √n ≈ whole + ¼ or ¾", 2.0f, new Color(.3f, .7f, 1f));
@@ -1693,6 +1919,7 @@ public class SacksSpiral : MonoBehaviour
 
     void OnDestroy()
     {
+        DisposeGrowth();
         StopFullMasterWave();
         if (fullPositions.IsCreated) fullPositions.Dispose();
     }
@@ -1953,12 +2180,12 @@ public class SacksSpiral : MonoBehaviour
         squares.transform.SetParent(hypothesisRoot.transform, false);
         for (int k = 1; k * k <= Count; k++)
         {
-            GameObject d = Factory.NewSphere("square point", .34f, new Color(1f, .55f, .2f), Factory.GlowIntensity);
+            GameObject d = Factory.NewSphere("square point", .34f, SquareColor, Factory.GlowIntensity);
             d.transform.SetParent(squares.transform, false);
             d.transform.position = SpiralPos(k * k, 1f) + Vector3.back * .25f;
         }
 
-        TextBox sl = TextBoxLabel("orange: the squares, where the √n spiral completes each turn", 2.0f, new Color(1f, .55f, .2f));
+        TextBox sl = TextBoxLabel("red: the squares, where the √n spiral completes each turn", 2.0f, SquareColor);
         sl.transform.SetParent(squares.transform, false);
         sl.transform.position = origin + new Vector3(0, -Extent - 13.5f, 0);
 
@@ -2009,7 +2236,7 @@ public class SacksSpiral : MonoBehaviour
         {
             int n = i + 1;
             dots[i].SetActive(IsPrime(n) || IsSquare(n));
-            labels[i].Color = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? new Color(1f, .55f, .2f) : new Color(.28f, .28f, .34f);
+            labels[i].Color = IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? SquareColor : new Color(.28f, .28f, .34f);
         }
 
         morph = 1f;
@@ -2017,6 +2244,296 @@ public class SacksSpiral : MonoBehaviour
         bend = 1f; // the final chapter always lives on the saddle
         caption.gameObject.SetActive(false);
         Layout();
+    }
+
+    // ---- the home view: the zeta trail grows out of the saddle's centre (t = 0 upward); every zero it passes sends ----
+    // ---- its wave out along the spiral at the zero's height, the wave sinks onto the saddle and joins the master wave. ----
+    // Performance: the road's points, normals and log n are computed once per bend; a zero's cosine is computed once when
+    // it is born; each frame only moves points along precomputed normals. No trig over the samples per frame.
+
+    public bool Growing => growRoot != null && growRoot.activeInHierarchy;
+    public float GrowthT { get; private set; }
+    public float GrowthHeight => GrowthT * ZetaT;
+    /// <summary>How fast the trail climbs, in units of t per second.</summary>
+    public float GrowthSpeed = 1.6f;
+    /// <summary>Seconds the finished picture holds before the growth starts over.</summary>
+    public float GrowthHold = 14f;
+    public int GrowthZerosMerged => growMerged;
+    /// <summary>Radius of the stretch of spiral the waves ride on (n up to 420).</summary>
+    public float WaveRadius => R * Mathf.Sqrt(FieldNMax);
+
+    const float GrowStep = 0.05f;
+    const float GrowWaveOut = 1.7f, GrowWaveHold = .4f, GrowWaveSink = 1.6f;
+
+    GameObject growRoot;
+    LineRenderer growTrail, growMaster, growAxis;
+    GameObject growTip;
+    Unity.Collections.NativeArray<Vector3> growTrailPts;
+    int growTrailCount, growNextZero, growMerged;
+    float growHoldTimer;
+    readonly List<GameObject> growZeroDots = new();
+    Vector3[] growBase, growNormal, growMasterPts;
+    float[] growLogN;
+    double[] growSum;
+    float growBend = -1f;
+
+    sealed class GrowWave
+    {
+        public LineRenderer Line;
+        public Unity.Collections.NativeArray<Vector3> Pts;
+        public float[] Cos;     // −cos(γ·log n) per sample, computed once
+        public float Amp, Altitude, Age;
+        public int Computed;    // samples placed so far while the wave runs out
+        public Color Color;
+    }
+
+    readonly List<GrowWave> growWaves = new();
+    readonly Stack<GrowWave> growPool = new();
+
+    public void StartGrowth()
+    {
+        gameObject.SetActive(true);
+        EnsureGrowth();
+        growRoot.SetActive(true);
+        ResetGrowth();
+    }
+
+    public void StopGrowth()
+    {
+        if (growRoot == null) return;
+        ResetGrowth();
+        growRoot.SetActive(false);
+    }
+
+    void EnsureGrowth()
+    {
+        if (growRoot != null) return;
+        growRoot = new GameObject("Growth");
+        growRoot.transform.SetParent(transform, false);
+        growTrail = Factory.NewLine("growing zeta trail", .08f, Factory.Palette.Zeta, Factory.SoftGlowIntensity);
+        growTrail.transform.SetParent(growRoot.transform, false);
+        growTrail.numCornerVertices = 2;
+        growTrailPts = new Unity.Collections.NativeArray<Vector3>(Mathf.CeilToInt(ZetaTMax / GrowStep) + 4, Unity.Collections.Allocator.Persistent);
+        growTip = Factory.NewSphere("trail tip", .5f, Color.white, Factory.GlowIntensity);
+        growTip.transform.SetParent(growRoot.transform, false);
+        growAxis = Factory.NewLine("growing axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
+        growAxis.transform.SetParent(growRoot.transform, false);
+        growAxis.positionCount = 2;
+        growMaster = Factory.NewLine("growing master wave", .11f, Factory.Palette.Cosine, Factory.GlowIntensity);
+        growMaster.transform.SetParent(growRoot.transform, false);
+        growMaster.numCornerVertices = 2;
+        growMaster.positionCount = WavePts;
+        growMasterPts = new Vector3[WavePts];
+        growSum = new double[WavePts];
+        growLogN = new float[WavePts];
+        for (int i = 0; i < WavePts; i++) growLogN[i] = Mathf.Log(WaveN(i));
+    }
+
+    /// <summary>The road's points and normals on the current surface, recomputed only when the bend changes.</summary>
+    void EnsureGrowGeometry()
+    {
+        if (growBase != null && Mathf.Approximately(growBend, bend)) return;
+        growBase ??= new Vector3[WavePts];
+        growNormal ??= new Vector3[WavePts];
+        for (int i = 0; i < WavePts; i++)
+        {
+            float n = WaveN(i);
+            growBase[i] = SpiralPos(n, bend);
+            growNormal[i] = SurfaceNormalAt(n);
+        }
+
+        growBend = bend;
+        UpdateGrowMaster();
+    }
+
+    void ResetGrowth()
+    {
+        GrowthT = 0f;
+        growTrailCount = 0;
+        growNextZero = 0;
+        growMerged = 0;
+        growHoldTimer = 0f;
+        if (growSum != null) System.Array.Clear(growSum, 0, growSum.Length);
+        foreach (GameObject d in growZeroDots) if (d != null) Destroy(d);
+        growZeroDots.Clear();
+        foreach (GrowWave w in growWaves) ReleaseWave(w);
+        growWaves.Clear();
+        if (growTrail == null) return;
+        growTrail.positionCount = 0;
+        growTip.transform.position = TrailPoint(0f);
+        growAxis.SetPosition(0, origin);
+        growAxis.SetPosition(1, origin);
+        growBase = null; // re-place the road for whatever bend is current
+        EnsureGrowGeometry();
+    }
+
+    Vector3 TrailPoint(float t)
+    {
+        Meta.Numerics.Complex z = ZetaMath.Exact(new Meta.Numerics.Complex(.5, t));
+        return origin + new Vector3((float)z.Re * ZetaXY, (float)z.Im * ZetaXY, 0f) + Vector3.back * (t * ZetaT);
+    }
+
+    void UpdateGrowMaster()
+    {
+        if (growMaster == null || growBase == null) return;
+        float scale = WaveAmp / Mathf.Sqrt(Mathf.Max(1, growMerged));
+        for (int i = 0; i < WavePts; i++) growMasterPts[i] = growBase[i] + growNormal[i] * ((float)growSum[i] * scale + .15f);
+        growMaster.SetPositions(growMasterPts);
+        // the empty road is only a faint guide; the master wave gains strength as the zeros pour in
+        float strength = Mathf.Clamp01(growMerged / 8f);
+        Color c = Factory.Palette.Cosine;
+        growMaster.startColor = growMaster.endColor = new Color(c.r, c.g, c.b, Mathf.Lerp(.22f, 1f, strength));
+        growMaster.startWidth = growMaster.endWidth = Mathf.Lerp(.05f, .1f, strength);
+    }
+
+    GrowWave TakeWave()
+    {
+        if (growPool.Count > 0)
+        {
+            GrowWave w = growPool.Pop();
+            w.Line.gameObject.SetActive(true);
+            return w;
+        }
+
+        LineRenderer line = Factory.NewLine("incoming wave", .08f, Color.white, Factory.GlowIntensity);
+        line.transform.SetParent(growRoot.transform, false);
+        line.numCornerVertices = 2;
+        return new GrowWave
+        {
+            Line = line,
+            Pts = new Unity.Collections.NativeArray<Vector3>(WavePts + 1, Unity.Collections.Allocator.Persistent),
+            Cos = new float[WavePts]
+        };
+    }
+
+    void ReleaseWave(GrowWave w)
+    {
+        w.Line.positionCount = 0;
+        w.Line.gameObject.SetActive(false);
+        growPool.Push(w);
+    }
+
+    void SpawnGrowZero(int k, float gamma)
+    {
+        Vector3 onAxis = origin + Vector3.back * (gamma * ZetaT);
+        GameObject dot = Factory.NewSphere("zero " + (k + 1), .38f, Factory.Palette.Zero, Factory.GlowIntensity);
+        dot.transform.SetParent(growRoot.transform, false);
+        dot.transform.position = onAxis;
+        StartCoroutine(PulseScale(dot.transform, .38f, 3f, .9f));
+        growZeroDots.Add(dot);
+
+        GrowWave w = TakeWave();
+        w.Altitude = gamma * ZetaT;
+        w.Amp = WaveAmp * 1.1f / Mathf.Pow(k + 1, .6f);
+        w.Age = 0f;
+        w.Computed = 0;
+        w.Color = Annotations.CollisionColor(k);
+        w.Line.startColor = w.Line.endColor = w.Color;
+        for (int i = 0; i < WavePts; i++) w.Cos[i] = -Mathf.Cos(gamma * growLogN[i]);
+        w.Pts[0] = onAxis + Vector3.back * .15f;
+        w.Line.positionCount = 1;
+        growWaves.Add(w);
+    }
+
+    void StepGrowth(float dt)
+    {
+        EnsureGrowGeometry();
+        double[] zs = Main.Instance != null ? Main.Instance.zetaZeroValues : System.Array.Empty<double>();
+        if (GrowthT < ZetaTMax)
+        {
+            GrowthT = Mathf.Min(ZetaTMax, GrowthT + GrowthSpeed * dt);
+            int before = growTrailCount;
+            while (growTrailCount < growTrailPts.Length && growTrailCount * GrowStep <= GrowthT)
+            {
+                growTrailPts[growTrailCount] = TrailPoint(growTrailCount * GrowStep);
+                growTrailCount++;
+            }
+
+            if (growTrailCount != before)
+            {
+                growTrail.positionCount = growTrailCount;
+                growTrail.SetPositions(growTrailPts.GetSubArray(0, growTrailCount));
+            }
+
+            growTip.transform.position = TrailPoint(GrowthT);
+            growAxis.SetPosition(1, origin + Vector3.back * GrowthHeight);
+            while (growNextZero < zs.Length && zs[growNextZero] <= GrowthT)
+            {
+                SpawnGrowZero(growNextZero, (float)zs[growNextZero]);
+                growNextZero++;
+            }
+        }
+        else if (growWaves.Count == 0)
+        {
+            growHoldTimer += dt;
+            if (growHoldTimer > GrowthHold) ResetGrowth();
+        }
+
+        for (int w = growWaves.Count - 1; w >= 0; w--)
+        {
+            GrowWave wave = growWaves[w];
+            wave.Age += dt;
+            if (wave.Age < GrowWaveOut)
+            {
+                // run out along the spiral at the zero's height: only the newly reached samples are placed
+                int want = Mathf.Clamp(Mathf.CeilToInt(Mathf.SmoothStep(0f, 1f, wave.Age / GrowWaveOut) * WavePts), 1, WavePts);
+                for (int i = wave.Computed; i < want; i++)
+                {
+                    wave.Pts[i + 1] = growBase[i] + growNormal[i] * (wave.Altitude + wave.Amp * wave.Cos[i] + .15f);
+                }
+
+                if (want != wave.Computed)
+                {
+                    wave.Computed = want;
+                    wave.Line.positionCount = want + 1;
+                    wave.Line.SetPositions(wave.Pts.GetSubArray(0, want + 1));
+                }
+            }
+            else if (wave.Age < GrowWaveOut + GrowWaveHold)
+            {
+                if (wave.Computed < WavePts)
+                {
+                    for (int i = wave.Computed; i < WavePts; i++) wave.Pts[i + 1] = growBase[i] + growNormal[i] * (wave.Altitude + wave.Amp * wave.Cos[i] + .15f);
+                    wave.Computed = WavePts;
+                    wave.Line.positionCount = WavePts + 1;
+                    wave.Line.SetPositions(wave.Pts);
+                }
+            }
+            else if (wave.Age < GrowWaveOut + GrowWaveHold + GrowWaveSink)
+            {
+                // sink onto the saddle, fading into the master wave
+                float u = Mathf.SmoothStep(0f, 1f, (wave.Age - GrowWaveOut - GrowWaveHold) / GrowWaveSink);
+                float alt = wave.Altitude * (1f - u);
+                wave.Pts[0] = origin + Vector3.back * (alt + .15f);
+                wave.Line.positionCount = WavePts + 1;
+                for (int i = 0; i < WavePts; i++) wave.Pts[i + 1] = growBase[i] + growNormal[i] * (alt + wave.Amp * wave.Cos[i] + .15f);
+                wave.Line.SetPositions(wave.Pts);
+                Color c = new(wave.Color.r, wave.Color.g, wave.Color.b, 1f - u * .75f);
+                wave.Line.startColor = wave.Line.endColor = c;
+            }
+            else
+            {
+                for (int i = 0; i < WavePts; i++) growSum[i] += wave.Cos[i];
+                growMerged++;
+                UpdateGrowMaster();
+                ReleaseWave(wave);
+                growWaves.RemoveAt(w);
+            }
+        }
+    }
+
+    void Update()
+    {
+        if (growRoot != null && growRoot.activeInHierarchy) StepGrowth(Time.deltaTime);
+    }
+
+    void DisposeGrowth()
+    {
+        if (growTrailPts.IsCreated) growTrailPts.Dispose();
+        foreach (GrowWave w in growWaves) if (w.Pts.IsCreated) w.Pts.Dispose();
+        foreach (GrowWave w in growPool) if (w.Pts.IsCreated) w.Pts.Dispose();
+        growWaves.Clear();
+        growPool.Clear();
     }
 
     public IEnumerable<Renderer> Renderers()

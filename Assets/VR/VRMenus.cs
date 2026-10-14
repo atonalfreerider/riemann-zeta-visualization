@@ -233,13 +233,12 @@ public partial class VRApp
                 name = "The spiral bent over a saddle";
                 break;
             case "explore":
-                // the final picture at room scale: you stand at the saddle's centre, the saddle is the floor,
-                // the zeta trail rises overhead and the master wave with every zero rides the spiral
+                // the final picture at room scale: you stand at the saddle's centre, the saddle is the floor, and the
+                // zeta trail grows from the floor up; every zero it passes sends its wave along the spiral into the master wave
                 layers.All(false);
                 ApplyLayers();
                 main.Pause();
-                tour.RunActions(new[] { "sacks:show", "hypothesis:zeta", "hypothesis:full" });
-                tour.Annotations.Sacks.FullWaveAmplitude = 4f;
+                tour.RunActions(new[] { "home:scene" });
                 Guide.SetFollow(false);
                 Grab.LockRotation = true; // standing view: pinch slides and scales, never turns
                 Rig.CancelAnimation();

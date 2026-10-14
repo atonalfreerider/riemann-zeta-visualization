@@ -149,6 +149,9 @@ public class CaptionDisplay : MonoBehaviour
         hint.color = new Color(.6f, .6f, .65f);
 
         BuildCard();
+        board = MakePanel("Board", 54, FontStyles.Bold, TextAlignmentOptions.Center, out boardText);
+        legend = MakePanel("EquationLegend", 32, FontStyles.Normal, TextAlignmentOptions.Left, out legendText);
+        SetLayout(false);
         Clear();
         if (VRMode.Enabled) MakeOverlay();
     }
@@ -172,6 +175,8 @@ public class CaptionDisplay : MonoBehaviour
             SetAnchor(captionRect, x, 0.13f, new Vector2(1480, 200));
             SetAnchor(footnoteRect, x, 0.13f, new Vector2(1500, 60));
             footnoteRect.anchoredPosition = new Vector2(0, 150);
+            PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -40), 1500);
+            PlacePanel(legend, new Vector2(0f, 1f), new Vector2(40, -110), 640);
         }
         else
         {
@@ -183,7 +188,87 @@ public class CaptionDisplay : MonoBehaviour
             SetAnchor(captionRect, x, 0.2f, new Vector2(920, 330));
             SetAnchor(footnoteRect, x, 0.2f, new Vector2(960, 70));
             footnoteRect.anchoredPosition = new Vector2(0, 200);
+            PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -130), 1000);
+            PlacePanel(legend, new Vector2(0.5f, 1f), new Vector2(0, -120), 760);
         }
+
+        Landscape = landscape;
+    }
+
+    public bool Landscape { get; private set; }
+
+    // ---- board (top centre: the multiplication being built) and equation legend (the saddle's three routes) ----
+    RectTransform board, legend;
+    TextMeshProUGUI boardText, legendText;
+
+    RectTransform MakePanel(string name, float size, FontStyles style, TextAlignmentOptions alignment, out TextMeshProUGUI text)
+    {
+        GameObject go = new(name);
+        go.transform.SetParent(transform, false);
+        RectTransform rect = go.AddComponent<RectTransform>();
+        Image bg = go.AddComponent<Image>();
+        bg.color = new Color(0.02f, 0.02f, 0.05f, 0.62f);
+        bg.raycastTarget = false;
+        VerticalLayoutGroup layout = go.AddComponent<VerticalLayoutGroup>();
+        layout.padding = new RectOffset(34, 34, 18, 22);
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandHeight = false;
+        ContentSizeFitter fitter = go.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        text = MakeText(go.transform, name + "Text", size, style, alignment);
+        text.textWrappingMode = TextWrappingModes.Normal;
+        text.lineSpacing = 6;
+        go.SetActive(false);
+        return rect;
+    }
+
+    static void PlacePanel(RectTransform panel, Vector2 anchor, Vector2 offset, float width)
+    {
+        if (panel == null) return;
+        panel.anchorMin = panel.anchorMax = anchor;
+        panel.pivot = new Vector2(anchor.x, 1f);
+        panel.anchoredPosition = offset;
+        panel.sizeDelta = new Vector2(width, panel.sizeDelta.y);
+    }
+
+    /// <summary>Top-centre board: the multiplication being built on the spiral, the skipped spot, the primes so far.</summary>
+    public void ShowBoard(string richText)
+    {
+        boardText.text = richText;
+        board.gameObject.SetActive(true);
+    }
+
+    public void HideBoard()
+    {
+        if (board != null) board.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// The three routes on the saddle, as equations: "on" shows all three evenly, "squares" / "pronic" / "euler"
+    /// highlights one and dims the others, "off" hides the legend.
+    /// </summary>
+    public void ShowEquations(string mode)
+    {
+        if (mode == "off")
+        {
+            legend.gameObject.SetActive(false);
+            return;
+        }
+
+        string Row(string id, Color c, string equation, string numbers, string note)
+        {
+            bool dim = mode != "on" && mode != id;
+            string hex = ColorUtility.ToHtmlStringRGB(c);
+            string row = $"<color=#{hex}>●  <b>{equation}</b></color>\n<size=78%><color=#C8C8D2>{numbers}</color>   {note}</size>";
+            return dim ? "<alpha=#40>" + row + "<alpha=#FF>" : row;
+        }
+
+        legendText.text =
+            Row("squares", SacksSpiral.SquareColor, "n = k²", "1, 4, 9, 16, 25 …", "squares: never prime") + "\n" +
+            Row("pronic", SacksSpiral.PronicColor, "n = k(k + 1)", "2, 6, 12, 20, 30 …", "neighbours multiplied: never prime") + "\n" +
+            Row("euler", SacksSpiral.EulerColor, "n = k² + k + 41", "41, 43, 47, 53 …", "Euler: prime for k = 0 to 39");
+        legend.gameObject.SetActive(true);
     }
 
     static void SetAnchor(RectTransform r, float x, float y, Vector2 size)
@@ -545,5 +630,7 @@ public class CaptionDisplay : MonoBehaviour
         footnote.text = "";
         chapterIndex.text = "";
         titleGroup.alpha = 0f;
+        HideBoard();
+        if (legend != null) legend.gameObject.SetActive(false);
     }
 }

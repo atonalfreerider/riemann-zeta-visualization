@@ -5,7 +5,7 @@ using UnityEngine;
 /// Wires the tour, captions, annotations and bloom into the scene at runtime, so the
 /// original zeta.unity scene needs no manual changes.
 ///
-/// Command line (player builds):  -tour  -record  -landscape  -chapter &lt;id&gt;
+/// Command line (player builds):  -tour  -record  -landscape | -portrait  -chapter &lt;id&gt;  (default format: the screen's shape)
 /// Editor: use the Zeta menu (Assets/Editor/ZetaMenu.cs) or press T in play mode.
 /// </summary>
 public static class ZetaBootstrap
@@ -63,6 +63,7 @@ public static class ZetaBootstrap
                 case "-tour": director.AutoStart = true; break;
                 case "-record": director.AutoStart = true; director.RecordOnStart = true; break;
                 case "-landscape": director.Portrait = false; break;
+                case "-portrait": director.Portrait = true; break;
                 case "-chapter": if (i + 1 < args.Length) director.StartChapter = args[++i]; break;
                 case "-storyboard": director.AutoStart = true; director.Storyboard = true; break;
                 case "-storyboard-dir": if (i + 1 < args.Length) director.StoryboardDirectory = args[++i]; break;

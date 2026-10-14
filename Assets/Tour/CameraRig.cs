@@ -50,6 +50,8 @@ public class CameraRig : MonoBehaviour
     }
 
     float Y(double t) => (float)t * Graph.yScale;
+    /// <summary>The aspect the camera renders at (the recording's when offscreen, else the framed viewport's).</summary>
+    float Aspect => Mathf.Max(0.3f, cam.aspect);
     float TipY => Y(main.CurrentT);
     Vector3 TipCenter => new(0.8f, TipY, 0.2f);
     float Orbit(float radius, float speed, float phase) => Mathf.Sin(Time.time * speed + phase) * radius;
@@ -176,9 +178,34 @@ public class CameraRig : MonoBehaviour
         cues["lattice"] = () => new CueState { Position = new Vector3(-31f, 15.5f, -27f), LookAt = new Vector3(-31f, 15.5f, 0f), Up = up, Fov = 60 };
         cues["sieve"] = () =>
         {
-            // tilted so the altitude rows (toward the camera) stack visibly above the spiral
-            Vector3 c = annotations.Sacks.Center + new Vector3(0, 1.0f, 0);
-            return new CueState { Position = c + new Vector3(-3f, -13f, -23f), LookAt = c + Vector3.back * .8f, Up = up, Fov = 60 };
+            // never still: a slow orbit around the spiral's centre, looking down from a little above its plane, with the
+            // spiral's normal as screen-up so the rows of dots stack upward; far enough that 1..30 fits either frame shape
+            Vector3 c = annotations.Sacks.Center + Vector3.back * 2.2f;
+            float a = Time.time * 0.07f - 1.9f;
+            const float tilt = 54f * Mathf.Deg2Rad; // from the normal: low enough that "one level up" reads as up
+            float d = Mathf.Max(13.5f, 10f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
+            Vector3 pos = c + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * (d * Mathf.Sin(tilt)) + Vector3.back * (d * Mathf.Cos(tilt));
+            return new CueState { Position = pos, LookAt = c, Up = Vector3.back, Fov = 60 };
+        };
+        cues["home_orbit"] = () =>
+        {
+            // the home view: orbit the saddle with its normal as screen-up, so the growing zeta trail rises up the
+            // screen; the look point climbs with the trail and the distance fits the saddle to the frame shape
+            SacksSpiral s = annotations.Sacks;
+            float h = s.GrowthHeight;
+            float a = Time.time * 0.045f + 2.2f;
+            // frame the part of the saddle the waves ride on (n ≤ 420, radius ~30); the outer spiral runs off the edges
+            const float elevation = 26f * Mathf.Deg2Rad;
+            float tan = Mathf.Tan(30f * Mathf.Deg2Rad);
+            float radius = s.WaveRadius;
+            float dWidth = radius * 1.05f / (tan * Mathf.Min(1f, Aspect));
+            float dHeight = (radius * .9f + h * Mathf.Cos(elevation) * .6f + 4f) / tan;
+            float dNear = 2.1f * radius / Mathf.Cos(elevation); // keep the near rim well away from the lens
+            float d = Mathf.Max(dNear, Mathf.Max(dWidth, dHeight));
+            Vector3 look = s.Center + Vector3.back * (h * .42f);
+            Vector3 horizontal = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
+            Vector3 pos = look + horizontal * (d * Mathf.Cos(elevation)) + Vector3.back * (d * Mathf.Sin(elevation));
+            return new CueState { Position = pos, LookAt = look, Up = Vector3.back, Fov = 60 };
         };
         cues["sacks_flat"] = () =>
         {
@@ -196,10 +223,14 @@ public class CameraRig : MonoBehaviour
         };
         cues["sacks_routes"] = () =>
         {
-            Vector3 c = annotations.Sacks.Center;
-            float a = Time.time * 0.15f;
-            float d = annotations.Sacks.Extent * 2.1f;
-            return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .35f, d * .1f, -d * .95f), LookAt = c, Up = up, Fov = 60 };
+            // a slow orbit over the saddle from the side its ridge rises toward (+Z), so the squares (red) and the
+            // neighbour products (blue) run along a ridge that visibly climbs, and Euler's green curve sweeps between
+            Vector3 c = annotations.Sacks.Center + Vector3.forward * 10f;
+            float a = Time.time * 0.05f + 3.6f;
+            const float elevation = 46f * Mathf.Deg2Rad;
+            float d = annotations.Sacks.Extent * (Aspect >= 1f ? 1.6f : 2.3f);
+            Vector3 pos = c + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * (d * Mathf.Cos(elevation)) + Vector3.forward * (d * Mathf.Sin(elevation));
+            return new CueState { Position = pos, LookAt = c, Up = Vector3.forward, Fov = 60 };
         };
         cues["sacks_3d"] = () =>
         {
@@ -417,22 +448,25 @@ public class CameraRig : MonoBehaviour
             return;
         }
 
-        if (!Portrait || !Active)
+        // The tour is framed to its format only when the screen has the other shape (a 9:16 tour on a monitor is
+        // pillarboxed, a 16:9 tour on an upright phone is letterboxed); everything else uses the whole window.
+        float screenAspect = (float)Screen.width / Screen.height;
+        float target = Portrait ? PortraitAspect : 1f / PortraitAspect;
+        bool tour = TourDirector.Instance != null && TourDirector.Instance.Running;
+        if (!tour || !Active || (screenAspect >= 1f) == (target >= 1f))
         {
-            // free-roam mode uses the whole window; the 9:16 frame only applies while the tour drives the camera
             cam.rect = new Rect(0, 0, 1, 1);
             return;
         }
 
-        float screenAspect = (float)Screen.width / Screen.height;
-        if (screenAspect > PortraitAspect)
+        if (screenAspect > target)
         {
-            float w = PortraitAspect / screenAspect;
+            float w = target / screenAspect;
             cam.rect = new Rect((1f - w) * .5f, 0, w, 1);
         }
         else
         {
-            float h = screenAspect / PortraitAspect;
+            float h = screenAspect / target;
             cam.rect = new Rect(0, (1f - h) * .5f, 1, h);
         }
     }
