@@ -71,9 +71,9 @@ public static class VRBuildSetup
         PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
         PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel32; // the passthrough camera feature needs Android 12L
         PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34;
-        PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.Activity;
+        PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.GameActivity; // required by the OpenXR Quest validation on Unity 6
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
         PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
         PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
@@ -81,6 +81,7 @@ public static class VRBuildSetup
         PlayerSettings.SetMobileMTRendering(android, true);
         PlayerSettings.gpuSkinning = true;
         PlayerSettings.Android.optimizedFramePacing = false; // XR controls the pacing
+        PlayerSettings.enableFrameTimingStats = true;         // GPU/CPU frame times for VRPerf
         EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
         EditorUserBuildSettings.buildAppBundle = false;
         EditorUserBuildSettings.androidBuildType = AndroidBuildType.Release;
@@ -128,6 +129,7 @@ public static class VRBuildSetup
         Enable<HandTracking>(openXR);             // XR Hands subsystem
         Enable<MetaHandTrackingAim>(openXR);      // aim / pinch strength
         Enable<HandInteractionProfile>(openXR);   // pinch / poke / aim poses without controllers
+        Enable<OculusTouchControllerProfile>(openXR); // the Quest build validation insists on one Touch profile; the app itself only reads hands
 
         openXR.renderMode = OpenXRSettings.RenderMode.SinglePassInstanced;
         openXR.depthSubmissionMode = OpenXRSettings.DepthSubmissionMode.None;

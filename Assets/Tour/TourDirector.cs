@@ -81,6 +81,7 @@ public class TourDirector : MonoBehaviour
         Rig.Portrait = Portrait;
         Captions = CaptionDisplay.Create(cam);
         Recorder = FrameRecorder.Create(cam);
+        if (!Portrait && !VRMode.Enabled && Recorder.Width < Recorder.Height) (Recorder.Width, Recorder.Height) = (Recorder.Height, Recorder.Width); // -landscape records 1920x1080
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
@@ -141,6 +142,8 @@ public class TourDirector : MonoBehaviour
         Recorder.ChapterMarks.Clear();
         tourStartTime = Time.time;
         Hint("");
+        // captions follow the shape of the recording (the editor preview keeps the tall layout)
+        if (RecordOnStart || Storyboard || Recorder.IsOffscreen) Captions.SetLayout(Recorder.Width > Recorder.Height);
 
         if (Storyboard)
         {

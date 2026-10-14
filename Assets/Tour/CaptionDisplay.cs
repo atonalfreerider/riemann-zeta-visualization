@@ -10,7 +10,8 @@ using UnityEngine.UI;
 /// </summary>
 public class CaptionDisplay : MonoBehaviour
 {
-    const int MaxPageCharacters = 58;
+    int maxPageCharacters = 58;
+    RectTransform titleRect, backdropRect, captionRect, footnoteRect;
 
     Canvas canvas;
     TextMeshProUGUI chapterTitle;
@@ -64,6 +65,8 @@ public class CaptionDisplay : MonoBehaviour
             // a headset has no screen to overlay: hang the captions on the lazily gaze-following HUD anchor,
             // 1080 x 1080 units at about 1.2 mm per unit, drawn over the model
             canvas.renderMode = RenderMode.WorldSpace;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 8; // after the model's lines, before the menus
             transform.SetParent(VRMode.Rig.Hud, false);
             RectTransform rect = GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(1080, 1080);
@@ -88,7 +91,7 @@ public class CaptionDisplay : MonoBehaviour
         // chapter title card
         GameObject titleCard = new("TitleCard");
         titleCard.transform.SetParent(transform, false);
-        RectTransform titleRect = titleCard.AddComponent<RectTransform>();
+        titleRect = titleCard.AddComponent<RectTransform>();
         titleRect.anchorMin = new Vector2(0.5f, 0.78f);
         titleRect.anchorMax = new Vector2(0.5f, 0.78f);
         titleRect.sizeDelta = new Vector2(960, 400);
@@ -116,7 +119,7 @@ public class CaptionDisplay : MonoBehaviour
         backdrop.transform.SetParent(transform, false);
         captionBackdrop = backdrop.AddComponent<Image>();
         captionBackdrop.color = new Color(0, 0, 0, .45f);
-        RectTransform backdropRect = captionBackdrop.rectTransform;
+        backdropRect = captionBackdrop.rectTransform;
         backdropRect.anchorMin = new Vector2(0.5f, 0.2f);
         backdropRect.anchorMax = new Vector2(0.5f, 0.2f);
         backdropRect.sizeDelta = new Vector2(980, 330);
@@ -127,6 +130,7 @@ public class CaptionDisplay : MonoBehaviour
         caption.rectTransform.sizeDelta = new Vector2(920, 330);
         caption.textWrappingMode = TextWrappingModes.Normal;
         caption.lineSpacing = 8;
+        captionRect = caption.rectTransform;
 
         footnote = MakeText(transform, "Footnote", 26, FontStyles.Italic, TextAlignmentOptions.Center);
         footnote.rectTransform.anchorMin = new Vector2(0.5f, 0.2f);
@@ -134,6 +138,7 @@ public class CaptionDisplay : MonoBehaviour
         footnote.rectTransform.anchoredPosition = new Vector2(0, 200);
         footnote.rectTransform.sizeDelta = new Vector2(960, 70);
         footnote.color = new Color(.75f, .75f, .8f);
+        footnoteRect = footnote.rectTransform;
 
         hint = MakeText(transform, "Hint", 28, FontStyles.Normal, TextAlignmentOptions.Center);
         hint.rectTransform.anchorMin = new Vector2(0.5f, 0);
@@ -145,6 +150,46 @@ public class CaptionDisplay : MonoBehaviour
         BuildCard();
         Clear();
         if (VRMode.Enabled) MakeOverlay();
+    }
+
+
+    /// <summary>
+    /// Lay the captions out for a wide (1920×1080) frame instead of the tall (1080×1920) default: a broad caption bar
+    /// along the bottom with longer pages, and a title card that uses the width.
+    /// </summary>
+    public void SetLayout(bool landscape)
+    {
+        if (VRMode.Enabled) return;
+        float x = 0.5f;
+        if (landscape)
+        {
+            maxPageCharacters = 84;
+            SetAnchor(titleRect, x, 0.72f, new Vector2(1500, 400));
+            chapterTitle.rectTransform.sizeDelta = new Vector2(1500, 200);
+            chapterSubtitle.rectTransform.sizeDelta = new Vector2(1500, 100);
+            SetAnchor(backdropRect, x, 0.13f, new Vector2(1560, 220));
+            SetAnchor(captionRect, x, 0.13f, new Vector2(1480, 200));
+            SetAnchor(footnoteRect, x, 0.13f, new Vector2(1500, 60));
+            footnoteRect.anchoredPosition = new Vector2(0, 150);
+        }
+        else
+        {
+            maxPageCharacters = 58;
+            SetAnchor(titleRect, x, 0.78f, new Vector2(960, 400));
+            chapterTitle.rectTransform.sizeDelta = new Vector2(960, 240);
+            chapterSubtitle.rectTransform.sizeDelta = new Vector2(960, 120);
+            SetAnchor(backdropRect, x, 0.2f, new Vector2(980, 330));
+            SetAnchor(captionRect, x, 0.2f, new Vector2(920, 330));
+            SetAnchor(footnoteRect, x, 0.2f, new Vector2(960, 70));
+            footnoteRect.anchoredPosition = new Vector2(0, 200);
+        }
+    }
+
+    static void SetAnchor(RectTransform r, float x, float y, Vector2 size)
+    {
+        r.anchorMin = r.anchorMax = new Vector2(x, y);
+        r.anchoredPosition = Vector2.zero;
+        r.sizeDelta = size;
     }
 
     /// <summary>In VR every graphic of the captions draws on top of the model (the scene is scaled around the user and would otherwise hide it).</summary>
@@ -442,7 +487,7 @@ public class CaptionDisplay : MonoBehaviour
         for (int i = 0; i < timing.words.Length; i++)
         {
             int length = timing.words[i].w.Length + 1;
-            if (chars + length > MaxPageCharacters && i > start)
+            if (chars + length > maxPageCharacters && i > start)
             {
                 pages.Add((start, i));
                 start = i;

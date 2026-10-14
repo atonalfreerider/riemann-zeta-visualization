@@ -107,7 +107,7 @@ public class VRHandVisual : MonoBehaviour
     VRPoker poker;
     VRWorldGrab grab;
     Material overlay;
-    readonly MaterialPropertyBlock block = new();
+    MaterialPropertyBlock block; // created in Build: Unity forbids it in a field initializer
     readonly Dictionary<VRHand, View> views = new();
     readonly Vector3[] chain = new Vector3[6];
     static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -125,6 +125,7 @@ public class VRHandVisual : MonoBehaviour
 
     void Build()
     {
+        block = new MaterialPropertyBlock();
         Shader glow = Shader.Find("Zeta/GlowLine");
         overlay = new Material(glow != null ? glow : Shader.Find("Sprites/Default")) { name = "VR Hands", enableInstancing = true };
         overlay.SetFloat("_ZTest", 8f); // always on top

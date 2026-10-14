@@ -39,6 +39,28 @@ public static class ZetaMenu
         menu.ShowAsContext();
     }
 
+    const string VRSimulateMenu = "Zeta/VR/Desktop Simulation (mouse as hands)";
+
+    /// <summary>
+    /// Enter Play mode with the VR interface and a mouse standing in for the hands: move the mouse to move the
+    /// fingertip, scroll to push it nearer or farther, hold the left button to poke, Shift + left button to pinch,
+    /// right button + WASD/QE to look and move.
+    /// </summary>
+    [MenuItem(VRSimulateMenu)]
+    static void ToggleVRSimulation()
+    {
+        bool on = !EditorPrefs.GetBool("Zeta.VRSimulate", false);
+        EditorPrefs.SetBool("Zeta.VRSimulate", on);
+        Debug.Log("Zeta VR desktop simulation " + (on ? "ON: enter Play mode to try the headset interface with the mouse." : "off."));
+    }
+
+    [MenuItem(VRSimulateMenu, true)]
+    static bool ToggleVRSimulationChecked()
+    {
+        Menu.SetChecked(VRSimulateMenu, EditorPrefs.GetBool("Zeta.VRSimulate", false));
+        return true;
+    }
+
     [MenuItem("Zeta/Game View - Portrait 1080x1920")]
     static void SetPortraitGameView()
     {

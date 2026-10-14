@@ -26,7 +26,7 @@ public static class VRStyle
             if (ui != null) return ui;
             Shader shader = Shader.Find("Zeta/VRUI");
             ui = new Material(shader != null ? shader : Shader.Find("UI/Default")) { name = "VR UI" };
-            ui.renderQueue = 4000;
+            // keep the shader's own queue (Transparent+100): the overlay text draws at 4000, after the images behind it
             return ui;
         }
     }
@@ -45,7 +45,7 @@ public static class VRStyle
         t.richText = true;
         t.raycastTarget = false;
         t.textWrappingMode = TextWrappingModes.Normal;
-        t.overflowMode = TextOverflowModes.Ellipsis;
+        t.overflowMode = TextOverflowModes.Truncate;
         t.isOverlay = true; // draw over the visualization
         return t;
     }
@@ -83,6 +83,7 @@ public class VRPanel : MonoBehaviour
         go.transform.SetParent(parent, false);
         Canvas canvas = go.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
+        canvas.overrideSorting = true;
         canvas.sortingOrder = 10;
         VRPanel panel = go.AddComponent<VRPanel>();
         panel.Group = go.AddComponent<CanvasGroup>();
@@ -256,7 +257,7 @@ public class VRButton : VRControl
             tr.pivot = new Vector2(.5f, 0);
             tr.sizeDelta = new Vector2(-6f, iconId.HasValue ? fontSize * 1.5f : h);
             tr.anchoredPosition = new Vector2(0, iconId.HasValue ? 3f : 0f);
-            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.overflowMode = TextOverflowModes.Truncate;
             text.textWrappingMode = TextWrappingModes.NoWrap;
             text.enableAutoSizing = true;
             text.fontSizeMax = fontSize;
@@ -384,11 +385,18 @@ public class VRSlider : VRControl
         set?.Invoke(Mathf.Lerp(min, max, t));
     }
 
+    float shownValue = float.NaN;
+
     void Update()
     {
         float v = Mathf.Clamp(get(), min, max);
         float t = Mathf.InverseLerp(min, max, v);
-        valueText.text = format(v);
+        if (!Mathf.Approximately(v, shownValue))
+        {
+            shownValue = v;
+            valueText.text = format(v); // only when it changes: a new string every frame would feed the garbage collector
+        }
+
         VRPanel.Place(fill, trackLeft, 36, Mathf.Max(14f, trackWidth * t), 14);
         VRPanel.Place(knob, trackLeft + trackWidth * t - 15f, 28, 30, 30);
         knobImage.color = Color.Lerp(Color.white, VRStyle.Accent, Mathf.Max(HoverAmount, Held ? 1f : 0f));
@@ -508,7 +516,8 @@ public class VRPoker : MonoBehaviour
 
     void Update()
     {
-        foreach (VRHand hand in new[] { hands.Left, hands.Right }) UpdateHand(hand, states[hand]);
+        UpdateHand(hands.Left, states[hands.Left]);
+        UpdateHand(hands.Right, states[hands.Right]);
         foreach (VRPanel panel in panels)
         {
             if (!panel.Open) continue;

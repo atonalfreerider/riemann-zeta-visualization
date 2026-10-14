@@ -210,6 +210,8 @@ public class VRRig : MonoBehaviour
         float s = Scale;
         Cam.nearClipPlane = Mathf.Max(0.001f, 0.05f * s);
         Cam.farClipPlane = Mathf.Max(1000f, 400f * s);
+        Factory.SetVrLineMetrics(s, ModelDistance);
+        foreach (LineRenderer line in floorLines) line.widthMultiplier = s; // these lines live in the user's space: a few millimetres wide
     }
 
     // ---- passthrough / blackout ---------------------------------------------------------------
@@ -230,9 +232,7 @@ public class VRRig : MonoBehaviour
         Color dim = new(0.28f, 0.34f, 0.5f, 0.55f);
         for (int ring = 1; ring <= 4; ring++)
         {
-            LineRenderer line = Factory.NewLine("ring", 0.004f, dim);
-            line.transform.SetParent(floorGrid.transform, false);
-            line.useWorldSpace = false;
+            LineRenderer line = NewFloorLine("ring", dim);
             line.loop = true;
             const int segments = 72;
             line.positionCount = segments;
@@ -245,14 +245,24 @@ public class VRRig : MonoBehaviour
 
         for (int spoke = 0; spoke < 8; spoke++)
         {
-            LineRenderer line = Factory.NewLine("spoke", 0.003f, dim);
-            line.transform.SetParent(floorGrid.transform, false);
-            line.useWorldSpace = false;
+            LineRenderer line = NewFloorLine("spoke", dim);
             float a = spoke * Mathf.PI / 4f;
             line.positionCount = 2;
             line.SetPosition(0, new Vector3(Mathf.Cos(a), 0.002f, Mathf.Sin(a)) * 0.5f);
             line.SetPosition(1, new Vector3(Mathf.Cos(a), 0.002f, Mathf.Sin(a)) * 2f);
         }
+    }
+
+    readonly System.Collections.Generic.List<LineRenderer> floorLines = new();
+
+    /// <summary>A thin line in the user's own space (not part of the model): 4 mm wide, whatever the rig scale.</summary>
+    LineRenderer NewFloorLine(string name, Color color)
+    {
+        LineRenderer line = Factory.NewLine(name, 0.004f, color);
+        line.transform.SetParent(floorGrid.transform, false);
+        line.useWorldSpace = false;
+        floorLines.Add(line);
+        return line;
     }
 
     // ---- HUD follow ----------------------------------------------------------------------------

@@ -142,19 +142,20 @@ public class VRHand
 
         Joints[Wrist] = origin;
         Joints[Palm] = origin + point * 0.045f;
-        // thumb: metacarpal, proximal, distal, tip (indices 1..4)
+        // thumb: metacarpal, proximal, distal, tip (joint indices 2..5, as numbered by XR Hands)
         Vector3 thumbBase = origin + point * 0.015f + side * 0.022f;
         Vector3 thumbTipRest = origin + point * 0.085f + side * 0.075f - back * 0.005f;
         Vector3 pinchTip = tip + side * 0.008f - back * 0.006f;
         Vector3 thumbTipPos = Vector3.Lerp(thumbTipRest, pinchTip, pinch);
-        Joints[1] = thumbBase;
-        Joints[2] = Vector3.Lerp(thumbBase, thumbTipPos, 0.35f) + back * 0.004f;
-        Joints[3] = Vector3.Lerp(thumbBase, thumbTipPos, 0.7f) + back * 0.003f;
-        Joints[4] = thumbTipPos;
-        Finger(5, -0.026f, new[] { 0.02f, 0.075f, 0.108f, 0.130f, 0.148f }, 0f);     // index (straight)
-        Finger(10, -0.008f, new[] { 0.02f, 0.080f, 0.118f, 0.142f, 0.162f }, 1.15f);  // middle
-        Finger(15, 0.012f, new[] { 0.02f, 0.076f, 0.112f, 0.135f, 0.153f }, 1.15f);   // ring
-        Finger(20, 0.030f, new[] { 0.02f, 0.068f, 0.098f, 0.117f, 0.132f }, 1.15f);   // little
+        int thumb = ThumbTip - 3;
+        Joints[thumb] = thumbBase;
+        Joints[thumb + 1] = Vector3.Lerp(thumbBase, thumbTipPos, 0.35f) + back * 0.004f;
+        Joints[thumb + 2] = Vector3.Lerp(thumbBase, thumbTipPos, 0.7f) + back * 0.003f;
+        Joints[thumb + 3] = thumbTipPos;
+        Finger(IndexMeta, -0.026f, new[] { 0.02f, 0.075f, 0.108f, 0.130f, 0.148f }, 0f);     // index (straight)
+        Finger(IndexMeta + 5, -0.008f, new[] { 0.02f, 0.080f, 0.118f, 0.142f, 0.162f }, 1.15f);  // middle
+        Finger(IndexMeta + 10, 0.012f, new[] { 0.02f, 0.076f, 0.112f, 0.135f, 0.153f }, 1.15f);   // ring
+        Finger(IndexMeta + 15, 0.030f, new[] { 0.02f, 0.068f, 0.098f, 0.117f, 0.132f }, 1.15f);   // little
     }
 }
 
@@ -176,9 +177,12 @@ public class VRHands : MonoBehaviour
     public bool ScriptedRight;
     public Vector3 ScriptedRightTip;
     public float ScriptedRightPinch;
+    /// <summary>Optional pointing direction and back-of-hand direction (zero = point away from the head, palm down).</summary>
+    public Vector3 ScriptedRightPoint, ScriptedRightBack;
     public bool ScriptedLeft;
     public Vector3 ScriptedLeftTip;
     public float ScriptedLeftPinch;
+    public Vector3 ScriptedLeftPoint, ScriptedLeftBack;
     float simulatedDepth = 0.5f;
     bool simulatedPoke;
     bool simulatedPinch;
@@ -260,11 +264,11 @@ public class VRHands : MonoBehaviour
     void PollSimulation(float dt)
     {
         Available = true;
-        PollSimulatedHand(Right, ScriptedRight, ScriptedRightTip, ScriptedRightPinch, dt, true);
-        PollSimulatedHand(Left, ScriptedLeft, ScriptedLeftTip, ScriptedLeftPinch, dt, false);
+        PollSimulatedHand(Right, ScriptedRight, ScriptedRightTip, ScriptedRightPinch, ScriptedRightPoint, ScriptedRightBack, dt, true);
+        PollSimulatedHand(Left, ScriptedLeft, ScriptedLeftTip, ScriptedLeftPinch, ScriptedLeftPoint, ScriptedLeftBack, dt, false);
     }
 
-    void PollSimulatedHand(VRHand hand, bool scripted, Vector3 scriptedTip, float scriptedPinch, float dt, bool mouseDriven)
+    void PollSimulatedHand(VRHand hand, bool scripted, Vector3 scriptedTip, float scriptedPinch, Vector3 scriptedPoint, Vector3 scriptedBack, float dt, bool mouseDriven)
     {
         Vector3 tip;
         float pinch;
@@ -293,8 +297,9 @@ public class VRHands : MonoBehaviour
         }
 
         Vector3 head = rig.Cam.transform.localPosition;
-        Vector3 pointDirection = (tip - head).normalized;
-        hand.FillSynthetic(tip, pointDirection, Vector3.up, pinch);
+        Vector3 pointDirection = scripted && scriptedPoint != Vector3.zero ? scriptedPoint : (tip - head).normalized;
+        Vector3 back = scripted && scriptedBack != Vector3.zero ? scriptedBack : Vector3.up;
+        hand.FillSynthetic(tip, pointDirection, back, pinch);
         hand.Tracked = true;
         hand.Update(dt);
     }

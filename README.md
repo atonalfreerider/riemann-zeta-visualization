@@ -52,6 +52,13 @@ scripting vocabulary, and [docs/narration-script.md](docs/narration-script.md) f
 | ![09-qrh](docs/gifs/09-qrh.gif) | ![12-seven-eighths](docs/screenshots/12-seven-eighths.png) | **9. 2026: A Wall at Seven Eighths.** OpenAI's AI-generated, Lean-checked claim that no collision can stray past 7/8 (and by symmetry below 1/8), the 11/12 companion proof, the honest status (not peer reviewed), and the open gap from ½ to 7/8 where the hypothesis still lives. |
 | ![10-outro](docs/gifs/10-outro.gif) | ![13-outro](docs/screenshots/13-outro.png) | **10. Written Into the Universe.** Back on the saddle, and a closing hypothesis (a guess, not a result): the square-root rule is the spiral itself (radius √n), and the logarithm rule at each collision's t picks out the numbers whose arrows point the same way, n = e^(2πk/t), tracing a curve on the saddle for t = 14.13 and for t = 21.02. Whether those curves know where the valleys are is an open question. |
 
+## Meta Quest 2 (VR, hands only)
+
+The same visualization runs on a Quest 2 with hand tracking only: passthrough is the default backdrop, one touch
+turns it into a blackout, and the whole tour (narrated, captioned) and every math view are driven with big icon buttons
+you push with a finger. Pinch to move the model, pinch with both hands to scale and turn it, turn your left palm toward
+your face for a quick menu. See [docs/VR.md](docs/VR.md) for building, installing and using it.
+
 Thumbnails for the video are in [docs/thumbnail](docs/thumbnail).
 
 ## Guided tour, bloom and recording

@@ -37,23 +37,33 @@ python3 Tools/mux_recording.py Recordings/<timestamp>
 
 That writes `Recordings/<timestamp>/tour.mp4`.
 
-## Narration audio (ElevenLabs)
+## Narration audio
 
-1. Review and edit the captions in `Assets/Resources/Narration/script.json`
-   (human-readable copy: `docs/narration-script.md`, regenerate with `python3 Tools/export_captions.py`).
-2. Put the API key in the environment, never on the command line:
-   ```bash
-   export ELEVENLABS_API_KEY=...
-   ```
-3. Generate (voice name defaults to `John V4`; `--only <chapter-id>` for a subset, `--force` to redo):
-   ```bash
-   python3 Tools/generate_narration.py --voice "John V4"
-   ```
-4. Switch to Unity so it imports `Assets/Resources/Narration/Audio/*.mp3`, then play the tour.
+The narration is rendered locally with this machine's Chatterbox install (`narrate`, John's voice):
 
-Each line gets an `.mp3` and a `Timing/<id>.json` with per-word start/end times derived from the
-ElevenLabs character alignment, so the yellow highlight follows the real speech. Until audio exists
-the tour estimates timings (~2.7 words/s) so everything can be previewed.
+```bash
+python Tools/generate_narration_chatterbox.py              # every line that has no render yet
+python Tools/generate_narration_chatterbox.py --only qrh   # one chapter id or one line id
+python Tools/generate_narration_chatterbox.py --only outro_05 --force   # render a line again
+python Tools/generate_narration_chatterbox.py --no-render  # redo only the alignment and loudness stages
+```
+
+For each line of `Assets/Resources/Narration/script.json` it runs `narrate "<text>" --exaggeration 0.25 -o <id>.wav`
+(untouched renders go to `Tools/narration_raw`, which is git-ignored), and then
+
+* **aligns** the words with the local Whisper model (`Tools/align_narration.py`, run with the narrator install's Python,
+  nothing is downloaded) and writes `Timing/<id>.json` so the yellow karaoke highlight follows the real speech. The same
+  pass compares what was spoken with the script and prints a word error rate per line; a high number means the line should
+  be rendered again (numbers spoken as words show up as "errors" because Whisper writes digits, that is not a fault);
+* **normalises** the loudness (a gentle compressor, gain to -18 LUFS and a peak limiter), because Chatterbox renders come
+  out around -28 LUFS. The result is `Assets/Resources/Narration/Audio/<id>.wav`.
+
+After changing a line's text in `script.json`, render that line again (`--only <id> --force`); lines whose text did not
+change keep their audio. Until audio exists the tour estimates timings (~2.7 words/s), and without Whisper the generator
+falls back to timing the words between the pauses it finds in the audio.
+
+The previous ElevenLabs route (`Tools/generate_narration.py`, an API key, `.mp3` files) still works and
+`Tools/mux_recording.py` accepts either format.
 
 ## Script format
 
@@ -113,6 +123,19 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `flash:zero`, `flash:tail` | pulse the newest zero marker / the orange tail |
 | `ghost:all:β` | draw the staircase as if every collision had shrink rate β |
 | `ghost:β:γ`, `ghost:off` | a single hypothetical zero at β + iγ |
+
+## One video per chapter, vertical and horizontal
+
+```bash
+python Tools/render_chapters.py --unity "C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor/Unity.exe" --project . --out Recordings/chapters
+python Tools/render_chapters.py ... --chapters hook,zeno --shapes vertical     # a subset
+python Tools/render_chapters.py ... --mux-only                                  # add narration to existing renders
+```
+
+`ChapterRecordingTest` records every chapter on its own from a freshly loaded scene, in 1080x1920 and in 1920x1080 (the
+captions switch to a wide layout), and `render_chapters.py` lays the narration on at the frames where each line started.
+Output: `Recordings/chapters/NN-<chapter>-vertical.mp4` and `NN-<chapter>-horizontal.mp4` (H.264 + AAC, 30 fps).
+Close the editor first, or point `--project` at a copy of the project.
 
 ## Reviewing without a window (headless)
 

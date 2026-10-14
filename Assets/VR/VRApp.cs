@@ -15,10 +15,12 @@ public partial class VRApp : MonoBehaviour
     public VRPoker Poker { get; private set; }
     public VRWorldGrab Grab { get; private set; }
     public VRHandVisual Visual { get; private set; }
+    public VRPerf Perf { get; private set; }
     public VRGuide Guide { get; private set; }
     public VRPanel Dock { get; private set; }
     public VRPanel Palm { get; private set; }
     public bool Ready { get; private set; }
+    public TourDirector Tour => tour;
 
     TourDirector tour;
     Main main;
@@ -60,6 +62,7 @@ public partial class VRApp : MonoBehaviour
         Grab = VRWorldGrab.Create(Rig, Hands, Poker);
         Guide = VRGuide.Create(Rig);
         Visual = VRHandVisual.Create(Rig, Hands, Poker, Grab);
+        Perf = VRPerf.Create(Rig);
 
         while (TourDirector.Instance == null || TourDirector.Instance.Captions == null || TourDirector.Instance.Rig == null || TourDirector.Instance.Annotations == null)
         {
@@ -96,15 +99,20 @@ public partial class VRApp : MonoBehaviour
         };
         Guide.FollowChanged += () => { };
         tour.ChapterStarted += (index, chapter) => Guide.ResetOffsets();
-        tour.TourEnded += () => Toast("Tour finished. Explore with Views, or pick a chapter");
-
-        Guide.SetCue(VRGuide.HomeCue, true);
-        main.Play();
+        tour.TourEnded += () =>
+        {
+            Perf.Mark("explore");
+            Toast("Tour finished. Explore with Views, or pick a chapter");
+        };
+        tour.LineStarted += line => Perf.Mark(line.id);
 
         PlaceDock(true);
         Dock.SetOpen(true);
         Ready = true;
-        Toast("Touch a chapter to begin. Pinch and drag in the air to move the model");
+
+        // start with something alive in front of the user: the chain of arrows, turning
+        ApplyView("chain");
+        Toast("Touch a chapter to begin. Pinch and drag in the air to move the model", 7f);
     }
 
     // ---- per-frame --------------------------------------------------------------------------------
@@ -256,11 +264,8 @@ public partial class VRApp : MonoBehaviour
         Vector3 toDock = Dock.transform.localPosition - head;
         Vector3 gaze = Rig.Cam.transform.localRotation * Vector3.forward;
         float angle = Vector3.Angle(gaze, toDock);
-        bool handNear = false;
-        foreach (VRHand hand in new[] { Hands.Left, Hands.Right })
-        {
-            if (hand.Tracked && Vector3.Distance(hand.IndexTip, Dock.transform.localPosition) < 0.35f) handNear = true;
-        }
+        bool handNear = (Hands.Left.Tracked && Vector3.Distance(Hands.Left.IndexTip, Dock.transform.localPosition) < 0.35f)
+                        || (Hands.Right.Tracked && Vector3.Distance(Hands.Right.IndexTip, Dock.transform.localPosition) < 0.35f);
 
         // out of sight or out of reach for a moment (and no finger on it): glide it back in front of the user
         bool lost = (angle > 75f || toDock.magnitude > 1.1f) && !handNear;

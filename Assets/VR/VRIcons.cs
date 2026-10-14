@@ -450,16 +450,16 @@ public static class VRIcons
         sheet.SetPixels32(fill);
         for (int n = 0; n < ids.Length; n++)
         {
-            Texture2D icon = Get(ids[n]).texture;
+            Canvas2D icon = new(Size);
+            Draw(ids[n], icon);
+            float[] coverage = icon.Coverage;
             int ox = (n % columns) * cell + (cell - Size) / 2;
             int oy = (rows - 1 - n / columns) * cell + (cell - Size) / 2;
-            Color32[] px = icon.GetPixels32();
             for (int y = 0; y < Size; y++)
             for (int x = 0; x < Size; x++)
             {
-                Color32 s = px[y * Size + x];
+                float a = coverage[y * Size + x];
                 Color32 bg = fill[(oy + y) * sheet.width + ox + x];
-                float a = s.a / 255f;
                 sheet.SetPixel(ox + x, oy + y, new Color32((byte)(bg.r + (235 - bg.r) * a), (byte)(bg.g + (240 - bg.g) * a), (byte)(bg.b + (255 - bg.b) * a), 255));
             }
         }
@@ -558,6 +558,7 @@ public static class VRIcons
     {
         readonly int n;
         readonly float[] coverage;
+        public float[] Coverage => coverage;
         readonly float scale;
 
         public Canvas2D(int size)

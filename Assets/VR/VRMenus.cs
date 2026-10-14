@@ -30,6 +30,7 @@ public partial class VRApp
     TextMeshProUGUI nowLabel;
     VRButton replayButton, skipButton, prevChapterButton, nextChapterButton;
     bool autoNextChapter = true;
+    int nowKey = -2;
 
     class Layers
     {
@@ -67,7 +68,7 @@ public partial class VRApp
         BuildFooter();
     }
 
-    void ShowPage(int index)
+    public void ShowPage(int index)
     {
         page = index;
         for (int i = 0; i < pages.Count; i++) pages[i].gameObject.SetActive(i == index);
@@ -358,15 +359,18 @@ public partial class VRApp
 
     void BuildPalm()
     {
-        Palm = VRPanel.Create("Palm menu", new Vector2(424f, 96f), Rig.Ui);
-        const float y = 8f, w = 62f, h = 80f;
-        Palm.AddButton(8, y, w, h, "Menu", VRIcons.Id.Menu, ToggleDock, false, null, 16f);
-        VRButton play = Palm.AddButton(76, y, w, h, "Pause", VRIcons.Id.Pause, PlayPause, false, null, 16f);
+        // a pad about as wide as a hand, floating over the palm: two rows of three 42 mm buttons
+        Palm = VRPanel.Create("Palm menu", new Vector2(152f, 118f), Rig.Ui);
+        const float w = 42f, h = 48f, gap = 6f, x0 = 8f, y0 = 8f;
+        float X(int c) => x0 + c * (w + gap);
+        Palm.AddButton(X(0), y0, w, h, "Menu", VRIcons.Id.Menu, ToggleDock, false, null, 13f);
+        VRButton play = Palm.AddButton(X(1), y0, w, h, "Pause", VRIcons.Id.Pause, PlayPause, false, null, 13f);
         play.Dynamic(() => PlayingNow ? VRIcons.Id.Pause : VRIcons.Id.Play, () => PlayingNow ? "Pause" : "Play");
-        Palm.AddButton(144, y, w, h, "Skip", VRIcons.Id.NextLine, () => tour.NextLine(), false, null, 16f);
-        Palm.AddButton(212, y, w, h, "Follow", VRIcons.Id.Pin, ToggleFollow, true, () => Guide.Follow, 16f);
-        Palm.AddButton(280, y, w, h, "Room", VRIcons.Id.Eye, () => SetRoom(true), true, () => Rig.Passthrough, 16f);
-        Palm.AddButton(348, y, w, h, "Dark", VRIcons.Id.Moon, () => SetRoom(false), true, () => !Rig.Passthrough, 16f);
+        Palm.AddButton(X(2), y0, w, h, "Skip", VRIcons.Id.NextLine, () => tour.NextLine(), false, null, 13f);
+        float y1 = y0 + h + gap;
+        Palm.AddButton(X(0), y1, w, h, "Follow", VRIcons.Id.Pin, ToggleFollow, true, () => Guide.Follow, 13f);
+        Palm.AddButton(X(1), y1, w, h, "Room", VRIcons.Id.Eye, () => SetRoom(true), true, () => Rig.Passthrough, 13f);
+        Palm.AddButton(X(2), y1, w, h, "Dark", VRIcons.Id.Moon, () => SetRoom(false), true, () => !Rig.Passthrough, 13f);
     }
 
     // ---- state shown on the buttons ----------------------------------------------------------------------
@@ -380,9 +384,14 @@ public partial class VRApp
         if (nowLabel != null)
         {
             bool known = running && tour.CurrentChapterIndex >= 0 && tour.CurrentChapterIndex < tour.Chapters.Length;
-            nowLabel.text = known
-                ? $"<color=#FFD129>{tour.CurrentChapterIndex + 1}</color>  {tour.Chapters[tour.CurrentChapterIndex].title}" + (tour.Paused ? "   (paused)" : "")
-                : "Touch a chapter to hear the story";
+            int key = known ? tour.CurrentChapterIndex * 2 + (tour.Paused ? 1 : 0) : -1;
+            if (key != nowKey)
+            {
+                nowKey = key;
+                nowLabel.text = known
+                    ? $"<color=#FFD129>{tour.CurrentChapterIndex + 1}</color>  {tour.Chapters[tour.CurrentChapterIndex].title}" + (tour.Paused ? "   (paused)" : "")
+                    : "Touch a chapter to hear the story";
+            }
         }
     }
 }

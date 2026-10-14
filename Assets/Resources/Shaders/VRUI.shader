@@ -1,5 +1,7 @@
 // Flat UI shader for the VR panels, hand cursors and the caption HUD: texture x vertex colour x tint,
 // always drawn on top of the visualization (ZTest Always), single-pass-instanced stereo safe.
+// Same queue as the TextMeshPro text so that UI elements draw in hierarchy order (text over its button); the canvases'
+// sorting order keeps them after the model's lines.
 Shader "Zeta/VRUI"
 {
     Properties
@@ -18,7 +20,7 @@ Shader "Zeta/VRUI"
     }
     SubShader
     {
-        Tags { "Queue" = "Transparent+100" "RenderType" = "Transparent" "IgnoreProjector" = "True" "CanUseSpriteAtlas" = "True" }
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" "CanUseSpriteAtlas" = "True" }
 
         Stencil
         {

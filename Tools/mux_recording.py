@@ -18,6 +18,15 @@ ROOT = Path(__file__).resolve().parent.parent
 AUDIO_DIR = ROOT / "Assets/Resources/Narration/Audio"
 
 
+def audio_file(line_id):
+    """The narration clip for a line: wav (Chatterbox, generate_narration_chatterbox.py) or mp3 (ElevenLabs)."""
+    for ext in (".wav", ".mp3"):
+        path = AUDIO_DIR / f"{line_id}{ext}"
+        if path.exists():
+            return path
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("recording", help="recording folder containing timeline.json")
@@ -41,7 +50,7 @@ def main():
         ], check=True)
         video = encoded
 
-    clips = [c for c in timeline["audio"] if (AUDIO_DIR / f"{c['id']}.mp3").exists()]
+    clips = [c for c in timeline["audio"] if audio_file(c["id"])]
     if not clips:
         print("no narration clips found for this recording; copying video only")
         shutil.copy(video, output)
@@ -50,7 +59,7 @@ def main():
     cmd = ["ffmpeg", "-y", "-i", str(video)]
     filters = []
     for i, clip in enumerate(clips):
-        cmd += ["-i", str(AUDIO_DIR / f"{clip['id']}.mp3")]
+        cmd += ["-i", str(audio_file(clip["id"]))]
         delay_ms = int(round(clip["frame"] / fps * 1000))
         filters.append(f"[{i + 1}:a]adelay={delay_ms}|{delay_ms}[a{i}]")
     mix_inputs = "".join(f"[a{i}]" for i in range(len(clips)))

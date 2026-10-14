@@ -47,7 +47,50 @@ public class Factory : MonoBehaviour
         newLine.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         newLine.receiveShadows = false;
         SetIntensity(newLine, intensity);
+        if (VRMode.Enabled) RegisterVrLine(newLine, W);
         return newLine;
+    }
+
+    // ---- VR: keep thin lines visible when the rig is scaled up --------------------------------------
+    // A line 0.05 units wide, seen with the model scaled to fit on a table (rig scale ~90), is half a millimetre
+    // wide: below a Quest pixel. Every line gets a width multiplier so that it is never narrower than about
+    // 0.08 degrees of the user's view (about 1.5 Quest pixels); the story's own widths win when they are larger.
+
+    struct VrLine
+    {
+        public LineRenderer Line;
+        public float Width;
+    }
+
+    static readonly System.Collections.Generic.List<VrLine> vrLines = new();
+    static float vrLineScale = 1f, vrLineDistance = 1f;
+
+    static float VrWidthMultiplier(float width) => Mathf.Clamp(0.0016f * vrLineScale * vrLineDistance / Mathf.Max(width, 1e-4f), 1f, 6f);
+
+    static void RegisterVrLine(LineRenderer line, float width)
+    {
+        vrLines.Add(new VrLine { Line = line, Width = width });
+        line.widthMultiplier = VrWidthMultiplier(width);
+    }
+
+    /// <summary>Called by the VR rig whenever it moves: <paramref name="rigScale"/> is the model's reduction, <paramref name="viewDistance"/> the metres to the model.</summary>
+    public static void SetVrLineMetrics(float rigScale, float viewDistance)
+    {
+        if (Mathf.Abs(Mathf.Log(rigScale / vrLineScale)) < 0.03f && Mathf.Approximately(viewDistance, vrLineDistance)) return;
+        vrLineScale = rigScale;
+        vrLineDistance = viewDistance;
+        for (int i = vrLines.Count - 1; i >= 0; i--)
+        {
+            LineRenderer line = vrLines[i].Line;
+            if (line == null)
+            {
+                vrLines[i] = vrLines[^1];
+                vrLines.RemoveAt(vrLines.Count - 1);
+                continue;
+            }
+
+            line.widthMultiplier = VrWidthMultiplier(vrLines[i].Width);
+        }
     }
 
     /// <summary>Per-renderer HDR intensity without instancing a new material.</summary>
