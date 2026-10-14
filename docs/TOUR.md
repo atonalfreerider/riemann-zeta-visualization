@@ -6,10 +6,18 @@ can be switched in the side menu.
 
 ## Starting screen and side menu
 
-The app opens on the **home view**: the Sacks spiral bent on its saddle, slowly orbiting, with the zeta trail
-growing out of the saddle's centre from t = 0 (up the screen on desktop and phones, from the floor up in VR).
-Each zero the trail passes sends its cosine wave out along the spiral at the zero's height; the wave sinks onto
-the saddle and joins the master wave. At t = 140 the picture holds, then grows again.
+The app opens on the **home view**: the Sacks spiral bent on its saddle, slowly orbiting, with the master wave of
+all 10,000 zeros already riding the spiral (computed once in the background, shown when complete) and the zeta trail
+growing out of the saddle's centre from t = 0 (up the screen on desktop and phones, from the floor up in VR), faster
+and faster, dropping a marker at every zero, up to t = 1000. The picture holds, then grows again. The tour's last
+line ends on the same animation.
+
+The master wave (10,000 zeros × 160,000 samples, 60,000 on the Quest) is baked into `Assets/Resources/MasterWave`
+by **Zeta ▸ Bake Master Wave** (`unity run . -- -executeMethod MasterWaveBake.Bake`, about 15 s); computing it at
+run time takes minutes. Re-bake after changing `zetazeros.txt` or the sampling in `SacksSpiral.FullWaveLogN`.
+
+The outro chapter shows the zeros one at a time instead (`hypothesis:grow`): every zero the growing trail passes sends
+its cosine wave out along the spiral at the zero's height, then the wave sinks onto the saddle and joins the master wave.
 
 A panel tucks into the left edge (the tab, **M** or **Tab** opens and closes it):
 **View** Home · Explore · Graph (the original zeta / staircase graph) — **Format** 16:9 / 9:16 —
@@ -134,6 +142,7 @@ spiral tip or the probe so they track the animation). Tune positions there.
 | `sacks:sieve[:seconds]` | both of the above in one go, up to 30 |
 | `sacks:highlight:squares\|pronic\|euler\|all` | widen one route on the saddle and dim the others |
 | `equations:on` / `equations:squares\|pronic\|euler` / `equations:off` | on-screen legend of the saddle's routes (red n = k², blue n = k(k+1), green n = k² + k + 41), optionally highlighting one |
+| `hypothesis:grow:TMAX:SECONDS` | the trail grows from the saddle's centre to t = TMAX in SECONDS; each zero's wave runs out along the spiral at its height and sinks into the master wave |
 | `home:scene` | the home view's content (saddle + growing trail and waves), without moving the camera (used by the VR Explore view) |
 | `landing:on` / `landing:off` | callout at the centre explaining why the chain closed at this t |
 | `hypothesis:on` / `hypothesis:off` | the closing guess on the saddle: the √n spiral road plus the rings picked out by the logarithm rule at t = 14.13 and 21.02 |

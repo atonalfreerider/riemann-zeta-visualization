@@ -475,7 +475,9 @@ public class TourDirector : MonoBehaviour
         if (Recorder.IsRecording) StopRecording();
         else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
         Main.SpeedMultiplier = 1d;
-        if (VRMode.Enabled || explore) RestoreFreeRoam();
+        // the tour ends on the same picture the app opens with (in VR: standing on the saddle as the trail grows)
+        if (VRMode.Enabled) { if (VRMode.App != null) VRMode.App.ApplyView("explore"); }
+        else if (explore) RestoreFreeRoam();
         else Home.Enter();
         CurrentChapterId = "";
         CurrentChapterIndex = -1;
@@ -784,13 +786,24 @@ public class TourDirector : MonoBehaviour
                         break;
                     case "home":
                         // home:scene — the saddle with the zeta trail growing from its centre (content only, the camera is left alone)
-                        Home.PrepareScene();
+                        Home.PrepareScene(true);
                         break;
                     case "hypothesis":
                         if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "zeta") Annotations.Sacks.ShowZetaOnly();
                         else if (arg == "sheet") { Annotations.Sacks.ShowZetaOnly(); Annotations.Sacks.ShowFringeSheet(60f, 62f, 13); Annotations.Sacks.ShowTrail(true); }
                         else if (arg == "full") Annotations.Sacks.StartFullMasterWave(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : Main.zetaZeroValues.Length, 160000, 1300f, Mathf.Max(6f, currentLineSeconds * 0.9f));
+                        else if (arg == "notrail" || arg == "trail") Annotations.Sacks.SetGrowthTrailVisible(arg == "trail");
+                        else if (arg == "grow")
+                        {
+                            // hypothesis:grow:TMAX:SECONDS — the trail grows from the saddle's centre to t = TMAX; every zero it
+                            // passes sends its wave along the spiral at its height, and the wave sinks into the master wave
+                            float tMax = parts.Length > 2 ? float.Parse(parts[2], CultureInfo.InvariantCulture) : 101.5f;
+                            float seconds = parts.Length > 3 ? float.Parse(parts[3], CultureInfo.InvariantCulture) : Mathf.Max(6f, currentLineSeconds * 0.9f);
+                            if (Storyboard) seconds *= StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f);
+                            Annotations.Sacks.ShowHypothesis(false); // the static trail and rings make way for the growing one
+                            Annotations.Sacks.StartGrowth(SacksSpiral.GrowthMode.Waves, tMax, seconds, false);
+                        }
                         else if (arg == "wavestack") Annotations.Sacks.StartWaveStack(Mathf.Max(6f, currentLineSeconds * 0.95f), parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : 24);
                         else if (arg == "interference") Annotations.Sacks.StartInterference(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "nointerference") Annotations.Sacks.HideInterference();

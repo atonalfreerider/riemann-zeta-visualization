@@ -194,19 +194,19 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `sacks_saddle` · actions `pause hide:prime hide:spiral hide:tail hide:trail hide:zeros hide:imaxis hide:cosine sacks:show sacks:saddle sacks:routes pulse:sacks`</sub>
 
 **outro_03** — One last picture, and this one is a guess, not a result. Keep the spiral on the saddle, and let the zeta trail rise from its centre, with a collision wherever the trail returns to the axis.
-  <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:zeta` · footnote: a visual hypothesis, not a theorem</sub>
+  <sub>camera `sacks_3d` · actions `sacks:noroutes hypothesis:grow:101.5:28` · footnote: a visual hypothesis, not a theorem</sub>
 
 **outro_04** — Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.
-  <sub>camera `sacks_wave` · actions `hypothesis:zeta hypothesis:wavestack:30`</sub>
+  <sub>camera `sacks_wave`</sub>
 
 **outro_05** — Look straight down at the centre. The master wave rides the spiral, and it spikes at every prime: two, three, five, seven, eleven, thirteen. The orange ticks catch the prime powers.
-  <sub>camera `master_top`</sub>
+  <sub>camera `master_top` · actions `hypothesis:notrail`</sub>
 
 **outro_06** — Now dial in every collision we have. Ten thousand of them. Watch the spikes sharpen and multiply as the spiral fills, prime after prime after prime, as far out as the table can take us.
   <sub>camera `master_top_pull` · actions `hypothesis:full`</sub>
 
 **outro_07** — Saddle, trail and waves, one structure seen three ways. Do they know about each other, or are we seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set. The picture is yours now: explore it.
-  <sub>camera `master_top_pull` · actions `explore:on` · footnote: after the tour: WASD / QE move, right-drag look, E exit · VR: the Explore view on the dock</sub>
+  <sub>camera `home_orbit` · actions `home:scene` · footnote: open the side menu (M) to explore this picture, pick a chapter or record</sub>
 
 ---
 1924 words ≈ 12.8 minutes of speech at 150 wpm, plus pauses and title cards.

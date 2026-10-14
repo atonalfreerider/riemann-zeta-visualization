@@ -6,13 +6,18 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 /// <summary>
-/// Headless review snapshots of the start-up experience (not a correctness test): the home view as the zeta trail grows,
-/// the side menu, and the first chapter (sieve on the spiral, saddle routes and their equations) at regular intervals.
-///   ZETA_OUT=/path [ZETA_PORTRAIT=1] [ZETA_REVIEW=home,menu,hook] Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ReviewRenderTest
-/// Also logs the wall-clock frame time while the home view grows (Debug.Log lines starting with [review]).
+/// Single-frame layout checks (not a recording, not a correctness test): the scene is fast-forwarded with the time scale
+/// and only a handful of PNGs are saved, at named moments.
+///   ZETA_OUT=/path [ZETA_PORTRAIT=1] [ZETA_REVIEW=home,menu,hook,outro] Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ReviewRenderTest
+///   home   the home view: master wave ready, then the trail at t ≈ 150, 500 and 1000
+///   menu   the side menu, open and tucked away
+///   hook   one frame each from the sieve and the saddle routes
+///   outro  one frame each from the per-zero waves, the full master wave and the closing home animation
 /// </summary>
 public class ReviewRenderTest
 {
+    const float FastForward = 6f;
+
     [UnityTest]
     [Timeout(3600000)]
     public IEnumerator RenderReview()
@@ -25,7 +30,7 @@ public class ReviewRenderTest
         }
 
         string parts = Environment.GetEnvironmentVariable("ZETA_REVIEW");
-        if (string.IsNullOrEmpty(parts)) parts = "home,menu,hook";
+        if (string.IsNullOrEmpty(parts)) parts = "home,menu,hook,outro";
         bool portrait = Environment.GetEnvironmentVariable("ZETA_PORTRAIT") == "1";
 
         SceneManager.LoadScene("zeta");
@@ -39,36 +44,31 @@ public class ReviewRenderTest
         string prefix = portrait ? "tall_" : "wide_";
         SacksSpiral sacks = director.Annotations.Sacks;
 
+        IEnumerator Shot(string name)
+        {
+            director.Recorder.Snapshot(prefix + name + ".png");
+            yield return null;
+            yield return null;
+        }
+
         if (parts.Contains("home"))
         {
             director.Home.Enter();
-            float wallPrev = Time.realtimeSinceStartup, wallMax = 0f, wallSum = 0f;
-            int frames = 0, shot = 0;
-            float[] shotsAt = { 4f, 20f, 45f, 70f, 95f };
-            float start = Time.time;
-            while (Time.time - start < 100f)
+            // the master wave is computed in the background before it appears: wait for it in real time
+            float until = Time.realtimeSinceStartup + 120f;
+            while (sacks.FullWaveZerosShown < sacks.FullWaveZerosTarget && Time.realtimeSinceStartup < until) yield return null;
+            Debug.Log($"[review] master wave ready: {sacks.FullWaveZerosShown} zeros, trail at t = {sacks.GrowthT:0}");
+            for (int i = 0; i < 20; i++) yield return null;
+            yield return Shot($"home_a_t{sacks.GrowthT:000}");
+            float[] targets = { 150f, 500f, 1000f };
+            foreach (float target in targets)
             {
-                float t = Time.time - start;
-                if (shot < shotsAt.Length && t >= shotsAt[shot])
-                {
-                    director.Recorder.Snapshot($"{prefix}home_{shot}_{t:000}s_t{sacks.GrowthT:000}.png");
-                    shot++;
-                }
-
-                yield return null;
-                float now = Time.realtimeSinceStartup;
-                float dt = now - wallPrev;
-                wallPrev = now;
-                if (frames > 5)
-                {
-                    wallSum += dt;
-                    wallMax = Mathf.Max(wallMax, dt);
-                }
-
-                frames++;
+                sacks.GrowthSpeedScale = 12f;
+                while (sacks.GrowthT < target - 1f) yield return null;
+                sacks.GrowthSpeedScale = 1f;
+                for (int i = 0; i < 45; i++) yield return null; // let the camera settle
+                yield return Shot($"home_b_t{sacks.GrowthT:0000}");
             }
-
-            Debug.Log($"[review] home view: {frames} frames, avg {wallSum / Mathf.Max(1, frames - 6) * 1000f:0.0} ms, max {wallMax * 1000f:0} ms, zeros merged {sacks.GrowthZerosMerged}");
         }
 
         if (parts.Contains("menu"))
@@ -85,37 +85,50 @@ public class ReviewRenderTest
             menu.Open = true;
             float until = Time.realtimeSinceStartup + 1.2f;
             while (Time.realtimeSinceStartup < until) yield return null;
-            director.Recorder.Snapshot(prefix + "menu_open.png");
-            yield return null;
+            yield return Shot("menu_open");
             menu.Open = false;
             until = Time.realtimeSinceStartup + 1.2f;
             while (Time.realtimeSinceStartup < until) yield return null;
-            director.Recorder.Snapshot(prefix + "menu_closed.png");
-            yield return null;
+            yield return Shot("menu_closed");
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
 
         if (parts.Contains("hook"))
         {
-            director.GoToChapter("hook", false);
-            float start = Time.time;
-            int n = 0;
-            while (director.Running && Time.time - start < 400f)
-            {
-                if (Time.time - start >= n * 2.5f)
-                {
-                    director.Recorder.Snapshot($"{prefix}hook_{n:000}_{director.CurrentLineId}.png");
-                    n++;
-                }
-
-                yield return null;
-            }
-
-            Debug.Log($"[review] hook chapter took {Time.time - start:0.0} s");
+            yield return ChapterFrames(director, "hook", new[] { ("hook_02c", .55f), ("hook_02d", .75f), ("hook_03b", .9f), ("hook_06", .6f), ("hook_06b", .6f), ("hook_06c", .6f) }, Shot);
         }
 
+        if (parts.Contains("outro"))
+        {
+            yield return ChapterFrames(director, "outro", new[] { ("outro_04", .55f), ("outro_05", .5f), ("outro_06", .85f), ("outro_07", .6f) }, Shot);
+        }
+
+        Time.timeScale = 1f;
         yield return null;
         yield return null;
         director.Recorder.EndOffscreen();
+    }
+
+    /// <summary>Play a chapter fast-forwarded and save one frame at a fraction of each named line.</summary>
+    static IEnumerator ChapterFrames(TourDirector director, string chapter, (string line, float at)[] moments, Func<string, IEnumerator> shot)
+    {
+        director.GoToChapter(chapter, false);
+        Time.timeScale = FastForward;
+        int next = 0;
+        float start = Time.time;
+        while (director.Running && next < moments.Length && Time.time - start < 900f)
+        {
+            if (director.CurrentLineId == moments[next].line && director.LineElapsed >= director.LineDuration * moments[next].at)
+            {
+                yield return shot($"{moments[next].line}_{(int)(moments[next].at * 100)}");
+                next++;
+                continue;
+            }
+
+            yield return null;
+        }
+
+        Time.timeScale = 1f;
+        director.StopTour();
     }
 }

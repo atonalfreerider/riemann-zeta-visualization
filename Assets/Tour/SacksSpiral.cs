@@ -727,6 +727,7 @@ public class SacksSpiral : MonoBehaviour
                 Tag($"{j} is prime", 2.1f, MultiplierColor, Outside(j, 2.0f));
                 Board(BoardText(pm + $" = {n}", $"<color=#{hp}>{j}</color> is prime, and joins the multipliers", Tally()));
                 yield return new WaitForSeconds(per * .45f);
+                StartCoroutine(FadeRing(open, 0f, 1.2f)); // the circle has done its job; the prime's own dot stays
             }
         }
 
@@ -874,6 +875,8 @@ public class SacksSpiral : MonoBehaviour
         gameObject.SetActive(true);
         HideLattice();
         CancelSieve();
+        StopGrowth();
+        if (hypothesisRoot != null) hypothesisRoot.SetActive(false);
         if (sieveRoot != null) sieveRoot.SetActive(false);
         if (spiralPath != null) spiralPath.enabled = false;
         struck.Clear();
@@ -1239,8 +1242,14 @@ public class SacksSpiral : MonoBehaviour
         if (fullSums != null && fullPublishedZeros > 0)
         {
             double[] local = new double[fullSamples];
-            lock (fullLock) System.Array.Copy(fullSums, local, fullSamples);
-            UploadFullWave(local);
+            int published;
+            lock (fullLock)
+            {
+                System.Array.Copy(fullSums, local, fullSamples);
+                published = fullPublishedZeros;
+            }
+
+            UploadFullWave(local, published);
         }
         else if (masterWave != null && masterWave.enabled && masterWave.positionCount == WavePts)
         {
@@ -1688,24 +1697,55 @@ public class SacksSpiral : MonoBehaviour
     /// thread (parallel over samples, batches of zeros); the main thread shows whatever has been published,
     /// with the displayed count rising geometrically over <paramref name="seconds"/>.
     /// </summary>
-    public void StartFullMasterWave(int zeros, int samples, float nMax, float seconds)
+    public void StartFullMasterWave(int zeros, int samples, float nMax, float seconds, bool revealWhenDone = false)
     {
         ShowHypothesis(true);
         EnsureWaveStack();
         ClearExploration();
         waveStackRoot.SetActive(true);
         EnsurePrimeTicks(nMax);
-        StopFullMasterWave();
+        HandGrowthToFullWave();
 
         double[] zs = Main.Instance.zetaZeroValues;
         zeros = Mathf.Clamp(zeros, 1, zs.Length);
         if (Application.platform == RuntimePlatform.Android) samples = Mathf.Min(samples, 60000); // mobile GPU / CPU budget
+
+        // computed before with the same settings, or baked into Resources/MasterWave: show it straight away
+        bool computing = fullThread != null && fullThread.IsAlive;
+        bool haveIt = fullSums != null && fullPublishedZeros == zeros && fullSamples == samples && Mathf.Approximately(fullNMax, nMax);
+        if (!computing && !haveIt) TryLoadBakedFullWave(zeros, samples, nMax);
+        if (!computing && fullSums != null && fullPublishedZeros == zeros && fullSamples == samples && Mathf.Approximately(fullNMax, nMax))
+        {
+            masterWave.enabled = false;
+            EnsureCurtain(samples);
+            curtainRenderer.enabled = true;
+            double[] cached = new double[fullSamples];
+            lock (fullLock) System.Array.Copy(fullSums, cached, fullSamples);
+            fullBaseBend = -1f;
+            UploadFullWave(cached, fullPublishedZeros);
+            FullWaveZerosTarget = zeros;
+            FullWaveZerosShown = zeros;
+            FullWaveRunning = false;
+            if (fullLabel != null && !VRMode.Enabled) fullLabel.Text = $"{zeros:N0} collision waves on the spiral — spikes at every prime";
+            return;
+        }
+
+        if (computing && fullPublishedZeros < zeros && FullWaveZerosTarget == zeros && fullSamples == samples && Mathf.Approximately(fullNMax, nMax))
+        {
+            // the same wave is still being computed (e.g. the home view started it): keep the work, just watch it again
+            fullHideUntilDone = revealWhenDone;
+            WatchFullWave(zeros, seconds);
+            return;
+        }
+
+        StopFullMasterWave();
+        fullHideUntilDone = revealWhenDone;
         fullSamples = samples;
         fullBaseBend = -1f;
         fullUploadedZeros = -1;
         fullNMax = nMax;
         fullLogN = new double[samples];
-        for (int i = 0; i < samples; i++) fullLogN[i] = System.Math.Log(FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (samples - 1f)));
+        for (int i = 0; i < samples; i++) fullLogN[i] = FullWaveLogN(i, samples, nMax);
         fullSums = new double[samples];
         fullPublishedZeros = 0;
         FullWaveZerosTarget = zeros;
@@ -1752,41 +1792,103 @@ public class SacksSpiral : MonoBehaviour
             }
         }) { IsBackground = true, Name = "FullMasterWave", Priority = System.Threading.ThreadPriority.BelowNormal };
         fullThread.Start();
-        StartCoroutine(FullWaveDisplay(zeros, seconds));
+        WatchFullWave(zeros, seconds);
+    }
+
+    bool fullHideUntilDone;
+    Coroutine fullDisplay;
+
+    /// <summary>log n of sample i of the full master wave (log-spaced from 1.5 to nMax); shared with the editor bake.</summary>
+    public static double FullWaveLogN(int i, int samples, float nMax) => System.Math.Log(FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (samples - 1f)));
+
+    /// <summary>Resources path of a baked full master wave (float32 sums, one per sample), see Assets/Editor/MasterWaveBake.cs.</summary>
+    public static string BakedFullWaveName(int zeros, int samples, float nMax) => $"MasterWave/master_{zeros}_{samples}_{(int)nMax}";
+
+    /// <summary>Load the sums from a baked file instead of computing 10,000 zeros × 160,000 samples (minutes on a laptop).</summary>
+    bool TryLoadBakedFullWave(int zeros, int samples, float nMax)
+    {
+        TextAsset baked = Resources.Load<TextAsset>(BakedFullWaveName(zeros, samples, nMax));
+        if (baked == null) return false;
+        byte[] bytes = baked.bytes;
+        Resources.UnloadAsset(baked);
+        if (bytes.Length != samples * 4) return false;
+        StopFullMasterWave();
+        double[] sums = new double[samples];
+        for (int i = 0; i < samples; i++) sums[i] = System.BitConverter.ToSingle(bytes, i * 4);
+        fullSamples = samples;
+        fullNMax = nMax;
+        fullLogN = new double[samples];
+        for (int i = 0; i < samples; i++) fullLogN[i] = FullWaveLogN(i, samples, nMax);
+        lock (fullLock)
+        {
+            fullSums = sums;
+            fullPublishedZeros = zeros;
+        }
+
+        FullWaveZerosTarget = zeros;
+        fullBaseBend = -1f;
+        fullUploadedZeros = -1;
+        return true;
+    }
+
+    void WatchFullWave(int zeros, float seconds)
+    {
+        if (fullDisplay != null) StopCoroutine(fullDisplay);
+        fullDisplay = StartCoroutine(FullWaveDisplay(zeros, seconds));
     }
 
     IEnumerator FullWaveDisplay(int zeros, float seconds)
     {
-        float t = 0f;
+        float t = 0f, sinceUpload = 10f;
         double[] local = new double[fullSamples];
+        int copied = -1;
+        if (fullHideUntilDone) curtainRenderer.enabled = false;
         while (!fullCancel)
         {
             t += Time.deltaTime;
+            sinceUpload += Time.deltaTime;
             float u = seconds <= 0f ? 1f : Mathf.Clamp01(t / seconds);
             int want = Mathf.Clamp(Mathf.RoundToInt(Mathf.Pow(zeros, u)), 1, zeros);
             int have;
-            lock (fullLock)
+            lock (fullLock) have = fullPublishedZeros;
+
+            // a few uploads a second at most: each one moves 2 × samples vertices (hidden waves wait for the last batch)
+            bool ready = !fullHideUntilDone || have >= zeros;
+            if (have != copied && ready && (sinceUpload >= .2f || have >= zeros))
             {
-                have = fullPublishedZeros;
-                System.Array.Copy(fullSums, local, fullSamples);
+                lock (fullLock)
+                {
+                    have = fullPublishedZeros;
+                    System.Array.Copy(fullSums, local, fullSamples);
+                }
+
+                copied = have;
             }
 
-            // show the published sums (they include all zeros up to 'have'); the count label follows the smaller of the two
-            int shown = Mathf.Min(want, have);
+            // the count label follows the smaller of the published and the wanted count
+            int shown = Mathf.Min(want, Mathf.Max(0, copied));
             if (shown > 0 && shown != FullWaveZerosShown)
             {
                 FullWaveZerosShown = shown;
-                if (!VRMode.Enabled) fullLabel.Text = $"{have:N0} collision waves on the spiral — spikes at every prime";
+                if (!VRMode.Enabled) fullLabel.Text = $"{copied:N0} collision waves on the spiral — spikes at every prime";
             }
 
-            // upload only when there is new data, or the amplitude / surface changed (not every frame)
-            bool changed = have != fullUploadedZeros || !Mathf.Approximately(fullUploadedAmplitude, FullWaveAmplitude) || !Mathf.Approximately(fullBaseBend, bend);
-            if (have > 0 && changed) UploadFullWave(local);
-            if (have >= zeros && u >= 1f) break;
+            // upload only for new data, a clear change of amplitude, or a new surface (not every frame)
+            bool amplitudeChanged = Mathf.Abs(fullUploadedAmplitude - FullWaveAmplitude) > .04f * Mathf.Max(.1f, FullWaveAmplitude);
+            bool changed = copied != fullUploadedZeros || amplitudeChanged || !Mathf.Approximately(fullBaseBend, bend);
+            if (copied > 0 && changed && (sinceUpload >= .2f || copied >= zeros))
+            {
+                UploadFullWave(local, copied);
+                sinceUpload = 0f;
+                if (fullHideUntilDone && copied >= zeros) curtainRenderer.enabled = true;
+            }
+
+            if (copied >= zeros && fullUploadedZeros >= zeros && u >= 1f) break;
             yield return null;
         }
 
         FullWaveRunning = false;
+        fullDisplay = null;
         Debug.Log($"FullMasterWave: {zeros} zeros × {fullSamples} samples ready after {t:0.0} s");
     }
 
@@ -1828,7 +1930,7 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
-    void UploadFullWave(double[] sums)
+    void UploadFullWave(double[] sums, int zeros)
     {
         if (fullBase == null || fullBase.Length != fullSamples || !Mathf.Approximately(fullBaseBend, bend))
         {
@@ -1855,7 +1957,7 @@ public class SacksSpiral : MonoBehaviour
 
         curtainMesh.vertices = curtainVerts;
         curtainMesh.RecalculateBounds();
-        fullUploadedZeros = fullPublishedZeros;
+        fullUploadedZeros = zeros;
         fullUploadedAmplitude = FullWaveAmplitude;
     }
 
@@ -2246,31 +2348,47 @@ public class SacksSpiral : MonoBehaviour
         Layout();
     }
 
-    // ---- the home view: the zeta trail grows out of the saddle's centre (t = 0 upward); every zero it passes sends ----
-    // ---- its wave out along the spiral at the zero's height, the wave sinks onto the saddle and joins the master wave. ----
+    // ---- the zeta trail growing out of the saddle's centre (t = 0 upward), in two modes ----
+    //   FullWave  (home view, start and end of the app): the master wave with every zero in the table is already on the
+    //             spiral (computed once on a background thread, shown only when complete, then cached); the trail climbs
+    //             ever faster toward a practical top, holds, and grows again.
+    //   Waves     (the outro chapter): every zero the trail passes sends its wave out along the spiral at the zero's
+    //             height; the wave sinks onto the saddle and joins the master wave.
     // Performance: the road's points, normals and log n are computed once per bend; a zero's cosine is computed once when
-    // it is born; each frame only moves points along precomputed normals. No trig over the samples per frame.
+    // it is born; each frame only moves points along precomputed normals. The trail is split into fixed chunks so only
+    // the newest chunk is ever re-uploaded, however tall the trail gets.
+
+    public enum GrowthMode { FullWave, Waves }
 
     public bool Growing => growRoot != null && growRoot.activeInHierarchy;
+    public GrowthMode Mode { get; private set; }
     public float GrowthT { get; private set; }
+    public float GrowthTMax { get; private set; } = HomeTMax;
     public float GrowthHeight => GrowthT * ZetaT;
-    /// <summary>How fast the trail climbs, in units of t per second.</summary>
-    public float GrowthSpeed = 1.6f;
-    /// <summary>Seconds the finished picture holds before the growth starts over.</summary>
-    public float GrowthHold = 14f;
+    /// <summary>Seconds the finished picture holds before the growth starts over (looping growth only).</summary>
+    public float GrowthHold = 12f;
+    /// <summary>Extra factor on the growth speed (the review test uses it to reach the top quickly).</summary>
+    public float GrowthSpeedScale = 1f;
     public int GrowthZerosMerged => growMerged;
-    /// <summary>Radius of the stretch of spiral the waves ride on (n up to 420).</summary>
-    public float WaveRadius => R * Mathf.Sqrt(FieldNMax);
+    /// <summary>Radius of the stretch of spiral to keep in frame: the wave's reach in each mode.</summary>
+    public float GrowthFrameRadius => Mode == GrowthMode.FullWave ? R * Mathf.Sqrt(FullNMax) * .8f : R * Mathf.Sqrt(FieldNMax);
 
+    /// <summary>The home view's practical stand-in for infinity: t = 1000 (about 650 zeros on the axis).</summary>
+    public const float HomeTMax = 1000f;
+    const float FullNMax = 1300f;
+    const int FullSamples = 160000;
     const float GrowStep = 0.05f;
+    const int TrailChunk = 1024;
     const float GrowWaveOut = 1.7f, GrowWaveHold = .4f, GrowWaveSink = 1.6f;
 
     GameObject growRoot;
-    LineRenderer growTrail, growMaster, growAxis;
+    LineRenderer growMaster, growAxis;
+    readonly List<LineRenderer> growTrailChunks = new();
     GameObject growTip;
     Unity.Collections.NativeArray<Vector3> growTrailPts;
     int growTrailCount, growNextZero, growMerged;
-    float growHoldTimer;
+    float growHoldTimer, growSeconds;
+    bool growLoop;
     readonly List<GameObject> growZeroDots = new();
     Vector3[] growBase, growNormal, growMasterPts;
     float[] growLogN;
@@ -2290,43 +2408,113 @@ public class SacksSpiral : MonoBehaviour
     readonly List<GrowWave> growWaves = new();
     readonly Stack<GrowWave> growPool = new();
 
-    public void StartGrowth()
+    /// <summary>
+    /// Start the trail at t = 0. <paramref name="seconds"/> &gt; 0 reaches <paramref name="tMax"/> at a steady pace in that
+    /// time; 0 uses the home pace (slow at first, then faster and faster).
+    /// </summary>
+    public void StartGrowth(GrowthMode mode, float tMax, float seconds, bool loop)
     {
         gameObject.SetActive(true);
+        Mode = mode;
+        GrowthTMax = Mathf.Clamp(tMax, 1f, (float)Main.Instance.zetaZeroValues[^1]);
+        growSeconds = seconds;
+        growLoop = loop;
         EnsureGrowth();
         growRoot.SetActive(true);
+        SetGrowthTrailVisible(true);
         ResetGrowth();
+        growMaster.enabled = mode == GrowthMode.Waves;
+        if (mode == GrowthMode.FullWave)
+        {
+            // the finished master wave, every zero in the table, waiting on the spiral before the trail starts
+            StartFullMasterWave(Main.Instance.zetaZeroValues.Length, FullSamples, FullNMax, 0f, true);
+            foreach (Transform c in hypothesisRoot.transform) c.gameObject.SetActive(c.name == "WaveStack");
+            if (fullLabel != null) fullLabel.gameObject.SetActive(false);
+        }
+        else if (waveStackRoot != null)
+        {
+            waveStackRoot.SetActive(false);
+        }
     }
 
     public void StopGrowth()
     {
         if (growRoot == null) return;
+        bool wasGrowing = growRoot.activeSelf;
         ResetGrowth();
         growRoot.SetActive(false);
+        SetGrowthTrailVisible(true);
+        // the master wave the growth showed goes with it (it is kept, computed, for the next time)
+        if (wasGrowing && hypothesisRoot != null) hypothesisRoot.SetActive(false);
+    }
+
+    /// <summary>Hide or show the growing trail, its axis, tip and zero markers (the master wave is unaffected).</summary>
+    public void SetGrowthTrailVisible(bool on)
+    {
+        if (growRoot == null) return;
+        foreach (LineRenderer chunk in growTrailChunks) chunk.enabled = on;
+        growAxis.enabled = on;
+        growTip.SetActive(on);
+        foreach (GameObject d in growZeroDots) if (d != null) d.SetActive(on);
+        growTrailHidden = !on;
+    }
+
+    bool growTrailHidden;
+
+    /// <summary>The waves stop coming and the growing master line steps aside (the full master wave is taking over).</summary>
+    void HandGrowthToFullWave()
+    {
+        if (growRoot == null || !growRoot.activeSelf) return;
+        // only the master wave joins the growing trail: none of the static trail, rings or columns
+        foreach (Transform c in hypothesisRoot.transform) c.gameObject.SetActive(c.name == "WaveStack");
+        Mode = GrowthMode.FullWave;
+        foreach (GrowWave w in growWaves) ReleaseWave(w);
+        growWaves.Clear();
+        growMaster.enabled = false;
     }
 
     void EnsureGrowth()
     {
-        if (growRoot != null) return;
-        growRoot = new GameObject("Growth");
-        growRoot.transform.SetParent(transform, false);
-        growTrail = Factory.NewLine("growing zeta trail", .08f, Factory.Palette.Zeta, Factory.SoftGlowIntensity);
-        growTrail.transform.SetParent(growRoot.transform, false);
-        growTrail.numCornerVertices = 2;
-        growTrailPts = new Unity.Collections.NativeArray<Vector3>(Mathf.CeilToInt(ZetaTMax / GrowStep) + 4, Unity.Collections.Allocator.Persistent);
-        growTip = Factory.NewSphere("trail tip", .5f, Color.white, Factory.GlowIntensity);
-        growTip.transform.SetParent(growRoot.transform, false);
-        growAxis = Factory.NewLine("growing axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
-        growAxis.transform.SetParent(growRoot.transform, false);
-        growAxis.positionCount = 2;
-        growMaster = Factory.NewLine("growing master wave", .11f, Factory.Palette.Cosine, Factory.GlowIntensity);
-        growMaster.transform.SetParent(growRoot.transform, false);
-        growMaster.numCornerVertices = 2;
-        growMaster.positionCount = WavePts;
-        growMasterPts = new Vector3[WavePts];
-        growSum = new double[WavePts];
-        growLogN = new float[WavePts];
-        for (int i = 0; i < WavePts; i++) growLogN[i] = Mathf.Log(WaveN(i));
+        if (growRoot == null)
+        {
+            growRoot = new GameObject("Growth");
+            growRoot.transform.SetParent(transform, false);
+            growTip = Factory.NewSphere("trail tip", .5f, Color.white, Factory.GlowIntensity);
+            growTip.transform.SetParent(growRoot.transform, false);
+            growAxis = Factory.NewLine("growing axis", .03f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
+            growAxis.transform.SetParent(growRoot.transform, false);
+            growAxis.positionCount = 2;
+            growMaster = Factory.NewLine("growing master wave", .11f, Factory.Palette.Cosine, Factory.GlowIntensity);
+            growMaster.transform.SetParent(growRoot.transform, false);
+            growMaster.numCornerVertices = 2;
+            growMaster.positionCount = WavePts;
+            growMasterPts = new Vector3[WavePts];
+            growSum = new double[WavePts];
+            growLogN = new float[WavePts];
+            for (int i = 0; i < WavePts; i++) growLogN[i] = Mathf.Log(WaveN(i));
+        }
+
+        int needed = Mathf.CeilToInt(GrowthTMax / GrowStep) + 4;
+        if (!growTrailPts.IsCreated || growTrailPts.Length < needed)
+        {
+            if (growTrailPts.IsCreated) growTrailPts.Dispose();
+            growTrailPts = new Unity.Collections.NativeArray<Vector3>(needed, Unity.Collections.Allocator.Persistent);
+        }
+    }
+
+    LineRenderer TrailChunkLine(int index)
+    {
+        while (growTrailChunks.Count <= index)
+        {
+            LineRenderer line = Factory.NewLine("growing zeta trail", .08f, Factory.Palette.Zeta, Factory.SoftGlowIntensity);
+            line.transform.SetParent(growRoot.transform, false);
+            line.numCornerVertices = 2;
+            line.positionCount = 0;
+            line.enabled = !growTrailHidden;
+            growTrailChunks.Add(line);
+        }
+
+        return growTrailChunks[index];
     }
 
     /// <summary>The road's points and normals on the current surface, recomputed only when the bend changes.</summary>
@@ -2358,8 +2546,8 @@ public class SacksSpiral : MonoBehaviour
         growZeroDots.Clear();
         foreach (GrowWave w in growWaves) ReleaseWave(w);
         growWaves.Clear();
-        if (growTrail == null) return;
-        growTrail.positionCount = 0;
+        if (growRoot == null) return;
+        foreach (LineRenderer chunk in growTrailChunks) chunk.positionCount = 0;
         growTip.transform.position = TrailPoint(0f);
         growAxis.SetPosition(0, origin);
         growAxis.SetPosition(1, origin);
@@ -2416,11 +2604,14 @@ public class SacksSpiral : MonoBehaviour
     void SpawnGrowZero(int k, float gamma)
     {
         Vector3 onAxis = origin + Vector3.back * (gamma * ZetaT);
-        GameObject dot = Factory.NewSphere("zero " + (k + 1), .38f, Factory.Palette.Zero, Factory.GlowIntensity);
+        float size = k < 100 ? .38f : .3f;
+        GameObject dot = Factory.NewSphere("zero " + (k + 1), size, Factory.Palette.Zero, Factory.GlowIntensity);
         dot.transform.SetParent(growRoot.transform, false);
         dot.transform.position = onAxis;
-        StartCoroutine(PulseScale(dot.transform, .38f, 3f, .9f));
         growZeroDots.Add(dot);
+        if (growTrailHidden) dot.SetActive(false);
+        else StartCoroutine(PulseScale(dot.transform, size, 3f, .9f));
+        if (Mode != GrowthMode.Waves) return;
 
         GrowWave w = TakeWave();
         w.Altitude = gamma * ZetaT;
@@ -2435,13 +2626,15 @@ public class SacksSpiral : MonoBehaviour
         growWaves.Add(w);
     }
 
+    float GrowthSpeed => (growSeconds > 0f ? GrowthTMax / growSeconds : 1.6f + 0.012f * GrowthT) * GrowthSpeedScale;
+
     void StepGrowth(float dt)
     {
         EnsureGrowGeometry();
         double[] zs = Main.Instance != null ? Main.Instance.zetaZeroValues : System.Array.Empty<double>();
-        if (GrowthT < ZetaTMax)
+        if (GrowthT < GrowthTMax)
         {
-            GrowthT = Mathf.Min(ZetaTMax, GrowthT + GrowthSpeed * dt);
+            GrowthT = Mathf.Min(GrowthTMax, GrowthT + GrowthSpeed * dt);
             int before = growTrailCount;
             while (growTrailCount < growTrailPts.Length && growTrailCount * GrowStep <= GrowthT)
             {
@@ -2451,8 +2644,16 @@ public class SacksSpiral : MonoBehaviour
 
             if (growTrailCount != before)
             {
-                growTrail.positionCount = growTrailCount;
-                growTrail.SetPositions(growTrailPts.GetSubArray(0, growTrailCount));
+                // chunks share their end points so the trail has no gaps; only chunks that gained points are uploaded
+                for (int c = Mathf.Max(0, (before - 1) / TrailChunk); c * TrailChunk < growTrailCount; c++)
+                {
+                    int start = c * TrailChunk;
+                    int count = Mathf.Min(TrailChunk + 1, growTrailCount - start);
+                    if (count < 2) continue;
+                    LineRenderer chunk = TrailChunkLine(c);
+                    chunk.positionCount = count;
+                    chunk.SetPositions(growTrailPts.GetSubArray(start, count));
+                }
             }
 
             growTip.transform.position = TrailPoint(GrowthT);
@@ -2463,7 +2664,7 @@ public class SacksSpiral : MonoBehaviour
                 growNextZero++;
             }
         }
-        else if (growWaves.Count == 0)
+        else if (growLoop && growWaves.Count == 0)
         {
             growHoldTimer += dt;
             if (growHoldTimer > GrowthHold) ResetGrowth();

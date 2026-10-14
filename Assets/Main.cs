@@ -399,6 +399,9 @@ public class Main : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
+        // these keys drive the graph view only; elsewhere they would run the hidden graph's animation for nothing
+        TourDirector director = TourDirector.Instance;
+        if (director != null && (director.Running || (director.Home != null && director.Home.Active) || (director.Explore != null && director.Explore.Active))) return;
 
         if (keyboard.spaceKey.wasPressedThisFrame)
         {

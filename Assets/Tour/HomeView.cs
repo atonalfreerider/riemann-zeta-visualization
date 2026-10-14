@@ -1,10 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// What the app shows before (and after) the tour: the Sacks spiral bent on its saddle, slowly orbiting, with the zeta
-/// trail growing out of the saddle's centre from t = 0. Every zero the trail passes sends its cosine wave out along the
-/// spiral at the zero's height; the wave sinks onto the saddle and joins the master wave. When the trail reaches the top
-/// the picture holds, then grows again.
+/// What the app shows before (and after) the tour: the Sacks spiral bent on its saddle, slowly orbiting, with the master
+/// wave of every zero in the table already riding the spiral and the zeta trail growing out of the saddle's centre from
+/// t = 0, faster and faster, dropping a marker at every zero, up to t = 1000 (a practical stand-in for infinity). The
+/// picture holds, then the trail grows again. The tour's last line ends on the same animation.
 ///
 /// Desktop and phones: the camera orbits the saddle with the saddle's normal as screen-up, so the trail rises up the screen.
 /// VR: the VR layer stands the user on the saddle (its "Stand on it" view) and calls <see cref="PrepareScene"/>, so the
@@ -23,9 +23,15 @@ public class HomeView : MonoBehaviour
         return home;
     }
 
-    /// <summary>Clear the stage and start the growth (no camera changes).</summary>
-    public void PrepareScene()
+    /// <summary>Clear the stage and start the growth (no camera changes). From a tour line the captions are left alone.</summary>
+    public void PrepareScene(bool fromTour = false)
     {
+        SacksSpiral sacks = director.Annotations.Sacks;
+        if (sacks.Growing && sacks.Mode == SacksSpiral.GrowthMode.FullWave && sacks.GrowthTMax >= SacksSpiral.HomeTMax)
+        {
+            return; // already showing it (the tour's last line started it): carry on rather than start over
+        }
+
         Main main = director.Main;
         main.CancelAnimations();
         main.Pause();
@@ -39,13 +45,11 @@ public class HomeView : MonoBehaviour
         main.Limit.SetTailVisible(false);
         director.Annotations.CancelAnimations();
         director.Annotations.HideAll();
-        director.Captions.Clear();
-        SacksSpiral sacks = director.Annotations.Sacks;
-        sacks.StopFullMasterWave();
+        if (!fromTour) director.Captions.Clear();
         sacks.ShowFull();
         sacks.ShowRoutes(false);
-        sacks.ShowHypothesis(false);
-        sacks.StartGrowth();
+        sacks.FullWaveAmplitude = 5f;
+        sacks.StartGrowth(SacksSpiral.GrowthMode.FullWave, SacksSpiral.HomeTMax, 0f, true);
     }
 
     public void Enter()

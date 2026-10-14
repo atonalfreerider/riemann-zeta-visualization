@@ -749,7 +749,7 @@
           "camera": "sacks_3d",
           "actions": [
             "sacks:noroutes",
-            "hypothesis:zeta"
+            "hypothesis:grow:101.5:28"
           ],
           "pause": 0.4,
           "footnote": "a visual hypothesis, not a theorem"
@@ -758,17 +758,16 @@
           "id": "outro_04",
           "text": "Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.",
           "camera": "sacks_wave",
-          "actions": [
-            "hypothesis:zeta",
-            "hypothesis:wavestack:30"
-          ],
+          "actions": [],
           "pause": 0.5
         },
         {
           "id": "outro_05",
           "text": "Look straight down at the centre. The master wave rides the spiral, and it spikes at every prime: two, three, five, seven, eleven, thirteen. The orange ticks catch the prime powers.",
           "camera": "master_top",
-          "actions": [],
+          "actions": [
+            "hypothesis:notrail"
+          ],
           "pause": 0.6
         },
         {
@@ -783,12 +782,12 @@
         {
           "id": "outro_07",
           "text": "Saddle, trail and waves, one structure seen three ways. Do they know about each other, or are we seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set. The picture is yours now: explore it.",
-          "camera": "master_top_pull",
+          "camera": "home_orbit",
           "actions": [
-            "explore:on"
+            "home:scene"
           ],
           "pause": 3.0,
-          "footnote": "after the tour: WASD / QE move, right-drag look, E exit · VR: the Explore view on the dock"
+          "footnote": "open the side menu (M) to explore this picture, pick a chapter or record"
         }
       ]
     }

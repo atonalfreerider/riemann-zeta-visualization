@@ -52,6 +52,8 @@ public class CameraRig : MonoBehaviour
     float Y(double t) => (float)t * Graph.yScale;
     /// <summary>The aspect the camera renders at (the recording's when offscreen, else the framed viewport's).</summary>
     float Aspect => Mathf.Max(0.3f, cam.aspect);
+    /// <summary>Extra distance for cues framed on a 16:9 screen when the frame is tall and narrow.</summary>
+    float NarrowWiden => Aspect >= 1f ? 1f : Mathf.Lerp(1.5f, 1f, Mathf.InverseLerp(.5625f, 1f, Aspect));
     float TipY => Y(main.CurrentT);
     Vector3 TipCenter => new(0.8f, TipY, 0.2f);
     float Orbit(float radius, float speed, float phase) => Mathf.Sin(Time.time * speed + phase) * radius;
@@ -180,11 +182,13 @@ public class CameraRig : MonoBehaviour
         {
             // never still: a slow orbit around the spiral's centre, looking down from a little above its plane, with the
             // spiral's normal as screen-up so the rows of dots stack upward; far enough that 1..30 fits either frame shape
-            Vector3 c = annotations.Sacks.Center + Vector3.back * 2.2f;
             float a = Time.time * 0.07f - 1.9f;
+            Vector3 toCamera = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
+            // aim a little in front of the centre and low, so the spiral sits above the caption bar
+            Vector3 c = annotations.Sacks.Center + Vector3.back * .8f + toCamera * 3.2f;
             const float tilt = 54f * Mathf.Deg2Rad; // from the normal: low enough that "one level up" reads as up
-            float d = Mathf.Max(13.5f, 10f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
-            Vector3 pos = c + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * (d * Mathf.Sin(tilt)) + Vector3.back * (d * Mathf.Cos(tilt));
+            float d = Mathf.Max(15f, 10.5f / (Mathf.Tan(30f * Mathf.Deg2Rad) * Aspect));
+            Vector3 pos = c + toCamera * (d * Mathf.Sin(tilt)) + Vector3.back * (d * Mathf.Cos(tilt));
             return new CueState { Position = pos, LookAt = c, Up = Vector3.back, Fov = 60 };
         };
         cues["home_orbit"] = () =>
@@ -195,12 +199,12 @@ public class CameraRig : MonoBehaviour
             float h = s.GrowthHeight;
             float a = Time.time * 0.045f + 2.2f;
             // frame the part of the saddle the waves ride on (n ≤ 420, radius ~30); the outer spiral runs off the edges
-            const float elevation = 26f * Mathf.Deg2Rad;
+            const float elevation = 34f * Mathf.Deg2Rad;
             float tan = Mathf.Tan(30f * Mathf.Deg2Rad);
-            float radius = s.WaveRadius;
+            float radius = s.GrowthFrameRadius;
             float dWidth = radius * 1.05f / (tan * Mathf.Min(1f, Aspect));
             float dHeight = (radius * .9f + h * Mathf.Cos(elevation) * .6f + 4f) / tan;
-            float dNear = 2.1f * radius / Mathf.Cos(elevation); // keep the near rim well away from the lens
+            float dNear = 2.6f * radius / Mathf.Cos(elevation); // the rim rises ~56 units: keep it well away from the lens
             float d = Mathf.Max(dNear, Mathf.Max(dWidth, dHeight));
             Vector3 look = s.Center + Vector3.back * (h * .42f);
             Vector3 horizontal = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
@@ -210,14 +214,14 @@ public class CameraRig : MonoBehaviour
         cues["sacks_flat"] = () =>
         {
             Vector3 c = annotations.Sacks.Center;
-            return new CueState { Position = c + new Vector3(0, -2f, -annotations.Sacks.Extent * 1.75f), LookAt = c, Up = up, Fov = 60 };
+            return new CueState { Position = c + new Vector3(0, -2f, -annotations.Sacks.Extent * 1.75f * NarrowWiden), LookAt = c, Up = up, Fov = 60 };
         };
         cues["sacks_saddle"] = () =>
         {
             // sway around the front of the saddle so its curvature reads in parallax
             Vector3 c = annotations.Sacks.Center;
             float a = Time.time * 0.25f;
-            float d = annotations.Sacks.Extent * 2.3f;
+            float d = annotations.Sacks.Extent * 2.3f * NarrowWiden;
             // swing well to the side and above so the saddle's rise and fall is unmistakable
             return new CueState { Position = c + new Vector3(Mathf.Sin(a) * d * .85f, .45f * d + Mathf.Cos(a * .7f) * d * .25f, -Mathf.Abs(Mathf.Cos(a)) * d * .55f - d * .25f), LookAt = c, Up = up, Fov = 60 };
         };
@@ -225,10 +229,11 @@ public class CameraRig : MonoBehaviour
         {
             // a slow orbit over the saddle from the side its ridge rises toward (+Z), so the squares (red) and the
             // neighbour products (blue) run along a ridge that visibly climbs, and Euler's green curve sweeps between
-            Vector3 c = annotations.Sacks.Center + Vector3.forward * 10f;
+            // the rim of the ridge rises ~56 units toward the camera, so stay far enough back that it never fills the lens
+            Vector3 c = annotations.Sacks.Center + Vector3.forward * 6f;
             float a = Time.time * 0.05f + 3.6f;
-            const float elevation = 46f * Mathf.Deg2Rad;
-            float d = annotations.Sacks.Extent * (Aspect >= 1f ? 1.6f : 2.3f);
+            const float elevation = 42f * Mathf.Deg2Rad;
+            float d = annotations.Sacks.Extent * (Aspect >= 1f ? 2.7f : 3.6f);
             Vector3 pos = c + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * (d * Mathf.Cos(elevation)) + Vector3.forward * (d * Mathf.Sin(elevation));
             return new CueState { Position = pos, LookAt = c, Up = Vector3.forward, Fov = 60 };
         };
