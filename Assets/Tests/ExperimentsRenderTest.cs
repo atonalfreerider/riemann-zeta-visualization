@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -64,6 +66,20 @@ public class ExperimentsRenderTest
             director.Recorder.Snapshot(name + ".png");
             yield return null;
             yield return null;
+        }
+
+        IEnumerator ShotOrtho(string name, Vector3 pos, Vector3 look, Vector3 up, float size)
+        {
+            cam.orthographic = true;
+            cam.orthographicSize = size;
+            cam.transform.position = pos;
+            cam.transform.rotation = Quaternion.LookRotation(look - pos, up);
+            yield return null;
+            yield return null;
+            director.Recorder.Snapshot(name + ".png");
+            yield return null;
+            yield return null;
+            cam.orthographic = false;
         }
 
         IEnumerator Flatten(bool flat)
@@ -306,6 +322,84 @@ public class ExperimentsRenderTest
         sacks.ExpMertensPanel(mpanel, 100f, 40f, SacksSpiral.Count, 3.6f);
         yield return Shot("H18-mertens-panel", mpanel + back * 112f, mpanel, Vector3.up, 55f);
         sacks.ClearExperiments();
+        sacks.ShowBackdrop(true);
+        }
+
+        if (Wanted('I')) {
+        // I. vortex eyes at every zero, traced through the zero planes
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        double[] zs = main.zetaZeroValues;
+        List<SacksSpiral.Vortex> all = new();
+        for (int j = 0; j < zs.Length; j++) all.AddRange(SacksSpiral.DetectVortices(zs[j], j + 1, 12, Meta.Numerics.Complex.Zero));
+        using (StreamWriter w = new(Path.Combine(outDir, "vortices.csv")))
+        {
+            w.WriteLine("j,t,k,knot,eye_re,eye_im,mirror_re,mirror_im,links,curl");
+            foreach (SacksSpiral.Vortex v in all) w.WriteLine($"{v.Zero},{v.T:R},{v.K},{v.Knot},{v.Eye.Re:R},{v.Eye.Im:R},{v.Mirror.Re:R},{v.Mirror.Im:R},{v.Links},{v.Curl}");
+        }
+
+        Debug.Log($"vortices detected: {all.Count} over {zs.Length} zeros");
+        Vector3 tower = c + new Vector3(1500f, 0f, 0f);
+        // I1-I3: zeros 1 … 40 at their true heights, with the planes and the trail
+        {
+            double t0 = zs[0];
+            float H = (float)(zs[39] - t0) * .4f;
+            sacks.ExpVortexTower(all, 1, 40, tower, 4f, t => (float)(t - t0) * .4f, false, true, true, true, 6, 2.2f);
+            yield return Shot("I1-vortex-tower-1-40-oblique", tower + new Vector3(-34f, -52f, -H * .5f), tower + back * (H * .5f), back, 55f);
+            yield return Shot("I2-vortex-tower-1-40-side", tower + new Vector3(0f, -64f, -H * .5f), tower + back * (H * .5f), back, 55f);
+            yield return Shot("I3-vortex-tower-1-40-top", tower + back * (H + 40f), tower + back * H, Vector3.up, 45f);
+            sacks.ClearExperiments();
+        }
+
+        // I4-I5: zeros 1000 … 1040, and I6: zeros 5000 … 5040, at their true heights
+        {
+            double t0 = zs[999];
+            float H = (float)(zs[1039] - t0) * 1.0f;
+            sacks.ExpVortexTower(all, 1000, 1040, tower, 4f, t => (float)(t - t0) * 1.0f, false, true, true, true, 8, 2.2f);
+            yield return Shot("I4-vortex-tower-1000-1040-oblique", tower + new Vector3(-34f, -52f, -H * .5f), tower + back * (H * .5f), back, 55f);
+            yield return Shot("I5-vortex-tower-1000-1040-side", tower + new Vector3(0f, -64f, -H * .5f), tower + back * (H * .5f), back, 55f);
+            sacks.ClearExperiments();
+            double t5 = zs[4999];
+            float H5 = (float)(zs[5039] - t5) * 1.6f;
+            sacks.ExpVortexTower(all, 5000, 5040, tower, 4f, t => (float)(t - t5) * 1.6f, false, true, true, true, 12, 2.2f);
+            yield return Shot("I6-vortex-tower-5000-5040-oblique", tower + new Vector3(-34f, -52f, -H5 * .5f), tower + back * (H5 * .5f), back, 55f);
+            sacks.ClearExperiments();
+        }
+
+        // I7-I9: all ten thousand zeros looked at down the axis (orthographic), plain and with the Gram phase taken out
+        {
+            System.Func<double, float> byIndex = t =>
+            {
+                int lo = 0, hi = zs.Length - 1;
+                while (hi - lo > 1) { int m = (lo + hi) / 2; if (zs[m] <= t) lo = m; else hi = m; }
+                double f = (t - zs[lo]) / System.Math.Max(1e-9, zs[hi] - zs[lo]);
+                return (float)((lo + f) * .03);
+            };
+            float H = 10000 * .03f;
+            sacks.ExpVortexTower(all, 1, 10000, tower, 4f, byIndex, false, false, false, false, 12, 0f, 1, .007f, false, Factory.NoGlow);
+            yield return ShotOrtho("I7-vortex-tower-all-down-axis", tower + back * (H + 50f), tower, Vector3.up, 10f);
+            sacks.ClearExperiments();
+            sacks.ExpVortexTower(all, 1, 10000, tower, 4f, byIndex, true, false, false, false, 12, 0f, 1, .007f, false, Factory.NoGlow);
+            yield return ShotOrtho("I8-vortex-tower-all-derotated-down-axis", tower + new Vector3(-4f, 0f, 0f) + back * (H + 50f), tower + new Vector3(-4f, 0f, 0f), Vector3.up, 10f);
+            sacks.ClearExperiments();
+            sacks.ExpVortexTower(all, 1, 10000, tower, 4f, byIndex, true, false, false, false, 4, 0f, 1, .007f, false, Factory.NoGlow);
+            yield return ShotOrtho("I9-vortex-tower-all-derotated-k1-4-down-axis", tower + new Vector3(-4f, 0f, 0f) + back * (H + 50f), tower + new Vector3(-4f, 0f, 0f), Vector3.up, 8f);
+            sacks.ClearExperiments();
+            sacks.ExpVortexTower(all, 2000, 2200, tower, 4f, t => (float)(t - zs[1999]) * 1.0f, true, false, true, false, 8, 2.2f);
+            float H2 = (float)(zs[2199] - zs[1999]);
+            yield return Shot("I10-vortex-tower-2000-2200-derotated-side", tower + new Vector3(0f, -200f, -H2 * .5f), tower + back * (H2 * .5f), back, 55f);
+            sacks.ClearExperiments();
+        }
+
+        // I11-I13: the chain at one zero with its vortices ringed and the mirror points crossed
+        foreach ((int j, string name) in new[] { (100, "I11-chain-vortices-zero-100"), (1000, "I12-chain-vortices-zero-1000"), (10000, "I13-chain-vortices-zero-10000") })
+        {
+            Vector3 panel = c + new Vector3(2000f, 0f, 0f);
+            sacks.ExpChainVortexPanel(zs[j - 1], j, panel, 11f, 16f, 12, $"zero #{j}, t = {zs[j - 1]:0.000}", 1.4f);
+            yield return Shot(name, panel + back * 48f, panel, Vector3.up, 50f);
+            sacks.ClearExperiments();
+        }
+
         sacks.ShowBackdrop(true);
         }
 

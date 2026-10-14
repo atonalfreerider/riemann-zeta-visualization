@@ -1167,4 +1167,295 @@ public partial class SacksSpiral
         ExpLine(g, "mertens", .08f, Factory.Palette.Cosine, Factory.GlowIntensity, pts);
         if (labelSize > 0f) ExpLabel(g, $"M(x) = Σ μ(n), the running total of the sieve's signs, between ±√x   (M({nMax:N0}) = {M[nMax]})", origin + new Vector3(0f, -Extent - 1.2f * labelSize, 0f) + Vector3.back * 2f, labelSize * .8f, Factory.Palette.Cosine);
     }
+
+    // ------------------------------------------------------------------------------------------------
+    // I. the vortex eyes of the chain, found from its turning angles, traced through the zero planes
+    // ------------------------------------------------------------------------------------------------
+
+    public struct Vortex
+    {
+        public int Zero;        // 1-based index j of the zero (0 for a dial value that is not a zero)
+        public double T;        // the dial value
+        public int K;           // vortex index: its knot sits at n ≈ t / ((2K + 1)π)
+        public int Knot;        // link index of the knot (the turn flips through ±π there)
+        public Complex Eye;     // the detected eye: mean of the four vertices around the knot
+        public Complex Mirror;  // ζ(½ + it) − e^{−2iθ(t)} · conj(S_K): the K-th vertex of the chain, reflected
+        public int Links;       // links between the spokes that bound this vortex
+        public int Curl;        // of those, links turning by more than half a radian
+
+        /// <summary>How clearly the chain draws this vortex: 0 for a couple of links, → 1 for dozens.</summary>
+        public float Certainty => 1f - Mathf.Exp(-Curl / 6f);
+    }
+
+    static double[] vortexLog, vortexInvSqrt;
+
+    static void EnsureVortexTables(int n)
+    {
+        if (vortexLog != null && vortexLog.Length > n) return;
+        int size = Mathf.Max(n + 1, 4096);
+        vortexLog = new double[size];
+        vortexInvSqrt = new double[size];
+        for (int i = 1; i < size; i++) { vortexLog[i] = System.Math.Log(i); vortexInvSqrt[i] = 1.0 / System.Math.Sqrt(i); }
+    }
+
+    /// <summary>Partial sums S_0 = 0, S_1 … S_N of n^(−½−it).</summary>
+    public static Complex[] ChainSums(double t, int N)
+    {
+        EnsureVortexTables(N + 1);
+        Complex[] S = new Complex[N + 1];
+        double re = 0, im = 0;
+        for (int n = 1; n <= N; n++)
+        {
+            double a = -t * vortexLog[n];
+            re += vortexInvSqrt[n] * System.Math.Cos(a);
+            im += vortexInvSqrt[n] * System.Math.Sin(a);
+            S[n] = new Complex(re, im);
+        }
+
+        return S;
+    }
+
+    /// <summary>
+    /// Find the vortices of the chain at dial value t from its turning angles alone: the signed turn between links n
+    /// and n + 1 is −t · log(1 + 1/n) reduced to (−π, π]; a knot is where it flips through ±π (the chain folds back on
+    /// itself), a spoke where it flips through 0 (the chain runs straight). Each knot is the eye of one vortex; the
+    /// vortex's extent is the stretch between the spokes around it.
+    /// </summary>
+    public static List<Vortex> DetectVortices(double t, int zeroIndex, int kMax, Complex zeta)
+    {
+        int N = (int)(t / System.Math.PI) + 12;
+        Complex[] S = ChainSums(t, N);
+        double[] tau = new double[N + 1];
+        for (int n = 1; n < N; n++)
+        {
+            double x = -t * (vortexLog[n + 1] - vortexLog[n]);
+            x = (x + System.Math.PI) % (2 * System.Math.PI);
+            if (x < 0) x += 2 * System.Math.PI;
+            tau[n] = x - System.Math.PI;
+        }
+
+        List<int> spokes = new(), knots = new();
+        for (int n = 1; n < N - 1; n++)
+        {
+            if (tau[n] > 0 && tau[n + 1] < 0 && System.Math.Abs(tau[n]) > System.Math.PI / 2) knots.Add(n);
+            if (tau[n] < 0 && tau[n + 1] > 0 && System.Math.Abs(tau[n]) < System.Math.PI / 2) spokes.Add(n);
+        }
+
+        double theta = ZetaMath.RiemannSiegelTheta(t);
+        double cr = System.Math.Cos(-2 * theta), ci = System.Math.Sin(-2 * theta);
+        List<Vortex> list = new();
+        foreach (int kn in knots)
+        {
+            int lo = 0, hi = N;
+            foreach (int sp in spokes) { if (sp <= kn) lo = sp; else { hi = sp; break; } }
+            int curl = 0;
+            for (int n = lo; n < hi; n++) if (System.Math.Abs(tau[n]) > 0.5) curl++;
+            int i0 = System.Math.Max(0, kn - 1), i1 = System.Math.Min(N, kn + 2);
+            double er = 0, ei = 0;
+            for (int i = i0; i <= i1; i++) { er += S[i].Re; ei += S[i].Im; }
+            int cnt = i1 - i0 + 1;
+            int k = (int)System.Math.Round((t / (System.Math.PI * (kn + 0.5)) - 1) / 2);
+            if (k < 0 || k > kMax) continue;
+            // mirror = ζ − χ · conj(S_k)  with χ = e^{−2iθ}
+            double sr = k >= 1 ? S[k].Re : 0, si = k >= 1 ? -S[k].Im : 0;
+            Complex mirror = new(zeta.Re - (cr * sr - ci * si), zeta.Im - (cr * si + ci * sr));
+            list.Add(new Vortex { Zero = zeroIndex, T = t, K = k, Knot = kn, Eye = new Complex(er / cnt, ei / cnt), Mirror = mirror, Links = hi - lo, Curl = curl });
+        }
+
+        return list;
+    }
+
+    static readonly Color[] VortexPalette =
+    {
+        new(1f, .85f, .1f), new(.25f, .9f, .85f), new(1f, .4f, .9f), new(.4f, 1f, .5f), new(1f, .6f, .2f), new(.4f, .55f, 1f),
+        new(1f, .3f, .3f), Color.white, new(.7f, .5f, 1f), new(.8f, 1f, .3f), new(.6f, .6f, .75f), new(.5f, .8f, .8f), new(.85f, .6f, .6f)
+    };
+
+    static Color VortexColor(int k, float certainty)
+    {
+        Color c = VortexPalette[Mathf.Min(k, VortexPalette.Length - 1)];
+        float f = .12f + .88f * certainty;
+        return new Color(c.r * f, c.g * f, c.b * f);
+    }
+
+    /// <summary>Crossed-quad ribbons for a list of segments with per-end colours, one mesh.</summary>
+    MeshRenderer ExpRibbons(Transform parent, string name, List<Vector3> a, List<Vector3> b, List<Color> ca, List<Color> cb, float width, float glow)
+    {
+        List<Vector3> verts = new(); List<Color> cols = new(); List<int> tris = new();
+        for (int i = 0; i < a.Count; i++)
+        {
+            Vector3 dir = (b[i] - a[i]).normalized;
+            Vector3 s1 = Vector3.Cross(dir, Vector3.right);
+            if (s1.sqrMagnitude < 1e-6f) s1 = Vector3.Cross(dir, Vector3.up);
+            s1 = s1.normalized * width;
+            Vector3 s2 = Vector3.Cross(dir, s1).normalized * width;
+            foreach (Vector3 side in new[] { s1, s2 })
+            {
+                int v = verts.Count;
+                verts.Add(a[i] - side); verts.Add(a[i] + side); verts.Add(b[i] - side); verts.Add(b[i] + side);
+                cols.Add(ca[i]); cols.Add(ca[i]); cols.Add(cb[i]); cols.Add(cb[i]);
+                tris.Add(v); tris.Add(v + 2); tris.Add(v + 1); tris.Add(v + 1); tris.Add(v + 2); tris.Add(v + 3);
+                tris.Add(v); tris.Add(v + 1); tris.Add(v + 2); tris.Add(v + 1); tris.Add(v + 3); tris.Add(v + 2);
+            }
+        }
+
+        Mesh mesh = new() { name = name, indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(verts); mesh.SetColors(cols); mesh.SetTriangles(tris, 0); mesh.RecalculateBounds();
+        GameObject go = new(name);
+        go.transform.SetParent(parent, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.sharedMaterial = Factory.mainMat;
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        Factory.SetIntensity(mr, glow);
+        return mr;
+    }
+
+    /// <summary>
+    /// The vortices of zeros first … last as a tower: the eye of vortex k at every zero (size and brightness by certainty),
+    /// traces joining the same k through consecutive zero planes, optional plane rings, the trail ζ(½ + it) between them,
+    /// and the mirror points. With <paramref name="derotate"/> every eye is multiplied by e^{2iθ(t)} (the Gram phase taken out).
+    /// </summary>
+    public void ExpVortexTower(List<Vortex> all, int first, int last, Vector3 center, float xyScale, System.Func<double, float> heightOfT,
+        bool derotate, bool planes, bool trail, bool mirrors, int kMax, float labelSize, int kMin = 0, float pointSize = .06f, bool ribbons = true, float glow = Factory.GlowIntensity)
+    {
+        Transform g = ExpGroup($"I vortex tower {first}-{last}{(derotate ? " derotated" : "")}").transform;
+        double[] zs = Main.Instance.zetaZeroValues;
+        Vector3 P(Complex z, double t)
+        {
+            if (derotate)
+            {
+                double th = ZetaMath.RiemannSiegelTheta(t);
+                double c = System.Math.Cos(2 * th), s = System.Math.Sin(2 * th);
+                z = new Complex(z.Re * c - z.Im * s, z.Re * s + z.Im * c);
+            }
+
+            return center + new Vector3((float)z.Re * xyScale, (float)z.Im * xyScale, 0f) + Vector3.back * heightOfT(t);
+        }
+
+        // group by k
+        Dictionary<int, List<Vortex>> byK = new();
+        foreach (Vortex v in all)
+        {
+            if (v.Zero < first || v.Zero > last || v.K > kMax || v.K < kMin) continue;
+            if (!byK.TryGetValue(v.K, out List<Vortex> l)) byK[v.K] = l = new List<Vortex>();
+            l.Add(v);
+        }
+
+        List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
+        List<Vector3> sa = new(), sb = new(); List<Color> ca = new(), cb = new();
+        List<Vector3> mpts = new(); List<Color> mcols = new(); List<float> msizes = new();
+        foreach ((int k, List<Vortex> l) in byK)
+        {
+            l.Sort((x, y) => x.Zero.CompareTo(y.Zero));
+            for (int i = 0; i < l.Count; i++)
+            {
+                Vortex v = l[i];
+                float cert = v.Certainty;
+                pts.Add(P(v.Eye, v.T));
+                cols.Add(VortexColor(k, cert));
+                sizes.Add(pointSize * xyScale * (.4f + .6f * cert));
+                if (mirrors && k >= 1)
+                {
+                    mpts.Add(P(v.Mirror, v.T));
+                    mcols.Add(new Color(.75f, .75f, .85f));
+                    msizes.Add(.025f * xyScale);
+                }
+
+                if (ribbons && i > 0 && l[i - 1].Zero == v.Zero - 1)
+                {
+                    sa.Add(P(l[i - 1].Eye, l[i - 1].T)); sb.Add(P(v.Eye, v.T));
+                    ca.Add(VortexColor(k, l[i - 1].Certainty)); cb.Add(VortexColor(k, cert));
+                }
+            }
+
+            if (labelSize > 0f && l.Count > 0)
+            {
+                Vortex top = l[^1];
+                ExpLabel(g, $"vortex {k}", P(top.Eye, top.T) + Vector3.back * (.6f * labelSize), labelSize * .7f, VortexColor(k, 1f));
+            }
+        }
+
+        if (sa.Count > 0) ExpRibbons(g, "traces", sa, sb, ca, cb, .022f * xyScale, Factory.SoftGlowIntensity);
+        if (pts.Count > 0) ExpPointCloud(g, "eyes", pts, cols, sizes, glow);
+        if (mpts.Count > 0) ExpPointCloud(g, "mirrors", mpts, mcols, msizes, Factory.NoGlow);
+
+        if (planes)
+        {
+            for (int j = first; j <= last; j++)
+            {
+                double t = zs[j - 1];
+                Vector3 at = center + Vector3.back * heightOfT(t);
+                ExpRing(g, "plane " + j, at, 2.2f * xyScale, new Color(.35f, .35f, .45f), .012f * xyScale, Factory.NoGlow);
+                ExpDot(g, "zero " + j, at, .05f * xyScale, Factory.Palette.Zero);
+                if (labelSize > 0f && (j == first || j == last || j % 10 == 0)) ExpLabel(g, $"zero #{j}   t = {t:0.00}", at + Vector3.right * (2.3f * xyScale), labelSize * .6f, new Color(.7f, .7f, .8f), TextAlignmentOptions.Left);
+            }
+        }
+
+        if (trail)
+        {
+            double t0 = zs[first - 1], t1 = zs[last - 1];
+            int count = (int)((t1 - t0) / .02) + 1;
+            Vector3[] tp = new Vector3[count];
+            for (int i = 0; i < count; i++)
+            {
+                double t = t0 + i * .02;
+                Complex z = ZetaMath.Decompose(new Complex(.5, t), ZetaMath.TermCount(t)).Total;
+                tp[i] = P(z, t);
+            }
+
+            ExpLine(g, "trail", .02f * xyScale, Factory.Palette.Zeta, Factory.SoftGlowIntensity, tp);
+        }
+
+        ExpLine(g, "axis", .008f * xyScale, new Color(.5f, .5f, .6f), Factory.NoGlow, new[] { center + Vector3.back * heightOfT(zs[first - 1]), center + Vector3.back * heightOfT(zs[last - 1]) });
+    }
+
+    /// <summary>The chain at one dial value, flat, with its detected vortices ringed (colour by k, brightness by certainty) and the mirror points as crosses.</summary>
+    public void ExpChainVortexPanel(double t, int zeroIndex, Vector3 center, float halfWidth, float halfHeight, int kMax, string title, float labelSize)
+    {
+        Transform g = ExpGroup("I chain vortices " + title).transform;
+        int N = (int)(t / System.Math.PI) + 12;
+        Complex[] S = ChainSums(t, N);
+        double minRe = 0, maxRe = 0, minIm = 0, maxIm = 0;
+        for (int n = 1; n <= N; n++)
+        {
+            minRe = System.Math.Min(minRe, S[n].Re); maxRe = System.Math.Max(maxRe, S[n].Re);
+            minIm = System.Math.Min(minIm, S[n].Im); maxIm = System.Math.Max(maxIm, S[n].Im);
+        }
+
+        float scale = Mathf.Min(halfWidth * 2f / (float)(maxRe - minRe + 1e-6), halfHeight * 2f / (float)(maxIm - minIm + 1e-6));
+        Vector3 o = center + new Vector3((float)(-(minRe + maxRe) * .5) * scale, (float)(-(minIm + maxIm) * .5) * scale, 0f);
+        Vector3 P(Complex z) => o + new Vector3((float)z.Re * scale, (float)z.Im * scale, 0f);
+        Vector3[] pts = new Vector3[N + 1];
+        pts[0] = o;
+        for (int n = 1; n <= N; n++) pts[n] = P(S[n]);
+        LineRenderer chain = ExpLine(g, "chain", .05f, Factory.Palette.Zeta, Factory.SoftGlowIntensity, pts);
+        chain.startColor = Factory.Palette.Zeta;
+        chain.endColor = Factory.Palette.Tail;
+        chain.widthCurve = new AnimationCurve(new Keyframe(0f, .07f), new Keyframe(1f, .03f));
+        ExpLine(g, "origin x", .04f, Color.white, Factory.GlowIntensity, new[] { o + Vector3.left * .5f, o + Vector3.right * .5f });
+        ExpLine(g, "origin y", .04f, Color.white, Factory.GlowIntensity, new[] { o + Vector3.down * .5f, o + Vector3.up * .5f });
+
+        Complex zeta = ZetaMath.Decompose(new Complex(.5, t), ZetaMath.TermCount(t)).Total;
+        foreach (Vortex v in DetectVortices(t, zeroIndex, kMax, zeta))
+        {
+            Color c = VortexColor(v.K, v.Certainty);
+            Vector3 e = P(v.Eye);
+            float r = .25f + .4f * v.Certainty;
+            ExpRing(g, "eye " + v.K, e, r, c, .05f, Factory.GlowIntensity);
+            ExpRing(g, "eye inner " + v.K, e, r * .5f, c, .035f, Factory.SoftGlowIntensity);
+            ExpLabel(g, $"{v.K}  ({v.Curl} links)", e + Vector3.up * (r + .45f * labelSize), labelSize * .65f, c);
+            if (v.K >= 1)
+            {
+                Vector3 m = P(v.Mirror);
+                ExpLine(g, "mirror x " + v.K, .035f, c, Factory.SoftGlowIntensity, new[] { m + new Vector3(-.3f, -.3f, 0), m + new Vector3(.3f, .3f, 0) });
+                ExpLine(g, "mirror y " + v.K, .035f, c, Factory.SoftGlowIntensity, new[] { m + new Vector3(-.3f, .3f, 0), m + new Vector3(.3f, -.3f, 0) });
+            }
+        }
+
+        // the first vertices of the chain, numbered, so the mirror can be read off
+        for (int k = 1; k <= Mathf.Min(kMax, 6); k++) ExpLabel(g, k.ToString(), pts[k] + Vector3.down * (.4f * labelSize), labelSize * .55f, VortexColor(k, 1f));
+        ExpLabel(g, title, center + Vector3.up * (halfHeight + 1.2f * labelSize), labelSize, Color.white);
+        ExpLabel(g, "rings: detected eyes, numbered by vortex, brighter when more links draw them   crosses: −e<sup>−2iθ</sup> · conj(S<sub>k</sub>), the k-th vertex reflected", center + Vector3.down * (halfHeight + 1.0f * labelSize), labelSize * .7f, new Color(.8f, .8f, .9f));
+    }
 }

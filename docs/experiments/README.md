@@ -247,6 +247,83 @@ itself diverges. Up to 1 601 the field has 252 primes, 450 cyan restorations (pl
 ![H18](H18-mertens-panel.jpg)
 ![H16](H16-mertens-oblique.jpg)
 
+## I. The vortex eyes of the chain, traced through the zero planes
+
+**Detection.** At a dial value `t` the chain's `n`-th link turns by `−t · log(1 + 1/n)`, reduced to `(−π, π]`. The
+detector uses nothing else: a *knot* is where that turn flips through `±π` (the chain folds back on itself), a
+*spoke* where it flips through `0` (the chain runs straight). Each knot is the eye of one vortex; the vortex's
+extent is the stretch between the spokes on either side; its certainty is `1 − e^{−L/6}` with `L` the number of
+links in that stretch turning by more than half a radian. A vortex drawn by two links is faded to black, one
+drawn by thirty is at full colour. The eye is the mean of the four vertices around the knot. Vortex `k` is the
+one whose knot sits near `n = t/(2k + 1)π`; vortex 0 is the tail. This was run at all 10 000 zeros in the table
+(199 096 vortices, `k ≤ 12`), and the detector's output is written to `vortices.csv` beside the frames.
+
+![I1](I1-vortex-tower-1-40-oblique.jpg)
+![I4](I4-vortex-tower-1000-1040-oblique.jpg)
+
+**What the traces do.** Colour is the vortex index, brightness its certainty, each zero is a plane, the white
+curve is `ζ(½ + it)` threading the planes through their centres. Vortex 1 (cyan) winds once around the axis per
+zero on a circle of radius exactly one; vortex 2 (magenta) rides an epicycle on it; the higher vortices are
+dimmer, more erratic, and farther out.
+
+**The law behind it.** The eyes are not new information. At every zero, to the accuracy of the detector,
+
+    eye_k(γ) = −e^{−2iθ(γ)} · conj(S_k(γ)),       S_k = Σ_{n≤k} n^{−½−iγ}
+
+the eye of vortex `k` is the chain's own `k`-th vertex, reflected (conjugated and turned by twice the
+Riemann–Siegel phase). Off a zero the same holds with `ζ(½ + it)` added. This is the approximate functional
+equation `Σ_{n≤x} n^{−s} ≈ ζ(s) − χ(s) Σ_{m≤t/2πx} m^{s−1}` read at the knots, where the dual cutoff `t/2πx = k + ½`
+falls exactly between integers and the equation is at its most accurate. The far end of the chain is the near
+end in a mirror, vortex by vortex. Grey diamonds in the pictures are the mirror points; they sit inside the eyes.
+
+| vortex `k` | zeros with `t < 1000`: median distance eye → mirror | zeros with `t ≥ 1000` |
+|---|---|---|
+| 1 | 0.001 | 0.000 |
+| 2 | 0.005 | 0.000 |
+| 5 | 0.036 | 0.001 |
+| 8 | 0.127 | 0.003 |
+| 12 | 0.193 | 0.009 |
+
+The mismatch is entirely a matter of how many links draw the vortex: median 0.052 for vortices drawn by fewer
+than three curling links, 0.017 for three to five, 0.002 for twelve to thirty, 0.000 beyond. The certainty
+fade is therefore honest: faint eyes are the ones the mirror law places least well.
+
+![I11](I11-chain-vortices-zero-100.jpg)
+![I13](I13-chain-vortices-zero-10000.jpg)
+
+The three views down the axis are all 10 000 zeros at once: plain (every eye of vortices 1 to 12), with the Gram
+phase taken out, and the same for vortices 1 to 4 only, where the point `−1`, the circle of radius `1/√2` and the
+next epicycle stand out.
+
+**Vortex 1 is the Gram clock.** With `S_1 = 1` the first eye sits at `−e^{−2iθ(γ)}`: on the unit circle (radius
+1.000 ± 0.004 over 9 994 zeros, angle residual below 0.001 rad), at angle `π − 2θ(γ)`. Since `θ` advances by
+about `π` per zero, the cyan trace is a helix with one turn per zero, and the amount by which its phase slips
+from one zero plane to the next is the Gram offset of that zero: the eye angle reads the zero's position within
+its Gram interval. Taking the Gram phase out (multiplying every eye by `e^{2iθ}`) collapses the whole tower onto
+the chain's own first vertices: vortex 1 to the single point `−1`, vortex 2 to the circle of radius `1/√2` around
+it, vortex 3 to an epicycle of radius `1/√3` on that, and so on.
+
+![I6](I6-vortex-tower-5000-5040-oblique.jpg)
+![I7](I7-vortex-tower-all-down-axis.jpg)
+![I8](I8-vortex-tower-all-derotated-down-axis.jpg)
+![I9](I9-vortex-tower-all-derotated-k1-4-down-axis.jpg)
+
+**Predictive structure.** Over the 10 000 zeros:
+
+| correlation | value |
+|---|---|
+| Gram offset of zero `j` with the offset of zero `j + 1` | +0.02 |
+| Gram offset of zero `j` with the spacing to zero `j + 1` (in Gram units) | −0.28 |
+| spacing `j` with spacing `j + 1` | −0.37 |
+
+So the eye angle at one zero plane (its Gram offset) says a little about where the next plane is, a zero late in
+its Gram interval being followed by a shorter gap, and consecutive gaps alternate, which is the repulsion of the
+zeros that random-matrix statistics predict. It says nothing about the next zero's own offset. Everything the
+vortex eyes carry is `θ(γ_j)` and the first dozen terms of the chain, which are the same functions of `γ_j` the
+chain started from; the picture is a faithful mirror, not an oracle. What it does give is a clean geometric
+object: the chain's far end is its near end reflected through the Gram phase, and the helix of the first eye is
+the zeros' Gram clock drawn as a curve through the planes.
+
 ## What I would take from this
 
 1. The cancellation curves are the product curves `n = u(u + d)`. For a prime-generating line they are indexed
@@ -260,8 +337,11 @@ itself diverges. Up to 1 601 the field has 252 primes, 450 cyan restorations (pl
    1:4 products and the half-Gram points. The bend is a probe, not a parameter of the arithmetic.
 5. Double intersections do not restore primes, but the sieve's sign at them is the Möbius function, whose running
    total is the Mertens function and whose series is `1/ζ`: that is the honest form of "double cancellation".
-6. None of this predicts a prime that the sieve or the explicit formula does not already predict. It makes
-   the two predictions visibly the same picture.
+6. The vortex eyes of the chain at a zero are the chain's first vertices reflected through twice the Gram
+   phase; the first eye's helix through the zero planes is the Gram clock, and its phase slips carry only the
+   weak next-gap correlation of zero repulsion (−0.28).
+7. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+   not already predict. It makes the predictions visibly the same picture.
 
 ## Rendering
 
