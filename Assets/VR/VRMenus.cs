@@ -119,7 +119,7 @@ public partial class VRApp
         new() { Id = "primes", Label = "Primes", Icon = VRIcons.Id.Sacks },
         new() { Id = "saddle", Label = "Saddle", Icon = VRIcons.Id.Saddle },
         new() { Id = "machine", Label = "Machine", Icon = VRIcons.Id.Machine },
-        new() { Id = "explore", Label = "Explore", Icon = VRIcons.Id.Waves },
+        new() { Id = "explore", Label = "Stand on it", Icon = VRIcons.Id.Saddle },
     };
 
     void BuildViewsPage(RectTransform p)
@@ -240,8 +240,9 @@ public partial class VRApp
                 tour.RunActions(new[] { "sacks:show", "hypothesis:zeta", "hypothesis:full" });
                 tour.Annotations.Sacks.FullWaveAmplitude = 4f;
                 Guide.SetFollow(false);
-                Rig.AnimateTo(ExplorePlacement(), 1.5f);
-                Toast("Explore: the saddle is the floor, the zeta trail rises from the centre. Pinch to move, two hands to scale. Flat toggle on this page.");
+                Rig.CancelAnimation();
+                Rig.SetPlacement(ExplorePlacement()); // standing on the saddle: the zeta trail is vertical, straight up from the floor
+                Rig.AnimateTo(ExplorePlacement(), 0.3f);
                 return;
             default:
                 jump = 40d;

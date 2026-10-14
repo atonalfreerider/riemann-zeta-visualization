@@ -1447,6 +1447,10 @@ public class SacksSpiral : MonoBehaviour
     volatile bool fullCancel;
     Unity.Collections.NativeArray<Vector3> fullPositions;
     TextBox fullLabel;
+    Vector3[] fullBase, fullNormal;   // per-sample surface point and normal for the current bend
+    float fullBaseBend = -1f;
+    int fullUploadedZeros = -1;
+    float fullUploadedAmplitude = -1f;
 
     /// <summary>
     /// Dial in up to <paramref name="zeros"/> collisions. The cumulative sums are computed on a background
@@ -1464,7 +1468,10 @@ public class SacksSpiral : MonoBehaviour
 
         double[] zs = Main.Instance.zetaZeroValues;
         zeros = Mathf.Clamp(zeros, 1, zs.Length);
+        if (Application.platform == RuntimePlatform.Android) samples = Mathf.Min(samples, 60000); // mobile GPU / CPU budget
         fullSamples = samples;
+        fullBaseBend = -1f;
+        fullUploadedZeros = -1;
         fullNMax = nMax;
         fullLogN = new double[samples];
         for (int i = 0; i < samples; i++) fullLogN[i] = System.Math.Log(FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (samples - 1f)));
@@ -1488,6 +1495,8 @@ public class SacksSpiral : MonoBehaviour
         fullCancel = false;
         FullWaveRunning = true;
         double[] logN = fullLogN;
+        // leave the main thread its cores: at most half the processors, low priority
+        var options = new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = System.Math.Max(1, System.Environment.ProcessorCount / 2) };
         fullThread = new System.Threading.Thread(() =>
         {
             double[] acc = new double[samples];
@@ -1497,7 +1506,7 @@ public class SacksSpiral : MonoBehaviour
             {
                 int end = System.Math.Min(zeros, done + batch);
                 int from = done;
-                System.Threading.Tasks.Parallel.For(0, samples, i =>
+                System.Threading.Tasks.Parallel.For(0, samples, options, i =>
                 {
                     double l = logN[i], s = 0;
                     for (int z = from; z < end; z++) s -= System.Math.Cos(zs[z] * l);
@@ -1510,7 +1519,7 @@ public class SacksSpiral : MonoBehaviour
                     fullPublishedZeros = done;
                 }
             }
-        }) { IsBackground = true, Name = "FullMasterWave" };
+        }) { IsBackground = true, Name = "FullMasterWave", Priority = System.Threading.ThreadPriority.BelowNormal };
         fullThread.Start();
         StartCoroutine(FullWaveDisplay(zeros, seconds));
     }
@@ -1536,10 +1545,12 @@ public class SacksSpiral : MonoBehaviour
             if (shown > 0 && shown != FullWaveZerosShown)
             {
                 FullWaveZerosShown = shown;
-                fullLabel.Text = $"{have:N0} collision waves on the spiral — spikes at every prime";
+                if (!VRMode.Enabled) fullLabel.Text = $"{have:N0} collision waves on the spiral — spikes at every prime";
             }
 
-            if (have > 0) UploadFullWave(local);
+            // upload only when there is new data, or the amplitude / surface changed (not every frame)
+            bool changed = have != fullUploadedZeros || !Mathf.Approximately(fullUploadedAmplitude, FullWaveAmplitude) || !Mathf.Approximately(fullBaseBend, bend);
+            if (have > 0 && changed) UploadFullWave(local);
             if (have >= zeros && u >= 1f) break;
             yield return null;
         }
@@ -1550,16 +1561,31 @@ public class SacksSpiral : MonoBehaviour
 
     void UploadFullWave(double[] sums)
     {
+        if (fullBase == null || fullBase.Length != fullSamples || !Mathf.Approximately(fullBaseBend, bend))
+        {
+            fullBase = new Vector3[fullSamples];
+            fullNormal = new Vector3[fullSamples];
+            for (int i = 0; i < fullSamples; i++)
+            {
+                float n = (float)System.Math.Exp(fullLogN[i]);
+                fullBase[i] = SpiralPos(n, bend);
+                fullNormal[i] = SurfaceNormalAt(n);
+            }
+
+            fullBaseBend = bend;
+        }
+
         double max = 1e-9;
         for (int i = 0; i < fullSamples; i++) if (System.Math.Abs(sums[i]) > max) max = System.Math.Abs(sums[i]);
         float scale = (float)(FullWaveAmplitude / max);
         for (int i = 0; i < fullSamples; i++)
         {
-            float n = (float)System.Math.Exp(fullLogN[i]);
-            fullPositions[i] = OnSpiral(n, 0f, (float)sums[i] * scale);
+            fullPositions[i] = fullBase[i] + fullNormal[i] * ((float)sums[i] * scale + .15f);
         }
 
         masterWave.SetPositions(fullPositions);
+        fullUploadedZeros = fullPublishedZeros;
+        fullUploadedAmplitude = FullWaveAmplitude;
     }
 
     public void StopFullMasterWave()

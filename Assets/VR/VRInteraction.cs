@@ -303,6 +303,20 @@ public class VRWorldGrab : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// A hand hanging at the side is not grabbing. A pinch only takes hold when the hand is raised (above roughly
+    /// chest height) and in front of the user; a hold lets go once the hand drops to the side.
+    /// </summary>
+    bool HandRaised(VRHand hand, float dropAllowance)
+    {
+        Vector3 head = rig.Cam.transform.localPosition;
+        Vector3 p = hand.PinchPoint;
+        if (p.y < head.y - (0.45f + dropAllowance)) return false;
+        Vector3 forward = Vector3.ProjectOnPlane(rig.Cam.transform.localRotation * Vector3.forward, Vector3.up).normalized;
+        Vector3 toHand = Vector3.ProjectOnPlane(p - head, Vector3.up);
+        return Vector3.Dot(toHand, forward) > -0.05f;
+    }
+
     void UpdateHold(VRHand hand, Hold hold)
     {
         if (!hand.Tracked)
@@ -313,11 +327,11 @@ public class VRWorldGrab : MonoBehaviour
 
         if (hold.Active)
         {
-            if (!hand.Pinching) hold.Active = false;
+            if (!hand.Pinching || !HandRaised(hand, 0.2f)) hold.Active = false;
             return;
         }
 
-        if (hand.PinchDown && !poker.NearPanel(hand.PinchPoint, 0.07f) && !poker.Hovering(hand))
+        if (hand.PinchDown && HandRaised(hand, 0f) && !poker.NearPanel(hand.PinchPoint, 0.07f) && !poker.Hovering(hand))
         {
             hold.Active = true;
             hold.Anchor = rig.Offset.TransformPoint(hand.PinchPoint);
