@@ -246,7 +246,8 @@ public class CameraRig : MonoBehaviour
             const float k = 1f / 48f;
             Vector3 here = c + new Vector3(r * Mathf.Cos(a), r * Mathf.Sin(a), k * (r * r * Mathf.Cos(2 * a)));
             Vector3 ahead = c + new Vector3(r2 * Mathf.Cos(a2), r2 * Mathf.Sin(a2), k * (r2 * r2 * Mathf.Cos(2 * a2)));
-            Vector3 pos = here + Vector3.back * (3.5f + r * .12f) - (ahead - here).normalized * 4f;
+            // ride well above and behind the road so a whole turn of the spiral stays in frame
+            Vector3 pos = here + Vector3.back * (11f + r * .35f) - (ahead - here).normalized * (10f + r * .2f);
             return new CueState { Position = pos, LookAt = ahead + Vector3.back * .6f, Up = Vector3.back, Fov = 60 };
         };
         cues["zeno_zoom"] = () => new CueState { Position = annotations.ZenoFocus + new Vector3(0, annotations.ZenoZoom, -annotations.ZenoZoom * .04f), LookAt = annotations.ZenoFocus, Up = Vector3.right, Fov = 60 };
