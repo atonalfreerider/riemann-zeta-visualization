@@ -119,6 +119,7 @@ public partial class VRApp
         new() { Id = "primes", Label = "Primes", Icon = VRIcons.Id.Sacks },
         new() { Id = "saddle", Label = "Saddle", Icon = VRIcons.Id.Saddle },
         new() { Id = "machine", Label = "Machine", Icon = VRIcons.Id.Machine },
+        new() { Id = "explore", Label = "Explore", Icon = VRIcons.Id.Waves },
     };
 
     void BuildViewsPage(RectTransform p)
@@ -126,8 +127,8 @@ public partial class VRApp
         for (int i = 0; i < Views.Length; i++)
         {
             ViewDef view = Views[i];
-            int col = i % 4, row = i / 4;
-            Dock.AddButton(8 + col * 148, 2 + row * 74, 140, 68, view.Label, view.Icon, () => ApplyView(view.Id), false, null, 20f, p);
+            int col = i % 5, row = i / 5;
+            Dock.AddButton(8 + col * 118, 2 + row * 74, 112, 68, view.Label, view.Icon, () => ApplyView(view.Id), false, null, 19f, p);
         }
 
         Dock.AddLabel(10, 150, 400, 24, "Show or hide", 20f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
@@ -139,15 +140,16 @@ public partial class VRApp
             ("Trail", VRIcons.Id.Trail, () => layers.Trail, v => layers.Trail = v),
             ("Waves", VRIcons.Id.Waves, () => layers.Waves, v => layers.Waves = v),
             ("Primes", VRIcons.Id.Stairs, () => layers.Stairs, v => layers.Stairs = v),
+            ("Flat", VRIcons.Id.Saddle, () => tour.Annotations.Sacks.Flat, v => tour.Annotations.Sacks.SetFlat(v)),
         };
         for (int i = 0; i < toggles.Length; i++)
         {
             var t = toggles[i];
-            Dock.AddButton(8 + i * 98, 176, 90, 64, t.label, t.icon, () =>
+            Dock.AddButton(8 + i * 84, 176, 78, 64, t.label, t.icon, () =>
             {
                 t.set(!t.get());
                 ApplyLayers();
-            }, true, t.get, 17f, p);
+            }, true, t.get, 16f, p);
         }
 
         Dock.AddSlider(10, 244, 580, 52, "Dial speed", 0f, 10f, () => (float)main.Speed, v => main.Speed = v, v => $"{v:0.0} per second", p);
@@ -229,6 +231,18 @@ public partial class VRApp
                 play = false;
                 name = "The spiral bent over a saddle";
                 break;
+            case "explore":
+                // the final picture at room scale: you stand at the saddle's centre, the saddle is the floor,
+                // the zeta trail rises overhead and the master wave with every zero rides the spiral
+                layers.All(false);
+                ApplyLayers();
+                main.Pause();
+                tour.RunActions(new[] { "sacks:show", "hypothesis:zeta", "hypothesis:full" });
+                tour.Annotations.Sacks.FullWaveAmplitude = 4f;
+                Guide.SetFollow(false);
+                Rig.AnimateTo(ExplorePlacement(), 1.5f);
+                Toast("Explore: the saddle is the floor, the zeta trail rises from the centre. Pinch to move, two hands to scale. Flat toggle on this page.");
+                return;
             default:
                 jump = 40d;
                 name = "The whole machine";
@@ -247,6 +261,16 @@ public partial class VRApp
         Guide.SetFollow(true, true);
         tour.Rig.SetCue(cue);
         Toast(name);
+    }
+
+    /// <summary>Standing on the saddle's centre: rig 'up' = the saddle normal (world −Z), model at half size.</summary>
+    VRRig.Placement ExplorePlacement()
+    {
+        const float scale = 2f;
+        Vector3 centre = tour.Annotations.Sacks.Center;
+        Quaternion rotation = Quaternion.LookRotation(Vector3.up, Vector3.back) * Quaternion.Inverse(Rig.YawHome);
+        Vector3 floorLocal = new(Rig.HeadHome.x, 0f, Rig.HeadHome.z);
+        return new VRRig.Placement { Rotation = rotation, Scale = scale, Position = centre - rotation * (scale * floorLocal) };
     }
 
     // ---- space page ----------------------------------------------------------------------------------

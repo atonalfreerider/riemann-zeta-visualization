@@ -717,16 +717,6 @@
           "footnote": "a visual hypothesis, not a theorem"
         },
         {
-          "id": "outro_03b",
-          "text": "Here is the whole machine on one sheet. Across: the numbers along the spiral. Up: the dial. Every row is a wave, every column is a chain arrow. Sum the columns and you get the zeta trail, in white, touching zero at the yellow rows. Sum the yellow rows and you get the prime map, in cyan, spiking on the primes.",
-          "camera": "sacks_sheet",
-          "actions": [
-            "hypothesis:sheet"
-          ],
-          "pause": 0.6,
-          "footnote": "the fringe sheet cos(t · log n): the explicit formula read in two directions"
-        },
-        {
           "id": "outro_04",
           "text": "Every collision is a dial. The first collision's wave is born at its own height on the trail and runs out along the spiral, above the saddle. Then it sinks down onto the saddle. The second, the third, the fourth: each new wave follows the spiral from its own height and settles onto the last, and the interference builds along the spiral itself.",
           "camera": "sacks_wave",
@@ -738,19 +728,29 @@
         },
         {
           "id": "outro_05",
-          "text": "Ride the spiral outward with the master wave. It spikes at every prime, two, three, five, seven, and on, and the orange ticks catch the prime powers. Saddle, trail and waves, one structure seen three ways.",
-          "camera": "sacks_track",
-          "actions": [
-            "pulse:sacks"
-          ],
+          "text": "Look straight down at the centre. The master wave rides the spiral, and it spikes at every prime: two, three, five, seven, eleven, thirteen. The orange ticks catch the prime powers.",
+          "camera": "master_top",
+          "actions": [],
           "pause": 0.6
         },
         {
           "id": "outro_06",
-          "text": "Do these three structures know about each other, or are we only seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set.",
-          "camera": "sacks_wave_close",
-          "actions": [],
-          "pause": 3.0
+          "text": "Now dial in every collision we have. Ten thousand of them. Watch the spikes sharpen and multiply as the spiral fills, prime after prime after prime, as far out as the table can take us.",
+          "camera": "master_top_pull",
+          "actions": [
+            "hypothesis:full"
+          ],
+          "pause": 1.0
+        },
+        {
+          "id": "outro_07",
+          "text": "Saddle, trail and waves, one structure seen three ways. Do they know about each other, or are we seeing one truth from three sides? Nobody knows yet. That is the kind of question humans and machines will now ask together. Prove the one half key, and we will have read one line of the instruction set. The picture is yours now: explore it.",
+          "camera": "master_top_pull",
+          "actions": [
+            "explore:on"
+          ],
+          "pause": 3.0,
+          "footnote": "after the tour: WASD / QE move, right-drag look, E exit · VR: the Explore view on the dock"
         }
       ]
     }

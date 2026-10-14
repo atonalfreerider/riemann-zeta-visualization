@@ -38,6 +38,7 @@ public class TourDirector : MonoBehaviour
     public CameraRig Rig { get; private set; }
     public CaptionDisplay Captions { get; private set; }
     public FrameRecorder Recorder { get; private set; }
+    public ExploreMode Explore { get; private set; }
 
     /// <summary>(line id, tour clock seconds, recorder frame) for every narration clip started — used to mux audio.</summary>
     public readonly List<(string id, float time, int frame)> AudioTimeline = new();
@@ -81,6 +82,7 @@ public class TourDirector : MonoBehaviour
         Rig.Portrait = Portrait;
         Captions = CaptionDisplay.Create(cam);
         Recorder = FrameRecorder.Create(cam);
+        Explore = ExploreMode.Create(this);
         if (!Portrait && !VRMode.Enabled && Recorder.Width < Recorder.Height) (Recorder.Width, Recorder.Height) = (Recorder.Height, Recorder.Width); // -landscape records 1920x1080
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -121,6 +123,11 @@ public class TourDirector : MonoBehaviour
         {
             Portrait = !Portrait;
             Rig.Portrait = Portrait;
+        }
+
+        if (keyboard.eKey.wasPressedThisFrame && !Explore.Active)
+        {
+            Explore.Enter();
         }
 
         if (keyboard.fKey.wasPressedThisFrame)
@@ -258,6 +265,7 @@ public class TourDirector : MonoBehaviour
     public void RunActions(params string[] actions) => ApplyActions(actions);
 
     float currentLineSeconds = 3f;
+    bool exploreAfterTour;
 
     int lineSerial;
 
@@ -430,6 +438,11 @@ public class TourDirector : MonoBehaviour
         CurrentChapterIndex = -1;
         CurrentLineId = "";
         TourEnded?.Invoke();
+        if (exploreAfterTour && !Storyboard && !Recorder.IsOffscreen)
+        {
+            exploreAfterTour = false;
+            Explore.Enter();
+        }
 
 #if UNITY_EDITOR
         if (UnityEditor.EditorPrefs.GetBool("Zeta.BatchQuitAfterPlay", false))
@@ -680,8 +693,8 @@ public class TourDirector : MonoBehaviour
                     case "rootlabel": Annotations.ShowRootFormula(arg); break;
                     case "sacks":
                         if (arg == "spiral") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.MorphToSpiral(Mathf.Max(2.5f, currentLineSeconds * 0.8f))); }
-                        else if (arg == "saddle") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.Bend(1f, Mathf.Max(2.5f, currentLineSeconds * 0.8f))); }
-                        else if (arg == "flat") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.Bend(0f, Mathf.Max(2f, currentLineSeconds * 0.6f))); }
+                        else if (arg == "saddle") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.SetFlat(false, Mathf.Max(2.5f, currentLineSeconds * 0.8f)); }
+                        else if (arg == "flat") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.SetFlat(true, Mathf.Max(2f, currentLineSeconds * 0.6f)); }
                         else if (arg == "lattice") { Annotations.Sacks.gameObject.SetActive(true); Annotations.Sacks.StartCoroutine(Annotations.Sacks.BuildLatticeRows(Mathf.Max(4f, currentLineSeconds * 0.9f))); }
                         else if (arg == "sieve")
                         {
@@ -701,10 +714,14 @@ public class TourDirector : MonoBehaviour
                         if (arg == "off") Annotations.ShowLanding(false);
                         else Annotations.ShowLanding(true, $"<color=#C8A0FF>t = {Main.CurrentT:0.00}</color>\nevery joint turned t·log(n/(n−1))\nand the chain closed on the centre");
                         break;
+                    case "explore":
+                        exploreAfterTour = arg != "off";
+                        break;
                     case "hypothesis":
                         if (arg == "drop") Annotations.Sacks.DropZeros(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "zeta") Annotations.Sacks.ShowZetaOnly();
                         else if (arg == "sheet") { Annotations.Sacks.ShowZetaOnly(); Annotations.Sacks.ShowFringeSheet(60f, 62f, 13); Annotations.Sacks.ShowTrail(true); }
+                        else if (arg == "full") Annotations.Sacks.StartFullMasterWave(parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : Main.zetaZeroValues.Length, 160000, 1300f, Mathf.Max(6f, currentLineSeconds * 0.9f));
                         else if (arg == "wavestack") Annotations.Sacks.StartWaveStack(Mathf.Max(6f, currentLineSeconds * 0.95f), parts.Length > 2 ? int.Parse(parts[2], CultureInfo.InvariantCulture) : 24);
                         else if (arg == "interference") Annotations.Sacks.StartInterference(Mathf.Max(4f, currentLineSeconds * 0.9f));
                         else if (arg == "nointerference") Annotations.Sacks.HideInterference();

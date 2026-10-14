@@ -207,3 +207,13 @@ Press **F** for the in-game readout and use the Profiler with 'Deep Profile' off
 
 `python3 Tools/make_chapter_gifs.py Recordings/<run>` cuts one GIF per chapter from a recording using the
 chapter marks the recorder writes into `timeline.json` (`--seconds`, `--offset`, `--offsets hook=14,turn=58`).
+
+## Explore mode (after the tour, or press E)
+
+The final picture, free to walk around: the Sacks spiral on the saddle, the zeta trail rising from its centre and
+the master wave with every zero in the table (10,000) riding the spiral, computed on a background thread.
+Desktop: WASD / QE move, right-drag look, scroll changes speed, **X** flattens the saddle to a plane and back
+(saddle is the default), **E** exits. The wave is displaced along the local surface normal, so it stands on the
+saddle in saddle mode and on the plane in flat mode. In VR the dock's Views page has an **Explore** view (you stand
+at the saddle's centre with the saddle as the floor and the trail overhead) and a **Flat** toggle.
+Actions: `hypothesis:full[:zeros]` dials every zero into the master wave; `explore:on` enters explore mode when the tour ends.

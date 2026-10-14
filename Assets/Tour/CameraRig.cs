@@ -226,6 +226,22 @@ public class CameraRig : MonoBehaviour
             Vector3 pos = c + new Vector3(Mathf.Sin(a) * d, Mathf.Cos(a) * d, -d * .75f);
             return new CueState { Position = pos, LookAt = c + Vector3.back * 1.5f, Up = Vector3.back, Fov = 55 };
         };
+        cues["master_top"] = () =>
+        {
+            // the clear view: straight down at the centre from close; the wave's normal displacement reads through perspective
+            Vector3 c = annotations.Sacks.Center;
+            float drift = Mathf.Sin(Time.time * 0.2f) * 0.6f;
+            return new CueState { Position = c + Vector3.back * 12f + new Vector3(drift, 0, 0), LookAt = c, Up = Vector3.up, Fov = 50 };
+        };
+        cues["master_top_pull"] = () =>
+        {
+            // pull straight up as the wave fills with zeros and the spiral extends
+            Vector3 c = annotations.Sacks.Center;
+            float u = Mathf.Clamp01((Time.time - cueStartTime) / 22f);
+            float d = Mathf.Lerp(12f, 95f, Mathf.SmoothStep(0f, 1f, u));
+            annotations.Sacks.FullWaveAmplitude = Mathf.Clamp(d * 0.17f, 1.5f, 14f);
+            return new CueState { Position = c + Vector3.back * d, LookAt = c, Up = Vector3.up, Fov = 50 };
+        };
         cues["sacks_sheet"] = () =>
         {
             // portrait framing of the fringe sheet standing on the ridge: front view, slight drift

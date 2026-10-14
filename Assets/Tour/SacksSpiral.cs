@@ -948,8 +948,81 @@ public class SacksSpiral : MonoBehaviour
 
     float WaveN(int i) => FieldNMin * Mathf.Pow(FieldNMax / FieldNMin, i / (WavePts - 1f));
 
-    /// <summary>The spiral road at a given altitude above the saddle, displaced along the normal by a wave.</summary>
-    Vector3 OnSpiral(float n, float altitude, float displacement) => SpiralPos(n, 1f) + Vector3.back * (altitude + displacement + .15f);
+    /// <summary>Unit normal of the current surface (saddle bent by <see cref="bend"/>) at radius r, angle a, pointing 'up' (toward −Z).</summary>
+    Vector3 SurfaceNormal(float x, float y)
+    {
+        // z = bend·k·(x² − y²)  →  gradient (2bkx, −2bky); the up-normal (toward −Z) is (2bkx, −2bky, −1) normalised
+        float k = bend * SaddleK;
+        return new Vector3(2f * k * x, -2f * k * y, -1f).normalized;
+    }
+
+    Vector3 SurfaceNormalAt(float n)
+    {
+        float r = R * Mathf.Sqrt(n), a = 2f * Mathf.PI * Mathf.Sqrt(n);
+        return SurfaceNormal(r * Mathf.Cos(a), r * Mathf.Sin(a));
+    }
+
+    /// <summary>The spiral road at a given altitude above the surface, displaced along the LOCAL surface normal by a wave.</summary>
+    Vector3 OnSpiral(float n, float altitude, float displacement) => SpiralPos(n, bend) + SurfaceNormalAt(n) * (altitude + displacement + .15f);
+
+    /// <summary>Saddle (default) or flat plane for the final view; the wave, ticks and trail follow the surface.</summary>
+    public bool Flat { get; private set; }
+    Coroutine flattenRoutine;
+
+    public void SetFlat(bool flat, float seconds = 1.5f)
+    {
+        Flat = flat;
+        if (flattenRoutine != null) StopCoroutine(flattenRoutine);
+        flattenRoutine = StartCoroutine(FlattenRoutine(flat ? 0f : 1f, seconds));
+    }
+
+    IEnumerator FlattenRoutine(float to, float seconds)
+    {
+        float from = bend;
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.deltaTime;
+            bend = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / seconds));
+            Layout();
+            RefreshWaveGeometry();
+            yield return null;
+        }
+
+        bend = to;
+        Layout();
+        RefreshWaveGeometry();
+        flattenRoutine = null;
+    }
+
+    /// <summary>Re-place everything that sits on the surface after the bend changed.</summary>
+    void RefreshWaveGeometry()
+    {
+        if (waveStackRoot == null) return;
+        foreach (Transform c in waveStackRoot.transform)
+        {
+            if (!c.name.StartsWith("ticks ")) continue;
+            float nMax = float.Parse(c.name.Substring(6), System.Globalization.CultureInfo.InvariantCulture);
+            c.gameObject.SetActive(false);
+            Destroy(c.gameObject);
+            c.name = "old";
+            EnsurePrimeTicks(nMax);
+            break;
+        }
+
+        if (fullSums != null && fullPublishedZeros > 0)
+        {
+            double[] local = new double[fullSamples];
+            lock (fullLock) System.Array.Copy(fullSums, local, fullSamples);
+            UploadFullWave(local);
+        }
+        else if (masterWave != null && masterWave.enabled && masterWave.positionCount == WavePts)
+        {
+            SetMasterWave(lastMasterZeros);
+        }
+    }
+
+    int lastMasterZeros;
 
     void EnsureWaveStack()
     {
@@ -960,18 +1033,7 @@ public class SacksSpiral : MonoBehaviour
         masterWave.transform.SetParent(waveStackRoot.transform, false);
         masterWave.positionCount = WavePts;
         masterWave.numCornerVertices = 3;
-        // prime ticks standing on the saddle along the spiral, so the spikes can be read against them
-        for (int n = 2; n <= (int)FieldNMax; n++)
-        {
-            bool prime = IsPrime(n);
-            bool primePower = !prime && IsPrimePower(n);
-            if (!prime && !primePower) continue;
-            Color c = prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f);
-            LineRenderer tick = Factory.NewLine(prime ? "prime tick" : "prime power tick", prime ? .05f : .04f, c, Factory.SoftGlowIntensity);
-            tick.transform.SetParent(waveStackRoot.transform, false);
-            tick.positionCount = 2;
-            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, prime ? 0.9f : 0.6f) });
-        }
+        EnsurePrimeTicks(FieldNMax);
     }
 
     // ---- exploration layers (static views of the interference, used by ExplorationRenderTest) ----
@@ -1370,6 +1432,169 @@ public class SacksSpiral : MonoBehaviour
         l.transform.position = origin + new Vector3(R * Mathf.Sqrt(nMax) * .5f, -5.5f, 0);
     }
 
+    // ---- the full master wave: as many zeros as the table holds, computed on a background thread ----
+    public bool FullWaveRunning { get; private set; }
+    public int FullWaveZerosShown { get; private set; }
+    public int FullWaveZerosTarget { get; private set; }
+    public float FullWaveAmplitude = 2.4f;
+    int fullSamples;
+    float fullNMax;
+    double[] fullLogN;
+    double[] fullSums;          // latest published cumulative sums (sample-wise)
+    int fullPublishedZeros;
+    readonly object fullLock = new();
+    System.Threading.Thread fullThread;
+    volatile bool fullCancel;
+    Unity.Collections.NativeArray<Vector3> fullPositions;
+    TextBox fullLabel;
+
+    /// <summary>
+    /// Dial in up to <paramref name="zeros"/> collisions. The cumulative sums are computed on a background
+    /// thread (parallel over samples, batches of zeros); the main thread shows whatever has been published,
+    /// with the displayed count rising geometrically over <paramref name="seconds"/>.
+    /// </summary>
+    public void StartFullMasterWave(int zeros, int samples, float nMax, float seconds)
+    {
+        ShowHypothesis(true);
+        EnsureWaveStack();
+        ClearExploration();
+        waveStackRoot.SetActive(true);
+        EnsurePrimeTicks(nMax);
+        StopFullMasterWave();
+
+        double[] zs = Main.Instance.zetaZeroValues;
+        zeros = Mathf.Clamp(zeros, 1, zs.Length);
+        fullSamples = samples;
+        fullNMax = nMax;
+        fullLogN = new double[samples];
+        for (int i = 0; i < samples; i++) fullLogN[i] = System.Math.Log(FieldNMin * Mathf.Pow(nMax / FieldNMin, i / (samples - 1f)));
+        fullSums = new double[samples];
+        fullPublishedZeros = 0;
+        FullWaveZerosTarget = zeros;
+        FullWaveZerosShown = 0;
+        if (fullPositions.IsCreated) fullPositions.Dispose();
+        fullPositions = new Unity.Collections.NativeArray<Vector3>(samples, Unity.Collections.Allocator.Persistent);
+        masterWave.positionCount = samples;
+        masterWave.enabled = true;
+        if (fullLabel == null)
+        {
+            fullLabel = TextBoxLabel("", 2.4f, Factory.Palette.Cosine);
+            fullLabel.transform.SetParent(waveStackRoot.transform, false);
+        }
+
+        fullLabel.gameObject.SetActive(true);
+        fullLabel.transform.position = origin + new Vector3(0, -R * Mathf.Sqrt(nMax) - 4f, 0);
+
+        fullCancel = false;
+        FullWaveRunning = true;
+        double[] logN = fullLogN;
+        fullThread = new System.Threading.Thread(() =>
+        {
+            double[] acc = new double[samples];
+            int done = 0;
+            const int batch = 40;
+            while (done < zeros && !fullCancel)
+            {
+                int end = System.Math.Min(zeros, done + batch);
+                int from = done;
+                System.Threading.Tasks.Parallel.For(0, samples, i =>
+                {
+                    double l = logN[i], s = 0;
+                    for (int z = from; z < end; z++) s -= System.Math.Cos(zs[z] * l);
+                    acc[i] += s;
+                });
+                done = end;
+                lock (fullLock)
+                {
+                    System.Array.Copy(acc, fullSums, samples);
+                    fullPublishedZeros = done;
+                }
+            }
+        }) { IsBackground = true, Name = "FullMasterWave" };
+        fullThread.Start();
+        StartCoroutine(FullWaveDisplay(zeros, seconds));
+    }
+
+    IEnumerator FullWaveDisplay(int zeros, float seconds)
+    {
+        float t = 0f;
+        double[] local = new double[fullSamples];
+        while (!fullCancel)
+        {
+            t += Time.deltaTime;
+            float u = seconds <= 0f ? 1f : Mathf.Clamp01(t / seconds);
+            int want = Mathf.Clamp(Mathf.RoundToInt(Mathf.Pow(zeros, u)), 1, zeros);
+            int have;
+            lock (fullLock)
+            {
+                have = fullPublishedZeros;
+                System.Array.Copy(fullSums, local, fullSamples);
+            }
+
+            // show the published sums (they include all zeros up to 'have'); the count label follows the smaller of the two
+            int shown = Mathf.Min(want, have);
+            if (shown > 0 && shown != FullWaveZerosShown)
+            {
+                FullWaveZerosShown = shown;
+                fullLabel.Text = $"{have:N0} collision waves on the spiral — spikes at every prime";
+            }
+
+            if (have > 0) UploadFullWave(local);
+            if (have >= zeros && u >= 1f) break;
+            yield return null;
+        }
+
+        FullWaveRunning = false;
+    }
+
+    void UploadFullWave(double[] sums)
+    {
+        double max = 1e-9;
+        for (int i = 0; i < fullSamples; i++) if (System.Math.Abs(sums[i]) > max) max = System.Math.Abs(sums[i]);
+        float scale = (float)(FullWaveAmplitude / max);
+        for (int i = 0; i < fullSamples; i++)
+        {
+            float n = (float)System.Math.Exp(fullLogN[i]);
+            fullPositions[i] = OnSpiral(n, 0f, (float)sums[i] * scale);
+        }
+
+        masterWave.SetPositions(fullPositions);
+    }
+
+    public void StopFullMasterWave()
+    {
+        fullCancel = true;
+        if (fullThread != null && fullThread.IsAlive) fullThread.Join(200);
+        fullThread = null;
+        FullWaveRunning = false;
+    }
+
+    void EnsurePrimeTicks(float nMax)
+    {
+        Transform existing = waveStackRoot.transform.Find("ticks " + (int)nMax);
+        if (existing != null) return;
+        foreach (Transform c in waveStackRoot.transform) if (c.name.StartsWith("ticks ")) c.gameObject.SetActive(false);
+        GameObject root = new("ticks " + (int)nMax);
+        root.transform.SetParent(waveStackRoot.transform, false);
+        for (int n = 2; n <= (int)nMax; n++)
+        {
+            bool prime = IsPrime(n);
+            bool primePower = !prime && IsPrimePower(n);
+            if (!prime && !primePower) continue;
+            Color c = prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f);
+            LineRenderer tick = Factory.NewLine(prime ? "prime tick" : "prime power tick", prime ? .05f : .04f, c, Factory.SoftGlowIntensity);
+            tick.transform.SetParent(root.transform, false);
+            tick.positionCount = 2;
+            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, prime ? 0.9f : 0.6f) });
+        }
+    }
+
+    void OnDestroy()
+    {
+        StopFullMasterWave();
+        if (fullPositions.IsCreated) fullPositions.Dispose();
+    }
+
     public void HideWaveStack()
     {
         if (waveStackRoot != null) waveStackRoot.SetActive(false);
@@ -1377,6 +1602,7 @@ public class SacksSpiral : MonoBehaviour
 
     void SetMasterWave(int k)
     {
+        lastMasterZeros = k;
         double[] zs = Main.Instance.zetaZeroValues;
         float scale = WaveAmp / Mathf.Sqrt(Mathf.Max(1, k));
         Vector3[] pts = new Vector3[WavePts];
@@ -1401,8 +1627,12 @@ public class SacksSpiral : MonoBehaviour
     {
         ShowHypothesis(true);
         EnsureWaveStack();
+        ClearExploration();
         waveStackRoot.SetActive(true);
         HideInterference();
+        StopFullMasterWave();
+        if (fullLabel != null) fullLabel.gameObject.SetActive(false);
+        masterWave.positionCount = WavePts;
         if (waveRoutine != null) StopCoroutine(waveRoutine);
         waveRoutine = StartCoroutine(WaveStackRoutine(seconds, count));
     }
