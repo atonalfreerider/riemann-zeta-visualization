@@ -302,6 +302,7 @@
           "text": "Start with an ordinary cosine wave and a dial, gamma, that sets its speed. Turn the dial up, and the ripples pack tighter.",
           "camera": "wave",
           "actions": [
+            "atleast:120",
             "pause",
             "card:off",
             "hide:spiral",

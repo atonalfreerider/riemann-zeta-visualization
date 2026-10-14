@@ -85,7 +85,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 *One wave per collision*
 
 **wave_01** — Start with an ordinary cosine wave and a dial, gamma, that sets its speed. Turn the dial up, and the ripples pack tighter.
-  <sub>camera `wave` · actions `pause card:off hide:spiral hide:tail hide:tip hide:center hide:trail hide:imaxis hide:outaxes hide:zeros show:numbers wave:plain:2.4 dial:on delay:4:wave:dial:6`</sub>
+  <sub>camera `wave` · actions `atleast:120 pause card:off hide:spiral hide:tail hide:tip hide:center hide:trail hide:imaxis hide:outaxes hide:zeros show:numbers wave:plain:2.4 dial:on delay:4:wave:dial:6`</sub>
 
 **wave_02** — Put a logarithm inside, and the ripples bunch up near zero. Dial it to fourteen point one three: the first collision's wave.
   <sub>camera `wave` · actions `wave:log delay:4:wave:dial:14.134725 delay:4:dialstrip:1`</sub>

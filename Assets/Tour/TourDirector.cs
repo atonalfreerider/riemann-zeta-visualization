@@ -674,6 +674,13 @@ public class TourDirector : MonoBehaviour
                     case "reset": Main.ResetAnimation(); break;
                     case "speed": Main.Speed = double.Parse(arg, CultureInfo.InvariantCulture); break;
                     case "jump": Main.JumpTo(double.Parse(arg, CultureInfo.InvariantCulture)); break;
+                    case "atleast":
+                    {
+                        // atleast:T — make sure the dial has passed t = T (so a chapter started on its own has its collisions); never goes back
+                        double target = double.Parse(arg, CultureInfo.InvariantCulture);
+                        if (Main.CurrentT < target) Main.JumpTo(target);
+                        break;
+                    }
                     case "flash":
                         if (arg == "zero") Annotations.PulseZero(Main.ZeroCount - 1);
                         else if (arg == "tail") Annotations.PulseTail();
