@@ -71,6 +71,24 @@ public class ReviewRenderTest
             }
         }
 
+        if (parts.Contains("logo"))
+        {
+            // the graph view's intro: the launch card should be playing over it
+            director.Home.Enter();
+            LaunchTitle card = UnityEngine.Object.FindAnyObjectByType<LaunchTitle>();
+            Assert.IsNotNull(card, "no launch card when the graph view opened");
+            Canvas canvas = card.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = cam;
+            canvas.planeDistance = 0.4f;
+            UnityEngine.UI.CanvasScaler scaler = card.GetComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
+            scaler.scaleFactor = Mathf.Min(director.Recorder.Width, director.Recorder.Height) / 1080f;
+            float until = Time.realtimeSinceStartup + 2.6f;
+            while (Time.realtimeSinceStartup < until) yield return null;
+            yield return Shot("logo_on_graph");
+        }
+
         if (parts.Contains("sparkle"))
         {
             // consecutive frames of the home view as the camera orbits: flicker on the master wave shows up as differences

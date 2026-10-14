@@ -82,6 +82,11 @@ public static class VRBuildSetup
         PlayerSettings.gpuSkinning = true;
         PlayerSettings.Android.optimizedFramePacing = false; // XR controls the pacing
         PlayerSettings.enableFrameTimingStats = true;         // GPU/CPU frame times for VRPerf
+        // no "Made with Unity" card: the headset shows the launch card's still (system splash and VR loading image)
+        PlayerSettings.SplashScreen.show = false;
+        PlayerSettings.SplashScreen.showUnityLogo = false;
+        Texture2D splash = AssetDatabase.LoadAssetAtPath<Texture2D>(SplashPath);
+        if (splash != null) PlayerSettings.virtualRealitySplashScreen = splash;
         EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
         EditorUserBuildSettings.buildAppBundle = false;
         EditorUserBuildSettings.androidBuildType = AndroidBuildType.Release;

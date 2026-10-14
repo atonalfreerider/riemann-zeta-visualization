@@ -8,7 +8,7 @@
       "lines": [
         {
           "id": "hook_01",
-          "text": "Come along on a discovery. Prime numbers: two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.",
+          "text": "Can a machine discover mathematics that humans have chased for over two thousand years? Start where every mathematician starts: the primes. Two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.",
           "camera": "primes_grid",
           "actions": [
             "reset",

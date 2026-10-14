@@ -6,7 +6,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 1. The Prime Sieve
 *Building blocks with no pattern*
 
-**hook_01** — Come along on a discovery. Prime numbers: two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.
+**hook_01** — Can a machine discover mathematics that humans have chased for over two thousand years? Start where every mathematician starts: the primes. Two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.
   <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build`</sub>
 
 **hook_02** — In 1994 Robert Sacks, out of pure curiosity, sketched the counting numbers on his notepad as a spiral. Let's do the same: break the grid open and let every number find its place. Only the two stays lit, our first prime.
@@ -162,4 +162,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `home_orbit` · actions `home:scene` · footnote: open the side menu (M) to explore this picture, pick a chapter or record</sub>
 
 ---
-1137 words ≈ 7.6 minutes of speech at 150 wpm, plus pauses and title cards.
+1151 words ≈ 7.7 minutes of speech at 150 wpm, plus pauses and title cards.

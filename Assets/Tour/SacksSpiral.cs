@@ -953,12 +953,27 @@ public class SacksSpiral : MonoBehaviour
             // A smooth curve through the route's numbers: at k the number n(k) sits at radius R√n and angle 2π√n, which is the
             // same direction as 2π(√n − k) for whole k. Following 2π(√n − k) between them traces the route itself instead of
             // jumping a full turn of the spiral between neighbours (Euler's 41, 43, 47, 53 … are about one turn apart).
+            // Where neighbouring numbers are far apart around the spiral (Euler's first few: 41, 43, 47, 53 … the curve
+            // would loop most of a turn between them), the segment joins them directly instead.
             int kStart = Mathf.CeilToInt(k0), kEnd = Mathf.FloorToInt(k1);
             Vector3[] pts = new Vector3[(kEnd - kStart) * RouteSteps + 1];
             for (int i = 0; i < pts.Length; i++)
             {
+                int seg = Mathf.Min(i / RouteSteps, kEnd - kStart - 1);
+                float ka = kStart + seg, kb = ka + 1f;
                 float k = kStart + i / (float)RouteSteps;
-                pts[i] = RoutePoint(fn(k), k) + Vector3.back * .15f;
+                float sweep = Mathf.Abs((Mathf.Sqrt(Mathf.Max(1f, fn(kb))) - kb) - (Mathf.Sqrt(Mathf.Max(1f, fn(ka))) - ka));
+                if (sweep > .2f)
+                {
+                    Vector3 a = RoutePoint(fn(ka), ka), b = RoutePoint(fn(kb), kb);
+                    Vector3 p = Vector3.Lerp(a, b, k - ka);
+                    float x = p.x - origin.x, y = p.y - origin.y;
+                    pts[i] = origin + new Vector3(x, y, bend * SaddleK * (x * x - y * y)) + Vector3.back * .15f;
+                }
+                else
+                {
+                    pts[i] = RoutePoint(fn(k), k) + Vector3.back * .15f;
+                }
             }
 
             int shown = routeReveal[r] < 0 ? pts.Length : Mathf.Clamp((routeReveal[r] - 1) * RouteSteps + 1, 0, pts.Length);
@@ -2802,8 +2817,14 @@ public class SacksSpiral : MonoBehaviour
         int needed = Mathf.CeilToInt(GrowthTMax / GrowStep) + 4;
         if (!growTrailPts.IsCreated || growTrailPts.Length < needed)
         {
-            if (growTrailPts.IsCreated) growTrailPts.Dispose();
-            growTrailPts = new Unity.Collections.NativeArray<Vector3>(needed, Unity.Collections.Allocator.Persistent);
+            Unity.Collections.NativeArray<Vector3> bigger = new(needed, Unity.Collections.Allocator.Persistent);
+            if (growTrailPts.IsCreated)
+            {
+                Unity.Collections.NativeArray<Vector3>.Copy(growTrailPts, bigger, Mathf.Min(growTrailCount, growTrailPts.Length));
+                growTrailPts.Dispose();
+            }
+
+            growTrailPts = bigger;
         }
     }
 
@@ -3083,6 +3104,32 @@ public class SacksSpiral : MonoBehaviour
     }
 
     public bool DotsVisible { get; private set; } = true;
+
+    /// <summary>How many zeros the growing trail passes before it stops (its length).</summary>
+    public int GrowthZeroTarget
+    {
+        get
+        {
+            double[] zs = Main.Instance.zetaZeroValues;
+            int n = System.Array.BinarySearch(zs, (double)GrowthTMax);
+            return n >= 0 ? n + 1 : ~n;
+        }
+    }
+
+    /// <summary>
+    /// Grow the trail up to the <paramref name="zeros"/>-th zero. Longer: it carries on climbing from where it is. Shorter
+    /// than what is drawn: it starts again from t = 0 and stops at the new height.
+    /// </summary>
+    public void SetGrowthZeroTarget(int zeros)
+    {
+        double[] zs = Main.Instance.zetaZeroValues;
+        zeros = Mathf.Clamp(zeros, 10, zs.Length);
+        GrowthTMax = (float)zs[zeros - 1] + .5f;
+        if (growRoot == null) return;
+        EnsureGrowth();
+        growHoldTimer = 0f;
+        if (GrowthT > GrowthTMax) ResetGrowth();
+    }
 
     /// <summary>Stretch the growing trail vertically (keeps every point already drawn, and its zero markers, in place in t).</summary>
     public void SetTrailHeightScale(float scale)

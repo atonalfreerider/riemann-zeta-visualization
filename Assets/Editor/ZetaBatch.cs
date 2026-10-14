@@ -23,6 +23,14 @@ public static class ZetaBatch
         Begin();
     }
 
+    /// <summary>Back to the desktop build target after a Quest build (renders and tests then run as on the desktop).</summary>
+    public static void SwitchToDesktop()
+    {
+        bool ok = EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+        Debug.Log($"ZetaBatch: active build target {EditorUserBuildSettings.activeBuildTarget} (switched: {ok})");
+        if (Application.isBatchMode) EditorApplication.Exit(ok ? 0 : 1);
+    }
+
     public static void Record()
     {
         EditorPrefs.SetBool("Zeta.RecordTour", true);

@@ -15,7 +15,6 @@ public class HomeView : MonoBehaviour
     TourDirector director;
 
     public bool Active { get; private set; }
-    static bool titleShown;
 
     public static HomeView Create(TourDirector director)
     {
@@ -63,10 +62,10 @@ public class HomeView : MonoBehaviour
         if (VRMode.Enabled) return; // the VR layer places the model itself
         director.Rig.Release();
         director.Orbit.Begin(!continuing);
-        if (!titleShown && !continuing)
+        if (!continuing)
         {
-            // the launch card plays over the saddle the first time it lands
-            titleShown = true;
+            // the launch card plays over the saddle whenever the graph view opens with its intro
+            foreach (LaunchTitle old in FindObjectsByType<LaunchTitle>(FindObjectsSortMode.None)) Destroy(old.gameObject);
             LaunchTitle.Play();
         }
     }

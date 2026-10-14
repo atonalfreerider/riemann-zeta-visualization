@@ -166,9 +166,10 @@ public class SideMenu : MonoBehaviour
         Toggle(layerRow, "n = k(k+1)", () => sacks.RouteVisible("pronic"), () => sacks.SetRouteVisible("pronic", !sacks.RouteVisible("pronic")), Icon(VRIcons.Id.Equations), SacksSpiral.PronicColor);
         Toggle(layerRow, "k² + k + 41", () => sacks.RouteVisible("euler"), () => sacks.SetRouteVisible("euler", !sacks.RouteVisible("euler")), Icon(VRIcons.Id.Equations), SacksSpiral.EulerColor);
         layerRow = Row(content);
-        Button(layerRow, "", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale / 1.25f), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Down));
-        heightLabel = Button(layerRow, "", () => sacks.SetTrailHeightScale(1f), 2f, TextAlignmentOptions.Center).GetComponentInChildren<TextMeshProUGUI>();
-        Button(layerRow, "", () => sacks.SetTrailHeightScale(sacks.TrailHeightScale * 1.25f), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Up));
+        // the trail's length: how many zeros it climbs past (each click × 1.5)
+        Button(layerRow, "", () => sacks.SetGrowthZeroTarget(Mathf.RoundToInt(sacks.GrowthZeroTarget / 1.5f)), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Down));
+        heightLabel = Button(layerRow, "", () => sacks.SetGrowthZeroTarget(649), 2f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Zeros)).GetComponentInChildren<TextMeshProUGUI>();
+        Button(layerRow, "", () => sacks.SetGrowthZeroTarget(Mathf.RoundToInt(sacks.GrowthZeroTarget * 1.5f)), .55f, TextAlignmentOptions.Center, Icon(VRIcons.Id.Up));
         Button(layerRow, "Reset", () => { if (director.Orbit != null) director.Orbit.ResetView(); }, 1.3f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Reset));
 
         Header(content, "FORMAT");
@@ -234,7 +235,7 @@ public class SideMenu : MonoBehaviour
         panel.anchoredPosition = new Vector2(-PanelWidth * (1f - eased), 0f);
         arrow.localRotation = Quaternion.Euler(0, 0, 180f * eased);
         foreach ((Image image, System.Func<bool> on) in toggles) image.color = on() ? ButtonActive : ButtonColor;
-        string height = $"trail height ×{director.Annotations.Sacks.TrailHeightScale:0.##}";
+        string height = $"{director.Annotations.Sacks.GrowthZeroTarget:N0} zeros";
         if (heightLabel.text != height) heightLabel.text = height;
 
         landscapeButton.color = director.Portrait ? ButtonColor : ButtonActive;
