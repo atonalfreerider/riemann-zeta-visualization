@@ -1448,6 +1448,11 @@ public class SacksSpiral : MonoBehaviour
     Unity.Collections.NativeArray<Vector3> fullPositions;
     TextBox fullLabel;
     Vector3[] fullBase, fullNormal;   // per-sample surface point and normal for the current bend
+    // the full wave is drawn as a curtain mesh (base on the surface, top at the wave): no per-frame LineRenderer rebuild
+    Mesh curtainMesh;
+    MeshRenderer curtainRenderer;
+    Vector3[] curtainVerts;
+    Color[] curtainColors;
     float fullBaseBend = -1f;
     int fullUploadedZeros = -1;
     float fullUploadedAmplitude = -1f;
@@ -1481,8 +1486,8 @@ public class SacksSpiral : MonoBehaviour
         FullWaveZerosShown = 0;
         if (fullPositions.IsCreated) fullPositions.Dispose();
         fullPositions = new Unity.Collections.NativeArray<Vector3>(samples, Unity.Collections.Allocator.Persistent);
-        masterWave.positionCount = samples;
-        masterWave.enabled = true;
+        masterWave.enabled = false; // the curtain mesh replaces the line in full mode
+        EnsureCurtain(samples);
         if (fullLabel == null)
         {
             fullLabel = TextBoxLabel("", 2.4f, Factory.Palette.Cosine);
@@ -1559,6 +1564,44 @@ public class SacksSpiral : MonoBehaviour
         Debug.Log($"FullMasterWave: {zeros} zeros × {fullSamples} samples ready after {t:0.0} s");
     }
 
+    void EnsureCurtain(int samples)
+    {
+        if (curtainMesh == null)
+        {
+            GameObject go = new("master wave curtain");
+            go.transform.SetParent(waveStackRoot.transform, false);
+            curtainMesh = new Mesh { name = "master wave curtain", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            curtainMesh.MarkDynamic();
+            go.AddComponent<MeshFilter>().sharedMesh = curtainMesh;
+            curtainRenderer = go.AddComponent<MeshRenderer>();
+            curtainRenderer.sharedMaterial = Factory.mainMat;
+            curtainRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Factory.SetIntensity(curtainRenderer, Factory.GlowIntensity);
+        }
+
+        curtainRenderer.enabled = true;
+        if (curtainVerts == null || curtainVerts.Length != samples * 2)
+        {
+            curtainVerts = new Vector3[samples * 2];
+            curtainColors = new Color[samples * 2];
+            Color top = Factory.Palette.Cosine, bottom = new(Factory.Palette.Cosine.r, Factory.Palette.Cosine.g, Factory.Palette.Cosine.b, .12f);
+            for (int i = 0; i < samples; i++) { curtainColors[2 * i] = bottom; curtainColors[2 * i + 1] = top; }
+            int[] tris = new int[(samples - 1) * 6];
+            int q = 0;
+            for (int i = 0; i < samples - 1; i++)
+            {
+                int a = 2 * i, b = a + 1, c = a + 2, d = a + 3;
+                tris[q++] = a; tris[q++] = c; tris[q++] = b;
+                tris[q++] = b; tris[q++] = c; tris[q++] = d;
+            }
+
+            curtainMesh.Clear();
+            curtainMesh.vertices = curtainVerts;
+            curtainMesh.colors = curtainColors;
+            curtainMesh.triangles = tris;
+        }
+    }
+
     void UploadFullWave(double[] sums)
     {
         if (fullBase == null || fullBase.Length != fullSamples || !Mathf.Approximately(fullBaseBend, bend))
@@ -1580,10 +1623,12 @@ public class SacksSpiral : MonoBehaviour
         float scale = (float)(FullWaveAmplitude / max);
         for (int i = 0; i < fullSamples; i++)
         {
-            fullPositions[i] = fullBase[i] + fullNormal[i] * ((float)sums[i] * scale + .15f);
+            curtainVerts[2 * i] = fullBase[i] + fullNormal[i] * .1f;
+            curtainVerts[2 * i + 1] = fullBase[i] + fullNormal[i] * ((float)sums[i] * scale + .15f);
         }
 
-        masterWave.SetPositions(fullPositions);
+        curtainMesh.vertices = curtainVerts;
+        curtainMesh.RecalculateBounds();
         fullUploadedZeros = fullPublishedZeros;
         fullUploadedAmplitude = FullWaveAmplitude;
     }
@@ -1596,6 +1641,7 @@ public class SacksSpiral : MonoBehaviour
         FullWaveRunning = false;
     }
 
+    /// <summary>All prime and prime-power ticks in ONE mesh (two crossed quads each) instead of hundreds of LineRenderers.</summary>
     void EnsurePrimeTicks(float nMax)
     {
         Transform existing = waveStackRoot.transform.Find("ticks " + (int)nMax);
@@ -1603,17 +1649,38 @@ public class SacksSpiral : MonoBehaviour
         foreach (Transform c in waveStackRoot.transform) if (c.name.StartsWith("ticks ")) c.gameObject.SetActive(false);
         GameObject root = new("ticks " + (int)nMax);
         root.transform.SetParent(waveStackRoot.transform, false);
+        List<Vector3> verts = new();
+        List<Color> cols = new();
+        List<int> tris = new();
         for (int n = 2; n <= (int)nMax; n++)
         {
             bool prime = IsPrime(n);
             bool primePower = !prime && IsPrimePower(n);
             if (!prime && !primePower) continue;
             Color c = prime ? Factory.Palette.Zero : new Color(1f, .55f, .2f);
-            LineRenderer tick = Factory.NewLine(prime ? "prime tick" : "prime power tick", prime ? .05f : .04f, c, Factory.SoftGlowIntensity);
-            tick.transform.SetParent(root.transform, false);
-            tick.positionCount = 2;
-            tick.SetPositions(new[] { OnSpiral(n, 0f, -0.3f), OnSpiral(n, 0f, prime ? 0.9f : 0.6f) });
+            Vector3 a = OnSpiral(n, 0f, -0.3f), b = OnSpiral(n, 0f, prime ? 0.9f : 0.6f);
+            Vector3 normal = SurfaceNormalAt(n);
+            Vector3 s1 = Vector3.Cross(normal, Vector3.right).normalized * (prime ? .03f : .022f);
+            Vector3 s2 = Vector3.Cross(normal, s1).normalized * (prime ? .03f : .022f);
+            foreach (Vector3 side in new[] { s1, s2 })
+            {
+                int v = verts.Count;
+                verts.Add(a - side); verts.Add(a + side); verts.Add(b - side); verts.Add(b + side);
+                cols.Add(c); cols.Add(c); cols.Add(c); cols.Add(c);
+                tris.Add(v); tris.Add(v + 2); tris.Add(v + 1); tris.Add(v + 1); tris.Add(v + 2); tris.Add(v + 3);
+            }
         }
+
+        Mesh mesh = new() { name = "prime ticks", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(verts);
+        mesh.SetColors(cols);
+        mesh.SetTriangles(tris, 0);
+        mesh.RecalculateBounds();
+        root.AddComponent<MeshFilter>().sharedMesh = mesh;
+        MeshRenderer mr = root.AddComponent<MeshRenderer>();
+        mr.sharedMaterial = Factory.mainMat;
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        Factory.SetIntensity(mr, Factory.SoftGlowIntensity);
     }
 
     void LateUpdate()
@@ -1667,6 +1734,8 @@ public class SacksSpiral : MonoBehaviour
         HideInterference();
         StopFullMasterWave();
         if (fullLabel != null) fullLabel.gameObject.SetActive(false);
+        if (curtainRenderer != null) curtainRenderer.enabled = false;
+        masterWave.enabled = true;
         masterWave.positionCount = WavePts;
         if (waveRoutine != null) StopCoroutine(waveRoutine);
         waveRoutine = StartCoroutine(WaveStackRoutine(seconds, count));
