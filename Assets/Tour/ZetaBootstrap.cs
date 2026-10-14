@@ -37,6 +37,7 @@ public static class ZetaBootstrap
             cam.allowHDR = !vr;
             cam.backgroundColor = new Color(0.012f, 0.012f, 0.02f);
             cam.clearFlags = CameraClearFlags.SolidColor;
+            if (!vr) QualitySettings.antiAliasing = 4; // thin lines and the master wave's edge: fewer crawling pixels
             if (!vr && cam.GetComponent<BloomEffect>() == null)
             {
                 cam.gameObject.AddComponent<BloomEffect>();

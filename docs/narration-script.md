@@ -6,10 +6,10 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 ## 1. The Prime Sieve
 *Building blocks with no pattern*
 
-**hook_01** — Prime numbers: two, three, five, seven, eleven. The building blocks of every other number, and they arrive with no pattern anyone can predict.
+**hook_01** — Come along on a discovery. Prime numbers: two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.
   <sub>camera `primes_grid` · actions `reset pause hide:spiral hide:outaxes hide:imaxis hide:polelabel primes:on primes:build`</sub>
 
-**hook_02** — Break the grid open and let every number find its place on the Sacks spiral. Only the two stays lit: our first prime.
+**hook_02** — In 1994 Robert Sacks, out of pure curiosity, sketched the counting numbers on his notepad as a spiral. Let's do the same: break the grid open and let every number find its place. Only the two stays lit, our first prime.
   <sub>camera `sieve` · actions `sacks:sievebegin`</sub>
 
 **hook_03** — Two times two. Count two dots. The two nearer the centre is the multiplier: it copies the row one level up, the copy slides along the Sacks spiral, and its final dot lands on four. Looking back, nothing landed on three, so three is prime.
@@ -18,13 +18,13 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
 **hook_04** — Two times three lands on six, so five is prime. Two times four lands on eight, so seven is prime. Three times three, three rows of three, lands on nine.
   <sub>camera `sieve` · actions `sacks:sieveto:9`</sub>
 
-**hook_05** — Every new prime joins the multipliers. On to thirty: eleven, thirteen, seventeen, nineteen, twenty three and twenty nine are never landed on. Whatever no multiplication reaches is a prime.
+**hook_05** — Every new prime joins the multipliers. On to thirty: eleven, thirteen, seventeen, nineteen, twenty three and twenty nine are never landed on. Whatever no multiplication reaches is a prime. Now let's see what Sacks saw.
   <sub>camera `sieve` · actions `sacks:sieveto:30`</sub>
 
 ## 2. The Sacks Spiral
 *Bent over a saddle*
 
-**sacks_01** — This is the Sacks spiral: every number n at a distance of root n from the centre, one full turn per square. Fill it in, and the primes stop looking random.
+**sacks_01** — This is Sacks's spiral: every number n at a distance of root n from the centre, one full turn per square. Fill it in the way he did, and the primes stop looking random.
   <sub>camera `sacks_flat` · actions `sacks:spiral` · footnote: Sacks spiral: n at radius √n, angle 2π√n</sub>
 
 **sacks_02** — Bend the Sacks spiral over a saddle. Composites fill the valleys, and whole routes from the centre appear: some with no primes at all, others crowded with them.
@@ -162,4 +162,4 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `home_orbit` · actions `home:scene` · footnote: open the side menu (M) to explore this picture, pick a chapter or record</sub>
 
 ---
-1106 words ≈ 7.4 minutes of speech at 150 wpm, plus pauses and title cards.
+1137 words ≈ 7.6 minutes of speech at 150 wpm, plus pauses and title cards.

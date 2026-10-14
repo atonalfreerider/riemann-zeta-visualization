@@ -70,6 +70,9 @@ public class SacksSpiral : MonoBehaviour
 
     static float FadedSize(float size, float fade) => size * Mathf.Lerp(1f, .22f, fade);
 
+    /// <summary>Resting colour of number n's dot: primes gold, squares red, the rest grey, fading toward the edge.</summary>
+    static Color RestColor(int n) => Faded(IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? SquareColor : new Color(.3f, .3f, .38f), EdgeFade(n));
+
     /// <summary>Resting size of number n's dot on the full spiral.</summary>
     static float RestSize(int n) => n <= GridCount ? (IsPrime(n) ? .42f : IsSquare(n) ? .34f : .26f) : FadedSize(IsPrime(n) ? .42f : .22f, EdgeFade(n));
 
@@ -911,6 +914,15 @@ public class SacksSpiral : MonoBehaviour
     }
 
     readonly List<(System.Func<float, float> fn, float k0, float k1)> routeFns = new();
+    const int RouteSteps = 12;
+
+    Vector3 RoutePoint(float n, float k)
+    {
+        float s = Mathf.Sqrt(Mathf.Max(1f, n));
+        float r = R * s, a = 2f * Mathf.PI * (s - k);
+        float x = r * Mathf.Cos(a), y = r * Mathf.Sin(a);
+        return origin + new Vector3(x, y, bend * SaddleK * (x * x - y * y));
+    }
 
     void Layout()
     {
@@ -938,14 +950,18 @@ public class SacksSpiral : MonoBehaviour
         {
             (System.Func<float, float> fn, float k0, float k1) = routeFns[r];
             // sample at integer k only: the route is the polyline through the actual numbers n(k)
-            int kStart = Mathf.CeilToInt(k0);
-            Vector3[] pts = new Vector3[Mathf.FloorToInt(k1) - kStart + 1];
+            // A smooth curve through the route's numbers: at k the number n(k) sits at radius R√n and angle 2π√n, which is the
+            // same direction as 2π(√n − k) for whole k. Following 2π(√n − k) between them traces the route itself instead of
+            // jumping a full turn of the spiral between neighbours (Euler's 41, 43, 47, 53 … are about one turn apart).
+            int kStart = Mathf.CeilToInt(k0), kEnd = Mathf.FloorToInt(k1);
+            Vector3[] pts = new Vector3[(kEnd - kStart) * RouteSteps + 1];
             for (int i = 0; i < pts.Length; i++)
             {
-                pts[i] = SpiralPos(Mathf.Max(1f, fn(kStart + i)), bend) + Vector3.back * .15f;
+                float k = kStart + i / (float)RouteSteps;
+                pts[i] = RoutePoint(fn(k), k) + Vector3.back * .15f;
             }
 
-            int shown = routeReveal[r] < 0 ? pts.Length : Mathf.Clamp(routeReveal[r], 0, pts.Length);
+            int shown = routeReveal[r] < 0 ? pts.Length : Mathf.Clamp((routeReveal[r] - 1) * RouteSteps + 1, 0, pts.Length);
             routes[r].positionCount = shown;
             if (shown > 0) routes[r].SetPositions(shown == pts.Length ? pts : pts[..shown]);
             routeLabels[r].transform.position = pts[^1] + Vector3.back * .6f + Vector3.up * 1.6f;
@@ -990,6 +1006,7 @@ public class SacksSpiral : MonoBehaviour
             {
                 labels[i].Color = Factory.Palette.Zero;
                 dots[i].SetActive(true);
+                Factory.SetColor(dots[i].GetComponent<Renderer>(), Factory.Palette.Zero);
                 StartCoroutine(Shrink(dots[i].transform, 1.8f, .5f, .6f));
             }
             else
@@ -1017,8 +1034,11 @@ public class SacksSpiral : MonoBehaviour
     /// <summary>Grid → spiral: the 30 numbers fly to their spiral places while the rest of the spiral fills in.</summary>
     public IEnumerator MorphToSpiral(float seconds)
     {
-        bool fresh = !gameObject.activeSelf && struck.Count == 0; // the chapter started on its own, without the sieve
+        bool fresh = struck.Count == 0 && sieveWorker == null; // the chapter started on its own, without the sieve
         gameObject.SetActive(true);
+        if (flattenRoutine != null) StopCoroutine(flattenRoutine);
+        bend = 0f; // the Sacks spiral is flat here; "sacks:saddle" bends it
+        Flat = true;
         bool sieveStarted = sieveWorker != null || struck.Count > 0;
         CancelSieve();
         if (sieveStarted || fresh) CompleteSieveColors();
@@ -1156,7 +1176,7 @@ public class SacksSpiral : MonoBehaviour
         {
             int n = k * (k + 1);
             Renderer rd = dots[n - 1].GetComponent<Renderer>();
-            Factory.SetColor(rd, Faded(name == "pronic" ? PronicColor : new Color(.3f, .3f, .38f), EdgeFade(n)));
+            Factory.SetColor(rd, name == "pronic" ? Faded(PronicColor, EdgeFade(n)) : RestColor(n)); // 2 = 1 × 2 is prime: back to gold
         }
 
         if (chosen >= 0 && gameObject.activeInHierarchy)
@@ -1998,6 +2018,7 @@ public class SacksSpiral : MonoBehaviour
         fullSamples = samples;
         fullNMax = nMax;
         fullFlat = null;
+        curtainColumnSamples = -1;
         fullLogN = new double[samples];
         for (int i = 0; i < samples; i++) fullLogN[i] = FullWaveLogN(i, samples, nMax);
         lock (fullLock)
@@ -2091,7 +2112,8 @@ public class SacksSpiral : MonoBehaviour
         }
 
         curtainRenderer.enabled = true;
-        int columns = (samples + CurtainBucket - 1) / CurtainBucket;
+        BuildCurtainColumns(samples);
+        int columns = curtainColumnStart.Length - 1;
         if (curtainVerts == null || curtainVerts.Length != columns * 2)
         {
             curtainVerts = new Vector3[columns * 2];
@@ -2100,7 +2122,7 @@ public class SacksSpiral : MonoBehaviour
             for (int c = 0; c < columns; c++)
             {
                 // the wave fades out with the Sacks spiral's last turns
-                int i = Mathf.Min(samples - 1, c * CurtainBucket + CurtainBucket / 2);
+                int i = (curtainColumnStart[c] + curtainColumnStart[c + 1]) / 2;
                 float fade = EdgeFade((float)System.Math.Exp(FullWaveLogN(i, samples, fullNMax)));
                 curtainColors[2 * c] = Faded(bottom, fade);
                 curtainColors[2 * c + 1] = Faded(top, fade);
@@ -2122,12 +2144,47 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
+    int[] curtainColumnStart = System.Array.Empty<int>();
+    int curtainColumnSamples = -1;
+
     /// <summary>
-    /// Samples per drawn column of the full master wave. The sum of 10,000 cosines changes sign from one sample to the next;
-    /// drawn sample by sample it became sub-pixel slivers whose coverage flickered as the camera moved (the sparkle).
-    /// Each column instead spans the lowest to the highest value in its bucket: the band an anti-aliased drawing would fill.
+    /// Column boundaries for the full master wave, evenly spaced along the spiral road (every <see cref="CurtainSpacing"/>
+    /// units of arc). The samples are spaced evenly in log n, so near the centre thousands of them share one pixel; drawn one
+    /// per sample they made sub-pixel slivers whose coverage flickered as the camera moved (the sparkle on the saddle).
+    /// Each column spans the lowest to the highest value among its samples: the band an anti-aliased drawing would fill.
     /// </summary>
-    const int CurtainBucket = 8;
+    void BuildCurtainColumns(int samples)
+    {
+        if (curtainColumnSamples == samples && curtainColumnStart.Length > 1) return;
+        List<int> starts = new() { 0 };
+        float travelled = 0f;
+        Vector2 previous = Flat2(0, samples);
+        for (int i = 1; i < samples; i++)
+        {
+            Vector2 here = Flat2(i, samples);
+            travelled += Vector2.Distance(previous, here);
+            previous = here;
+            if (travelled >= CurtainSpacing)
+            {
+                starts.Add(i);
+                travelled = 0f;
+            }
+        }
+
+        starts.Add(samples);
+        curtainColumnStart = starts.ToArray();
+        curtainColumnSamples = samples;
+    }
+
+    Vector2 Flat2(int i, int samples)
+    {
+        float n = (float)System.Math.Exp(FullWaveLogN(i, samples, fullNMax));
+        float r = R * Mathf.Sqrt(n), a = 2f * Mathf.PI * Mathf.Sqrt(n);
+        return new Vector2(r * Mathf.Cos(a), r * Mathf.Sin(a));
+    }
+
+    const float CurtainSpacing = .12f;
+
 
     void UploadFullWave(double[] sums, int zeros)
     {
@@ -2169,7 +2226,7 @@ public class SacksSpiral : MonoBehaviour
         int columns = curtainVerts.Length / 2;
         for (int c = 0; c < columns; c++)
         {
-            int i0 = c * CurtainBucket, i1 = Mathf.Min(fullSamples, i0 + CurtainBucket);
+            int i0 = curtainColumnStart[c], i1 = Mathf.Min(fullSamples, curtainColumnStart[c + 1]);
             double lo = 0, hi = 0;
             for (int i = i0; i < i1; i++)
             {
@@ -2177,7 +2234,7 @@ public class SacksSpiral : MonoBehaviour
                 if (sums[i] > hi) hi = sums[i];
             }
 
-            int mid = Mathf.Min(fullSamples - 1, i0 + CurtainBucket / 2);
+            int mid = Mathf.Min(fullSamples - 1, (i0 + i1) / 2);
             curtainVerts[2 * c] = fullBase[mid] + fullNormal[mid] * ((float)lo * scale + .1f);
             curtainVerts[2 * c + 1] = fullBase[mid] + fullNormal[mid] * ((float)hi * scale + .15f);
         }

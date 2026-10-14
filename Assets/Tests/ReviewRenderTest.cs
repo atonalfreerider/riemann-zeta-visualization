@@ -71,6 +71,22 @@ public class ReviewRenderTest
             }
         }
 
+        if (parts.Contains("sparkle"))
+        {
+            // consecutive frames of the home view as the camera orbits: flicker on the master wave shows up as differences
+            director.Home.Enter();
+            float until = Time.time + 12f;
+            while (Time.time < until) yield return null;
+            for (int f = 0; f < 3; f++)
+            {
+                director.Recorder.Snapshot($"{prefix}sparkle_{f}.png");
+                yield return null;
+            }
+
+            yield return null;
+            yield return null;
+        }
+
         if (parts.Contains("menu"))
         {
             SideMenu menu = UnityEngine.Object.FindAnyObjectByType<SideMenu>();
@@ -127,8 +143,8 @@ public class ReviewRenderTest
 
         (string chapter, (string line, float at)[] moments)[] chapters =
         {
-            ("hook", new[] { ("hook_03", .72f), ("hook_04", .8f), ("hook_05", .95f) }),
-            ("sacks", new[] { ("sacks_01", .8f), ("sacks_02", .7f), ("sacks_03", .6f), ("sacks_04", .6f), ("sacks_05", .7f) }),
+            ("hook", new[] { ("hook_01", .85f), ("hook_03", .72f), ("hook_04", .8f), ("hook_05", .95f) }),
+            ("sacks", new[] { ("sacks_01", .3f), ("sacks_01", .9f), ("sacks_02", .25f), ("sacks_02", .9f), ("sacks_03", .6f), ("sacks_04", .6f), ("sacks_05", .35f), ("sacks_05", .95f) }),
             ("turn", new[] { ("turn_01", .7f), ("turn_04", .7f), ("turn_05", .95f) }),
             ("staircase", new[] { ("stair_02", .9f), ("stair_03", .6f), ("stair_04", .95f) }),
             ("key", new[] { ("key_01", .9f), ("key_03", .6f) }),

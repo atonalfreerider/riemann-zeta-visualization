@@ -8,7 +8,7 @@
       "lines": [
         {
           "id": "hook_01",
-          "text": "Prime numbers: two, three, five, seven, eleven. The building blocks of every other number, and they arrive with no pattern anyone can predict.",
+          "text": "Come along on a discovery. Prime numbers: two, three, five, seven, eleven. They build every other number, yet nobody has found the pattern in how they arrive.",
           "camera": "primes_grid",
           "actions": [
             "reset",
@@ -24,7 +24,7 @@
         },
         {
           "id": "hook_02",
-          "text": "Break the grid open and let every number find its place on the Sacks spiral. Only the two stays lit: our first prime.",
+          "text": "In 1994 Robert Sacks, out of pure curiosity, sketched the counting numbers on his notepad as a spiral. Let's do the same: break the grid open and let every number find its place. Only the two stays lit, our first prime.",
           "camera": "sieve",
           "actions": [
             "sacks:sievebegin"
@@ -51,7 +51,7 @@
         },
         {
           "id": "hook_05",
-          "text": "Every new prime joins the multipliers. On to thirty: eleven, thirteen, seventeen, nineteen, twenty three and twenty nine are never landed on. Whatever no multiplication reaches is a prime.",
+          "text": "Every new prime joins the multipliers. On to thirty: eleven, thirteen, seventeen, nineteen, twenty three and twenty nine are never landed on. Whatever no multiplication reaches is a prime. Now let's see what Sacks saw.",
           "camera": "sieve",
           "actions": [
             "sacks:sieveto:30"
@@ -67,7 +67,7 @@
       "lines": [
         {
           "id": "sacks_01",
-          "text": "This is the Sacks spiral: every number n at a distance of root n from the centre, one full turn per square. Fill it in, and the primes stop looking random.",
+          "text": "This is Sacks's spiral: every number n at a distance of root n from the centre, one full turn per square. Fill it in the way he did, and the primes stop looking random.",
           "camera": "sacks_flat",
           "actions": [
             "sacks:spiral"
