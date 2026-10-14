@@ -176,6 +176,7 @@ public partial class VRApp
         main.SpeedMultiplier = 1d;
         layers.All(true);
 
+        Grab.LockRotation = false;
         string cue = "machine";
         double jump = -1d;
         bool play = true;
@@ -240,6 +241,7 @@ public partial class VRApp
                 tour.RunActions(new[] { "sacks:show", "hypothesis:zeta", "hypothesis:full" });
                 tour.Annotations.Sacks.FullWaveAmplitude = 4f;
                 Guide.SetFollow(false);
+                Grab.LockRotation = true; // standing view: pinch slides and scales, never turns
                 Rig.CancelAnimation();
                 Rig.SetPlacement(ExplorePlacement()); // standing on the saddle: the zeta trail is vertical, straight up from the floor
                 Rig.AnimateTo(ExplorePlacement(), 0.3f);

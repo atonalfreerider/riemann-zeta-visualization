@@ -234,6 +234,8 @@ public class VRHandVisual : MonoBehaviour
 public class VRWorldGrab : MonoBehaviour
 {
     public bool Enabled = true;
+    /// <summary>Keep the model's orientation fixed: two hands only scale and slide it (the standing-on-the-saddle view).</summary>
+    public bool LockRotation;
 
     class Hold
     {
@@ -357,6 +359,16 @@ public class VRWorldGrab : MonoBehaviour
         if (localSpan.magnitude < 0.03f || worldSpan.magnitude < 1e-5f) return;
 
         float scale = Mathf.Clamp(worldSpan.magnitude / localSpan.magnitude, 1e-2f, 2e3f);
+        if (LockRotation)
+        {
+            // orientation fixed: scale about the point between the hands, slide with it
+            Quaternion fixedRotation = rig.Current.Rotation;
+            scale = Mathf.Clamp(scale, 0.25f, 12f);
+            Vector3 midL = (h1 + h2) * .5f, midW = (g1 + g2) * .5f;
+            rig.SetPlacement(new VRRig.Placement { Rotation = fixedRotation, Scale = scale, Position = midW - fixedRotation * (scale * midL) });
+            return;
+        }
+
         Quaternion swing = Quaternion.FromToRotation(localSpan, worldSpan);
 
         // keep the horizon level: spin about the axis between the hands until the rig's up is as close to world up as it can be
