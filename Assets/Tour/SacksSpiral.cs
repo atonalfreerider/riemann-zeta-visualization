@@ -1589,6 +1589,14 @@ public class SacksSpiral : MonoBehaviour
         }
     }
 
+    void LateUpdate()
+    {
+        // in VR the only text is the menus: no caption strip or count label on the model
+        if (!VRMode.Enabled) return;
+        if (caption != null && caption.gameObject.activeSelf) caption.gameObject.SetActive(false);
+        if (fullLabel != null && fullLabel.gameObject.activeSelf) fullLabel.gameObject.SetActive(false);
+    }
+
     void OnDestroy()
     {
         StopFullMasterWave();

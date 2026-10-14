@@ -321,7 +321,6 @@ public partial class VRApp
 
     void BuildSettingsPage(RectTransform p)
     {
-        Dock.AddButton(8, 4, 190, 78, "Captions", VRIcons.Id.Captions, () => tour.Captions.Visible = !tour.Captions.Visible, true, () => tour.Captions.Visible, 21f, p);
         Dock.AddButton(206, 4, 190, 78, "Hand outline", VRIcons.Id.Skeleton, () =>
         {
             Visual.Skeleton = Visual.Skeleton switch

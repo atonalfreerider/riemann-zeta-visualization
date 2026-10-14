@@ -73,6 +73,7 @@ public class CaptionDisplay : MonoBehaviour
             rect.localPosition = Vector3.zero;
             rect.localRotation = Quaternion.identity;
             rect.localScale = Vector3.one * 0.0011f;
+            canvas.enabled = false; // VR shows no captions, cards or hints: menus are the only text
         }
         else
         {
@@ -208,7 +209,7 @@ public class CaptionDisplay : MonoBehaviour
         get => canvas != null && canvas.enabled;
         set
         {
-            if (canvas != null) canvas.enabled = value;
+            if (canvas != null) canvas.enabled = value && !VRMode.Enabled;
         }
     }
 

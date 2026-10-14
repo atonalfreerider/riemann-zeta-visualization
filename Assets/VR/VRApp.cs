@@ -111,7 +111,7 @@ public partial class VRApp : MonoBehaviour
         Ready = true;
 
         // start with something alive in front of the user: the chain of arrows, turning (unless the command line started the tour)
-        if (!tour.Running) ApplyView("chain");
+        if (!tour.Running) ApplyView("explore"); // default: standing on the saddle, the zeta trail rising from its centre
         Toast("Touch a chapter to begin. Pinch and drag in the air to move the model", 7f);
 
         // launch options for testing from the command line (adb shell am start ... -e unity "-vrview waves -vrdark")
@@ -171,11 +171,15 @@ public partial class VRApp : MonoBehaviour
 
     public void Toast(string text, float seconds = 4f)
     {
+        // No text in front of the eyes in VR: toasts are off. Menus are the only interface text.
+        return;
+#pragma warning disable CS0162
         if (toastPanel == null) return;
         toastText.text = text;
         toastUntil = Time.unscaledTime + seconds;
         toastPanel.SetOpen(true);
     }
+#pragma warning restore CS0162
 
     void UpdateToast()
     {
