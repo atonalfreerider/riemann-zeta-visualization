@@ -63,10 +63,12 @@ def main():
         delay_ms = int(round(clip["frame"] / fps * 1000))
         filters.append(f"[{i + 1}:a]adelay={delay_ms}|{delay_ms}[a{i}]")
     mix_inputs = "".join(f"[a{i}]" for i in range(len(clips)))
-    filters.append(f"{mix_inputs}amix=inputs={len(clips)}:normalize=0:dropout_transition=0[aout]")
+    filters.append(f"{mix_inputs}amix=inputs={len(clips)}:normalize=0:dropout_transition=0,apad[aout]")
     cmd += [
         "-filter_complex", ";".join(filters),
         "-map", "0:v", "-map", "[aout]",
+        # the narration is padded with silence and cut at the end of the video: the film runs to its last frame,
+        # not to the end of the last spoken line
         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", str(output)
     ]
     subprocess.run(cmd, check=True)

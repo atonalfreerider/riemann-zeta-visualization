@@ -122,7 +122,7 @@
             "pulse:sacks"
           ],
           "pause": 1.2,
-          "footnote": "Product curves: Robert Sacks, numberspiral.com  ·  explained by Michael M. Ross, naturalnumbers.org/sparticle.html"
+          "footnote": "Product curves: Robert Sacks, numberspiral.com"
         }
       ]
     },
@@ -198,7 +198,7 @@
             "delay:5:show:spiral",
             "delay:5:play"
           ],
-          "pause": 1.2
+          "pause": 3.0
         }
       ]
     },

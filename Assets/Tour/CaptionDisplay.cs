@@ -268,7 +268,7 @@ public class CaptionDisplay : MonoBehaviour
             Row("squares", SacksSpiral.SquareColor, "n = k²", "1, 4, 9, 16, 25 …", "squares: never prime") + "\n" +
             Row("pronic", SacksSpiral.PronicColor, "n = k(k + 1)", "2, 6, 12, 20, 30 …", "neighbours multiplied: never prime") + "\n" +
             Row("euler", SacksSpiral.EulerColor, "n = k² + k + 41", "41, 43, 47, 53 …", "Euler: prime for k = 0 to 39")
-            + (mode == "family" ? "\n" + Row("family", SacksSpiral.FamilyColors[0], "n = k² + k + p", "p = 5, 11, 17, 41 …", "Robert Sacks's product curves: prime-rich when p is prime (after M. M. Ross)") : "");
+            + (mode == "family" ? "\n" + Row("family", SacksSpiral.FamilyColors[0], "n = k² + k + p", "p = 5, 11, 17, 41 …", "Robert Sacks's product curves: prime-rich when p is prime") : "");
         legend.gameObject.SetActive(true);
     }
 

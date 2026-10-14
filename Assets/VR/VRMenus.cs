@@ -134,7 +134,7 @@ public partial class VRApp
             Dock.AddButton(8 + col * 118, 2 + row * 74, 112, 68, view.Label, view.Icon, () => ApplyView(view.Id), false, null, 19f, p);
         }
 
-        Dock.AddLabel(10, 150, 400, 24, "Show or hide", 20f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
+        Dock.AddLabel(10, 146, 400, 22, "Show or hide", 20f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
         (string label, VRIcons.Id icon, System.Func<bool> get, System.Action<bool> set)[] toggles =
         {
             ("Chain", VRIcons.Id.Chain, () => layers.Chain, v => layers.Chain = v),
@@ -148,14 +148,29 @@ public partial class VRApp
         for (int i = 0; i < toggles.Length; i++)
         {
             var t = toggles[i];
-            Dock.AddButton(8 + i * 84, 176, 78, 64, t.label, t.icon, () =>
+            Dock.AddButton(8 + i * 84, 170, 78, 58, t.label, t.icon, () =>
             {
                 t.set(!t.get());
                 ApplyLayers();
             }, true, t.get, 16f, p);
         }
 
-        Dock.AddSlider(10, 244, 580, 52, "Dial speed", 0f, 10f, () => (float)main.Speed, v => main.Speed = v, v => $"{v:0.0} per second", p);
+        // the curves on the Sacks spiral: the squares, the neighbour products, Euler's and Sacks's product curves
+        SacksSpiral sacks = tour.Annotations.Sacks;
+        (string label, System.Func<bool> get, System.Action<bool> set)[] curves =
+        {
+            ("Squares", () => sacks.RouteVisible("squares"), v => sacks.SetRouteVisible("squares", v)),
+            ("k(k+1)", () => sacks.RouteVisible("pronic"), v => sacks.SetRouteVisible("pronic", v)),
+            ("Euler", () => sacks.RouteVisible("euler"), v => sacks.SetRouteVisible("euler", v)),
+            ("Products", () => sacks.FamilyVisible, v => sacks.SetFamilyVisible(v)),
+        };
+        for (int i = 0; i < curves.Length; i++)
+        {
+            var c = curves[i];
+            Dock.AddButton(8 + i * 84, 232, 78, 58, c.label, VRIcons.Id.Equations, () => c.set(!c.get()), true, c.get, 16f, p);
+        }
+
+        Dock.AddSlider(8 + curves.Length * 84 + 4, 232, 580 - curves.Length * 84 - 2, 58, "Dial speed", 0f, 10f, () => (float)main.Speed, v => main.Speed = v, v => $"{v:0.0}/s", p);
     }
 
     void ApplyLayers()

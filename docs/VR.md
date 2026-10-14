@@ -40,7 +40,7 @@ statistics from the headset's log (`[VRPERF]` lines, one per narration line).
 | Open the menu from anywhere | Turn your **left palm toward your face**: a small 2×3 pad floats over it (Menu, Pause, Skip, Follow, Room, Dark). |
 | Go back to the story's view | **Follow** (pin icon) in the footer or on the palm menu. |
 | See the room / go dark | **Room** and **Dark** in the footer or on the palm menu. In blackout a faint floor ring and your hand outlines appear. |
-| Look at one visualization | **Views** tab: Chain, Zeros, Strip, Waves, Staircase, Primes, Saddle, Machine. Below them, **Show or hide** toggles for the layers, and a slider for how fast the dial turns. |
+| Look at one visualization | **Views** tab: Chain, Zeros, Strip, Waves, Staircase, Primes, Saddle, Machine. Below them, **Show or hide** toggles for the layers, a row for the curves on the Sacks spiral (Squares n = k², k(k+1), Euler's k² + k + 41 and Sacks's product curves k² + k + p), and a slider for how fast the dial turns. |
 | Zoom, turn, tilt, raise, bring closer | **Space** tab. These keep working while the story moves on. |
 | Reset | **Space ▸ Reset** (the story's view) or **Re-centre** (use where you stand and look now). |
 | Captions, volume, hand outline, gentle motion, model distance | **Settings** tab. |

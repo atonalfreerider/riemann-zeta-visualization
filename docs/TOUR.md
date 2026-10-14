@@ -92,8 +92,10 @@ After changing a line's text in `script.json`, render that line again (`--only <
 change keep their audio. Until audio exists the tour estimates timings (~2.7 words/s), and without Whisper the generator
 falls back to timing the words between the pauses it finds in the audio.
 
-The previous ElevenLabs route (`Tools/generate_narration.py`, an API key, `.mp3` files) still works and
-`Tools/mux_recording.py` accepts either format.
+The ElevenLabs route (`Tools/generate_narration.py`, voice JohnV4, an API key in `ELEVENLABS_API_KEY`, `.mp3` files) is
+the one the current narration uses, and `Tools/mux_recording.py` accepts either format. Its defaults read the lines in a
+lively, unhurried way (`--speed 0.95 --stability 0.35 --style 0.45`), and its `PRONOUNCE` table respells names for the
+voice only ("Euler" is sent as "Oiler", "cosine" as "co-sign"); the captions keep the script's spelling.
 
 ## Script format
 

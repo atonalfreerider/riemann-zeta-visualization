@@ -40,7 +40,7 @@ Camera cues and scene actions are listed for reference; see docs/TOUR.md for the
   <sub>camera `route_follow` · actions `equations:euler`</sub>
 
 **sacks_06** — Robert Sacks saw that Euler's curve is one of a family: the blue line, shifted out by a number. When the shift is prime, the curve is rich in primes.
-  <sub>camera `sacks_routes` · actions `equations:family pulse:sacks` · footnote: Product curves: Robert Sacks, numberspiral.com  ·  explained by Michael M. Ross, naturalnumbers.org/sparticle.html</sub>
+  <sub>camera `sacks_routes` · actions `equations:family pulse:sacks` · footnote: Product curves: Robert Sacks, numberspiral.com</sub>
 
 ## 3. Zeno's Chain
 *and a gentler rule*

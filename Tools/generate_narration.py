@@ -16,6 +16,7 @@ The timing JSON is derived from the ElevenLabs character alignment returned by t
 Existing files are skipped unless --force is given.
 """
 import argparse
+import re
 import base64
 import json
 import os
@@ -83,17 +84,31 @@ def words_from_alignment(text, alignment):
     return [{"w": sw, "s": tw["s"], "e": tw["e"]} for sw, tw in zip(script_words, words)]
 
 
-def synthesize(session, voice_id, text, model_id, previous_text, next_text, speed=1.0):
+# How names are said, spelled the way the voice reads them. The captions keep the script's own spelling: every
+# replacement is a single word for a single word, so the word timings still line up with the script's words.
+PRONOUNCE = [
+    (re.compile(r"\bEuler"), "Oiler"),             # Leonhard Euler: "oil-er", never "you-ler"
+    (re.compile(r"\b([Cc])osine"), r"\1o-sign"),  # "co-sign"
+]
+
+
+def spoken(text):
+    for pattern, said in PRONOUNCE:
+        text = pattern.sub(said, text)
+    return text
+
+
+def synthesize(session, voice_id, text, model_id, previous_text, next_text, speed=1.0, stability=0.35, style=0.45):
     body = {
-        "text": text,
+        "text": spoken(text),
         "model_id": model_id,
-        # speed < 1 slows the delivery (ElevenLabs accepts 0.7 to 1.2); a little more stability keeps the pacing even
-        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": speed},
+        # lower stability and more style give a livelier, less even read; speed < 1 slows it (0.7 to 1.2 accepted)
+        "voice_settings": {"stability": stability, "similarity_boost": 0.8, "style": style, "use_speaker_boost": True, "speed": speed},
     }
     if previous_text:
-        body["previous_text"] = previous_text
+        body["previous_text"] = spoken(previous_text)
     if next_text:
-        body["next_text"] = next_text
+        body["next_text"] = spoken(next_text)
     for attempt in range(4):
         r = session.post(
             f"{API}/text-to-speech/{voice_id}/with-timestamps",
@@ -116,7 +131,9 @@ def main():
     parser.add_argument("--only", help="chapter id or line id to generate")
     parser.add_argument("--force", action="store_true", help="regenerate existing files")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--speed", type=float, default=0.9, help="delivery speed, 0.7 to 1.2 (default 0.9: unhurried)")
+    parser.add_argument("--speed", type=float, default=0.95, help="delivery speed, 0.7 to 1.2 (default 0.95: unhurried, not dragging)")
+    parser.add_argument("--stability", type=float, default=0.35, help="lower = more expressive (default 0.35)")
+    parser.add_argument("--style", type=float, default=0.45, help="style exaggeration, 0 to 1 (default 0.45)")
     args = parser.parse_args()
 
     script = json.loads(SCRIPT.read_text(encoding="utf-8"))
@@ -160,7 +177,7 @@ def main():
         next_text = all_texts[idx + 1] if idx + 1 < len(all_texts) else None
 
         print(f"generating {l['id']} …", end=" ", flush=True)
-        result = synthesize(session, voice_id, l["text"], args.model, previous_text, next_text, args.speed)
+        result = synthesize(session, voice_id, l["text"], args.model, previous_text, next_text, args.speed, args.stability, args.style)
         mp3.write_bytes(base64.b64decode(result["audio_base64"]))
         alignment = result.get("alignment") or result.get("normalized_alignment")
         words = words_from_alignment(l["text"], alignment)

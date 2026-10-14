@@ -159,8 +159,8 @@ public class SacksSpiral : MonoBehaviour
         AddRoute("squares", SquareColor, k => k * k, 1f, 40f, "n = k²   the squares: never prime");
         AddRoute("pronic", PronicColor, k => k * (k + 1), 1f, 39f, "n = k(k + 1)   neighbours multiplied: never prime");
         AddRoute("euler", EulerColor, k => k * k + k + 41, 6f, 39f, "n = k² + k + 41   Euler: 40 primes in a row");
-        // Robert Sacks's product curves: the neighbour line k(k + 1) moved out by a prime p (Michael M. Ross,
-        // naturalnumbers.org/sparticle.html). Each starts where its curve has settled into a smooth arc.
+        // Robert Sacks's product curves: the neighbour line k(k + 1) moved out by a prime p (numberspiral.com).
+        // Each starts where its curve has settled into a smooth arc.
         AddRoute("p17", FamilyColors[0], k => k * k + k + 17, 6f, 39f, "n = k² + k + 17");
         AddRoute("p11", FamilyColors[1], k => k * k + k + 11, 5f, 39f, "n = k² + k + 11");
         AddRoute("p5", FamilyColors[2], k => k * k + k + 5, 3f, 39f, "n = k² + k + 5");
@@ -2672,6 +2672,12 @@ public class SacksSpiral : MonoBehaviour
     public float GrowthT { get; private set; }
     public float GrowthTMax { get; private set; } = HomeTMax;
     public float GrowthHeight => GrowthT * ZetaT * TrailHeightScale;
+
+    /// <summary>
+    /// Top of the zeta axis. The home view's trail climbs toward t = 1000, so its axis grows with it; the outro's trail
+    /// has a known end, so its axis stands at full height from the start and the trail climbs it.
+    /// </summary>
+    float GrowthAxisHeight => Mode == GrowthMode.Waves ? Mathf.Max(GrowthHeight, GrowthTMax * ZetaT * TrailHeightScale) : GrowthHeight;
     /// <summary>Seconds the finished picture holds before the growth starts over (looping growth only).</summary>
     public float GrowthHold = 12f;
     /// <summary>Extra factor on the growth speed (the review test uses it to reach the top quickly).</summary>
@@ -2774,6 +2780,11 @@ public class SacksSpiral : MonoBehaviour
         growTip.SetActive(on);
         foreach (GameObject d in growZeroDots) if (d != null) d.SetActive(on);
         growTrailHidden = !on;
+        if (!on && growWaves.Count > 0)
+        {
+            foreach (GrowWave w in growWaves) MergeWave(w);
+            growWaves.Clear();
+        }
     }
 
     bool growTrailHidden;
@@ -2886,7 +2897,7 @@ public class SacksSpiral : MonoBehaviour
         foreach (LineRenderer chunk in growTrailChunks) chunk.positionCount = 0;
         UpdateGrowChain();
         growAxis.SetPosition(0, origin);
-        growAxis.SetPosition(1, origin);
+        growAxis.SetPosition(1, origin + Vector3.back * GrowthAxisHeight);
         growBase = null; // re-place the road for whatever bend is current
         EnsureGrowGeometry();
     }
@@ -2920,7 +2931,7 @@ public class SacksSpiral : MonoBehaviour
             return w;
         }
 
-        LineRenderer line = Factory.NewLine("incoming wave", .08f, Color.white, Factory.GlowIntensity);
+        LineRenderer line = Factory.NewLine("incoming wave", GrowWaveWidth, Color.white, Factory.GlowIntensity);
         line.transform.SetParent(growRoot.transform, false);
         line.numCornerVertices = 2;
         return new GrowWave
@@ -2929,6 +2940,54 @@ public class SacksSpiral : MonoBehaviour
             Pts = new Unity.Collections.NativeArray<Vector3>(WavePts + 1, Unity.Collections.Allocator.Persistent),
             Cos = new float[WavePts]
         };
+    }
+
+    const float GrowWaveWidth = .08f;
+    static readonly Color WaveFarColor = new(.42f, .43f, .48f);
+    readonly GradientColorKey[] waveColorKeys = new GradientColorKey[5];
+    readonly GradientAlphaKey[] waveAlphaKeys = new GradientAlphaKey[5];
+    readonly Keyframe[] waveWidthKeys = new Keyframe[5];
+
+    /// <summary>
+    /// Colour and width along a wave by its distance out the spiral, <paramref name="f"/> = 0 at the axis … 1 at its far
+    /// end: the zero's own colour near the centre, then thin grey, then black.
+    /// </summary>
+    static Color WaveFadeColor(Color c, float f)
+    {
+        if (f < .22f) return c;
+        if (f < .6f) return Color.Lerp(c, WaveFarColor, Mathf.SmoothStep(0f, 1f, (f - .22f) / .38f));
+        return Color.Lerp(WaveFarColor, Color.black, Mathf.SmoothStep(0f, 1f, (f - .6f) / .4f));
+    }
+
+    static float WaveFadeWidth(float f) => Mathf.Lerp(1f, .3f, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((f - .15f) / .55f)));
+
+    /// <summary>Set the fade on a wave whose first <paramref name="drawn"/> samples are placed (the line grows outward).</summary>
+    void ApplyWaveFade(GrowWave w, int drawn, float alpha)
+    {
+        float reach = Mathf.Clamp01(drawn / (float)WavePts);
+        for (int i = 0; i < 5; i++)
+        {
+            float u = i / 4f, f = u * reach;
+            Color c = WaveFadeColor(w.Color, f);
+            waveColorKeys[i] = new GradientColorKey(c, u);
+            waveAlphaKeys[i] = new GradientAlphaKey(alpha * Mathf.Lerp(1f, .25f, Mathf.Clamp01((f - .6f) / .4f)), u);
+            waveWidthKeys[i] = new Keyframe(u, GrowWaveWidth * WaveFadeWidth(f)); // the curve is the width itself, not a factor
+        }
+
+        Gradient g = w.Line.colorGradient;
+        g.SetKeys(waveColorKeys, waveAlphaKeys);
+        w.Line.colorGradient = g;
+        w.Line.widthCurve = new AnimationCurve(waveWidthKeys);
+    }
+
+    /// <summary>Add a wave to the master wave and return it to the pool (the caller removes it from the list).</summary>
+    void MergeWave(GrowWave wave)
+    {
+        for (int i = 0; i < WavePts; i++) growSum[i] += wave.Cos[i];
+        growMerged++;
+        growMaster.enabled = Mode == GrowthMode.Waves;
+        UpdateGrowMaster();
+        ReleaseWave(wave);
     }
 
     void ReleaseWave(GrowWave w)
@@ -2950,6 +3009,16 @@ public class SacksSpiral : MonoBehaviour
         if (growTrailHidden) dot.SetActive(false);
         else StartCoroutine(PulseScale(dot.transform, size, 3f, .9f));
         if (Mode != GrowthMode.Waves) return;
+        if (growTrailHidden)
+        {
+            // no trail to send it from: the zero's wave joins the master wave directly
+            EnsureGrowGeometry();
+            for (int i = 0; i < WavePts; i++) growSum[i] += -Mathf.Cos(gamma * growLogN[i]);
+            growMerged++;
+            growMaster.enabled = true;
+            UpdateGrowMaster();
+            return;
+        }
 
         GrowWave w = TakeWave();
         w.Altitude = gamma * GrowZetaT;
@@ -2957,7 +3026,7 @@ public class SacksSpiral : MonoBehaviour
         w.Age = 0f;
         w.Computed = 0;
         w.Color = Annotations.CollisionColor(k);
-        w.Line.startColor = w.Line.endColor = w.Color;
+        ApplyWaveFade(w, 1, 1f);
         for (int i = 0; i < WavePts; i++) w.Cos[i] = -Mathf.Cos(gamma * growLogN[i]);
         w.Pts[0] = onAxis + Vector3.back * .15f;
         w.Line.positionCount = 1;
@@ -2995,7 +3064,7 @@ public class SacksSpiral : MonoBehaviour
             }
 
             UpdateGrowChain();
-            growAxis.SetPosition(1, origin + Vector3.back * GrowthHeight);
+            growAxis.SetPosition(1, origin + Vector3.back * GrowthAxisHeight);
             while (growNextZero < zs.Length && zs[growNextZero] <= GrowthT)
             {
                 SpawnGrowZero(growNextZero, (float)zs[growNextZero]);
@@ -3026,6 +3095,7 @@ public class SacksSpiral : MonoBehaviour
                     wave.Computed = want;
                     wave.Line.positionCount = want + 1;
                     wave.Line.SetPositions(wave.Pts.GetSubArray(0, want + 1));
+                    ApplyWaveFade(wave, want, 1f);
                 }
             }
             else if (wave.Age < GrowWaveOut + GrowWaveHold)
@@ -3036,6 +3106,7 @@ public class SacksSpiral : MonoBehaviour
                     wave.Computed = WavePts;
                     wave.Line.positionCount = WavePts + 1;
                     wave.Line.SetPositions(wave.Pts);
+                    ApplyWaveFade(wave, WavePts, 1f);
                 }
             }
             else if (wave.Age < GrowWaveOut + GrowWaveHold + GrowWaveSink)
@@ -3047,16 +3118,11 @@ public class SacksSpiral : MonoBehaviour
                 wave.Line.positionCount = WavePts + 1;
                 for (int i = 0; i < WavePts; i++) wave.Pts[i + 1] = growBase[i] + growNormal[i] * (alt + wave.Amp * wave.Cos[i] + .15f);
                 wave.Line.SetPositions(wave.Pts);
-                Color c = new(wave.Color.r, wave.Color.g, wave.Color.b, 1f - u * .75f);
-                wave.Line.startColor = wave.Line.endColor = c;
+                ApplyWaveFade(wave, WavePts, 1f - u * .75f);
             }
             else
             {
-                for (int i = 0; i < WavePts; i++) growSum[i] += wave.Cos[i];
-                growMerged++;
-                growMaster.enabled = Mode == GrowthMode.Waves;
-                UpdateGrowMaster();
-                ReleaseWave(wave);
+                MergeWave(wave);
                 growWaves.RemoveAt(w);
             }
         }
@@ -3167,7 +3233,7 @@ public class SacksSpiral : MonoBehaviour
             if (growZeroDots[k] != null) growZeroDots[k].transform.position = origin + Vector3.back * (growZeroGammas[k] * now);
         }
 
-        growAxis.SetPosition(1, origin + Vector3.back * GrowthHeight);
+        growAxis.SetPosition(1, origin + Vector3.back * GrowthAxisHeight);
         UpdateGrowChain();
     }
 
@@ -3177,6 +3243,26 @@ public class SacksSpiral : MonoBehaviour
         {
             using (FrameProbe.Measure("Sacks: growth step")) StepGrowth(Time.deltaTime);
         }
+
+        if (growAxis != null && growAxis.enabled && growRoot.activeInHierarchy && !VRMode.Enabled && Camera.main != null) FitGrowthAxis(Camera.main.transform.position);
+    }
+
+    /// <summary>
+    /// Keep the zeta axis readable on screen: about 3 px wide whatever the distance (a fixed 0.03-unit line vanishes
+    /// from the outro's and the home view's distance), and, when the camera looks straight down it, ending below the
+    /// camera rather than running past the lens.
+    /// </summary>
+    void FitGrowthAxis(Vector3 eye)
+    {
+        float top = GrowthAxisHeight;
+        Vector3 rel = eye - origin;
+        float above = Vector3.Dot(rel, Vector3.back);
+        float aside = (rel - Vector3.back * above).magnitude;
+        if (above > 0f && aside < above * .5f) top = Mathf.Min(top, above * .6f);
+        Vector3 end = origin + Vector3.back * top;
+        growAxis.SetPosition(1, end);
+        float d = Vector3.Distance(eye, (origin + end) * .5f);
+        growAxis.widthMultiplier = Mathf.Max(1f, d * .0018f / .03f);
     }
 
     void DisposeGrowth()
