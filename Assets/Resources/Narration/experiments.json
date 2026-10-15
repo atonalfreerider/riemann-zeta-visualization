@@ -638,6 +638,129 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xpinch",
+      "title": "Pinching the spiral",
+      "subtitle": "four ways to pile up the primes",
+      "setup": [
+        "exp:stage",
+        "exp:surface:2:0",
+        "exp:bend:0",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xpinch_01",
+          "camera": "orbit:on=centre;fit=118,118>108,108;el=89.5;az=-90;spin=1;raise=.05;span=11",
+          "pause": 0.6,
+          "text": "A pinch brings far-apart parts of the spiral together, so whatever they share piles up in one place. First, the fold: double every angle, and the squares ray and the pronic ray fall onto one ray.",
+          "actions": [
+            "exp:pinchlive:fold:2:line"
+          ]
+        },
+        {
+          "id": "xpinch_02",
+          "camera": "orbit:on=centre;fit=112,112>104,104;el=89.5>80;az=-90;spin=1.5;raise=.05;span=12",
+          "pause": 0.6,
+          "text": "Now every quadratic straightens at a distance set by its discriminant alone, from both sides at once. The two half combs merge into one comb of every discriminant.",
+          "actions": [
+            "exp:clear",
+            "exp:fold:2:comb"
+          ]
+        },
+        {
+          "id": "xpinch_03",
+          "camera": "orbit:on=centre;fit=104,104>112,112;el=80>70;az=-70;spin=2;raise=.05;span=12",
+          "pause": 0.8,
+          "text": "The prime two shows up as a stripe. Lines whose discriminant is five mod eight never take an even value, and they average four hundred and thirty-eight primes. The lines at one mod eight are always even.",
+          "actions": []
+        },
+        {
+          "id": "xpinch_04",
+          "camera": "orbit:on=centre;fit=118,118>108,108;el=89.5;az=-90;spin=1;raise=.05;span=11",
+          "pause": 0.6,
+          "text": "The residue pinch slides every number around its own circle to the angle two pi n over m. The spiral collapses onto m arms, one for each remainder.",
+          "actions": [
+            "exp:clear",
+            "exp:pinchlive:residue:30:line"
+          ]
+        },
+        {
+          "id": "xpinch_05",
+          "camera": "orbit:on=centre;fit=120,120>110,110;el=89.5>82;az=-90;spin=1.5;raise=.05;span=12",
+          "pause": 0.8,
+          "text": "The primes ride only the arms that share no factor with m. Modulo thirty that is eight arms, each almost four times richer in primes. The rest are cancellation arms, and their only prime is the one dividing thirty.",
+          "actions": [
+            "exp:clear",
+            "exp:residue:30:1:arms"
+          ]
+        },
+        {
+          "id": "xpinch_06",
+          "camera": "orbit:on=centre;at=0,0,-12;d=215>200;el=24>32;az=-155;spin=4;raise=.04;span=12",
+          "pause": 0.8,
+          "text": "Pinched modulo four on the saddle, the two prime arms are exactly its two rising lobes, and the even numbers fall away down the valleys.",
+          "actions": [
+            "exp:clear",
+            "exp:bend:1",
+            "exp:residue:4:1:arms",
+            "exp:snap"
+          ]
+        },
+        {
+          "id": "xpinch_07",
+          "camera": "orbit:on=centre;fit=118,118>108,108;el=89.5;az=-90;spin=1;raise=.05;span=11",
+          "pause": 0.6,
+          "text": "The pleat folds each turn into thirty slots after the pronic ray, and slot j becomes the curve k squared plus k plus j.",
+          "actions": [
+            "exp:clear",
+            "exp:bend:0",
+            "exp:pinchlive:pleat:30:line",
+            "exp:snap"
+          ]
+        },
+        {
+          "id": "xpinch_08",
+          "camera": "orbit:on=centre;at=-16,8,0;fit=72,72>62,62;el=89.5>80;az=-90;spin=1.5;raise=.05;span=12",
+          "pause": 0.8,
+          "text": "The primes gather on two curves named by Euler's lucky numbers, k squared plus k plus eleven, and plus seventeen. The white marks are the composites the pleat cannot see, built from primes larger than five.",
+          "actions": [
+            "exp:clear",
+            "exp:pleat:30:1:curves:marks"
+          ]
+        },
+        {
+          "id": "xpinch_09",
+          "camera": "orbit:on=centre;at=0,0,-2;d=130>120;el=26>34;az=-148;spin=4;raise=.04;span=12",
+          "pause": 0.8,
+          "text": "On the squares side a curve takes both odd and even values, so it can never dodge two. That is why the prime-rich Euler lines all live on the pronic side.",
+          "actions": [
+            "exp:clear",
+            "exp:bend:1",
+            "exp:pleat:30:1:curves:marks",
+            "exp:snap"
+          ]
+        },
+        {
+          "id": "xpinch_10",
+          "camera": "orbit:on=centre;at=6006,12,-18;d=88>76;el=52>40;az=-135;spin=6;raise=.04;span=12",
+          "pause": 0.8,
+          "text": "Pinch by three, five and seven at once, as three axes, and every odd number falls into one cell of a lattice. The primes fill exactly the forty-eight cells off the three zero planes.",
+          "actions": [
+            "exp:clear",
+            "exp:residuelattice",
+            "exp:snap"
+          ]
+        },
+        {
+          "id": "xpinch_11",
+          "camera": "orbit:on=centre;at=6006,12,-18;d=76>92;el=40>30;az=-63;spin=6;raise=.04;span=14",
+          "pause": 1.4,
+          "text": "Every pinch gathers primes the way the sieve does, and no better: the best curve is richer by the product of p over p minus one, for the primes it sees. Euler's line sees every prime up to thirty-seven. The pinch shows the sieve as geometry. It cannot beat it.",
+          "actions": []
+        }
+      ]
     }
   ]
 }
