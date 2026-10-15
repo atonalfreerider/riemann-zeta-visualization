@@ -312,6 +312,325 @@
           "pause": 1.4
         }
       ]
+    },
+    {
+      "id": "xlattice",
+      "title": "Two counting problems",
+      "subtitle": "the saddle and its half-twist",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xlattice_01",
+          "text": "Count the whole-number points under the curve u times v equals x. Each one is a factor pair, a point on a cancellation curve. The count grows like x log x, and the white line is how it wobbles around that. Each faint line marks one turn of the spiral.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=64,44>60,42;el=89.5;az=-90;spin=0;raise=.07;span=10",
+          "actions": [
+            "exp:latticechart:divisor:3000:exact"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattice_02",
+          "text": "Voronoi wrote that wobble as a sum of waves, one cosine of four pi root n x for each n. Here they arrive one by one, and the cyan sum settles onto the white.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=62,44;el=89.5;az=-90;spin=0;raise=.07;span=10",
+          "actions": [
+            "exp:latticechartlive:divisor:3000:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattice_03",
+          "text": "The first wave on its own goes up and down twice on every turn of the spiral. That is the saddle itself. The surface the tour is drawn on is the first wave of the divisor problem.",
+          "camera": "orbit:on=centre;at=0,0,-2;fit=78,52>72,48;el=22>14;az=-90;spin=5;raise=.06;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:surfacewire:30",
+            "exp:surfacefield:400",
+            "exp:lattice:divisor:1:first",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xlattice_04",
+          "text": "Now count the points inside a circle of radius root x instead. There are about pi x of them, and this count wobbles too.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=64,44>60,42;el=89.5;az=-90;spin=0;raise=.07;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:latticechart:circle:3000:exact",
+            "exp:snap"
+          ],
+          "pause": 0.5
+        },
+        {
+          "id": "xlattice_05",
+          "text": "Hardy found its waves: two pi root n x, weighted by the number of ways to write n as a sum of two squares. They run half as fast, one up and down per turn. Watch them add up.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=62,44;el=89.5;az=-90;spin=0;raise=.07;span=10",
+          "actions": [
+            "exp:latticechartlive:circle:3000:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattice_06",
+          "text": "A wave that rises once per turn needs a different surface. Twist the saddle by half a turn for every turn of the spiral. The squares slide onto the crests and fall away, the pronic numbers slide into the troughs and rise, and the orange wave slows from two crests per turn to one.",
+          "camera": "orbit:on=centre;at=0,0,-2;fit=84,62>78,58;el=16>24;az=-90;spin=6;raise=.06;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:twistlive:0:2:line:ribbon",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xlattice_07",
+          "text": "So the two counting problems have two surfaces. The divisor wobble, made of the points on the cancellation curves, rides on two waves per turn: the saddle. The circle wobble, made of the points on the mirror lines, rides on one wave per turn: the saddle's half-twist.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=64,92;el=89.5;az=-90;spin=0;raise=.05;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:latticechart:divisor:3000:exact:series:first:top",
+            "exp:latticechart:circle:3000:exact:series:first:bottom",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xlattice_08",
+          "text": "Both wobbles are believed to grow no faster than about the fourth root of x. For neither problem has anyone proved it.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=64,92>70,100;el=89.5;az=-90;spin=0;raise=.05;span=10",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xideals",
+      "title": "Primes of Euler's ring",
+      "subtitle": "a second set of zeros",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0",
+        "exp:backdrop:off",
+        "exp:idealfield:800"
+      ],
+      "lines": [
+        {
+          "id": "xideals_01",
+          "text": "Euler's k squared plus k plus forty-one measures the size of numbers in a ring built on the square root of minus one hundred sixty-three. In that ring some ordinary primes break into two pieces. They split. The others stay whole.",
+          "camera": "orbit:on=centre;fit=96,96>88,88;el=80>66;az=-90;spin=2;raise=.06;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xideals_02",
+          "text": "Only a prime that splits can divide one of Euler's numbers, and the first prime that splits is forty-one. That is why his first forty values are all prime. Gold marks the primes that split, blue the primes that stay whole.",
+          "camera": "orbit:on=centre;fit=88,88>84,84;el=66>56;az=-70;spin=3;raise=.06;span=12",
+          "actions": [
+            "exp:eulerroute:800"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xideals_03",
+          "text": "The zeros of zeta build a wave that rises at every prime, by the explicit formula. Here they arrive, all five and a half thousand below height six thousand. Every prime gets the same needle, every prime square half of one.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=96,70>90,66;el=38>30;az=-115;spin=4;raise=.05;span=13",
+          "actions": [
+            "exp:idealwave:800:zeta:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xideals_04",
+          "text": "Now a second set of zeros: the zeros of the L-function of minus one sixty-three, ten thousand four hundred and sixty-two of them below the same height, computed for this. As they join, the needles at the blue primes sink away and the gold ones double.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=90,66>88,64;el=30>26;az=-75;spin=4;raise=.05;span=14",
+          "actions": [
+            "exp:idealwave:800:l:line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xideals_05",
+          "text": "Below forty-one nothing is left standing except four, nine, sixteen and twenty-five: squares of primes that stay whole, which are the sizes of those primes inside the ring.",
+          "camera": "orbit:on=centre;at=6,1,-3;fit=34,26>30,23;el=40>48;az=-95;spin=3;raise=.08;span=12",
+          "actions": [
+            "exp:numberlabels:4,9,16,25,41,43,47,53:7"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xideals_06",
+          "text": "Together the two sets of zeros count the primes of Euler's ring. Every composite value of his polynomial, every crossing of a cancellation curve with his line, is built from the gold spikes.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=90,66>104,80;el=40>58;az=-60;spin=4;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.8
+        },
+        {
+          "id": "xideals_07",
+          "text": "The extra zeros say which primes can divide Euler's numbers, which is what one Legendre symbol already says. They do not say which of his values are prime.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=104,80>112,90;el=58>70;az=-30;spin=3;raise=.05;span=10",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xmirrorlines",
+      "title": "Mirror lines",
+      "subtitle": "one pair proves a prime, two pairs factor",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0",
+        "exp:mirrorswing:3:0.01:0:0"
+      ],
+      "lines": [
+        {
+          "id": "xmirrorlines_01",
+          "text": "On the squares side of the spiral the cancellation curves are k squared minus m squared. Every value is a difference of two squares, so every value factors.",
+          "camera": "orbit:on=centre;at=26,0,0;fit=78,70>74,66;el=80>72;az=-90;spin=2;raise=.06;span=10",
+          "actions": [],
+          "pause": 0.5
+        },
+        {
+          "id": "xmirrorlines_02",
+          "text": "Reflect them across the squares ray and the minus becomes a plus. They swing over into k squared plus m squared: sums of two squares.",
+          "camera": "orbit:on=centre;at=26,0,0;fit=74,66>78,70;el=72>78;az=-90;spin=2;raise=.06;span=10",
+          "actions": [
+            "exp:mirrorswing:3:line:0:1"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmirrorlines_03",
+          "text": "Through every number pass some pairs of these mirror lines, one pair for each way to write it as a sum of two squares. Gold numbers have exactly one pair. Red numbers have two or more.",
+          "camera": "orbit:on=centre;fit=128,128>122,122;el=84>76;az=-90;spin=2;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:backdrop:off",
+            "exp:gaussfield",
+            "exp:mirrorcomb:3"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmirrorlines_04",
+          "text": "One pair proves a prime. Sixteen oh one is forty squared plus one squared, and no other pair of squares. So it is prime. This is Euler's criterion.",
+          "camera": "orbit:on=centre;at=46,-4,0;fit=42,36>38,32;el=80>70;az=-100;spin=2;raise=.07;span=11",
+          "actions": [
+            "exp:clear",
+            "exp:gaussfield",
+            "exp:eulershow:1601"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmirrorlines_05",
+          "text": "Two pairs prove a composite, and hand over a factor. Two twenty-one is fourteen squared plus five squared and also eleven squared plus ten squared. One greatest common divisor turns those into seventeen.",
+          "camera": "orbit:on=centre;at=12,-22,0;fit=36,36>33,33;el=80>70;az=-85;spin=2;raise=.07;span=12",
+          "actions": [
+            "exp:eulershow:221"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmirrorlines_06",
+          "text": "Eleven oh five sits on four pairs, and its factors fall out the same way: thirteen, five and seventeen.",
+          "camera": "orbit:on=centre;at=2,42,0;fit=98,58>94,56;el=80>72;az=-95;spin=2;raise=.07;span=11",
+          "actions": [
+            "exp:eulershow:1105"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmirrorlines_07",
+          "text": "Fermat works the other side of the mirror. He walks out along the squares until m squared minus n is itself a square. For fifteen oh one that takes ten steps, and the curve he finds is the cancellation curve through it.",
+          "camera": "orbit:on=centre;at=34,-28,0;fit=88,72>84,68;el=82>74;az=-90;spin=2;raise=.06;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:backdrop:on",
+            "exp:fermatwalk:1501:line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xmirrorlines_08",
+          "text": "Euler's test works only for his sixty-five idoneal numbers, and both methods are slower than modern tests. What the spiral adds is the picture: one search on each side of the mirror.",
+          "camera": "orbit:on=centre;at=30,-20,0;fit=88,72>128,128;el=74>82;az=-80;spin=2;raise=.05;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xcomb",
+      "title": "The discriminant comb",
+      "subtitle": "one quadratic per plane",
+      "setup": [
+        "exp:stage",
+        "exp:comb"
+      ],
+      "lines": [
+        {
+          "id": "xcomb_01",
+          "text": "Every curve on the spiral is a quadratic. Far from the centre it straightens into a line, and its distance from its ray is set by one number, its discriminant.",
+          "camera": "orbit:on=centre;fit=132,132>126,126;el=80>68;az=-90;spin=2;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.5
+        },
+        {
+          "id": "xcomb_02",
+          "text": "Slide a vertical plane across the squares side and it picks up one quadratic at a time. Red when the quadratic factors. Blue or green when it does not.",
+          "camera": "orbit:on=centre;at=25,0,10;fit=112,92>106,88;el=30>36;az=-35;spin=3;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:combslide:0:-9:7:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xcomb_03",
+          "text": "Count the primes on every plane, for k up to three thousand. Only the planes whose quadratic factors come up empty.",
+          "camera": "orbit:on=centre;at=2646,22,0;fit=130,252;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:skyline:0",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xcomb_04",
+          "text": "The white ticks are the Hardy–Littlewood predictions, from the discriminant alone. They match the counts with a correlation of 0.9995.",
+          "camera": "orbit:on=centre;at=2636,52,0;fit=96,150>90,140;el=89.5;az=-90;spin=0;raise=.05;span=10",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xcomb_05",
+          "text": "On the pronic side, Euler's k squared plus k plus forty-one is the record, at discriminant minus one sixty-three. And a line among the cancellation curves, k squared plus k minus one, beats Landau's k squared plus one.",
+          "camera": "orbit:on=centre;at=2646,22,0;fit=130,252;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:skyline:1",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xcomb_06",
+          "text": "Two of these curves meet only where the difference of their discriminants factors. Euler's line and k squared plus one meet at exactly two numbers, one ninety-seven and sixteen oh one, and both are prime.",
+          "camera": "orbit:on=centre;at=8,0,0;fit=132,132>124,124;el=80>70;az=-90;spin=2;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:bend:0",
+            "exp:backdrop:on",
+            "exp:meet",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }

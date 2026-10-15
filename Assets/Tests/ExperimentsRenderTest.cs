@@ -591,6 +591,68 @@ public class ExperimentsRenderTest
         sacks.ShowBackdrop(true);
         }
 
+        if (Wanted('P')) {
+        // P. two lattice-point problems: wobbles as charts (one faint line per turn of the spiral), first waves on their surfaces
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        Vector3 chart = c + new Vector3(SacksSpiral.LatticeChartOffset, 0f, 0f);
+        foreach (bool circle in new[] { false, true })
+        {
+            float corr = sacks.ExpLatticeWaveCorrelation(circle, 3000), corr1 = sacks.ExpLatticeWaveCorrelation(circle, 1);
+            Debug.Log($"P: {(circle ? "circle" : "divisor")} problem: 3000 waves correlate {corr:0.000} with the wobble, the first wave alone {corr1:0.000}");
+        }
+
+        sacks.ExpLatticeChart(false, 3000, chart + new Vector3(0f, 22f, 0f), 54f, 26f, 10f, true, true, true);
+        sacks.ExpLatticeChart(true, 3000, chart + new Vector3(0f, -22f, 0f), 54f, 26f, 10f, true, true, true);
+        yield return Shot("P1-two-wobbles-charts", chart + back * 115f, chart, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpLatticeChart(false, 1, chart, 54f, 26f, 10f, true, false, true);
+        yield return Shot("P2-divisor-first-wave-chart", chart + back * 100f, chart, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpLatticeChart(true, 1, chart, 54f, 26f, 10f, true, false, true);
+        yield return Shot("P3-circle-first-wave-chart", chart + back * 100f, chart, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        foreach ((float twistPi, bool circle, string name) in new[] { (0f, false, "P4-divisor-first-wave-on-the-saddle"), (2f, true, "P5-circle-first-wave-on-the-half-twist") })
+        {
+            sacks.ExpSetSurface(2, twistPi * Mathf.PI);
+            sacks.ExpSurfaceWire(30f, new Color(.32f, .36f, .5f), 6f);
+            sacks.ExpSurfaceField(400);
+            sacks.ExpLatticeWave(circle, 1, 9f, 400f, 5f, false, false, true);
+            yield return Shot(name + "-side", c + new Vector3(0f, -92f, -10f), c + back * 4f, back, 45f);
+            yield return Shot(name + "-oblique", c + new Vector3(-34f, -66f, -46f), c + back * 3f, back, 50f);
+            sacks.ClearExperiments();
+        }
+
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ShowBackdrop(true);
+        }
+
+        if (Wanted('Q')) {
+        // Q. the prime ideals of Euler's ring: ζ's zeros, the L-function's zeros, and both
+        sacks.ShowRoutes(false);
+        yield return Flatten(true);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        foreach ((string which, string name) in new[] { ("zeta", "Q1-zeta-zeros-every-prime"), ("l", "Q2-l-zeros-split-up-inert-down"), ("both", "Q3-both-the-primes-of-euler-ring") })
+        {
+            sacks.ExpIdealField(800);
+            sacks.ExpIdealNeedles(800, which, 6f);
+            yield return Shot(name + "-oblique", c + new Vector3(-50f, -92f, -46f), c + back * 4f, back, 50f);
+            sacks.ClearExperiments();
+        }
+
+        sacks.ExpIdealField(800);
+        sacks.ExpIdealNeedles(800, "both", 6f);
+        sacks.ExpEulerRoute(800);
+        sacks.ExpNumberLabels(new long[] { 4, 9, 16, 25, 41, 43, 47, 53 }, 2.2f, Color.white);
+        yield return Shot("Q4-centre-nothing-below-41", c + new Vector3(-14f, -34f, -22f), c + back * 3f, back, 50f);
+        yield return Shot("Q5-both-with-euler-line", c + new Vector3(-50f, -92f, -46f), c + back * 4f, back, 50f);
+        sacks.ClearExperiments();
+        yield return Flatten(false);
+        sacks.ShowBackdrop(true);
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();

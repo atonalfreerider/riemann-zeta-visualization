@@ -575,6 +575,91 @@ Twisting and folding change which product families share a crest. They do not ga
 kind puts the primes on its crests, because the primes are spread over every family at that family's
 Hardy–Littlewood rate.
 
+## P. Two counting problems: the saddle and its half-twist
+
+Two classical lattice-point counts both wobble, and each wobble is a sum of waves that tick with the Sacks clock
+`√x`. The waves run at different speeds, and that puts the two problems on two different surfaces.
+
+* **Divisors.** `Σ_{n≤x} d(n)` counts the lattice points under the hyperbola `uv = x`, one for each point of a
+  cancellation curve. Around `x log x + (2γ − 1)x` it wobbles by `Δ(x)`. Voronoi (1904) wrote `Δ(x)` as a sum of
+  waves `d(n) n^(−3/4) cos(4π√(nx) − π/4)` (section C). Each wave goes up and down **twice** per turn of the spiral,
+  and the first one is the saddle.
+* **Circles.** `N(x) = #{a² + b² ≤ x}` counts the lattice points in a disk, one for each representation
+  `n = a² + b²`, which is one for each point of the mirror lines `k² + m²` (section L). Around `πx` it wobbles by
+  `P(x)`. Hardy (1915) wrote `P(x) ≈ (x^¼/π) Σ r₂(n) n^(−3/4) cos(2π√(nx) − 3π/4)`. Each wave goes up and down
+  **once** per turn, and the first one lives on the saddle twisted half a turn per turn (section O's `τR = 2π`).
+
+The charts plot `√x` from 3 to 20 along the bottom, with one faint line per turn of the spiral. White is the exact
+wobble, cyan the sum of 3 000 waves, orange the first wave alone.
+
+![P1](P1-two-wobbles-charts.jpg)
+
+| problem | 3 000 waves, correlation with the wobble | first wave alone |
+|---|---|---|
+| divisors, `Δ(x)` | 0.968 | 0.194 |
+| circles, `P(x)` | 0.988 | 0.589 |
+
+The first wave of the circle problem carries much more of its wobble than the divisor problem's first wave does,
+because `r₂(1) = 4` while `d(n)` keeps growing.
+
+![P2](P2-divisor-first-wave-chart.jpg)
+![P3](P3-circle-first-wave-chart.jpg)
+
+On the surfaces, the divisor problem's first wave rides the plain saddle, crossing each turn twice. The circle
+problem's first wave rides the half-twisted surface, where the squares sit on the crests and the pronic numbers
+in the troughs.
+
+![P4](P4-divisor-first-wave-on-the-saddle-side.jpg)
+![P5](P5-circle-first-wave-on-the-half-twist-side.jpg)
+
+**What this is and is not.** It is a pairing of pictures resting on Voronoi's and Hardy's formulas. Divisors and
+the cancellation curves go with the saddle; sums of two squares and the mirror lines go with its half-twist. Both
+wobbles are conjectured to grow like `x^(¼ + ε)`, and for both problems the best proven exponent is still above
+0.31. The pictures do not touch that gap.
+
+## Q. A second set of zeros: the primes of Euler's ring
+
+Euler's `E(k) = k² + k + 41` is the norm of `(2k + 1 + √−163)/2` in the ring `O = Z[(1 + √−163)/2]`, which has
+unique factorization. In `O` an ordinary prime `p` **splits** into two primes of norm `p` when `(−163/p) = 1`,
+**stays inert** as a prime of norm `p²` when `(−163/p) = −1`, and ramifies when `p = 163`. Only split primes and
+163 can divide a value of `E`. Every prime below 41 is inert and 41 is the first that splits, which is why
+`E(0) … E(39)` are all prime.
+
+Split primes are counted by the zeros of the Dirichlet L-function `L(s, χ)` with `χ(n) = (n/163)`, just as all
+primes are counted by the zeros of `ζ`. Its zeros were computed for this: **10 462 zeros below height 6 000**, the
+first at `t = 0.2029`. The program and its checks are in `Tools/LZeros`: values below 1e-12 by mpmath's
+independent evaluation, and the zero count within half a zero of `(T/2π) log(qT/2πe)` at every checkpoint.
+
+The wave `−Σ (1 − γ/T) cos(γ log n)` over zeros below `T = 6 000` spikes at prime powers. Rescaled by `√n/log n`,
+ζ's version stands at about 1 at every prime and `1/k` at `p^k`. The L-function's version stands at `+1` at split
+primes, `−1` at inert primes and `+½` at their squares. Their sum is the explicit formula of the ring's zeta
+function `ζ(s)·L(s, χ)`: it spikes at the norms of the ring's prime ideals.
+
+![Q1](Q1-zeta-zeros-every-prime-oblique.jpg)
+![Q2](Q2-l-zeros-split-up-inert-down-oblique.jpg)
+![Q3](Q3-both-the-primes-of-euler-ring-oblique.jpg)
+
+| n ≤ 800 | count | ζ zeros | L zeros | both |
+|---|---|---|---|---|
+| split primes | 60 | 0.95 | 1.02 | **1.97** |
+| inert primes | 78 | 0.96 | −1.02 | **−0.06** |
+| 163 | 1 | 0.99 | 0.00 | 0.99 |
+| even powers of inert primes (4, 9, 16, 25, 49, …) | 15 | 0.35 | 0.39 | 0.74 |
+| odd powers of inert primes | 8 | 0.22 | −0.25 | −0.03 |
+| not a prime power | 637 | −0.06 | 0.00 | −0.06 |
+
+The separation is complete up to 800. The lowest split prime stands at 1.92, and every inert prime and every
+non-prime-power stays below 0. Below 41 the only spikes left standing are 4, 9, 16 and 25: 4, 9 and 25 are the
+norms of the inert primes 2, 3 and 5, and 16 is the norm of 2².
+
+![Q4](Q4-centre-nothing-below-41.jpg)
+![Q5](Q5-both-with-euler-line.jpg)
+
+**What this is and is not.** The second set of zeros knows which primes can divide Euler's numbers, and every
+crossing of a cancellation curve with his line is built from those spikes. That is exactly the information in one
+Legendre symbol `(−163/p)`, written as a wave. It does not say which values `E(k)` are prime: that is the
+Bunyakovsky and Hardy–Littlewood question of section K, still open for every quadratic.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -647,7 +732,7 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 3. *1601 is a meeting point.* The tour's spiral stops at 1601, chosen as the last prime of Euler's run. Euler's line
    and Landau's `k² + 1` share exactly two values, 197 and 1601.
 
-**Worth exploring.**
+**Worth exploring.** The first two are now sections P and Q above.
 
 1. **The circle problem lives on the half-twisted saddle.** The number of lattice points in a circle of radius `√x`
    wobbles around `πx`. Hardy's formula writes that wobble as `(x^¼/π) Σ r₂(n) n^(−3/4) cos(2π√(nx) − 3π/4)`, which
@@ -674,6 +759,15 @@ in [`experiments.json`](../../Assets/Resources/Narration/experiments.json); the 
 [`ExperimentTour.cs`](../../Assets/Tour/ExperimentTour.cs) and `CameraRig.cs`. They are narrated with the tour's
 ElevenLabs voice (JohnV4) and record as one vertical video each with
 `Tools/render_chapters.py --script experiments --shapes vertical`.
+
+Four more modules are scripted, directed and animated, but not narrated or recorded yet: *Two counting problems*
+(section P: the divisor and circle wobbles as charts, their waves added one by one, then the saddle twisting from two
+waves per turn to one while the squares slide onto the crests), *Primes of Euler's ring* (section Q: needles built
+from ζ's zeros, then the L-function's zeros joining so the inert primes sink and the split primes double), *Mirror
+lines* (section L: `k² − m²` swinging into `k² + m²`, 1601 proved prime by one pair, 221 and 1105 factored by two,
+Fermat's walk out to 1501) and *The discriminant comb* (section K: a plane sliding across the comb with its prime
+count, the yield of every plane, Euler's and Landau's lines meeting at 197 and 1601). Their shots use `fit`, so they
+frame the same subject in 16:9 and 9:16.
 
 ## Rendering
 

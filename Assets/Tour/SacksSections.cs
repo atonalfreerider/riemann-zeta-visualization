@@ -671,7 +671,7 @@ public partial class SacksSpiral
                     text += $" = {Poly(1, cv.B, cv.C).Replace("k", k.ToString())}";
                 }
 
-                ExpLabel(g, text, ExpNumberAt(n, .3f) + new Vector3(0f, 1.6f + .6f * labelSize, -.5f), labelSize, ExpPrime(n) ? Factory.Palette.Zero : CompositeDotColor);
+                ExpLabel(g, text, ExpNumberAt(n, .3f) + new Vector3(0f, 1.6f + (labelSize > 8f ? .12f : .6f) * labelSize, -.5f), labelSize, ExpPrime(n) ? Factory.Palette.Zero : CompositeDotColor);
             }
         }
 

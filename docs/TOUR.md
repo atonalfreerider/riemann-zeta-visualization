@@ -38,7 +38,9 @@ Below the chapter list the side menu has an **Experiments** section: directed ex
 experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
 chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
 when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour,
-narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The modules are
+narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The first four
+modules are narrated; the last four are scripted, directed and animated but not narrated yet (their captions run on
+estimated timing until audio exists). The modules are
 
 | module | id | what it shows |
 |---|---|---|
@@ -46,16 +48,23 @@ narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.
 | Level contours | `xlevels` | the saddle sliced by horizontal planes: hyperbolas, the numbers on them, the trail, the three product families |
 | The bend as a probe | `xprobe` | a fixed plane sweeping the product families as the bend goes from flat to twice the tour's |
 | Mirrors, not oracles | `xmirror` | the vortex eyes of the chain at a zero, their mirror points, the traces through the zero planes |
+| Two counting problems | `xlattice` | the divisor and circle problems' wobbles as charts, their waves added one by one, the saddle twisting from two waves per turn to one |
+| Primes of Euler's ring | `xideals` | split and inert primes; needles built from ζ's zeros, then the zeros of L(s, (·/163)) joining |
+| Mirror lines | `xmirrorlines` | k² − m² swinging into k² + m²; one pair proves 1601 prime, two pairs factor 221 and 1105; Fermat's walk to 1501 |
+| The discriminant comb | `xcomb` | a plane sliding across the comb with its prime count, the prime yield of every plane, Euler's and Landau's lines meeting at 197 and 1601 |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
 `exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`, `exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors]`
 (the chain redrawn every frame as the dial turns, its vortex eyes detected live; FROM / TO are dial values, `zN` for zero
 N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
-`exp:snap` (cut to the line's shot instead of flying there); see `ExperimentTour.cs`). Their shots are written into the
+`exp:snap` (cut to the line's shot instead of flying there), and for the section modules `exp:latticechart[live]`,
+`exp:twistlive`, `exp:idealwave`, `exp:mirrorswing`, `exp:eulershow`, `exp:fermatwalk`, `exp:combslide`, `exp:skyline`,
+`exp:meet` and more; see `ExperimentTour.cs`). Their shots are written into the
 script as moving orbits, `orbit:on=centre|panel|tower|live|towerfocus;at=x,y,z[>x,y,z];d=FROM>TO;el=FROM>TO;az=A;spin=DEG_PER_S;fov=F;span=S;h=FRAC`
 (distance, elevation above the saddle and look point eased over `span` seconds while the camera circles; see
-`CameraRig.OrbitCue`), and each module opens already framed on its first shot. To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
+`CameraRig.OrbitCue`). `fit=W,H[>W2,H2]` replaces the distance with the one that frames a W × H box at the current
+aspect, so one shot works in 16:9 and 9:16, and `raise=F` lifts the subject by F of the frame's height above the captions, and each module opens already framed on its first shot. To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
 storyboard command below; to record them as narrated videos, one per module, run
 `python Tools/render_chapters.py --unity <Unity.exe> --script experiments --shapes vertical --out <folder>`.
 

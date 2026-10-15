@@ -468,7 +468,9 @@ public class CameraRig : MonoBehaviour
     /// (degrees above the saddle; 90 looks straight down) and distance d, turning at spin degrees per second from az;
     /// "A>B" eases a value from A to B over span seconds (distance, elevation, and the look point's at). on: centre
     /// (the saddle), panel, tower, live (the tower plane the live chain is climbing through) or towerfocus; h raises
-    /// the look point by that fraction of the current tower's height.
+    /// the look point by that fraction of the current tower's height. fit=W,H (or W,H>W2,H2) replaces d with the distance that
+    /// frames a W × H box (world units, across × up the screen) at the camera's current aspect, so one shot works in 16:9 and
+    /// 9:16; raise=F moves the subject up the screen by F of the frame's height (to clear the captions).
     /// </summary>
     Func<CueState> OrbitCue(string spec)
     {
@@ -511,6 +513,16 @@ public class CameraRig : MonoBehaviour
         float fov = Num(p.TryGetValue("fov", out string fv) ? fv : "", 55f);
         float span = Mathf.Max(.1f, Num(p.TryGetValue("span", out string sn) ? sn : "", 12f));
         float hFrac = Num(p.TryGetValue("h", out string hh) ? hh : "", 0f);
+        float raise = Num(p.TryGetValue("raise", out string rs) ? rs : "", 0f);
+        Vector2 fit0 = Vector2.zero, fit1 = Vector2.zero;
+        if (p.TryGetValue("fit", out string ft))
+        {
+            string[] ab = ft.Split('>');
+            Vector2 Box(string s) { string[] c = s.Split(','); return new Vector2(Num(c[0], 50f), c.Length > 1 ? Num(c[1], 50f) : Num(c[0], 50f)); }
+            fit0 = Box(ab[0]);
+            fit1 = ab.Length > 1 ? Box(ab[1]) : fit0;
+        }
+
         return () =>
         {
             SacksSpiral s = annotations.Sacks;
@@ -527,12 +539,26 @@ public class CameraRig : MonoBehaviour
             float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(age / span));
             Vector3 look = basePoint + Vector3.Lerp(at0, at1, u) + Vector3.back * (hFrac * Mathf.Max(1f, s.ExpTowerHeight));
             float d = Mathf.Lerp(d0, d1, u);
+            float tanV = Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
+            if (fit0.x > 0f)
+            {
+                Vector2 box = Vector2.Lerp(fit0, fit1, u);
+                d = Mathf.Max(box.x * .5f / (tanV * Aspect), box.y * .5f / tanV) * 1.06f;
+            }
+
             float el = Mathf.Clamp(Mathf.Lerp(e0, e1, u), -80f, 89.5f) * Mathf.Deg2Rad;
             float a = (az0 + spin * age) * Mathf.Deg2Rad;
             Vector3 hdir = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
             Vector3 position = look + (hdir * Mathf.Cos(el) + Vector3.back * Mathf.Sin(el)) * d;
             // "up the screen" is the saddle's normal tipped back by the elevation, so a shot can pass overhead smoothly
             Vector3 upDir = (Vector3.back * Mathf.Cos(el) - hdir * Mathf.Sin(el)).normalized;
+            if (raise != 0f)
+            {
+                Vector3 shift = -upDir * (raise * 2f * d * tanV);
+                position += shift;
+                look += shift;
+            }
+
             return new CueState { Position = position, LookAt = look, Up = upDir, Fov = fov };
         };
     }

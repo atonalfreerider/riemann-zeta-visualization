@@ -61,6 +61,7 @@ public partial class SacksSpiral
     {
         gameObject.SetActive(true);
         StopGrowth();
+        ExpSetSurface(2, 0f); // a twisted or folded surface from a section module never leaks into the next one
         foreach (GameObject r in new[] { growRoot, hypothesisRoot, zeroDropsRoot, explorationRoot, sieveRoot, latticeRoot, routeNumbersRoot })
         {
             if (r != null) r.SetActive(false);
@@ -131,6 +132,7 @@ public partial class SacksSpiral
     {
         ClearExperiments();
         ClearBackdrop();
+        ExpSetSurface(2, 0f);
         bend = 1f;
         Flat = false;
         for (int i = 0; i < labels.Count && i < GridCount; i++) labels[i].gameObject.SetActive(true);
