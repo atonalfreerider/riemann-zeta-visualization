@@ -1688,7 +1688,7 @@ In the flat spiral these strands sit on opposite rays. The cone puts them in one
 * **No faster prime-finding.** Fermat's test is already fast (log n multiplications), but it is fooled by exactly the
   overlap shown here. Gauss sums cost p steps. The cone only rearranges the comb.
 
-## EA–EF. The circularity of ζ, and the symmetries behind the primes
+## EA–EI. The circularity of ζ, and the symmetries behind the primes
 
 **The objection is right.** The zeta chain adds arrows of length 1/n^σ at angles t·log n, so both its lengths and its
 angles are built from the counting numbers. Its zeros are computed from the same chain, so they are built from the
@@ -1900,6 +1900,121 @@ geometry encodes divisibility exactly, and reading it costs at least as much as 
 ![EF2](EF2-the-tower-of-spheres.jpg)
 ![EF3](EF3-one-cube-per-divisor.jpg)
 
+### EG. The wheels of E6, E7 and E8, stacked
+
+E6, E7 and E8 have Coxeter numbers 12, 18 and 30. Each Coxeter element turns its plane by one hour of a wheel with that
+many hours ([`SacksE8Stack.cs`](../../Assets/Tour/SacksE8Stack.cs)). I checked the characteristic polynomials exactly:
+
+| lattice | roots | hours | characteristic polynomial |
+|---|---|---|---|
+| E6 | 72 | 12 | Φ12·Φ3 |
+| E7 | 126 | 18 | Φ18·Φ2 |
+| E8 | 240 | 30 | Φ30 |
+
+So the hours where c^k turns the lattice the way c does are the units mod h:
+
+| lattice | spokes (units mod h) |
+|---|---|
+| E6 | 1, 5, 7, 11 |
+| E7 | 1, 5, 7, 11, 13, 17 |
+| E8 | 1, 7, 11, 13, 17, 19, 23, 29 |
+
+**Why these three wheels are clean at first.** 12, 18 and 30 are three of the ten numbers whose units are all prime
+(1, 2, 3, 4, 6, 8, 12, 18, 24 and 30, a theorem of Schatunowsky, checked to 5000). **30 is the largest of them, and it
+is E8's Coxeter number.** So the first loop of each wheel holds only primes.
+
+The first composite to land on a spoke is the square of the smallest prime that does not divide h:
+
+* 25 = 5·5 on E6 and E7, which do not sieve out 5;
+* 49 = 7·7 on E8.
+
+In the stack, a thread joins each number's three positions:
+
+* The primes stay on spokes in all three wheels.
+* 49, 77 and 91 are on spokes in all three.
+* 25 and 35 are on spokes in E6 and E7 but off E8's, because only E8 also sieves out 5.
+
+The ladder of sieve wheels is 2, 6, 30, 210, 2310, with 1, 2, 8, 48 and 480 spokes. Two of its rungs are Coxeter
+numbers of exceptional groups: 6 = h(G2) and 30 = h(E8). The next rung, 210, would need the classical type A₂₀₉.
+
+![EG1](EG1-coxeter-wheels-e6-e7-e8.jpg)
+![EG2](EG2-the-wheels-stacked.jpg)
+
+### EH. The double overlap: the spokes multiply
+
+The first composites on E8's spokes are 49 = 7·7, 77 = 7·11 and 91 = 7·13. They come from 7 multiplying the spokes 7,
+11 and 13. Because 7 is a unit, ×7 sends every spoke to another: (1 → 7 → 19 → 13)(11 → 17 → 29 → 23).
+
+* 49 = 7·7 sits on spoke 19 (7·7 ≡ 19 mod 30).
+* 77 = 7·11 sits on spoke 17.
+* 91 = 7·13 sits on spoke 1.
+
+The full multiplication table of the eight spokes is EH1: they form the group of units mod 30, Z/2 × Z/4.
+
+So every composite on a spoke is a product of two or more spoke primes, and its spoke is the product of their spokes
+mod 30. EH2 rings every composite on a spoke once per prime factor, one colour per prime:
+
+* 49 = 7·7 is a double overlap of 7 with itself;
+* 77 = 7·11 overlaps 7 and 11;
+* 539 = 7·7·11 carries three rings.
+
+Up to 1200, the 126 composites on spokes are 9 prime squares and cubes, 116 products of two distinct primes and one of
+three (1001 = 7·11·13). The primes are exactly the points with no ring: nothing overlaps there. This is the cancellation
+idea in its exact form. The spokes are where 2, 3 and 5 do not cancel, and inside them the composites are the overlaps
+of the spoke primes' own multiples.
+
+**The spokes bent into conics (EH3, EH4).** Put each number at the Sacks radius s√n on its spoke. Then lift each
+composite n = a·b (7 ≤ a ≤ b) to the height s(b − a)/2, as in section CB.
+
+* In each spoke's plane, the points with a common factor a lie on one parabola, z = (r² − s²a²)/(2sa).
+* All these parabolas share their focus at the centre: a confocal family, one for each factor.
+* A number with several factorizations sits on several parabolas at once, one for each way of splitting it.
+* The primes have no such pair and stay on the floor.
+* So do the squares a², where their parabola crosses the floor. On the floor they carry their factor's colour instead
+  of gold.
+
+The profile EH4 folds all the spokes into one plane.
+
+![EH1](EH1-the-spokes-multiply.jpg)
+![EH2](EH2-the-double-overlap.jpg)
+![EH3](EH3-the-spokes-bent-into-parabolas.jpg)
+![EH4](EH4-the-parabolas-in-profile.jpg)
+
+### EI. The three-fold saddle with ridges at 0, 12 and 18: twin primes
+
+**The ridges at 0, 12 and 18 are exactly the hours where twin primes straddle on E8's wheel.** A twin pair (p, p + 2)
+above (5, 7) has both members on spokes, so p ≡ 11, 17 or 29 (mod 30), and the pair is centred on hour 12, 18 or 0.
+Up to a million:
+
+| centre (mod 30) | twin pairs |
+|---|---|
+| 0 | 2697 |
+| 12 | 2736 |
+| 18 | 2734 |
+| any other hour | 0 (apart from (5, 7) at hour 6) |
+
+The valleys at 6, 15 and 24 lie between the ridges:
+
+* Spoke 7 sits just past valley 6, and spoke 23 just before valley 24.
+* Their primes can never have a twin: 7 ± 2 gives 5 and 9 ≡ 0 (mod 3); 23 ± 2 gives 21 ≡ 0 (mod 3) and 25 ≡ 0 (mod 5).
+* Of the 19 652 primes ≡ 7 or 23 (mod 30) below a million, only 7 itself has a twin (5).
+
+The other two wheels give the regular saddles:
+
+| wheel | twin centres | saddle |
+|---|---|---|
+| E6 (12 hours) | 0 and 6 | ordinary saddle (two-fold) |
+| E7 (18 hours) | 0, 6 and 12 | monkey saddle (three-fold) |
+| E8 (30 hours) | 0, 12 and 18 | three-fold saddle, warped |
+
+E8's saddle is warped because the prime 5 removes hour 6: a pair centred there would need p ≡ 5 (mod 30).
+
+As with every wheel, this sorts by residue only. It says where twin primes can sit, not whether there are infinitely
+many.
+
+![EI1](EI1-the-twin-prime-saddle.jpg)
+![EI2](EI2-twin-saddles-of-e6-e7-e8.jpg)
+
 ### What the symmetries give
 
 * **The circularity is real.** ζ, its chain and its zeros are one object, and the explicit formula only translates
@@ -1916,6 +2031,11 @@ geometry encodes divisibility exactly, and reading it costs at least as much as 
   * E8's Coxeter wheel sieves out 2, 3 and 5 by position alone: every prime above 5 lands on one of eight spokes.
   * The sphere of norm 2n holds the fewest possible E8 points exactly when n is prime, and the extra points of n = pq
     give p and q back.
+* **The wheels stacked, multiplied and bent (EG–EI).**
+  * E6, E7 and E8 give the wheels of 12, 18 and 30. 30 is the largest number whose units are all prime.
+  * The composites on the spokes are the overlaps of spoke primes, placed by the multiplication table of the units.
+  * Bent into confocal parabolas, the factor pairs rise and the primes stay on the floor.
+  * The saddle ridges at 0, 12 and 18 are exactly where twin primes sit.
 * **No faster prime-finding.** Counting an E8 shell point by point (about 240n³ points) is far slower than trial
   division. j needs high precision.
   GUE statistics describe the zeros only on average.
@@ -2108,7 +2228,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
-are EA to EE (`6` is EF). Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EF are drawn for full horizontal frames: run them with
+are EA to EE (`6` is EF, and `7` to `9` are EG to EI). Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EI are drawn for full horizontal frames: run them with
 `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,

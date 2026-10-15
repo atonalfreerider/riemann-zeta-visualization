@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EF)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EI)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1323,6 +1323,89 @@ public class ExperimentsRenderTest
                     "a prime has only the cubes of 1 and n" }, 30f, new Color(.85f, .88f, .95f), false);
         Vector3 ecl = ec + new Vector3(50f, 0f, 4f);
         yield return Shot("EF3-one-cube-per-divisor", ecl + new Vector3(-22f, -100f, -40f), ecl, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // The E6, E7, E8 wheels stacked, the spokes' multiplication, the parabolas and the twin-prime saddles: sections EG–EI
+        // (SacksE8Stack.cs), digits 7–9, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('7')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 wr = c + new Vector3(SacksSpiral.WheelRowOffset, 0f, 0f);
+        sacks.ExpWheelFor(wr + new Vector3(-118f, 0f, 0f), 6, 180, 15f, 37f, 7.2f, .85f, 110f, "E6:  12 hours|spokes 1, 5, 7, 11|first composite on a spoke:  25 = 5·5", null, 0f, false, false, false, new long[] { 25 });
+        sacks.ExpWheelFor(wr, 7, 180, 15f, 37f, 7.5f, .85f, 110f, "E7:  18 hours|spokes 1, 5, 7, 11, 13, 17|first composite on a spoke:  25 = 5·5", null, 0f, false, false, false, new long[] { 25 });
+        sacks.ExpWheelFor(wr + new Vector3(118f, 0f, 0f), 8, 180, 15f, 37f, 7.9f, .85f, 110f, "E8:  30 hours|spokes 1, 7, 11, 13, 17, 19, 23, 29|first composite on a spoke:  49 = 7·7", null, 0f, false, false, false, new long[] { 49 });
+        sacks.ExpCaption(wr + new Vector3(-163f, 84f, -.3f), Vector3.down * 7f,
+            "1 … 180 dropped on the Coxeter wheels of E6, E7, E8:  gold primes, red composites on a spoke|12, 18 and 30 are three of the ten numbers whose units are all prime:  1, 2, 3, 4, 6, 8, 12, 18, 24, 30 — 30 is the largest", 60f);
+        yield return Shot("EG1-coxeter-wheels-e6-e7-e8", wr + new Vector3(0f, 8f, 0f) + back * 182f, wr + new Vector3(0f, 8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 ws = c + new Vector3(SacksSpiral.WheelStackOffset, 0f, 0f);
+        sacks.ExpWheelStack(ws, 180, 45f, 10f, 34f, .55f, 110f, new long[] { 25, 35, 49, 77, 91, 31, 37 }, new[] { 1, 0, 2, 0, 1, 0, 2 });
+        sacks.ExpCaption(ws + new Vector3(52f, 0f, -30f), Vector3.forward * 8.5f,
+            "the wheels stacked, 1 … 180|threads:  one number through all three|gold:  primes on a spoke in every wheel|red:  49, 77, 91 — on a spoke in every wheel|blue:  25, 35 — on E6's and E7's spokes,|off E8's:  only E8 also sieves out 5", 72f);
+        Vector3 wsl = ws + new Vector3(40f, 0f, 45f);
+        yield return ShotOrtho("EG2-the-wheels-stacked", wsl + new Vector3(0f, -400f, -195f), wsl, back, 82f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('8')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 st = c + new Vector3(SacksSpiral.SpokeTableOffset, 0f, 0f);
+        sacks.ExpSpokeMultiplication(st, 7f, st + new Vector3(78f, -4f, 0f), 24f, 7, 100f);
+        Vector3 stl = st + new Vector3(52f, 2f, 0f);
+        yield return Shot("EH1-the-spokes-multiply", stl + back * 112f, stl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 ov = c + new Vector3(SacksSpiral.OverlapOffset, 0f, 0f);
+        sacks.ExpOverlapWheel(ov, 600, 10f, 62f, .6f, 120f, new long[] { 49, 77, 91, 121, 143, 343, 539 });
+        sacks.ExpCaption(ov + new Vector3(-140f, -84f, -.3f), Vector3.down * 7f,
+            "every composite on a spoke is a product of spoke primes, one ring for each prime factor|49 = 7·7 is a double overlap of 7 with itself, 77 = 7·11 of 7 and 11 — the primes carry no ring", 62f);
+        Vector3 ovl = ov + new Vector3(20f, -15f, 0f);
+        yield return Shot("EH2-the-double-overlap", ovl + back * 175f, ovl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 pw = c + new Vector3(SacksSpiral.ParabolaOffset, 0f, 0f);
+        sacks.ExpParabolaWheel(pw, 900, 1.6f, .8f, 120f, new[] { 7, 23 });
+        sacks.ExpCaption(pw + new Vector3(-178f, 0f, -118f), Vector3.forward * 9f,
+            "the spokes bent into parabolas|each composite n = a·b (7 ≤ a ≤ b) lifted (b − a)/2|above its spoke:  one parabola per factor a,|all with their focus at the centre|bright:  the planes of spokes 7 and 23|the primes have no such pair:  they stay on the floor", 72f);
+        Vector3 pwl = pw + new Vector3(-50f, 0f, -45f);
+        yield return Shot("EH3-the-spokes-bent-into-parabolas", pwl + new Vector3(0f, -215f, -40f), pwl, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpParabolaProfile(pw, 1500, 2.2f, 62f, .8f, 120f);
+        sacks.ExpCaption(pw + new Vector3(-124f, 98f, -.3f), Vector3.down * 7.5f,
+            "the wheel cut through its centre:  each n = a·b on a spoke at height (b − a)/2|on the parabola of its factor a, all confocal — the primes stay on the floor, and so do the squares a²", 64f);
+        Vector3 pfl = pw + new Vector3(4f, 34f, 0f);
+        yield return Shot("EH4-the-parabolas-in-profile", pfl + back * 140f, pfl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('9')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        // the screen-down direction of a camera at pos looking at look with the given up: captions step along it
+        Vector3 ScreenDown(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 d = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, d) * d).normalized;
+        }
+
+        Vector3 sd = c + new Vector3(SacksSpiral.SaddleOffset, 0f, 0f);
+        sacks.ExpWheelFor(sd, 8, 600, 15f, 37f, 7.9f, .55f, 100f, null, new[] { 0, 12, 18 }, .0117f, true, true, false);
+        Vector3 sdl = sd + new Vector3(-28f, 4f, -8f), sdPos = sdl + new Vector3(0f, -82f, -112f);
+        Vector3 down1 = ScreenDown(sdPos, sdl, back);
+        sacks.ExpCaption(sd + new Vector3(-124f, 26f, -40f), down1 * 7.5f,
+            "E8's wheel on a three-fold saddle|ridges at 0, 12, 18;  valleys at 6, 15, 24|white links:  twin primes, each pair across a ridge|blue:  spokes 7 and 23, down by the valleys —|their primes can never have a twin", 64f);
+        yield return Shot("EI1-the-twin-prime-saddle", sdPos, sdl, back, 55f);
+        sacks.ClearExperiments();
+        Vector3 sdr = sd + new Vector3(0f, -4f, -6f), sdrPos = sdr + new Vector3(0f, -128f, -172f);
+        Vector3 down2 = ScreenDown(sdrPos, sdr, back);
+        sacks.ExpWheelFor(sd + new Vector3(-118f, 0f, 0f), 6, 360, 12f, 30f, 7.2f, .45f, 105f, "E6:  ridges 0, 6|an ordinary saddle", new[] { 0, 6 }, .015f, true, true, false, null, false, down2, false);
+        sacks.ExpWheelFor(sd, 7, 360, 12f, 30f, 7.5f, .45f, 105f, "E7:  ridges 0, 6, 12|a monkey saddle", new[] { 0, 6, 12 }, .015f, true, true, false, null, false, down2, false);
+        sacks.ExpWheelFor(sd + new Vector3(118f, 0f, 0f), 8, 360, 12f, 30f, 7.9f, .45f, 105f, "E8:  ridges 0, 12, 18|warped by the prime 5", new[] { 0, 12, 18 }, .015f, true, true, false, null, false, down2, false);
+        sacks.ExpCaption(sd + new Vector3(-178f, 62f, -40f), down2 * 8f,
+            "twin primes (white links) straddle the ridges (gold lines) of each wheel;  the blue lines are the valleys|E6:  hours 0 and 6      E7:  hours 0, 6, 12      E8:  hours 0, 12, 18 — never 6 or 24, where 5 sits", 72f);
+        yield return Shot("EI2-twin-saddles-of-e6-e7-e8", sdrPos, sdr, back, 55f);
         sacks.ClearExperiments();
         }
 
