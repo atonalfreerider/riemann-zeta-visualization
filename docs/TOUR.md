@@ -52,6 +52,7 @@ captions run on estimated timing until audio exists). The modules are
 | Primes of Euler's ring | `xideals` | split and inert primes; needles built from ζ's zeros, then the zeros of L(s, (·/163)) joining |
 | Mirror lines | `xmirrorlines` | k² − m² swinging into k² + m²; one pair proves 1601 prime, two pairs factor 221 and 1105; Fermat's walk to 1501 |
 | The discriminant comb | `xcomb` | a plane sliding across the comb with its prime count, the prime yield of every plane, Euler's and Landau's lines meeting at 197 and 1601 |
+| Pinching the spiral | `xpinch` | the fold and its one comb of every discriminant, the residue arms mod 30 and mod 4 on the saddle, the pleat gathering primes onto k² + k + 11 and k² + k + 17 (leftover composites in white), the residue lattice mod 3, 5, 7 |
 | The 12 × 12 torus | `xtorus` | numbers marked with turn and step; the board filling as the primes up to 10⁷ arrive (only 2 and 3 off the 48 gold cells); diagonals swept cell by cell; the board rolled into a torus |
 | The saddle computes (3/p) | `xlegendre` | the pinch to 24 arms, then the saddle rising so every prime falls or rises by (3/p); the same for (2/p) on 16 arms, (5/p) on 10, and 144 arms on a 12-fold saddle |
 | Base-12 fingerprints | `xfinger` | the last two base-12 digits as a board; the primes filling four columns; the squares, Euler's line, k² + k + 17 and the pronic numbers stamping their cells one value at a time |
