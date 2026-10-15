@@ -92,7 +92,7 @@ public partial class TourDirector
 
     /// <summary>
     /// exp:stage · exp:clear · exp:backdrop:on|off · exp:routes:on|off · exp:bend:B · exp:sweep:FROM:TO:SECONDS:H1,H2[:families]
-    /// exp:contours:H1,H2[:planes] · exp:family:ridge|valley|level|all · exp:section:x|y|z:C · exp:trail:TMAX[:gram][:half]
+    /// exp:contours:H1,H2[:planes] · exp:family:squares|quarter|diagonal|all · exp:section:x|y|z:C · exp:trail:TMAX[:gram][:half]
     /// exp:curves:MAXD · exp:euler:KMAX[:plain] · exp:zetawave · exp:vortexprep · exp:vortexpanel:J · exp:tower:A:B[:derotate]
     /// exp:towerall[:derotate][:KMAX] · exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors] · exp:towergrow:A:B:SECONDS
     /// (FROM / TO: a dial value, zN for zero N, or "here" for where the live chain is; SECONDS: a number or "line")
@@ -114,7 +114,7 @@ public partial class TourDirector
         Vector3 c = sacks.Center;
         Vector3 panel = c + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f);
         Vector3 tower = c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f);
-        Color ridge = new(1f, .45f, .3f), valley = new(.35f, .65f, 1f), level = new(.85f, .85f, .95f);
+        Color fall = new(1f, .45f, .3f), rise = new(.35f, .65f, 1f), level = new(.85f, .85f, .95f); // below the centre (falls away from the trail) / above it
         switch (verb)
         {
             case "stage": ExpStage(); break;
@@ -132,7 +132,7 @@ public partial class TourDirector
             case "contours":
                 foreach (float h in Heights(A(2)))
                 {
-                    Color col = h > 0 ? ridge : h < 0 ? valley : level;
+                    Color col = h > 0 ? fall : h < 0 ? rise : level;
                     if (Has("planes")) sacks.ExpSectionPlane('z', h, sacks.Extent + 6f, col, 16f);
                     sacks.ExpSectionCurve('z', h, col, .07f);
                     sacks.ExpSectionNumbers('z', h, System.Math.Abs(h) < 1e-3f ? .6f : 1f, col, SacksSpiral.Count, false, 0f);
@@ -144,7 +144,7 @@ public partial class TourDirector
             {
                 char axis = A(2).ToLowerInvariant().Length > 0 ? A(2).ToLowerInvariant()[0] : 'z';
                 float cc = F(3, 0f);
-                Color col = axis == 'y' ? ridge : axis == 'x' ? valley : level;
+                Color col = axis == 'y' ? fall : axis == 'x' ? rise : level;
                 sacks.ExpSectionPlane(axis, cc, sacks.Extent + 6f, col);
                 sacks.ExpSectionCurve(axis, cc, col);
                 sacks.ExpSectionNumbers(axis, cc, 1.2f, col, SacksSpiral.Count, false, 0f);

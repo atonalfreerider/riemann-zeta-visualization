@@ -26,7 +26,7 @@
         },
         {
           "id": "xcurves_03",
-          "text": "Gap zero is the squares, gap one the pronic numbers. On the saddle every one of these curves climbs the ridge, because a product of two nearly equal numbers lands near the x axis.",
+          "text": "Gap zero is the squares, gap one the pronic numbers. On the saddle every one of these curves runs down the x axis, where the surface falls away from the centre, because a product of two nearly equal numbers lands near that axis.",
           "camera": "orbit:on=centre;at=0,0,-4;d=110>145;el=20>34;az=-30;spin=5;span=11",
           "actions": [
             "exp:routes:on"
@@ -82,14 +82,14 @@
       "lines": [
         {
           "id": "xlevels_01",
-          "text": "The saddle is z equals x squared minus y squared, scaled down. Slice it with a horizontal plane and the cut is a hyperbola: opening left and right above the middle, up and down below it.",
+          "text": "The saddle is z equals x squared minus y squared, scaled down. Slice it with a horizontal plane and the cut is a hyperbola: opening left and right below the centre, up and down above it.",
           "camera": "orbit:on=centre;d=230>205;el=38>28;az=-90;spin=5;span=12",
           "actions": [],
           "pause": 0.5
         },
         {
           "id": "xlevels_02",
-          "text": "Here are the cuts at heights fifteen and thirty on the ridge side, opening along the squares and pronic rays. Every number lit on one contour shares the same value of n times the cosine of four pi root n.",
+          "text": "Here are the cuts fifteen and thirty units below the centre, where the saddle falls away: they open along the squares and pronic rays. Every number lit on one contour shares the same value of n times the cosine of four pi root n.",
           "camera": "orbit:on=centre;d=215>200;el=60>80;az=-30;spin=4;span=13",
           "actions": [
             "exp:contours:15,30"
@@ -98,17 +98,17 @@
         },
         {
           "id": "xlevels_03",
-          "text": "Below the middle, on the valley side, the contours open along the y axis instead. The valley is where the one-to-four products live: u times four u plus an odd number.",
+          "text": "Above the centre, where the saddle rises, the contours open along the y axis instead. That rising axis is where the one-to-four products live: u times four u plus an odd number.",
           "camera": "orbit:on=centre;d=200>215;el=80>70;az=20;spin=4;span=12",
           "actions": [
             "exp:contours:-15,-30",
-            "exp:family:valley"
+            "exp:family:quarter"
           ],
           "pause": 0.6
         },
         {
           "id": "xlevels_04",
-          "text": "Seen from the side the planes are real cuts through the surface. The valley planes also cut the trail of zeta rising from the centre: a plane at minus h meets the trail at the dial value four h.",
+          "text": "Seen from the side the planes are real cuts through the surface. The planes above the centre also cut the trail of zeta rising from it: a plane at height h meets the trail at the dial value four h.",
           "camera": "orbit:on=centre;at=0,0,-6;d=240>205;el=22>32;az=-135;spin=6;span=13",
           "actions": [
             "exp:clear",
@@ -124,9 +124,9 @@
           "actions": [
             "exp:clear",
             "exp:contours:0",
-            "exp:family:level",
-            "exp:family:ridge",
-            "exp:family:valley"
+            "exp:family:diagonal",
+            "exp:family:squares",
+            "exp:family:quarter"
           ],
           "pause": 0.6
         },
@@ -154,14 +154,14 @@
       "lines": [
         {
           "id": "xprobe_01",
-          "text": "Start flat. The ridge family in orange, the valley family in blue, the diagonal family in white, all drawn on a flat spiral. A plane at height fifteen touches nothing yet.",
+          "text": "Start flat. The squares family of products in orange, the one-to-four family in blue, the diagonal family in white, all drawn on a flat spiral. A plane at height fifteen touches nothing yet.",
           "camera": "orbit:on=centre;d=215>205;el=70>55;az=-90;spin=3;span=10",
           "actions": [],
           "pause": 0.5
         },
         {
           "id": "xprobe_02",
-          "text": "Bend the saddle a quarter of the way. The plane at minus fifteen now cuts the valley near the rim, around n equals thirteen hundred and seventy, and lights every number it crosses.",
+          "text": "Bend the saddle a quarter of the way. The plane fifteen units above the centre now cuts the rising side near the rim, around n equals thirteen hundred and seventy, and lights every number it crosses.",
           "camera": "orbit:on=centre;d=215;el=55>45;az=-60;spin=4;span=10",
           "actions": [
             "exp:sweep:0:0.25:6:15,-15:families"
@@ -170,7 +170,7 @@
         },
         {
           "id": "xprobe_03",
-          "text": "Half the bend, and the contour has moved inward to n near six hundred and eighty. The valley curves dive faster now, so the plane reads them off closer to the centre.",
+          "text": "Half the bend, and the contour has moved inward to n near six hundred and eighty. The blue curves climb faster now, so the plane reads them off closer to the centre.",
           "camera": "orbit:on=centre;d=220;el=45>35;az=-20;spin=4;span=10",
           "actions": [
             "exp:sweep:0.25:0.5:6:15,-15:families"
@@ -188,7 +188,7 @@
         },
         {
           "id": "xprobe_05",
-          "text": "Bend it twice as hard and the contour closes in to n near one hundred and seventy. Nothing on the vertical planes has moved: the ridge still holds the squares and the pronics, the valley still holds the one-to-four products.",
+          "text": "Bend it twice as hard and the contour closes in to n near one hundred and seventy. Nothing on the vertical planes has moved: the falling axis still holds the squares and the pronics, the rising axis still holds the one-to-four products.",
           "camera": "orbit:on=centre;d=230>240;el=28>22;az=62;spin=4;span=13",
           "actions": [
             "exp:sweep:1:2:6:15,-15:families"

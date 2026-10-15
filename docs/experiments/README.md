@@ -167,37 +167,42 @@ know about the primes, and it is erased, arm by arm, by the next ones.
 
 ## H. Cross sections of the saddle
 
+*Orientation.* Height is measured toward the trail, the tour's up (`−z`). Seen that way the saddle falls away along
+`±x`, where the squares and pronic rays run, and rises along `±y`, where the one-to-four products climb. An earlier
+version of this page called the x axis the ridge and the y axis the valley, which is how the surface looks from the
+other side (`+z`, the side the tour's saddle wire is labelled from); the pictures here are taken from the trail's side.
+
 The saddle is `z = b · K (x² − y²)` with the bend `b` (1 in the tour, 0 flat). Its sections by the three
-coordinate planes are a parabola up the ridge (`y = 0`), a parabola down the valley (`x = 0`), and hyperbolas
+coordinate planes are a parabola falling away from the trail (`y = 0`), a parabola rising toward it (`x = 0`), and hyperbolas
 (`z = h`), with the two diagonals at `z = 0`. What each plane collects, exactly:
 
 | plane | saddle section | numbers in it | product curves that run along it | zeta trail pierces it at |
 |---|---|---|---|---|
-| `y = 0` (ridge) | `z = bKx²` | the squares (`+x`), the pronic numbers (`−x`) | every 1:1 product `u(u + d)` (all the cancellation curves) | the **Gram points** (`ζ` real, `θ = mπ`) and the zeros |
-| `x = 0` (valley) | `z = −bKy²` | `√n ≡ ¼` and `¾`: `u(4u + 1)` on `+y`, `u(4u + 3)` on `−y` | the 1:4 products with odd gap | the **half-Gram points** (`ζ` imaginary, `θ = (m + ½)π`) and the zeros |
+| `y = 0` (x axis, falls away) | `z = bKx²` | the squares (`+x`), the pronic numbers (`−x`) | every 1:1 product `u(u + d)` (all the cancellation curves) | the **Gram points** (`ζ` real, `θ = mπ`) and the zeros |
+| `x = 0` (y axis, rises) | `z = −bKy²` | `√n ≡ ¼` and `¾`: `u(4u + 1)` on `+y`, `u(4u + 3)` on `−y` | the 1:4 products with odd gap | the **half-Gram points** (`ζ` imaginary, `θ = (m + ½)π`) and the zeros |
 | `z = 0` (level) | the diagonals `y = ±x` | `√n ≡ ⅛, ⅜, ⅝, ⅞` | the 1:16 products with odd gap, `u(16u + d)` | the trail's foot, `t = 0` |
-| `z = h` (level) | hyperbola `x² − y² = h/bK` | all `n` with `n · cos(4π√n) = h / bKR²`: one contour of the Voronoi harmonic | cut once each, near `n ≈ h/bKR²` on the ridge | one dial value, `t = −4h` (valley side only) |
+| `z = h` (level) | hyperbola `x² − y² = h/bK` | all `n` with `n · cos(4π√n) = h / bKR²`: one contour of the Voronoi harmonic | cut once each, near `n ≈ h/bKR²` on the x axis | one dial value, `t = −4h` (planes above the centre only) |
 
 The general rule behind the middle column: a product `u(q²u + d)` has `√n ≈ qu + d/2q`, so it straightens
-along the ray at angle `2π · d/2q`. `q = 1` gives the two ridge rays, `q = 2` the two valley rays, `q = 4` the
+along the ray at angle `2π · d/2q`. `q = 1` gives the two x-axis rays, `q = 2` the two y-axis rays, `q = 4` the
 four diagonals. The bend does not move any of this (the planes `x = c`, `y = c` cut the same numbers at every
-bend); it only decides how steeply the ridge family climbs and the valley family dives, and which contour a level
+bend); it only decides how steeply the x-axis family falls away and the y-axis family rises, and which contour a level
 plane picks: raising the bend from ¼ to 2 pulls the `z = −15` contour in from `n ≈ 1370` to `n ≈ 170`, so a
-fixed plane sweeps inward through the valley family and reads off where each curve crosses that height.
+fixed plane sweeps inward through the one-to-four family and reads off where each curve crosses that height.
 
-![H1](H1-ridge-plane-side.jpg)
-![H3](H3-ridge-plane-trail.jpg)
-![H4](H4-valley-plane-side.jpg)
+![H1](H1-x-axis-plane-side.jpg)
+![H3](H3-x-axis-plane-trail.jpg)
+![H4](H4-y-axis-plane-side.jpg)
 ![H7](H7-zero-level-full.jpg)
 
 The trail column is the one worth keeping. `ζ(½ + it) = Z(t) e^{−iθ(t)}` with `Z` real, so the trail crosses
-the ridge plane exactly when `sin θ = 0` (the Gram points) and the valley plane exactly when `cos θ = 0`. The
+the x-axis plane exactly when `sin θ = 0` (the Gram points) and the y-axis plane exactly when `cos θ = 0`. The
 coordinate planes of the saddle are therefore the Gram planes of the trail, and the correspondence
 
 | Sacks spiral, clock `√n` | zeta trail, clock `θ/π` |
 |---|---|
-| squares and pronics: `√n ≡ 0, ½` (ridge plane) | Gram points: `θ/π ≡ 0` (ridge plane) |
-| `u(4u + odd)`: `√n ≡ ¼, ¾` (valley plane) | half-Gram points: `θ/π ≡ ½` (valley plane) |
+| squares and pronics: `√n ≡ 0, ½` (x-axis plane) | Gram points: `θ/π ≡ 0` (x-axis plane) |
+| `u(4u + odd)`: `√n ≡ ¼, ¾` (y-axis plane) | half-Gram points: `θ/π ≡ ½` (y-axis plane) |
 | `u(16u + odd)`: `√n ≡ odd/8` (diagonals) | `θ/π ≡ ±¼`: quarter-Gram points |
 
 is exact, not a metaphor: both are "where the clock reads a whole or half value". Section D is the same
@@ -211,9 +216,9 @@ correspondence seen from above.
 **Unconventional spatial readings that fall out of the sections.**
 
 * *The two clocks as two axes.* Unroll the spiral into a chart with `√n` along `x` (turn count) and the position
-  within the turn along `y`. The saddle depends only on `y` (ridge at 0 and ½, valley at ¼ and ¾, horizontal
+  within the turn along `y`. The saddle depends only on `y` (falling away at 0 and ½, rising at ¼ and ¾, horizontal
   stripes); a zero's wave depends only on `x` (its crests are the log-spaced vertical lines); the cancellation
-  curves are the `1/u` hyperbolas converging to the ridge stripes, and Euler's line converges to the pronic
+  curves are the `1/u` hyperbolas converging to the stripes at 0 and ½, and Euler's line converges to the pronic
   stripe from above. The primes are the gold points no hyperbola passes through. The chart makes "the √ clock
   and the log clock are orthogonal" literal.
 
@@ -324,6 +329,273 @@ chain started from; the picture is a faithful mirror, not an oracle. What it doe
 object: the chain's far end is its near end reflected through the Gram phase, and the helix of the first eye is
 the zeros' Gram clock drawn as a curve through the planes.
 
+## J–O. Sections, second round: the discriminant law
+
+**One law organises every section below.** A quadratic `n = q²k² + Bk + C` traces a curve on the Sacks spiral.
+Far out, the curve straightens into a line pointing `B/2q` of a turn round, at perpendicular offset
+
+    offset = −πR · Δ / (4q²),        Δ = B² − 4q²C   (the discriminant)
+
+from that ray. Checked numerically at `k = 10⁶` (`R = 1.45`):
+
+| quadratic | Δ | direction (turns) | measured offset | predicted |
+|---|---|---|---|---|
+| `k² + 1` | −4 | 0 | 4.5557 | 4.5553 |
+| `k² − 4` | 16 | 0 | −18.2218 | −18.2212 |
+| `k² + k + 41` | −163 | ½ | 185.6290 | 185.6289 |
+| `k² + k − 2` (the curve `C₃`) | 9 | ½ | −10.2505 | −10.2494 |
+| `4k² + k + 5` | −79 | ¼ | 22.4925 | 22.4918 |
+| `9k² + 2k + 7` | −248 | ⅓ | 31.3816 | 31.3810 |
+
+So the direction of a line is set by `B/2q` and its distance from its ray by its discriminant. Three kinds of line
+follow:
+
+* **cancellation curves**: `Δ` a perfect square. The quadratic factors over the integers, so every value past the
+  birth is composite. These are exactly the product curves `u(q²u + d)`.
+* **prime curves**: `Δ` not a square. They carry primes at a rate fixed by `Δ` (below). `Δ < 0` puts them on the
+  far side of the ray from the cancellation curves; `Δ > 0` puts them on the same side, in between the cancellation
+  curves.
+* **un-cancellation curves**: the mirror images of the cancellation curves, section L.
+
+## J. Planes through the centre, rotated
+
+A vertical plane through the centre at angle `α` cuts the saddle in the parabola `z = bK·t²·cos 2α`. The parabola
+falls away from the trail for `|α| < 45°`, is a straight line at 45° (one of the saddle's rulings), and rises
+beyond. Turning the plane sweeps the parabola from falling to straight to rising.
+
+![J1](J1-fan-of-parabolas-oblique.jpg)
+![J2](J2-fan-of-parabolas-side.jpg)
+
+A plane at a rational angle `a/b` of a turn holds, far out, the families of that direction: `q²k² + Bk + C` with
+`B/2q ≡ a/b`. At 90° that is `4k² + k + C` (up) and `4k² + 3k + C` (down); at 45° it is `16k² + k + C` and
+`16k² + 5k + C`, which lie along the straight section. An irrational angle holds no family at all.
+
+![J3](J3-plane-90-quarter-families.jpg)
+![J4](J4-plane-45-straight-section.jpg)
+
+Counting the numbers in a thin strip around each plane (perpendicular half-width `R/2`, all `n ≤ 2·10⁷`):
+
+| direction (turns) | numbers in the strip | primes |
+|---|---|---|
+| 0 (squares ray) | 4 420 | 0 |
+| ¼, ¾ | 2 210 each | 0 |
+| ⅓, ⅔ | 1 473 each | 0 |
+| ⅛ | 1 105 | 0 |
+| ⅙ | 1 473 | 0 |
+| ⅕ | 884 | 0 |
+| ⅜ | 2 210 | 155 (7.0 %) |
+| ⅖ | 884 | 119 (13.5 %) |
+| √2 − 1, π − 3, φ − 1 (irrational) | about 1 405 each | 110, 95, 89 (6–8 %) |
+
+The strip at a small-denominator angle holds only the product line `k(q²k + B)`, which sits almost exactly on the
+ray, so it holds no primes. At ⅜ and ⅖ a prime curve of the same family also falls inside the strip. An irrational
+angle samples the numbers at random and gets the average prime rate. Rotating the plane therefore finds no
+prime-rich direction. It finds prime-free rational directions, set by the product lines, and that structure fades
+as the strip is widened.
+
+![J5](J5-eight-strips-top.jpg)
+
+## K. Planes off the axis: the discriminant comb
+
+Vertical planes parallel to the x axis, at `y = πR·C`, each hold **one** quadratic far out. On the `+x` side that is
+`k² + C`. On the `−x` side, the plane at `y = −πR(c − ¼)` holds `k² + k + c`. Sliding the plane sideways steps
+through the quadratics in order of discriminant. Each plane cuts the saddle in a parabola `z = bK(x² − y²)`
+lowered by `bK·y²`, and its quadratic's values climb that parabola. In the pictures, red marks a curve that
+factors, blue `Δ > 0`, and green `Δ < 0`.
+
+![K1](K1-comb-oblique.jpg)
+![K3a](K3-comb-top-squares-side.jpg)
+![K3b](K3-comb-top-pronic-side.jpg)
+
+**How many primes each plane holds.** The prime count on every line from `C = −30` to `60`, for `k ≤ 3 000`, is
+drawn as a column of bars, one per plane. Each bar is compared with the Hardy–Littlewood constant
+`Π_p (1 − w(p)/p)/(1 − 1/p)`, where `w(p)` is the number of roots mod `p`. That constant depends only on the
+discriminant through the Legendre symbols `(Δ/p)`.
+
+![K4](K4-skyline-squares-side.jpg)
+![K5](K5-skyline-pronic-side.jpg)
+
+| line | Δ | primes, k ≤ 3 000 | Hardy–Littlewood |
+|---|---|---|---|
+| `k² + k + 41` (Euler) | −163 | 1 449 | 6.65 |
+| `k² + k + 17` | −67 | 938 | 4.17 |
+| `k² + k − 1` | +5 | 759 | 3.54 |
+| `k² + k + 11` | −43 | 714 | 3.26 |
+| `k² + k − 29` | +117 | 711 | 3.23 |
+| `k² + 58` | −232 | 651 | 2.97 |
+| `k² − 17` | +68 | 528 | 2.36 |
+| `k² − 2` | +8 | 413 | 1.85 |
+| `k² + 1` (Landau) | −4 | 303 | 1.37 |
+| `k² + k + 2` | −7 | 1 (always even) | 0 |
+| `k² − 1`, `k² − 4`, `k² + k`, `k² + k − 2`, … | squares | 0 or 1 (the birth) | 0 |
+
+Over the 175 lines that do not factor, the counts and the constants correlate at 0.9995. Three findings,
+honestly stated:
+
+1. **Only the square discriminants are prime-free.** Every other plane carries primes, on either side of the ray.
+2. **The side of the ray does not decide.** Lines with `Δ > 0` between the cancellation curves average 262–272
+   primes, slightly *more* than the `Δ < 0` lines (221–224, whose values are larger). `k² + k − 1` (`Δ = 5`) beats
+   Landau's `k² + 1` by 2.5 to 1.
+3. **Euler's line is the record**, at the class-number-one discriminant −163. It is followed by −67, −43 and −19.
+   This is Rabinowitsch's theorem made visible: `k² + k + c` is prime for all `k ≤ c − 2` exactly when `1 − 4c` is
+   one of −3, −7, −11, −19, −43, −67, −163. The lines with an even `c` on the pronic side are always even, which
+   is a second, 2-adic way to carry no primes.
+
+## L. The mirror: un-cancellation curves
+
+**Reflecting across the squares ray sends a line of discriminant `Δ` to the line of discriminant `−Δ`.** On the
+`+x` side that maps `k² + C` to `k² − C`. The cancellation curves `k² − m² = (k − m)(k + m)` (`Δ = 4m²`) therefore
+reflect into `k² + m²` (`Δ = −4m²`), the rows of the Gaussian integers. On the pronic side the mirror image of an
+integer line falls between the integers, since an odd `−Δ` is not a discriminant. So only the squares side has
+integer mirror images.
+
+These mirror lines earn the name **un-cancellation curves**, because they turn the cancellation test inside out.
+Every number has some pairs of them through it, one pair for each proper representation `n = x² + y²` with
+`gcd(x, y) = 1`, lying on `k² + y²` at `k = x` and on `k² + x²` at `k = y`.
+
+* **Exactly one pair ⟹ prime (power).** An odd number on exactly one pair is a prime power `pᵏ` with `p ≡ 1 (mod 4)`,
+  and every prime `≡ 1 (mod 4)` is on exactly one pair. This is Euler's criterion. It held for every odd
+  `n ≤ 200 000`, with no exception.
+* **Two pairs ⟹ composite, and the factor falls out.** If `n = a² + b² = c² + d²`, then `gcd(n, ad − bc)` is a proper
+  factor. Euler factored `1 000 009 = 1000² + 3² = 972² + 235² = 293 × 3413` this way. Below 1 601, 63 numbers sit on
+  two or more pairs:
+
+      1105 = 33² + 4² = 32² + 9² = 31² + 12² = 24² + 23²    gcd(1105, 33·9 − 4·32) = 13    1105 = 13 × 85
+       221 = 14² + 5² = 11² + 10²                            gcd(221, 14·10 − 5·11) = 17    221 = 17 × 13
+      1601 = 40² + 1²                                        one pair only                   prime
+
+![L1](L1-mirror-comb-full.jpg)
+![L3](L3-euler-two-pairs-factor.jpg)
+
+The same holds for the mirror images of `k² − N·m²`, the rows `k² + N·m²`, when `N` is one of Euler's 65 idoneal
+numbers. It was checked for `N` = 1, 2, 3, 5, 6, 7 (odd `n ≤ 200 000`) and 1848 (`n ≤ 3 000 000`), with no
+exception. It fails as soon as `N` is not idoneal: for `N = 11`, `15 = 2² + 11·1²` is composite with only one
+representation, and there are 1 047 such failures below 20 000. Euler used `N = 1848` to prove `18 518 809 =
+197² + 1848·100²` prime by finding it on exactly one line. The test is silent on primes that the form does not
+represent, such as `p ≡ 3 (mod 4)` for `N = 1`.
+
+**Fermat's method lives on the other side of the mirror.** Writing `n = u·v` puts `n` on the cancellation curve
+`C_{v−u}`. Fermat's method starts at `⌈√n⌉` on the squares ray and steps outward until `m² − n` is a square, and
+the number of steps is `(u + v)/2 − ⌈√n⌉ ≈ d²/8√n`. That is proportional to how far the curve through `n` sits from
+the ray:
+
+| n | factors | curve | Fermat steps |
+|---|---|---|---|
+| 1591 | 37 × 43 | `C₆` | 0 |
+| 1003 | 17 × 59 | `C₄₂` | 6 |
+| 1501 | 19 × 79 | `C₆₀` | 10 |
+
+![L4](L4-fermat-curves.jpg)
+
+So the two classical factoring methods are the two sides of one mirror. Fermat looks for **one** cancellation curve
+through `n`. Euler looks for **two** pairs of un-cancellation curves.
+
+## M. The intersection atlas
+
+Twenty-five curves were drawn: eight cancellation curves (`u ≥ 2`, so every value is composite), eleven prime curves
+with `Δ < 0` (from `k² + 1` to Euler's) and six lines with `Δ > 0`. Every number that two of them share up to 1 601
+is marked, gold if prime and red if composite.
+
+![M1](M1-atlas-full.jpg)
+![M2](M2-atlas-centre.jpg)
+
+| pair of curves | meetings | prime |
+|---|---|---|
+| two prime curves (`Δ < 0`) | 72 | 66 |
+| one curve that factors | 78 | 0 |
+| other pairs (involving `Δ > 0`) | 94 | 74 |
+
+In all there are 118 meeting points, 34 of them where three or more curves meet. **The law for every meeting point:**
+two monic curves `f`, `g` share a value once for each factorization
+
+    (2k + B_f − 2m − B_g) · (2k + B_f + 2m + B_g) = Δ_f − Δ_g
+
+so a pair meets only finitely often, at points fixed by the divisors of the difference of their discriminants.
+
+* Euler's line and Landau's `k² + 1`: the difference is `−159 = −3 · 53`, so they meet at exactly **197 and 1601**,
+  both prime. 1601 is the last prime of Euler's run and the edge of the tour's spiral.
+* Euler and `k² + k + 17` (difference −96): 47 and 173. Euler and `k² + k − 1` (difference −168): 41, 71, 131, 461.
+  All are prime, because they fall inside Euler's prime run.
+* A cancellation curve `C_{2j}` meets `f(k) = k² + C` exactly where `(u + j − k)(u + j + k) = f(j)`. The composite
+  values of a line are coded by factorizations of the line's own values. The trivial factorization gives the
+  identity `f(x + f(x)) = f(x)·f(x + 1)`, which holds for every monic quadratic and is family I of section A. For
+  Landau's line, the even case is Sophie Germain's `4i⁴ + 1 = (2i² + 2i + 1)(2i² − 2i + 1)`. For Euler's line the
+  values factored are `4E(j − ½) = 4j² + 163`, the sister line of section A.
+
+## N. Tilted planes: hyperbolas off the axis
+
+A plane `z = px + qy + d` cuts the saddle in
+
+    bK (x − p/2bK)² − bK (y + q/2bK)² = d + (p² − q²)/4bK
+
+a hyperbola centred **off the axis** at `(p/2bK, −q/2bK)`, with its axes still along x and y. Turning a plane of fixed
+slope `s` about the vertical slides that centre round a circle of radius `s/2bK` (14.4 units for `s = 0.6`), and the
+hyperbola never turns.
+
+![N1](N1-tilted-plane-hyperbola.jpg)
+![N2](N2-six-tilts-top.jpg)
+
+When the right side is zero the plane is tangent, and the hyperbola collapses into **two straight lines**. These are
+the two rulings through the point of tangency: the saddle is doubly ruled, with every point on one straight line
+in each diagonal direction. At 1601 the two lines pass within 0.9 units of 44 numbers, 5 of them prime, which is
+the ordinary rate and nothing special. Far out, the rulings parallel to the diagonals are the homes of the
+one-to-sixteen families `16k² + k + C`, at offsets `−πR(1 − 64C)/64` from the diagonal. The saddle's straight lines
+carry those quadratics the way the axis planes carry `k² + C`.
+
+![N4](N4-tangent-plane-1601-top.jpg)
+![N6](N6-diagonal-families-on-straight-lines.jpg)
+
+## O. Twisting and folding the saddle
+
+The surface was generalised to `z = bK · r² · cos(F·θ − τ·r)`: `F` folds and a twist `τ` per unit of radius. On the
+spiral (`r = R√n`, `θ = 2π√n`) this becomes
+
+    z = bK R² · n · cos((2πF − τR) · √n)
+
+so **on the spiral, a twist is a change in the number of folds**: a twist of `τR = 2π(F − F′)` turns an `F`-fold
+saddle into the `F′`-fold pattern. A non-integer `F′ = 2√m` is Voronoi's `m`-th harmonic `cos(4π√(mn))`, so the
+divisor function's wobble is a sum of twisted saddles. The pictures use half the tour's bend so the twisted
+surfaces stay in frame.
+
+* `τR = 2π` (one fold on the spiral): the squares sit on the crests (`cos = 1`) and fall away, while the pronic
+  numbers sit in the troughs and rise. The twist pulls apart the two cancellation families that the plain saddle
+  keeps together.
+* `τR = 4π` (no folds): every number is on a crest, and the whole spiral lies on the single bowl `z = bKR²n`.
+* `τR = 4π(1 − √2)`: Voronoi's second harmonic. Its exact crest numbers are `2t²`, and in general `m·t²` for
+  squarefree `m`.
+* Four folds put the squares, the pronics and both one-to-four families on crests together. Three folds put the
+  squares and the one-to-nine products `k(9k + 2)`, `k(9k + 4)` there.
+
+![O1](O1-twist-half-squares-down-pronics-up-side.jpg)
+![O2](O2-twist-full-spiral-on-one-line-side.jpg)
+![O4](O4-four-fold-saddle-oblique.jpg)
+
+Twisting and folding change which product families share a crest. They do not gather the primes: no surface of this
+kind puts the primes on its crests, because the primes are spread over every family at that family's
+Hardy–Littlewood rate.
+
+## What the sections give, as algorithms
+
+Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
+
+1. **Primality by counting mirror lines (Euler).** An odd number on exactly one pair of the un-cancellation curves
+   `k² + N·m²` (`N` idoneal) is a prime power, and one on two pairs is composite and factored by a gcd. This is
+   exact but costs about `√n` steps.
+2. **Factoring by finding the cancellation curve (Fermat).** It is fast exactly when the curve through `n` is near
+   the squares ray, at a cost of about `d²/8√n` steps.
+3. **Sieving a line.** Along a quadratic of discriminant `Δ`, the crossings with cancellation curves repeat with
+   period `p` at the roots of the quadratic mod `p`, and only for primes with `(Δ/p) = 1`. Marking them is the
+   sieve for prime values of the quadratic. How many primes survive on each plane is the Hardy–Littlewood constant
+   of `Δ` (correlation 0.9995).
+4. **Long prime runs need class number one (Rabinowitsch).** `k² + k + c` is prime for all `k ≤ c − 2` only for
+   `c` = 2, 3, 5, 11, 17, 41, a finite list (Heegner, Stark).
+
+A purely algebraic description of all primes does exist. Jones, Sato, Wada and Wiens (1976) wrote down a polynomial
+of degree 25 in 26 variables whose positive values are exactly the primes. It re-encodes Wilson's theorem, and it is
+useless for finding primes. None of the four methods above beats a modern primality test (Miller–Rabin, ECPP, AKS).
+What the saddle sections add is a single picture in which the sieve, Fermat's and Euler's methods, and the
+Hardy–Littlewood constants are all one statement about quadratic curves and their discriminants.
+
 ## What I would take from this
 
 1. The cancellation curves are the product curves `n = u(u + d)`. For a prime-generating line they are indexed
@@ -332,16 +604,31 @@ the zeros' Gram clock drawn as a curve through the planes.
    is the clock of `ζ²`, the spiral's log clock is the clock of `ζ`. The two live together on this surface.
 3. The chain's vortices are inverse-square link counts and logarithmic turning, mirror images of the integers
    and half-integers; a zero's wave makes an inverse-square ladder of spiral arms on the saddle.
-4. The saddle's coordinate planes are the trail's Gram planes: the ridge plane holds the squares, the pronics
-   and every cancellation curve, and is pierced by the trail at the Gram points; the valley plane holds the
+4. The saddle's coordinate planes are the trail's Gram planes: the x-axis plane holds the squares, the pronics
+   and every cancellation curve, and is pierced by the trail at the Gram points; the y-axis plane holds the
    1:4 products and the half-Gram points. The bend is a probe, not a parameter of the arithmetic.
 5. Double intersections do not restore primes, but the sieve's sign at them is the Möbius function, whose running
    total is the Mertens function and whose series is `1/ζ`: that is the honest form of "double cancellation".
 6. The vortex eyes of the chain at a zero are the chain's first vertices reflected through twice the Gram
    phase; the first eye's helix through the zero planes is the Gram clock, and its phase slips carry only the
    weak next-gap correlation of zero repulsion (−0.28).
-7. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
-   not already predict. It makes the predictions visibly the same picture.
+7. Every curve on the spiral is a quadratic, and far out it is a straight line whose direction is `B/2q` and whose
+   distance from its ray is `−πRΔ/4q²`. Off-axis planes read the quadratics in order of discriminant. Their prime
+   yield is the Hardy–Littlewood constant of `Δ` (correlation 0.9995): zero exactly when `Δ` is a square, highest
+   at the class-number-one discriminants, and just as high for `Δ > 0` between the cancellation curves as beyond
+   them.
+8. The mirror across the squares ray turns the cancellation curves into un-cancellation curves. One pair through a
+   number certifies a prime power (Euler's criterion), and two pairs factor it. On the cancellation side, Fermat's
+   method finds the one curve through a composite, in steps that grow with that curve's distance from the ray.
+9. Any two curves meet once per factorization of the difference of their discriminants. Euler's line and
+   `k² + 1` meet only at the primes 197 and 1601.
+10. Tilted sections are hyperbolas whose centres circle the axis; tangent sections are the saddle's straight lines,
+    the homes of the one-to-sixteen quadratics. Twisting the saddle is folding it, as far as the spiral can tell, and
+    the divisor function's wobble is a sum of twisted saddles.
+11. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+    not already predict. The algorithms that do come out of the sections (Euler's criterion, Fermat's method, the
+    sieve along a line) are classical. What the sections add is one geometry in which they are all the same
+    statement about quadratics and their discriminants.
 
 ## Explainer modules
 

@@ -146,13 +146,14 @@ public partial class SacksSpiral
     /// <summary>Where the down-the-axis view of the last tower should look (the point −1 when the Gram phase is taken out).</summary>
     public Vector3 ExpTowerFocus { get; set; } = Vector3.zero;
 
-    /// <summary>The product families of section H: ridge = u(u + d) in orange, valley = u(4u + odd) in blue, level = u(16u + odd) in white.</summary>
+    /// <summary>The product families of section H: "squares" = u(u + d) in orange (they run down the x axis, where the saddle falls away from the trail),
+    /// "quarter" = u(4u + odd) in blue (up the y axis, where it rises), "diagonal" = u(16u + odd) in white (along the level diagonals).</summary>
     public void ExpFamilies(string which, float labelSize)
     {
         bool all = which == "all";
-        if (all || which == "ridge") ExpProductFamily(1, new[] { 0, 1, 2, 3, 4 }, Count, new Color(1f, .6f, .4f), .05f, labelSize);
-        if (all || which == "valley") ExpProductFamily(2, new[] { 1, 3, 5, 7 }, Count, new Color(.45f, .75f, 1f), .05f, labelSize);
-        if (all || which == "level") ExpProductFamily(4, new[] { 1, 3, 5, 7 }, Count, new Color(.9f, .9f, 1f), .05f, labelSize);
+        if (all || which == "squares") ExpProductFamily(1, new[] { 0, 1, 2, 3, 4 }, Count, new Color(1f, .6f, .4f), .05f, labelSize);
+        if (all || which == "quarter") ExpProductFamily(2, new[] { 1, 3, 5, 7 }, Count, new Color(.45f, .75f, 1f), .05f, labelSize);
+        if (all || which == "diagonal") ExpProductFamily(4, new[] { 1, 3, 5, 7 }, Count, new Color(.9f, .9f, 1f), .05f, labelSize);
     }
 
     /// <summary>
@@ -913,8 +914,6 @@ public partial class SacksSpiral
 
     public float ExpBend => bend;
 
-    static readonly Color RidgeColor = new(1f, .45f, .3f);
-    static readonly Color ValleyColor = new(.35f, .65f, 1f);
     static readonly Color LevelColor = new(.85f, .85f, .95f);
 
     float SurfaceZ(float x, float y) => bend * SaddleK * (x * x - y * y);
@@ -1004,8 +1003,8 @@ public partial class SacksSpiral
     }
 
     /// <summary>
-    /// The product curves n = u(q²u + d), u = 1, 2, …: for q = 1 the cancellation curves (they climb the ridge, both rays);
-    /// q = 2 with odd d runs down the valley (the ±y axis); q = 4 with odd d hugs the zero level (the diagonals).
+    /// The product curves n = u(q²u + d), u = 1, 2, …: for q = 1 the cancellation curves (they run down the x axis, both rays,
+    /// where the saddle falls away from the trail); q = 2 with odd d climbs the ±y axis, where it rises; q = 4 with odd d hugs the level diagonals.
     /// </summary>
     public void ExpProductFamily(int q, int[] ds, int nMax, Color color, float width, float labelSize)
     {
@@ -1091,7 +1090,7 @@ public partial class SacksSpiral
 
     /// <summary>
     /// A flat panel with √n along x (the turn count) and the position within the turn along y (frac √n = angle / 2π).
-    /// The saddle's height depends only on y (ridge at 0 and ½, valley at ¼ and ¾); a zero's wave depends only on x
+    /// The saddle's height depends only on y (falling away at 0 and ½, rising at ¼ and ¾); a zero's wave depends only on x
     /// (vertical crest lines, log-spaced); the product curves u(u + d) are the 1/u hyperbolas, Euler's line one too.
     /// </summary>
     public void ExpUnrolledChart(Vector3 center, float width, float height, int nMax, int crestZero, int[] ds, float labelSize)
@@ -1101,8 +1100,8 @@ public partial class SacksSpiral
         Vector3 P(float c, float frac) => center + new Vector3((c - 1f) / (cMax - 1f) * width - width * .5f, frac * height - height * .5f, 0f);
         // frame
         ExpLine(g, "frame", .04f, new Color(.5f, .5f, .6f), Factory.NoGlow, new[] { P(1f, 0f), P(cMax, 0f), P(cMax, 1f), P(1f, 1f) }, true);
-        // saddle: ridge lines at 0 and ½ (and 1), valley at ¼ and ¾
-        foreach ((float f, Color col, string name) in new[] { (0f, RidgeColor, "ridge (squares ray)"), (.5f, RidgeColor, "ridge (pronic ray)"), (1f, RidgeColor, ""), (.25f, ValleyColor, "valley (+y axis)"), (.75f, ValleyColor, "valley (−y axis)") })
+        // saddle: falling away from the trail at 0 and ½ (and 1), rising at ¼ and ¾
+        foreach ((float f, Color col, string name) in new[] { (0f, FallColor, "falls away (squares ray)"), (.5f, FallColor, "falls away (pronic ray)"), (1f, FallColor, ""), (.25f, RiseColor, "rises (+y axis)"), (.75f, RiseColor, "rises (−y axis)") })
         {
             ExpLine(g, "stripe " + f, .05f, new Color(col.r, col.g, col.b, .8f), Factory.SoftGlowIntensity, new[] { P(1f, f), P(cMax, f) });
             if (name.Length > 0) ExpLabel(g, name, P(cMax, f) + Vector3.right * 2.2f * labelSize, labelSize * .7f, col, TextAlignmentOptions.Left);

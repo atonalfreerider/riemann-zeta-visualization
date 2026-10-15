@@ -44,11 +44,11 @@ narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.
 |---|---|---|
 | Cancellation curves | `xcurves` | the product curves, Euler's line cut by them in two families, the zeta wave along the line |
 | Level contours | `xlevels` | the saddle sliced by horizontal planes: hyperbolas, the numbers on them, the trail, the three product families |
-| The bend as a probe | `xprobe` | a fixed plane sweeping the valley and ridge families as the bend goes from flat to twice the tour's |
+| The bend as a probe | `xprobe` | a fixed plane sweeping the product families as the bend goes from flat to twice the tour's |
 | Mirrors, not oracles | `xmirror` | the vortex eyes of the chain at a zero, their mirror points, the traces through the zero planes |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
-`exp:contours:H1,H2:planes`, `exp:family:ridge|valley|level|all`, `exp:euler:KMAX`, `exp:zetawave`,
+`exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
 `exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`, `exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors]`
 (the chain redrawn every frame as the dial turns, its vortex eyes detected live; FROM / TO are dial values, `zN` for zero
 N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),

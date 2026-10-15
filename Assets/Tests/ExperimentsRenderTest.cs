@@ -235,25 +235,25 @@ public class ExperimentsRenderTest
         sacks.ShowRoutes(false);
         sacks.ShowBackdrop(true);
         float half = sacks.Extent + 6f;
-        // H1: the plane y = 0 holds the x axis: the ridge. Every 1:1 product curve climbs it; the trail pierces it at the Gram points
+        // H1: the plane y = 0 holds the x axis, where the saddle falls away. Every 1:1 product curve runs down it; the trail pierces it at the Gram points
         sacks.ExpSectionPlane('y', 0f, half, new Color(1f, .45f, .3f));
         sacks.ExpSectionCurve('y', 0f, new Color(1f, .45f, .3f));
         sacks.ExpSectionNumbers('y', 0f, 1.2f, new Color(1f, .45f, .3f), SacksSpiral.Count, false, 0f);
         sacks.ExpProductFamily(1, new[] { 0, 1, 2, 3, 4, 5, 6 }, SacksSpiral.Count, new Color(1f, .6f, .4f), .05f, 0f);
         sacks.ExpTrail(140f, true, false, 4f);
-        yield return Shot("H1-ridge-plane-side", c + new Vector3(0f, -200f, 15f), c + new Vector3(0f, 0f, 15f), back, 55f);
-        yield return Shot("H2-ridge-plane-oblique", c + new Vector3(-150f, -130f, -70f), c + back * 10f, back, 55f);
-        yield return Shot("H3-ridge-plane-trail", c + new Vector3(0f, -70f, -14f), c + back * 14f, back, 50f);
+        yield return Shot("H1-x-axis-plane-side", c + new Vector3(0f, -200f, 15f), c + new Vector3(0f, 0f, 15f), back, 55f);
+        yield return Shot("H2-x-axis-plane-oblique", c + new Vector3(-150f, -130f, -70f), c + back * 10f, back, 55f);
+        yield return Shot("H3-x-axis-plane-trail", c + new Vector3(0f, -70f, -14f), c + back * 14f, back, 50f);
         sacks.ClearExperiments();
-        // H2: the plane x = 0 holds the y axis: the valley. The 1:4 products with odd gap run down it; the trail pierces it at the half-Gram points
+        // H2: the plane x = 0 holds the y axis, where the saddle rises. The 1:4 products with odd gap climb it; the trail pierces it at the half-Gram points
         sacks.ExpSectionPlane('x', 0f, half, new Color(.35f, .65f, 1f));
         sacks.ExpSectionCurve('x', 0f, new Color(.35f, .65f, 1f));
         sacks.ExpSectionNumbers('x', 0f, 1.2f, new Color(.35f, .65f, 1f), SacksSpiral.Count, false, 0f);
         sacks.ExpProductFamily(2, new[] { 1, 3, 5, 7, 9, 11 }, SacksSpiral.Count, new Color(.45f, .75f, 1f), .05f, 0f);
         sacks.ExpTrail(140f, false, true, 4f);
-        yield return Shot("H4-valley-plane-side", c + new Vector3(-200f, 0f, 15f), c + new Vector3(0f, 0f, 15f), back, 55f);
-        yield return Shot("H5-valley-plane-oblique", c + new Vector3(-130f, -150f, -70f), c + back * 10f, back, 55f);
-        yield return Shot("H6-valley-plane-trail", c + new Vector3(-70f, 0f, -14f), c + back * 14f, back, 50f);
+        yield return Shot("H4-y-axis-plane-side", c + new Vector3(-200f, 0f, 15f), c + new Vector3(0f, 0f, 15f), back, 55f);
+        yield return Shot("H5-y-axis-plane-oblique", c + new Vector3(-130f, -150f, -70f), c + back * 10f, back, 55f);
+        yield return Shot("H6-y-axis-plane-trail", c + new Vector3(-70f, 0f, -14f), c + back * 14f, back, 50f);
         sacks.ClearExperiments();
         // H3: the zero level z = 0: the diagonals; the 1:16 products with odd gap hug them
         sacks.ExpSectionCurve('z', 0f, new Color(.85f, .85f, .95f));
@@ -263,7 +263,7 @@ public class ExperimentsRenderTest
         sacks.ExpProductFamily(2, new[] { 1, 3 }, SacksSpiral.Count, new Color(.45f, .75f, 1f), .04f, 0f);
         yield return Shot("H7-zero-level-full", c + back * Full, c, Vector3.up, 55f);
         sacks.ClearExperiments();
-        // H3b: level planes z = h at bend 1: hyperbolas; the valley planes also cut the trail
+        // H3b: level planes z = h at bend 1: hyperbolas; the planes above the centre also cut the trail
         foreach (float hgt in new[] { 30f, 15f, -15f, -30f })
         {
             Color lc = hgt > 0 ? new Color(1f, .45f, .3f) : new Color(.35f, .65f, 1f);
@@ -283,7 +283,7 @@ public class ExperimentsRenderTest
         foreach (float hgt in new[] { 30f, 15f, -15f, -30f }) sacks.ExpSectionNumbers('z', hgt, 1.0f, hgt > 0 ? new Color(1f, .45f, .3f) : new Color(.35f, .65f, 1f), SacksSpiral.Count, false, 0f);
         yield return Shot("H10-level-contours-full", c + back * Full, c, Vector3.up, 55f);
         sacks.ClearExperiments();
-        // H3c: the bend as the probe: the plane z = −15 at bend ¼, ½, 1, 2 sweeps inward through the valley family
+        // H3c: the bend as the probe: the plane z = −15 (above the centre) at bend ¼, ½, 1, 2 sweeps inward through the one-to-four family
         foreach (float b in new[] { .25f, .5f, 1f, 2f })
         {
             sacks.ExpSetBend(b);
@@ -400,6 +400,194 @@ public class ExperimentsRenderTest
             sacks.ClearExperiments();
         }
 
+        sacks.ShowBackdrop(true);
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // second round: sections J–O (SacksSections.cs)
+        // ---------------------------------------------------------------------------------------------
+        float L = sacks.Extent + 4f;
+        int N = SacksSpiral.Count;
+        if (Wanted('J')) {
+        // J. vertical planes through the centre, rotated: parabolas of curvature cos 2α, straight at 45°
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        foreach (float a in new[] { 0f, 22.5f, 45f, 67.5f, 90f, 112.5f, 135f, 157.5f }) sacks.ExpVSection(a, 0f, -L, L, L, SacksSpiral.FanColor(a), .1f);
+        yield return Shot("J1-fan-of-parabolas-oblique", c + new Vector3(-40f, -70f, -45f), c + back * 2f, back, 60f);
+        yield return Shot("J2-fan-of-parabolas-side", c + new Vector3(-70f, -150f, -12f), c + back * 4f, back, 50f);
+        sacks.ClearExperiments();
+        // J3: the plane at 90°: it holds the one-to-four families 4k² + k + C (up) and 4k² + 3k + C (down)
+        sacks.ExpVPlane(90f, 0f, -L, L, -75f, 15f, SacksSpiral.FanColor(90f), 12f);
+        sacks.ExpVSection(90f, 0f, -L, L, L, SacksSpiral.FanColor(90f), .1f);
+        Vector2Int j90 = sacks.ExpVNumbers(90f, 0f, -L, L, 1.0f, N, new Color(.6f, .8f, 1f));
+        sacks.ExpQuarterFamilies(new long[] { 0, 1, 2, 3 }, N);
+        yield return Shot("J3-plane-90-quarter-families", c + new Vector3(-150f, -60f, -60f), c + back * 10f, back, 55f);
+        Debug.Log($"J: plane 90°: {j90.x} numbers within 1 unit, {j90.y} primes");
+        sacks.ClearExperiments();
+        // J4: the plane at 45°: its section is a straight line of the saddle; the 1:16 families run beside it
+        sacks.ExpVPlane(45f, 0f, -L, L, -40f, 40f, SacksSpiral.FanColor(45f), 12f);
+        sacks.ExpVSection(45f, 0f, -L, L, L, Color.white, .12f);
+        Vector2Int j45 = sacks.ExpVNumbers(45f, 0f, -L, L, 1.0f, N, Color.white);
+        sacks.ExpDiagonalFamilies(new long[] { 0, 1, 2, 3 }, N);
+        yield return Shot("J4-plane-45-straight-section", c + new Vector3(60f, -150f, -40f), c + back * 2f, back, 55f);
+        Debug.Log($"J: plane 45°: {j45.x} numbers within 1 unit, {j45.y} primes");
+        sacks.ClearExperiments();
+        // J5: eight strips seen from above, with their counts
+        string jText = "";
+        foreach (float a in new[] { 0f, 30f, 45f, 60f, 90f, 120f, 135f, 150f })
+        {
+            Vector2Int cnt = sacks.ExpVNumbers(a, 0f, 0f, L, 1.0f, N, SacksSpiral.FanColor(a));
+            sacks.ExpVSection(a, 0f, 0f, L, L, SacksSpiral.FanColor(a), .07f);
+            sacks.ExpLabelAt(new Vector2(Mathf.Cos(a * Mathf.Deg2Rad), Mathf.Sin(a * Mathf.Deg2Rad)) * (L + 6f), $"{a}°   {cnt.y} of {cnt.x} prime", SacksSpiral.FanColor(a), 9.5f);
+            jText += $"{a}°: {cnt.x} numbers, {cnt.y} primes;  ";
+        }
+
+        Debug.Log("J strips: " + jText);
+        yield return Shot("J5-eight-strips-top", c + new Vector3(10f, 25f, 0f) + back * 215f, c + new Vector3(10f, 25f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('K')) {
+        // K. off-axis planes parallel to the x axis: one quadratic each, ordered by discriminant
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        int[] sq = { -9, -4, -2, -1, 0, 1, 2, 4, 7 };
+        int[] pr = { -6, -2, -1, 0, 1, 2, 3, 5 };
+        sacks.ExpComb(sq, pr, -20f, 75f, true, true, true, 0f, N);
+        yield return Shot("K1-comb-oblique", c + new Vector3(-40f, -95f, -60f), c + back * 2f, back, 60f);
+        yield return Shot("K2-comb-end-on", c + new Vector3(200f, 0f, -30f), c + back * 4f, back, 50f);
+        sacks.ClearExperiments();
+        sacks.ExpComb(sq, pr, -20f, 75f, false, false, true, 9.5f, N);
+        yield return Shot("K3-comb-top-squares-side", c + new Vector3(42f, 0f, 0f) + back * 205f, c + new Vector3(42f, 0f, 0f), Vector3.up, 55f);
+        yield return Shot("K3-comb-top-pronic-side", c + new Vector3(-42f, 0f, 0f) + back * 205f, c + new Vector3(-42f, 0f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ShowBackdrop(false);
+        Vector3 sky = c + new Vector3(2600f, 0f, 0f);
+        float corr0 = sacks.ExpSkyline(0, -30, 60, 3000, sky, 2.1f, 42f, 12.5f);
+        yield return Shot("K4-skyline-squares-side", sky + new Vector3(46f, 22f, 0f) + back * 250f, sky + new Vector3(46f, 22f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        float corr1 = sacks.ExpSkyline(1, -30, 60, 3000, sky, 2.1f, 42f, 12.5f);
+        yield return Shot("K5-skyline-pronic-side", sky + new Vector3(46f, 22f, 0f) + back * 250f, sky + new Vector3(46f, 22f, 0f), Vector3.up, 55f);
+        Debug.Log($"K: correlation with Hardy–Littlewood: squares side {corr0:0.0000}, pronic side {corr1:0.0000}");
+        sacks.ClearExperiments();
+        sacks.ShowBackdrop(true);
+        }
+
+        if (Wanted('L')) {
+        // L. the mirror y → −y: k² − m² (cancellation) ↔ k² + m² (un-cancellation); Euler's criterion and Fermat's method
+        sacks.ShowRoutes(false);
+        yield return Flatten(true);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpGaussianField(N);
+        sacks.ExpMirrorComb(3, N, 9.5f, false);
+        yield return Shot("L1-mirror-comb-full", c + back * 205f, c, Vector3.up, 55f);
+        yield return Shot("L2-mirror-comb-right", c + new Vector3(30f, 0f, 0f) + back * 110f, c + new Vector3(30f, 0f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpGaussianField(N);
+        string e1105 = sacks.ExpEulerShowcase(1105, 8.5f, new Vector3(0f, 14f, -1f));
+        string e221 = sacks.ExpEulerShowcase(221, 8.5f, new Vector3(-6f, -16f, -1f));
+        string e1601 = sacks.ExpEulerShowcase(1601, 8.5f, new Vector3(-22f, -9f, -1f));
+        Debug.Log("L: " + e1105.Replace('\n', ' ') + " | " + e221.Replace('\n', ' ') + " | " + e1601.Replace('\n', ' '));
+        yield return Shot("L3-euler-two-pairs-factor", c + back * 205f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpGaussianField(N);
+        string f1 = sacks.ExpFermatShowcase(1591, 7.5f, new Vector3(-20f, 7f, -1f));
+        string f2 = sacks.ExpFermatShowcase(1003, 7.5f, new Vector3(0f, -10f, -1f));
+        string f3 = sacks.ExpFermatShowcase(1501, 7.5f, new Vector3(0f, 10f, -1f));
+        Debug.Log("L: " + f1 + " | " + f2 + " | " + f3);
+        yield return Shot("L4-fermat-curves", c + back * 205f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        yield return Flatten(false);
+        sacks.ShowBackdrop(true);
+        }
+
+        if (Wanted('M')) {
+        // M. the atlas: where prime curves, cancellation curves and the lines between them meet
+        sacks.ShowRoutes(false);
+        yield return Flatten(true);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        SacksSpiral.AtlasCurve[] curves =
+        {
+            new(0, -1, 3), new(0, -4, 4), new(0, -9, 5), new(0, -16, 6),          // cancellation, squares side: (k − j)(k + j), u ≥ 2
+            new(1, 0, 2), new(1, -2, 3), new(1, -6, 4), new(1, -12, 5),           // cancellation, pronic side: (k − j)(k + j + 1), u ≥ 2
+            new(0, 1, 1), new(0, 2, 0), new(0, 4, 0), new(0, 6, 0),               // prime curves (Δ < 0), squares side
+            new(1, 1, 0), new(1, 2, 0), new(1, 3, 0), new(1, 5, 0), new(1, 11, 0), new(1, 17, 0), new(1, 41, 0),
+            new(0, -2, 2), new(0, -3, 2), new(0, -5, 3), new(1, -1, 1), new(1, -3, 2), new(1, -5, 2) // Δ > 0, not a square
+        };
+        string atlas = sacks.ExpAtlas(curves, N, 3.4f, new long[] { 1601, 197, 47, 173, 461, 131, 71 });
+        Debug.Log("M: " + atlas);
+        yield return Shot("M1-atlas-full", c + back * 205f, c, Vector3.up, 55f);
+        yield return Shot("M2-atlas-centre", c + back * 70f, c, Vector3.up, 55f);
+        Vector3 rimFocus = c + new Vector3(-30f, 25f, 0f);
+        yield return Shot("M3-atlas-upper-left", rimFocus + back * 90f, rimFocus, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        yield return Flatten(false);
+        }
+
+        if (Wanted('N')) {
+        // N. tilted planes: hyperbolas whose centre slides round a circle as the tilt turns; the tangent plane's two straight lines
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        float tilt = .6f;
+        Vector2 n1 = sacks.ExpTiltedPlane(tilt, 0f, 0f, L, new Color(1f, .7f, .3f), true, true, L);
+        yield return Shot("N1-tilted-plane-hyperbola", c + new Vector3(-60f, -110f, -70f), c + back * 4f, back, 55f);
+        sacks.ClearExperiments();
+        for (int b = 0; b < 6; b++)
+        {
+            float beta = b * 60f * Mathf.Deg2Rad;
+            Color col = Color.HSVToRGB(b / 6f, .7f, 1f);
+            Vector2 ctr = sacks.ExpTiltedPlane(tilt * Mathf.Cos(beta), tilt * Mathf.Sin(beta), 0f, 0f, col, false, true, L);
+            sacks.ExpMarker(ctr, col, $"centre {b * 60}°");
+        }
+
+        sacks.ExpCentreCircle(tilt);
+        yield return Shot("N2-six-tilts-top", c + back * 205f, c, Vector3.up, 55f);
+        yield return Shot("N3-six-tilts-oblique", c + new Vector3(-40f, -70f, -45f), c + back * 2f, back, 60f);
+        sacks.ClearExperiments();
+        Vector2Int t1601 = sacks.ExpTangentPlane(1601, 30f, new Color(.6f, .9f, 1f), .9f, N);
+        Debug.Log($"N: tangent plane at 1601: {t1601.x} numbers within 0.9 of its two straight lines, {t1601.y} primes");
+        Vector3 at1601 = sacks.ExpNumberPosition(1601);
+        yield return Shot("N4-tangent-plane-1601", at1601 + new Vector3(-30f, -70f, -50f), at1601, back, 55f);
+        yield return Shot("N5-tangent-plane-1601-top", c + back * 205f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpDiagonalFamilies(new long[] { -1, 0, 1, 2, 3 }, N * 4);
+        foreach (long C in new long[] { -1, 0, 1, 2, 3 }) sacks.ExpRuling(true, -Mathf.PI * 1.45f * (1f - 64f * C) / 64f, sacks.Extent * 2f, new Color(1f, 1f, 1f, .6f), .04f);
+        yield return Shot("N6-diagonal-families-on-straight-lines", c + new Vector3(70f, 70f, 0f) + back * 160f, c + new Vector3(70f, 70f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('O')) {
+        // O. twist and fold: z = K r² cos(folds·θ − twist·r); on the spiral the phase is (2π·folds − twist·R)·√n
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetBend(.5f);
+        foreach ((int folds, float twistR, string name, float[] levels) in new[]
+        {
+            (2, 2f * Mathf.PI, "O1-twist-half-squares-down-pronics-up", new float[0]),
+            (2, 4f * Mathf.PI, "O2-twist-full-spiral-on-one-line", new float[0]),
+            (2, 4f * Mathf.PI * (1f - Mathf.Sqrt(2f)), "O3-twist-voronoi-2-ridge-2t2", new float[0]),
+            (4, 0f, "O4-four-fold-saddle", new[] { 12f }),
+            (3, 0f, "O5-three-fold-saddle", new float[0]),
+        })
+        {
+            sacks.ExpSetSurface(folds, twistR);
+            sacks.ExpSurfaceWire(L - 2f, new Color(.32f, .36f, .5f));
+            sacks.ExpSurfaceField(N);
+            sacks.ExpFamiliesOnSurface(folds, twistR, N);
+            foreach (float h in levels) sacks.ExpLevelArms(h, h > 0 ? new Color(1f, .45f, .3f) : new Color(.35f, .65f, 1f), L - 2f);
+            yield return Shot(name + "-oblique", c + new Vector3(-50f, -95f, -70f), c + back * 2f, back, 55f);
+            yield return Shot(name + "-side", c + new Vector3(0f, -170f, -10f), c + back * 4f, back, 50f);
+            sacks.ClearExperiments();
+        }
+
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(1f);
+        sacks.ExpNumberField(SacksSpiral.Count);
         sacks.ShowBackdrop(true);
         }
 
