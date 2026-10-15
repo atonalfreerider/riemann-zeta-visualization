@@ -63,12 +63,12 @@ public class VRPreviewRenderTest
         yield return Shot("01-home-dock");
         Debug.Log($"VR rig scale {rig.Scale:0.0}, passthrough {rig.Passthrough}");
 
-        // the pages of the dock
-        for (int p = 1; p <= 3; p++)
+        // the pages of the dock: experiments, views, space, settings
+        for (int p = 1; p <= 4; p++)
         {
             app.ShowPage(p);
             for (int i = 0; i < 12; i++) yield return null;
-            yield return Shot($"0{p + 1}-page-{p}");
+            yield return Shot($"02-page-{p}");
         }
 
         app.ShowPage(0);

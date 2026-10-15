@@ -257,12 +257,15 @@ public partial class TourDirector : MonoBehaviour
     /// <summary>Start (or restart) the narrated tour at a chapter, from a clean stage.</summary>
     public void GoToChapter(string chapterId, bool continueOn = true)
     {
+        bool experiment = PlayingExperiment; // a jump between modules stays among the modules
         if (Running)
         {
             jumping = true;
-            StopTour();
+            StopTour(); // ends the experiment, which puts the main script back
             jumping = false;
         }
+
+        if (experiment) UseExperimentsScript();
 
         Main.CancelAnimations();
         Annotations.CancelAnimations();

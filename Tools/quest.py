@@ -5,6 +5,8 @@ Install, launch and observe the VR build on a Quest connected over USB (adb).
   python Tools/quest.py install Builds/zeta-vr.apk
   python Tools/quest.py run                            # launch normally
   python Tools/quest.py run --chapter turn --seconds 90   # start straight in a chapter and collect performance lines
+  python Tools/quest.py run --experiment xtorus --seconds 120   # start straight in an experiment module (id from experiments.json)
+  python Tools/quest.py run --experiment all --seconds 1700     # every experiment module, one after the other
   python Tools/quest.py log --seconds 30               # just watch the app's log
   python Tools/quest.py stop
 
@@ -81,7 +83,9 @@ def start(args):
     adb("shell", "am", "force-stop", PACKAGE, check=False)
     adb("logcat", "-c", check=False)
     unity_args = []
-    if getattr(args, "tour", False) or getattr(args, "chapter", None):
+    if getattr(args, "experiment", None):
+        unity_args += ["-vrexperiment", args.experiment]
+    elif getattr(args, "tour", False) or getattr(args, "chapter", None):
         unity_args.append("-tour")
     if getattr(args, "chapter", None):
         unity_args += ["-chapter", args.chapter]
@@ -148,6 +152,7 @@ def main():
     p = sub.add_parser("run")
     p.add_argument("--chapter", help="start the narrated tour at this chapter id")
     p.add_argument("--tour", action="store_true", help="start the narrated tour from the first chapter")
+    p.add_argument("--experiment", help="start an experiment module by id, or 'all' for every module in turn")
     p.add_argument("--seconds", type=int, default=0, help="watch the log for this long")
     p.set_defaults(func=cmd_run)
     p = sub.add_parser("log")

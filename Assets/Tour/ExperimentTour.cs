@@ -18,8 +18,11 @@ public partial class TourDirector
     public bool PlayingExperiment { get; private set; }
     public TourChapter[] ExperimentChapters => experiments?.chapters ?? System.Array.Empty<TourChapter>();
 
-    /// <summary>Play one experiment module on its own, from a clean stage, then return to the home view.</summary>
-    public void PlayExperiment(string id)
+    /// <summary>
+    /// Play one experiment module on its own, from a clean stage, then return to the home view. With
+    /// <paramref name="continueOn"/> the modules after it follow (the VR sweep uses that).
+    /// </summary>
+    public void PlayExperiment(string id, bool continueOn = false)
     {
         if (Running)
         {
@@ -28,10 +31,27 @@ public partial class TourDirector
             jumping = false;
         }
 
-        mainScript ??= script;
-        script = experiments;
-        PlayingExperiment = true;
-        GoToChapter(id, false);
+        UseExperimentsScript();
+        GoToChapter(id, continueOn);
+    }
+
+    /// <summary>
+    /// Back to the main tour's script: stops the module that is playing (without the end-of-tour handling), so a chapter
+    /// of the tour can be started next.
+    /// </summary>
+    public void LeaveExperiment()
+    {
+        if (!PlayingExperiment) return;
+        if (Running)
+        {
+            jumping = true;
+            StopTour(); // ends the experiment
+            jumping = false;
+        }
+        else
+        {
+            EndExperiment();
+        }
     }
 
     public void PlayExperiment(int index)

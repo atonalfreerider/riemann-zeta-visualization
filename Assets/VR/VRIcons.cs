@@ -15,7 +15,9 @@ public static class VRIcons
         Eye, Moon, ZoomIn, ZoomOut, RotateLeft, RotateRight, TiltUp, TiltDown, Closer, Farther, Up, Down, Grab, Move,
         Captions, Volume, Mute, List, Cube, Skeleton, Reset,
         Chain, Tail, Zeros, Trail, Waves, Stairs, Strip, Sacks, Saddle, Equations, Grid, Dial, Zeno, Stage, Machine, Key,
-        Speed, Check
+        Speed, Check,
+        // the experiments tab
+        Flask, Curves, Contours, Probe, Mirror, Lattice, Ideals, Chords, Comb, Pinch, Torus, Legendre, Fingerprint, Clock, Pair, Sieve, Twist
     }
 
     const int Size = 96;
@@ -386,6 +388,165 @@ public static class VRIcons
                 c.Fill(Shape.Segment(V(-.7f, -.02f), V(-.25f, -.5f), .24f));
                 c.Fill(Shape.Segment(V(-.25f, -.5f), V(.72f, .55f), .24f));
                 break;
+
+            // ---- the experiments ------------------------------------------------------------------
+            case Id.Flask:
+                c.Fill(Shape.Box(V(0, .52f), V(.2f, .36f), .06f));
+                c.Fill(Shape.Box(V(0, .88f), V(.36f, .07f), .05f));
+                c.Fill(Shape.Tri(V(-.2f, .3f), V(.2f, .3f), V(.86f, -.8f)));
+                c.Fill(Shape.Tri(V(-.2f, .3f), V(.86f, -.8f), V(-.86f, -.8f)));
+                c.Erase(Shape.Circle(V(-.18f, -.45f), .14f));
+                c.Erase(Shape.Circle(V(.2f, -.6f), .1f));
+                c.Erase(Shape.Circle(V(.02f, -.22f), .08f));
+                break;
+            case Id.Curves: // a family of cancellation curves
+                foreach (float shift in new[] { -.55f, 0f, .55f })
+                {
+                    bool have = false;
+                    Vector2 prev = V(0, 0);
+                    for (int i = 0; i <= 40; i++)
+                    {
+                        float x = Mathf.Lerp(-.95f, .95f, i / 40f);
+                        float y = 1.25f * (x - shift) * (x - shift) - .75f;
+                        if (y > .95f) { have = false; continue; }
+                        Vector2 p = V(x, y);
+                        if (have) c.Fill(Shape.Segment(prev, p, .12f));
+                        prev = p;
+                        have = true;
+                    }
+                }
+
+                break;
+            case Id.Contours: // nested level lines
+                c.Fill(Shape.Ring(V(0, 0), .9f, .1f));
+                c.Fill(Shape.Ring(V(.05f, .04f), .6f, .1f));
+                c.Fill(Shape.Ring(V(.1f, .08f), .3f, .1f));
+                c.Fill(Shape.Circle(V(.12f, .1f), .07f));
+                break;
+            case Id.Probe: // a needle touching a bent surface
+                c.Fill(Shape.Arc(V(0, -1.25f), 1.2f, .14f, 52f, 128f));
+                c.Fill(Shape.Segment(V(0, .88f), V(0, .1f), .12f));
+                c.Fill(Shape.Circle(V(0, -.05f), .17f));
+                c.Fill(Shape.Segment(V(-.5f, .88f), V(.5f, .88f), .11f));
+                break;
+            case Id.Mirror: // a shape and its reflection
+                c.Fill(Shape.Segment(V(0, -.92f), V(0, .92f), .1f));
+                c.Fill(Shape.Tri(V(-.88f, -.62f), V(-.28f, -.62f), V(-.88f, .62f)));
+                c.Fill(Shape.Tri(V(.88f, -.62f), V(.28f, -.62f), V(.88f, .62f)));
+                break;
+            case Id.Lattice: // whole-number points under a circle
+                foreach (float x in new[] { -.65f, -.22f, .22f, .65f })
+                foreach (float y in new[] { -.65f, -.22f, .22f, .65f })
+                {
+                    c.Fill(Shape.Circle(V(x, y), .095f));
+                }
+
+                c.Fill(Shape.Arc(V(-.85f, -.85f), 1.55f, .08f, 0f, 90f));
+                break;
+            case Id.Ideals: // the hexagonal lattice of a ring of integers
+                c.Fill(Shape.Circle(V(0, 0), .19f));
+                for (int i = 0; i < 6; i++)
+                {
+                    Vector2 corner = Dir(i * 60f) * .66f;
+                    c.Fill(Shape.Segment(V(0, 0), corner, .07f));
+                    c.Fill(Shape.Segment(corner, Dir((i + 1) * 60f) * .66f, .07f));
+                    c.Fill(Shape.Circle(corner, .15f));
+                }
+
+                break;
+            case Id.Chords: // chords at right angles to a mirror line
+                c.Fill(Shape.Segment(V(-.88f, -.88f), V(.88f, .88f), .08f));
+                foreach (float t in new[] { -.5f, 0f, .5f })
+                {
+                    float half = .5f - Mathf.Abs(t) * .35f;
+                    Vector2 mid = V(t, t);
+                    Vector2 d = V(1f, -1f).normalized * half;
+                    c.Fill(Shape.Segment(mid - d, mid + d, .1f));
+                    c.Fill(Shape.Circle(mid - d, .12f));
+                    c.Fill(Shape.Circle(mid + d, .12f));
+                }
+
+                break;
+            case Id.Comb:
+            {
+                float[] teeth = { .35f, .72f, .52f, .88f, .42f, .66f, .3f };
+                c.Fill(Shape.Segment(V(-.88f, -.5f), V(.88f, -.5f), .17f));
+                for (int i = 0; i < teeth.Length; i++)
+                {
+                    float x = -.75f + i * .25f;
+                    c.Fill(Shape.Segment(V(x, -.5f), V(x, -.5f + teeth[i] * 1.3f), .1f));
+                }
+
+                break;
+            }
+            case Id.Pinch: // two curves squeezing a point
+                c.Fill(Shape.Arc(V(-1.05f, 0), .82f, .14f, -52f, 52f));
+                c.Fill(Shape.Arc(V(1.05f, 0), .82f, .14f, 128f, 232f));
+                c.Fill(Shape.Circle(V(0, 0), .17f));
+                break;
+            case Id.Torus:
+                Ellipse(c, V(0, 0), .92f, .6f, .12f);
+                Ellipse(c, V(0, .02f), .4f, .2f, .1f);
+                break;
+            case Id.Legendre: // ( a over p )
+                c.Fill(Shape.Arc(V(.34f, 0), 1.1f, .13f, 150f, 210f));
+                c.Fill(Shape.Arc(V(-.34f, 0), 1.1f, .13f, -30f, 30f));
+                c.Fill(Shape.Circle(V(0, .4f), .17f));
+                c.Fill(Shape.Segment(V(-.34f, 0), V(.34f, 0), .1f));
+                c.Fill(Shape.Circle(V(0, -.4f), .17f));
+                break;
+            case Id.Fingerprint:
+                foreach (float r in new[] { .22f, .42f, .62f, .82f })
+                {
+                    c.Fill(Shape.Arc(V(0, -.18f), r, .08f, 18f, 162f));
+                }
+
+                foreach (float r in new[] { .32f, .52f, .72f })
+                {
+                    c.Fill(Shape.Arc(V(0, -.18f), r, .08f, 205f, 335f));
+                }
+
+                c.Fill(Shape.Segment(V(0, -.18f), V(0, -.55f), .08f));
+                break;
+            case Id.Clock:
+                c.Fill(Shape.Ring(V(0, 0), .8f, .12f));
+                for (int i = 0; i < 12; i++)
+                {
+                    float inner = i % 3 == 0 ? .5f : .58f;
+                    c.Fill(Shape.Segment(Dir(i * 30f) * inner, Dir(i * 30f) * .64f, i % 3 == 0 ? .1f : .06f));
+                }
+
+                c.Fill(Shape.Segment(V(0, 0), V(0, .46f), .12f));
+                c.Fill(Shape.Segment(V(0, 0), Dir(-35f) * .32f, .12f));
+                c.Fill(Shape.Circle(V(0, 0), .1f));
+                break;
+            case Id.Pair: // two numbers equally far either side of a mirror
+                for (int i = -1; i <= 1; i++) c.Fill(Shape.Segment(V(0, i * .5f - .14f), V(0, i * .5f + .14f), .08f));
+                c.Fill(Shape.Circle(V(-.6f, -.12f), .22f));
+                c.Fill(Shape.Circle(V(.6f, -.12f), .22f));
+                c.Fill(Shape.Arc(V(0, -.12f), .6f, .09f, 38f, 142f));
+                break;
+            case Id.Sieve: // a perforated disc
+                c.Fill(Shape.Circle(V(0, 0), .9f));
+                foreach (float x in new[] { -.52f, 0f, .52f })
+                foreach (float y in new[] { -.52f, 0f, .52f })
+                {
+                    if (x * x + y * y < .55f) c.Erase(Shape.Circle(V(x, y), .15f));
+                }
+
+                break;
+            case Id.Twist: // a trefoil knot
+            {
+                Vector2 prev = Trefoil(0f);
+                for (int i = 1; i <= 90; i++)
+                {
+                    Vector2 p = Trefoil(i / 90f);
+                    c.Fill(Shape.Segment(prev, p, .13f));
+                    prev = p;
+                }
+
+                break;
+            }
         }
     }
 
@@ -398,6 +559,24 @@ public static class VRIcons
         float a = t * Mathf.PI * 5.2f + 0.6f;
         float r = Mathf.Lerp(.95f, .12f, t);
         return V(Mathf.Cos(a) * r, Mathf.Sin(a) * r);
+    }
+
+    static Vector2 Trefoil(float t)
+    {
+        float a = t * Mathf.PI * 2f;
+        return V((Mathf.Sin(a) + 2f * Mathf.Sin(2f * a)) * .3f, (Mathf.Cos(a) - 2f * Mathf.Cos(2f * a)) * .3f);
+    }
+
+    static void Ellipse(Canvas2D c, Vector2 centre, float rx, float ry, float width)
+    {
+        Vector2 prev = centre + V(rx, 0f);
+        for (int i = 1; i <= 56; i++)
+        {
+            float a = i / 56f * Mathf.PI * 2f;
+            Vector2 p = centre + V(Mathf.Cos(a) * rx, Mathf.Sin(a) * ry);
+            c.Fill(Shape.Segment(prev, p, width));
+            prev = p;
+        }
     }
 
     static void Wave(Canvas2D c, float y, float amplitude, float cycles, float width)

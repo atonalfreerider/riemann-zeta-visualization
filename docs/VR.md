@@ -1,10 +1,10 @@
-# Meta Quest 2 (VR, hands only)
+# Meta Quest 2 and 3 (VR, hands only)
 
-The visualization runs on a Quest 2 with **hand tracking only** (no controllers). The real room is the backdrop
+The visualization runs on a Quest 2 or Quest 3 with **hand tracking only** (no controllers). The real room is the backdrop
 (**passthrough**) and the model floats in front of you; one touch turns the room off for a **blackout**. The narrated
 tour plays with its captions, and every control is a large icon you push with one finger.
 
-On a Quest 2 the passthrough image is black and white (the colour passthrough cameras are on the Quest 3 / Pro).
+On a Quest 2 the passthrough image is black and white; the Quest 3 and Pro show the room in colour. The frame-time numbers below were measured on a Quest 2.
 
 ## Quick start
 
@@ -27,6 +27,8 @@ On a Quest 2 the passthrough image is black and white (the colour passthrough ca
 
 `Tools/quest.py run --chapter turn --seconds 90` starts the app straight in a chapter and prints frame-time
 statistics from the headset's log (`[VRPERF]` lines, one per narration line).
+`Tools/quest.py run --experiment xtorus --seconds 120` does the same for an experiment module (`--experiment all` plays
+every module one after the other).
 
 ## Using it
 
@@ -34,7 +36,8 @@ statistics from the headset's log (`[VRPERF]` lines, one per narration line).
 |---|---|
 | Press a button | Touch it with your index finger and push about 1 cm through its face. It clicks, lights up, and works again when you pull back. |
 | Pick a chapter | **Tour** tab: one big button per chapter. Touch the playing one to restart it. |
-| Pause, replay, skip | Footer of the menu: **Back / Replay / Pause / Skip / Next**. |
+| Watch an experiment | **Experiments** tab (the flask): one button per thought experiment on the saddle, with its own icon. A module plays alone, narrated, with its own camera moves; **Next** and **Back** in the footer go to the module after or before it, and a chapter on the Tour tab takes the story back. |
+| Pause, replay, skip | Footer of the menu: **Back / Replay / Pause / Skip / Next** (for a chapter or an experiment module, whichever plays). |
 | Move the model | **Pinch** (thumb and index) in the air, away from the menu, and drag. The model stays where you leave it. |
 | Scale and turn the model | Pinch with **both hands** and move them apart, together or around each other. |
 | Open the menu from anywhere | Turn your **left palm toward your face**: a small 2×3 pad floats over it (Menu, Pause, Skip, Follow, Room, Dark). |
@@ -59,6 +62,15 @@ The menu follows you if you walk or turn away from it for a moment, and it never
 `Zeta ▸ VR ▸ Desktop Simulation (mouse as hands)`, then Play. Move the mouse to move the fingertip, scroll to push it
 nearer or farther, hold the left button to poke, **Shift + left button** to pinch, right button + WASD / QE to look and move.
 `-vr` on the command line does the same for a standalone build.
+
+`VRExperimentsTest` checks the experiment modules in the simulation: `ExperimentNavigation` (always runs) asserts that Next and
+Back stay among the modules and that a tour chapter takes the script back; `PlayEveryExperiment` plays every line of every
+module at a few times real speed in the headset's eye shape (1440 × 1584), writes one picture per line and fails on any
+logged error:
+
+```bash
+ZETA_OUT=/tmp/vr-experiments [ZETA_EXP_ONLY=xtorus,xclock] [ZETA_SPEED=4] Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter VRExperimentsTest.PlayEveryExperiment
+```
 
 `VRPreviewRenderTest` renders the interface to PNGs from scripted hands and asserts on the hover, press, palm menu and
 one- and two-handed grab maths:
