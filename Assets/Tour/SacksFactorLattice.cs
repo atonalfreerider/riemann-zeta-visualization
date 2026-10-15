@@ -51,13 +51,8 @@ public partial class SacksSpiral
         return string.Join("·", parts);
     }
 
-    static string Superscript(int k)
-    {
-        const string digits = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-        string s = k.ToString(), o = "";
-        foreach (char ch in s) o += digits[ch - '0'];
-        return o;
-    }
+    /// <summary>An exponent as rich text (the label font has ² and ³ but not the other superscript digits).</summary>
+    static string Superscript(int k) => k == 2 ? "²" : k == 3 ? "³" : $"<sup>{k}</sup>";
 
     // ================================================================================================
     // FA. the factor lattice of 2, 3, 5, and its shadow

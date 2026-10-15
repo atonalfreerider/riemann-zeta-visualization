@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EI, FA–FE)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EI, FA–FE, GA–GE)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1491,6 +1491,100 @@ public class ExperimentsRenderTest
             "the lattice read backwards:  a quadratic sieve on 773,203|each row:  x² − N factored over the base, its exponents (amber:  odd)|the four lit rows add to an all-even vector:  their product is a square Y²|so X² ≡ Y² (mod N), and gcd(X − Y, N) is a factor", 52f);
         Vector3 qsl = qs + new Vector3(78f, -26f, 0f);
         yield return Shot("FE1-the-lattice-read-backwards", qsl + back * 124f, qsl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Searching the geometry for a prime / factor locator: sections GA–GE (SacksFactorSearch.cs), keys '0', 'B', 'Z',
+        // drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('0')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Sat(Vector3 pos, Vector3 look, Vector3 up, float x, float y)
+        {
+            Vector3 fw = (look - pos).normalized, u = (up - Vector3.Dot(up, fw) * fw).normalized;
+            return look + Vector3.Cross(u, fw) * x + u * y;
+        }
+
+        Vector3 Sdown(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fw = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, fw) * fw).normalized;
+        }
+
+        Vector3 es = c + new Vector3(SacksSpiral.EStackOffset, 0f, 0f);
+        sacks.ExpEStack(es, new[] { 5, 6, 7, 8 }, 180, 40f, 10f, 34f, .55f, 105f, new long[] { 9, 25, 35, 49, 77, 91, 31, 37 }, new[] { 0, 2, 1, 3, 2, 1, 3, 0 });
+        Vector3 esl = es + new Vector3(42f, 0f, 60f), esPos = esl + new Vector3(0f, -400f, -195f);
+        sacks.ExpCaption(Sat(esPos, esl, back, 52f, 88f), Sdown(esPos, esl, back) * 8.4f,
+            "the E-series wheels stacked, 1 … 180|E5 (= D5) 8 hours,  E6 12,  E7 18,  E8 30|threads:  one number through all four|green:  a factor 3 — falls off at E6|blue:  a factor 5 — falls off at E8|red:  factors ≥ 7 — never falls off|8, 12, 18, 30 are made of 2, 3 and 5 only:|no E-wheel removes 7", 70f);
+        yield return ShotOrtho("GA1-the-e-series-wheels-stacked", esPos, esl, back, 100f);
+        sacks.ClearExperiments();
+        Vector3 ff = c + new Vector3(SacksSpiral.FactorFunnelOffset, 0f, 0f);
+        sacks.ExpFactorColumns(ff, 400, 2.6f, 5f, .5f, 100f, new long[] { 360, 343, 256, 397 }, true, false);
+        Vector3 ffl = ff + new Vector3(10f, 4f, -10f), ffPos = ffl + new Vector3(-16f, -118f, -118f);
+        sacks.ExpCaption(Sat(ffPos, ffl, back, -150f, 70f), Sdown(ffPos, ffl, back) * 6.6f,
+            "the factor columns on E8's wheel, 1 … 400|n at hour n mod 30, at radius s·√n|its column rises to log n, cut into one segment|of height log p per prime factor|red 2, green 3, blue 5, orange 7, violet 11, cyan 13, gold ≥ 17|white:  the paths down from 360, 343, 256 and the prime 397 —|one drop per factor, then across to the column of n/p", 58f);
+        yield return Shot("GB1-the-factor-columns", ffPos, ffl, back, 55f);
+        sacks.ClearExperiments();
+        Vector3 dc = ff + new Vector3(600f, 0f, 0f);
+        sacks.ExpDescentChart(dc, new long[] { 360, 1024, 343, 1001, 997 }, 6.6f, 8.5f, 9f, .6f, 100f);
+        sacks.ExpCaption(dc + new Vector3(-14f, 92f, -.3f), Vector3.down * 6.6f,
+            "the paths back, unrolled:  each drop is log p, smallest prime first, down to 1|equal drops in a row are an exponent:  360 = 2³·3²·5 drops ÷2 ÷2 ÷2, ÷3 ÷3, ÷5|1024 = 2<sup>10</sup> drops ten times by log 2;  a prime drops straight to 1 in one step", 58f);
+        Vector3 dcl = dc + new Vector3(96f, 30f, 0f);
+        yield return Shot("GB2-the-paths-back", dcl + back * 126f, dcl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('B')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 wv = c + new Vector3(SacksSpiral.ExponentWaveOffset, 0f, 0f);
+        sacks.ExpExponentWaves(wv, 96, new[] { 2, 3, 5, 7 }, 1.7f, 3.2f, 4f, .6f, 100f, new long[] { 49, 64, 72, 90 });
+        sacks.ExpCaption(wv + new Vector3(-96f, 27f, -.3f), Vector3.down * 6f,
+            "exponent waves:  for each prime p, a sum of cosine waves of periods p, p², p³, …|at every whole n the wave's height is the exponent of p in n — the grey columns read 49, 64, 72, 90|where all four waves are zero (gold), n ≤ 96 is a prime above 7:  that is trial division, drawn as waves", 54f);
+        Vector3 wvl = wv + new Vector3(0f, -32f, 0f);
+        yield return Shot("GC1-exponent-waves", wvl + back * 122f, wvl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 sq = c + new Vector3(SacksSpiral.SquareRootOffset, 0f, 0f);
+        sacks.ExpIndexCirclePath(sq + new Vector3(-62f, 19f, 0f), 97, 5, 2, 19f, .6f, 100f,
+            "97 (prime)|base 2:  " + "8 → 64 → 22 → −1 → 1|squaring doubles the angle:  1 is reached only through −1");
+        sacks.ExpCrtPath(sq + new Vector3(62f, 30f, 0f), 341, 31, 11, 2, 2.1f, .6f, 100f,
+            "341 = 11·31:  a Fermat pseudoprime (2<sup>340</sup> ≡ 1)|base 2:  32 → 1", "through 32, a red corner:  gcd(32 − 1, 341) = 31,  gcd(32 + 1, 341) = 11|on the 31 × 11 grid of (x mod 31, x mod 11)");
+        sacks.ExpCrtPath(sq + new Vector3(-62f, -40f, 0f), 561, 33, 17, 2, 2f, .6f, 100f,
+            "561 = 3·11·17:  a Carmichael number|base 2:  263 → 166 → 67 → 1", "through 67 = (1, −1):  gcd(66, 561) = 33,  gcd(68, 561) = 17|on the 33 × 17 grid");
+        sacks.ExpCrtPath(sq + new Vector3(62f, -40f, 0f), 817, 43, 19, 2, 1.55f, .6f, 100f,
+            "817 = 19·43:  an ordinary composite|base 2:  297 → 790 → 729 → 391 → 102", "never reaches 1:  composite for certain —|but it touches no red line, and no factor appears");
+        Vector3 sql = sq + new Vector3(0f, -4f, 0f);
+        yield return Shot("GD1-square-root-paths", sql + back * 130f, sql, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('Z')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 st = c + new Vector3(SacksSpiral.SearchTableOffset, 0f, 0f);
+        sacks.ExpSearchTable(st, new[] { "geometry (sections)", "placing n costs", "prime or not?", "a path back to the factors?", "the exponents?" },
+            new[] { 72f, 42f, 46f, 52f, 40f }, new[]
+            {
+                "Sacks spiral, quadratic curves (A–Z)|instant:g|only curve families:r|u(u + d) through n: search d:a|no:r",
+                "funnel needles, spheres (CB, CC)|instant:g|empty needle: search √n:a|rungs = factor pairs: search:a|rungs = divisors: search:a",
+                "divisor spiral (CA)|d(n): needs the divisors:r|d(n) = 2:a|no:r|only Π(a + 1):a",
+                "Coxeter wheels E5–E8 (EF–EI, GA)|instant:g|only 2, 3, 5:r|no:r|no:r",
+                "E8 sphere tower (EF)|~240·n³ points:r|the fewest points:a|p + q when n = pq:a|σ<sub>3</sub> = Π geometric series:a",
+                "lattice spheres, j (CD, EC)|~n steps, 80 digits:r|h(−n) odd, some n:a|no:r|no:r",
+                "Fermat spiral (DB, DC)|log n multiplications:g|yes, but pseudoprimes:a|no:r|no:r",
+                "square-root paths, Miller–Rabin (GD)|log n per base:g|exact below 3.3·10<sup>24</sup>:g|by luck: 31% to 10<sup>6</sup>, 0% large:a|no:r",
+                "factor lattice, zonotopes (FA–FC)|the factorization itself:r|a unit vector:g|the coordinates:g|the coordinates:g",
+                "factor columns, exponent waves (GB, GC)|a wave per prime ≤ √n:r|all waves zero:g|the staircase down:g|crest heights:g",
+                "quadratic sieve (FE)|subexponential:a|(test first):n|a factor:g|repeat on the parts:a",
+            }, 7.4f, 100f);
+        sacks.ExpCaption(st + new Vector3(-126f, 31f, -.3f), Vector3.down * 6.4f,
+            "the search:  which geometry places n where its position says prime or not —|and leads back to the factors and their exponents?|green:  yes, cheaply      amber:  yes, after a search      red:  no, or only at the cost of factoring", 56f);
+        sacks.ExpCaption(st + new Vector3(-126f, -92f, -.3f), Vector3.down * 5.6f,
+            "cheap positions decide prime or not (the square-root paths exactly), but lead back to the factors only by luck|every structure that reads the factors and exponents costs as much as factoring, and no known method is polynomial —|not even for 'are all the exponents 1?'  (is n squarefree?)", 50f);
+        Vector3 stl = st + new Vector3(0f, -36f, 0f);
+        yield return Shot("GE1-the-search", stl + back * 140f, stl, Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 

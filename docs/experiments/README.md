@@ -2189,6 +2189,170 @@ of log N, so it is not polynomial.
 * **Going backwards is factoring.** The lattice gives exact methods (PSLQ over a known base, the quadratic and number
   field sieves), but none of them is polynomial in the number of digits.
 
+## GA–GE. Searching the geometry for a prime and factor locator
+
+The goal was a single structure that does three things:
+
+1. **A position test.** Drop n into space and its position says prime or not.
+2. **A path back.** For a composite, a vector to follow back through its prime factors.
+3. **The exponents.** Along that path, read each factor's exponent, for instance as the steepness of a wave above or
+   below the curve.
+
+This round searched every structure built so far for those three things, and added the missing pieces
+([`SacksFactorSearch.cs`](../../Assets/Tour/SacksFactorSearch.cs)). Every number was checked in Python first. The frames
+are 1920 × 1080 (`ZETA_EXP_WIDE=1`). The result is in one table (GE1), and it splits cleanly:
+
+* **The position test exists, and it is cheap.**
+* **The path back and the exponents exist exactly.** But every structure that carries them costs as much as factoring,
+  and no known method makes that cheap.
+
+### GA. The E-series wheels stacked: E5, E6, E7, E8
+
+The E-series continues below E6:
+
+| lattice | also called | Coxeter number h |
+|---|---|---|
+| E5 | D5 | 8 |
+| E4 | A4 | 5 |
+| E3 | A2 × A1 | 6 |
+
+(E3 is reducible, and its Coxeter element has no eigenvalue e^(2πi/6), so it has no Coxeter plane to draw.)
+
+The stack of E5 to E8 has wheels of 8, 12, 18 and 30 hours, checked from their Coxeter elements, with exponents
+{1, 3, 4, 5, 7}, {1, 4, 5, 7, 8, 11}, {1, 5, 7, 9, 11, 13, 17} and {1, 7, 11, 13, 17, 19, 23, 29}. **Of the four, only E8
+has exponents that are exactly the units mod h**, and those are 1 and the primes 7 to 29.
+
+All four hour counts are built from 2, 3 and 5 alone (lcm = 360), so the stack still removes only the multiples of 2, 3
+and 5. Threads through the four wheels show where each composite falls off:
+
+* 9 and 15 drop off at E6 (a factor 3).
+* 25 and 35 drop off at E8 (a factor 5).
+* 49, 77 and 91 never drop off.
+
+To remove 7 a wheel needs a Coxeter number divisible by 7, such as A6 (h = 7) or D8 (h = 14). No exceptional group has
+one.
+
+**No fixed wheel can do better.** By Dirichlet's theorem every spoke coprime to h carries infinitely many primes, and it
+also carries infinitely many composites: for any prime p on the spoke, p·(h + 1) is on the same spoke. So any geometry
+whose position depends only on n mod h, for a fixed h, cannot separate primes from composites. A test that works has to
+use a wheel that grows with n. The tests in GD use the wheel of n hours itself.
+
+![GA1](GA1-the-e-series-wheels-stacked.jpg)
+
+### GB. The factor columns and the paths back
+
+**This is the structure imagined above, built exactly.** Put each n on E8's wheel, at hour n mod 30 and radius s√n, and
+raise a column to the height log n. Every column reaches the same funnel surface, z = log n. Cut each column into one
+segment of height log p per prime factor, counted with multiplicity (log n = Σ a_p log p). Then:
+
+* **A prime's column is a single segment.**
+* **A composite's column is striped by its factors.** The number of segments of one colour is that prime's exponent.
+* **The path back** starts at the top of n's column. It drops one segment (÷ smallest prime p) and then moves across at
+  that height to the top of the column of n/p, which is exactly as tall. It repeats until it reaches 1 at the centre.
+
+For example:
+
+* 360 = 2³·3²·5 drops ÷2, ÷2, ÷2, ÷3, ÷3, ÷5.
+* 1024 = 2¹⁰ drops ten times by log 2.
+* 343 = 7³ drops three times by log 7.
+* A prime drops straight to 1.
+
+**Equal drops in a row are an exponent, and a larger prime makes a steeper drop.** GB2 unrolls the paths into
+staircases.
+
+The catch: to draw a column you must already know its factors. The column is the factorization, drawn.
+
+![GB1](GB1-the-factor-columns.jpg)
+![GB2](GB2-the-paths-back.jpg)
+
+### GC. Exponent waves
+
+The same exponents can be drawn as waves. For each prime p, add the non-negative cosine waves (Fejér kernels) of periods
+p, p², p³, …:
+
+  y_p(x) = Σ_k F_{p^k}(x), with F_q(x) = (1/q²)·(sin πx / sin(πx/q))².
+
+At every integer n, y_p(n) is exactly the exponent of p in n (checked for p = 2, 3, 5, 7 and n ≤ 96, with no mismatch).
+So the crest above n is as high as the exponent, and its sides are steeper the higher it is. GC1 reads off
+64 = 2⁶, 72 = 2³·3², 49 = 7² and 90 = 2·3²·5 from the columns. Weighted by log p, the waves add up to log n at every
+integer, which is the identity log n = Σ_{d|n} Λ(d) behind the tour's prime staircase.
+
+Where every wave for p ≤ √n is zero, n is prime: in 2 … 96 the waves of 2, 3, 5, 7 all vanish at exactly the primes 11
+to 89. That is trial division, written as waves. It needs one wave per prime up to √n, which is far too many for large n.
+
+![GC1](GC1-exponent-waves.jpg)
+
+### GD. Square-root paths: the cheap test, and where it leaks a factor
+
+The Fermat spiral (DB) placed n at the angle of 2^(n−1) mod n. Miller and Rabin refine this into a short path. Write
+n − 1 = 2^s·d, then square repeatedly: a^d, a^(2d), …, a^(n−1) mod n.
+
+* **For a prime**, 1 has only two square roots, ±1. So the path reaches 1 either at the start or through −1. On the
+  index circle of 97 (GD1, top left), squaring doubles the angle, and the path 8 → 64 → 22 → −1 → 1 must pass through
+  the antipode −1.
+* **For a composite** n = A·B, the residues form an A × B grid (CRT), and 1 has at least four square roots: (±1, ±1).
+  * **341 = 11·31.** The path for 2 reaches 1 through 32 = (1, −1), a mixed corner. Then gcd(31, 341) = 31 and
+    gcd(33, 341) = 11: the path has handed over the factors.
+  * **561 = 3·11·17 (Carmichael).** The path reaches 1 through 67 = (1, −1) on the 33 × 17 grid. Then gcd(66, 561) = 33
+    and gcd(68, 561) = 17.
+  * **817 = 19·43.** The path never reaches 1, so 817 is certainly composite. But the path never touches the red lines
+    x ≡ ±1 of either coordinate, so no factor appears.
+
+**Prime or not prime, from a position, exists and is fast.** The path costs about log n multiplications per base.
+
+* Its first impostors (strong pseudoprimes) are 2047 for base 2, 1 373 653 = 829·1657 for bases 2 and 3, and
+  25 326 001 = 2251·11 251 for bases 2, 3 and 5, all checked by brute force.
+* 3 215 031 751 = 151·751·28351 passes bases 2, 3, 5 and 7 (checked).
+* The first 13 prime bases decide every n below 3.3·10²⁴ (Sorenson and Webster).
+* The AKS test (2002) decides primality deterministically in polynomial time for every n.
+
+**The path back to the factors appears only by luck.** A factor appears exactly when a path point lands on a red line,
+that is x ≡ ±1 modulo one prime factor but not the other. I measured how often that happens for bases 2 and 3:
+
+| composites | path hands over a factor |
+|---|---|
+| coprime to 30, up to 10⁶ | 31% |
+| two primes of 3 digits | 5.5% |
+| two primes of 4 digits | 1.0% |
+| two primes of 5 digits | 0.1% |
+| two primes of 7, 10, 15 or 20 digits | none of 600 to 2000 tried |
+
+The pseudoprimes, the composites that sit on the prime curve, are the ones whose path reaches 1. For them a factor
+appears whenever the path arrives through a mixed corner, as for 341 and 561. Every other composite leaks a factor only
+when a path point happens to land on a red line. To force every composite's path to 1 you would need a multiple of λ(n)
+(Carmichael's function), and finding one is as hard as factoring (Miller, 1976).
+
+![GD1](GD1-square-root-paths.jpg)
+
+### GE. The search
+
+GE1 rates every structure on the four questions:
+
+* how much it costs to place n;
+* whether the position says prime or not;
+* whether it gives a path back to the factors;
+* whether it gives the exponents.
+
+The table splits into two groups.
+
+* **Cheap positions decide primality but carry no factors.**
+  * The Sacks spiral, the E-wheels and the Fermat spiral place n instantly or in log n steps.
+  * Only the square-root paths decide primality, exactly below 3.3·10²⁴, and they reach the factors only by luck.
+* **Structures that carry the factors and exponents cost at least as much as factoring.**
+  * The factor lattice, the factor columns and the exponent waves all carry the factors and exponents exactly.
+  * The funnel needles and the E8 sphere tower carry them only after a long search or count.
+  * The quadratic sieve finds factors in subexponential time.
+  * No polynomial method is known.
+
+Even the simplest exponent question, "are all the exponents 1?" (is n squarefree?), has no known method faster than
+factoring.
+
+So the intersecting curve lattice exists: it is the factor lattice. In it, primality is cheap to read (Miller–Rabin and
+AKS), while the path back and the exponents are exactly the factorization. Every geometry tried so far splits the
+problem the same way, and a fast route from n to its factors would be a fast factoring algorithm.
+
+![GE1](GE1-the-search.jpg)
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -2377,7 +2541,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
-are EA to EE (`6` is EF, and `7` to `9` are EG to EI), and `w` to `z` are FA to FE. Sections AA–AE, BA–BD, CA–CE, DA–DD, EA–EI and FA–FE are drawn for full horizontal frames: run them with
+are EA to EE (`6` is EF, and `7` to `9` are EG to EI), `w` to `z` are FA to FE, and `0`, `B`, `Z` are GA–GB, GC–GD and GE. Sections AA–AE, BA–BD, CA–CE, DA–DD, EA–EI, FA–FE and GA–GE are drawn for full horizontal frames: run them with
 `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
