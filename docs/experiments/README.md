@@ -660,6 +660,130 @@ crossing of a cancellation curve with his line is built from those spikes. That 
 Legendre symbol `(−163/p)`, written as a wave. It does not say which values `E(k)` are prime: that is the
 Bunyakovsky and Hardy–Littlewood question of section K, still open for every quadratic.
 
+## R–U. Pinching the spiral
+
+A pinch brings different parts of the spiral together. It identifies points that were apart, so whatever the
+identified points share piles up in one place. Four pinches were tried, each a map with a parameter `s` from 0 (the
+Sacks spiral) to 1 (fully pinched). The white glows mark what needs attention. They are drawn with the experiment
+modules' attention bloom (`Halo` on lines, persistent glow marks at points) far above the bloom threshold. Top views
+are on the flat spiral, so the arms and slots read as straight lines; oblique views are on the saddle.
+
+### R. The fold: one comb of all discriminants
+
+Doubling the angle (`θ → 2θ`) folds the plane onto itself and lays the squares ray and the pronic ray on one ray.
+Every monic quadratic `k² + Bk + C` then straightens at a distance from that ray set by its discriminant alone, for
+both families (checked at `k = 10⁶`):
+
+    offset after the fold = −πR · Δ / 2
+
+| line | Δ | measured | predicted |
+|---|---|---|---|
+| `k² + 1` | −4 | 9.1113 | 9.1106 |
+| `k² + k − 1` | 5 | −11.3884 | −11.3883 |
+| `k² − 4` | 16 | −36.4437 | −36.4425 |
+| `k² + k + 41` | −163 | 371.2581 | 371.2577 |
+
+So the fold merges the squares-side comb (Δ ≡ 0 mod 4) and the pronic-side comb (Δ ≡ 1 mod 4) into **one comb of
+all quadratic discriminants**. The cancellation curves (perfect squares Δ) all lie on one side of the ray and the
+Euler-type lines (negative Δ) on the other. The merged comb shows the prime 2 as a period-8 stripe (|Δ| ≤ 120,
+primes for `k ≤ 3 000`):
+
+| lines with | count | mean primes |
+|---|---|---|
+| Δ ≡ 5 (mod 8): values never even | 30 | **438.3** |
+| Δ ≡ 0 (mod 8) | 28 | 241.0 |
+| Δ ≡ 4 (mod 8) | 27 | 244.2 |
+| Δ ≡ 1 (mod 8), not a square: values always even | 25 | 0.2 |
+| Δ a perfect square: the line factors | 11 | 0.5 |
+
+![R1a](R1a-fold-1-sacks.jpg)
+![R1c](R1c-fold-2.jpg)
+![R2](R2-fold-one-comb.jpg)
+![R3](R3-fold-comb-skyline.jpg)
+![R4](R4-fold-on-the-saddle.jpg)
+
+### S. The residue pinch: arms
+
+Sliding every number around its own circle to the angle `2πn/m` collapses the spiral onto `m` arms, one per residue
+class mod `m`. The primes ride the `φ(m)` arms of the classes coprime to `m`. The other arms are **cancellation
+arms**: the only prime on each is the prime that divides `m` (glowing). Each prime arm is enriched by `m/φ(m)`:
+
+| m | arms | prime arms | enrichment | numbers below 10⁷: arms that are squares mod m vs the rest |
+|---|---|---|---|---|
+| 4 | 4 | 2 | 2 | 1 mod 4: 332 180  ·  3 mod 4: 332 398 |
+| 6 | 6 | 2 | 3 | 1 mod 6: 332 194  ·  5 mod 6: 332 383 |
+| 30 | 30 | 8 | 3.75 | mean of 1, 19: 83 006.5  ·  others: 83 093.8 |
+| 210 | 210 | 48 | 4.375 | mean of the 6 squares: 13 806.7  ·  others: 13 850.8 |
+
+Pinched mod 4 on the saddle, the two prime arms (1 and 3 mod 4) are exactly the two rising lobes along ±y, and the
+even numbers fall away along ±x. Within the tour's 1 601 numbers the 3-mod-4 arm leads 131 to 120. It first falls
+behind at 26 861. The arms of quadratic residues lag in every row: that is Chebyshev's bias, which the zeros of the
+Dirichlet L-functions control (section Q).
+
+![S0](S0-mod-4-rising-lobes.jpg)
+![S1](S1-mod-6.jpg)
+![S2](S2-mod-30-halfway.jpg)
+![S3](S3-mod-30.jpg)
+![S4](S4-mod-210.jpg)
+![S5](S5-mod-30-on-the-saddle.jpg)
+
+### T. The pleat: curves that gather primes
+
+Write every number as `n = k(k + 1) + c` (`0 ≤ c ≤ 2k + 1`, counted from the pronic number before it) and slide it
+back along its own turn to slot `c mod L`, stacking the folds along the surface normal. Each turn is pleated into `L`
+slots after the pronic ray, and slot `j` becomes the curve `k² + k + j`. A slot curve can dodge a prime `p` only if
+`k² + k + j` has no root mod `p`. The slots that dodge every prime dividing `L` are the **anti-cancellation curves**,
+glowing gold. The even slots are cancellation curves, since `k² + k` is always even.
+
+| L | anti-cancellation slots | enrichment, n ≤ 1 601 | n ≤ 10⁷ | predicted Π p/(p − 1) |
+|---|---|---|---|---|
+| 6 | 5 | 3.07 | 3.00 | 3.000 |
+| 30 | 11, 17 | 4.41, 4.28 | 3.76, 3.74 | 3.750 |
+| 210 | 11, 17, 41, 101, 137, 167 | (too few per slot) | 41: 4.54, 101: 4.46, 17: 4.37, 137: 4.33 | 4.375 |
+
+The pleat mod 30 gathers the primes onto two curves named by Euler's lucky numbers, `k² + k + 11` and `k² + k + 17`;
+`k² + k + 41` folds onto slot 11. The 14 even slots hold no primes at all. On the squares side (`n = k² + C`, slot
+`C mod L`) the best slots reach only 1.50 (L = 6) and 1.88 (L = 30), half the pronic side. `k² + C` takes both
+parities, so no squares-side curve can dodge 2. **This is why the prime-rich Euler lines all live on the pronic
+side.**
+
+The gold curves still carry composites, glowing white: 18 on slot 11 and 16 on slot 17 below 1 601. Examples are
+`121 = 11²`, `143 = 11·13`, `221 = 13·17`, `289 = 17²`, `323 = 17·19` and `749 = 7·107`. Each is built from primes
+larger than 5, which the pleat mod 30 cannot see.
+
+![T1](T1-pleat-30-halfway.jpg)
+![T2](T2-pleat-30.jpg)
+![T2b](T2b-pleat-30-close.jpg)
+![T3](T3-pleat-6.jpg)
+![T4](T4-pleat-30-on-the-saddle.jpg)
+![T5](T5-slot-bars-pronic-vs-squares.jpg)
+
+### U. Many dimensions: the residue lattice
+
+Pinching modulo 3, 5 and 7 at once, as three axes, places every odd number in one cell of a 3 × 5 × 7 lattice. The
+three zero planes (`n ≡ 0` mod 3, 5 or 7) are cancellation planes. Up to 10⁷ the primes fill exactly the `2·4·6 = 48`
+cells off them, with between 13 757 and 13 922 primes per cell (a spread of 1.2 %). The only primes on the planes are
+3, 5 and 7 themselves. Parity is a fourth axis: the even lattice beside it holds the single prime 2.
+
+![U1](U1-residue-lattice-3-5-7.jpg)
+![U2](U2-residue-lattice-with-parity.jpg)
+
+### What pinching can and cannot do
+
+Every pinch that clusters primes does it the same way. It sorts numbers by their remainders modulo the primes it
+sees, and it gathers the primes onto the curves, arms, slots or cells that never meet those primes. The enrichment
+of the best curve is `Π p/(p − 1)` over the primes it sees, which grows only like `e^γ log P` (Mertens):
+
+| primes seen, up to | 2 | 3 | 5 | 7 | 11 | 13 | 17 | 19 | 23 | 29 | 31 | 37 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enrichment of the best curve | 2.00 | 3.00 | 3.75 | 4.38 | 4.81 | 5.21 | 5.54 | 5.85 | 6.11 | 6.33 | 6.54 | 6.72 |
+
+Euler's line is the anti-cancellation curve for every prime up to 37, and its Hardy–Littlewood constant, 6.648, is
+that product (6.724) trimmed slightly by the primes above 41. The pinch pictures therefore show the sieve as
+geometry. They cannot do better than the sieve: the brightest pinched curve always keeps the composites made of
+primes it cannot see. Seeing more primes needs a finer pinch, and the gain grows only with the logarithm of the
+largest prime used.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -711,7 +835,12 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 10. Tilted sections are hyperbolas whose centres circle the axis; tangent sections are the saddle's straight lines,
     the homes of the one-to-sixteen quadratics. Twisting the saddle is folding it, as far as the spiral can tell, and
     the divisor function's wobble is a sum of twisted saddles.
-11. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+11. Pinching the spiral clusters the primes onto curves exactly as a sieve by the primes the pinch sees: residue
+    arms, pleated slot curves and lattice cells all reach the same ceiling, Π p/(p − 1), which grows like
+    `e^γ log P`. The fold merges the two half-combs into one comb of discriminants with a period-8 stripe from the
+    prime 2, and the pleat shows why the Euler lines live on the pronic side. The brightest pinched curve always
+    keeps composites built from primes it cannot see.
+12. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
     not already predict. The algorithms that do come out of the sections (Euler's criterion, Fermat's method, the
     sieve along a line) are classical. What the sections add is one geometry in which they are all the same
     statement about quadratics and their discriminants.

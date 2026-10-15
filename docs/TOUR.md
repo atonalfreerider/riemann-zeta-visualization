@@ -60,7 +60,8 @@ Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:S
 N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
 `exp:snap` (cut to the line's shot instead of flying there), and for the section modules `exp:latticechart[live]`,
 `exp:twistlive`, `exp:idealwave`, `exp:mirrorswing`, `exp:eulershow`, `exp:fermatwalk`, `exp:combslide`, `exp:skyline`,
-`exp:meet` and more, and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
+`exp:meet`, the pinches `exp:fold`, `exp:residue`, `exp:pleat`, `exp:residuelattice` and `exp:pinchlive`, and more,
+and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
 see `ExperimentTour.cs`).
 
 Anything that moves or happens in a module draws the eye with white bloom (`ExperimentAttention.cs`): a moving line

@@ -101,6 +101,8 @@ public partial class TourDirector
     /// exp:idealwave:NMAX:zeta|l|lonly:SECONDS · exp:eulerroute:NMAX · exp:numberlabels:N1,N2,… · exp:gaussfield · exp:mirrorcomb:M
     /// exp:mirrorswing:M:SECONDS[:FROM:TO] · exp:eulershow:N · exp:fermatwalk:N:SECONDS · exp:fermat:N · exp:comb[:rims][:sections][:labels]
     /// exp:combslide:B:FROM:TO:SECONDS · exp:skyline:B · exp:meet
+    /// Pinches (SacksPinch.cs): exp:fold:F[:comb] · exp:residue:M:S[:arms] · exp:pleat:L:S[:curves][:marks] · exp:residuelattice[:even]
+    /// exp:pinchlive:fold|residue|pleat:PARAM:SECONDS (fold PARAM = the final angle multiple)
     /// </summary>
     void ApplyExperimentAction(string[] p)
     {
@@ -283,6 +285,14 @@ public partial class TourDirector
                 break;
             case "combslide": sacks.ExpCombSlideLive(I(2, 0), F(3, -9f), F(4, 7f), Seconds(A(5), 8f), 3000, 20f); break;
             case "skyline": sacks.ExpSkyline(I(2, 0), -30, 60, 3000, c + new Vector3(2600f, 0f, 0f), 2.1f, 42f, 18f); break;
+            case "fold":
+                sacks.ExpFoldField(SacksSpiral.Count, F(2, 2f));
+                if (Has("comb")) sacks.ExpFoldComb(-32, 32, SacksSpiral.Count, 20f, true);
+                break;
+            case "residue": sacks.ExpResiduePinch(I(2, 30), F(3, 1f), SacksSpiral.Count, Has("arms"), I(2, 30) <= 30 ? 22f : 0f, true); break;
+            case "pleat": sacks.ExpPleat(I(2, 30), F(3, 1f), SacksSpiral.Count, .9f, 20f, Has("curves"), Has("marks")); break;
+            case "residuelattice": sacks.ExpResidueLattice(c + new Vector3(6000f, 0f, 0f), 6f, SacksSpiral.Count, Has("even"), 9f); break;
+            case "pinchlive": sacks.ExpPinchLive(A(2).ToLowerInvariant(), I(3, 30), Seconds(A(4), 8f), SacksSpiral.Count); break;
             case "meet": sacks.ExpEulerLandauMeet(24f); break;
             case "flare":
                 // exp:flare:N1,N2,…[:RADIUS] — white flares at the numbers the line is talking about

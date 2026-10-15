@@ -653,6 +653,109 @@ public class ExperimentsRenderTest
         sacks.ShowBackdrop(true);
         }
 
+        // ---------------------------------------------------------------------------------------------
+        // pinching the spiral: sections R–U (SacksPinch.cs). Top views flat, oblique views on the saddle.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('R')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(0f);
+        foreach ((float f, string name) in new[] { (1f, "R1a-fold-1-sacks"), (1.5f, "R1b-fold-1.5"), (2f, "R1c-fold-2") })
+        {
+            sacks.ExpFoldField(SacksSpiral.Count, f);
+            yield return Shot(name, c + back * 215f, c, Vector3.up, 55f);
+            sacks.ClearExperiments();
+        }
+
+        sacks.ExpFoldField(SacksSpiral.Count, 2f);
+        sacks.ExpFoldComb(-32, 32, SacksSpiral.Count, 20f, true);
+        yield return Shot("R2-fold-one-comb", c + back * 215f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 fsky = c + new Vector3(5200f, 0f, 0f);
+        sacks.ExpFoldSkyline(-164, 40, 3000, fsky, 2.1f, 46f, 18f);
+        yield return Shot("R3-fold-comb-skyline", fsky + new Vector3(30f, 8f, 0f) + back * 250f, fsky + new Vector3(30f, 8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ExpFoldField(SacksSpiral.Count, 2f);
+        sacks.ExpFoldComb(-32, 32, SacksSpiral.Count, 0f, true);
+        yield return Shot("R4-fold-on-the-saddle", c + new Vector3(-50f, -95f, -70f), c + back * 2f, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('S')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        // S0: mod 4 on the saddle: odd primes up the two rising lobes, even numbers down the falling ones
+        sacks.ExpSetBend(1f);
+        sacks.ExpResiduePinch(4, 1f, SacksSpiral.Count, true, 30f, true, .55f);
+        yield return Shot("S0-mod-4-rising-lobes", c + new Vector3(-165f, -85f, -95f), c + back * 12f, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(0f);
+        sacks.ExpResiduePinch(6, 1f, SacksSpiral.Count, true, 22f, true);
+        yield return Shot("S1-mod-6", c + back * 230f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpResiduePinch(30, .5f, SacksSpiral.Count, false, 0f, false);
+        yield return Shot("S2-mod-30-halfway", c + back * 215f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpResiduePinch(30, 1f, SacksSpiral.Count, true, 20f, true);
+        yield return Shot("S3-mod-30", c + back * 235f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpResiduePinch(210, 1f, SacksSpiral.Count, true, 0f, true);
+        yield return Shot("S4-mod-210", c + back * 215f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ExpResiduePinch(30, 1f, SacksSpiral.Count, true, 0f, true);
+        yield return Shot("S5-mod-30-on-the-saddle", c + new Vector3(-50f, -95f, -70f), c + back * 2f, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('T')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(0f);
+        sacks.ExpPleat(30, .5f, SacksSpiral.Count, .9f, 0f, false, false);
+        yield return Shot("T1-pleat-30-halfway", c + back * 215f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        int left30 = sacks.ExpPleat(30, 1f, SacksSpiral.Count, .9f, 20f, true, true);
+        Debug.Log($"T: pleat 30: {left30} composites left on the anti-cancelling slots");
+        yield return Shot("T2-pleat-30", c + back * 215f, c, Vector3.up, 55f);
+        Vector3 wedge = c + new Vector3(-16f, 8f, 0f);
+        yield return Shot("T2b-pleat-30-close", wedge + back * 120f, wedge, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        int left6 = sacks.ExpPleat(6, 1f, SacksSpiral.Count, .9f, 12f, true, true);
+        Debug.Log($"T: pleat 6: {left6} composites left on the anti-cancelling slot");
+        Vector3 band = c + new Vector3(-30f, -4f, 0f);
+        yield return Shot("T3-pleat-6", band + back * 125f, band, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ExpPleat(30, 1f, SacksSpiral.Count, 1.4f, 0f, true, true);
+        yield return Shot("T4-pleat-30-on-the-saddle", c + new Vector3(-95f, -60f, -55f), c + back * 2f, back, 55f);
+        sacks.ClearExperiments();
+        Vector3 bars = c + new Vector3(5600f, 0f, 0f);
+        sacks.ExpSlotBars(30, 10000000, bars, 2.6f, 36f, 16f);
+        yield return Shot("T5-slot-bars-pronic-vs-squares", bars + new Vector3(0f, 4f, 0f) + back * 235f, bars + new Vector3(0f, 4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('U')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetBend(1f);
+        Vector3 lat = c + new Vector3(6000f, 0f, 0f);
+        Vector3 latMid = lat + new Vector3(6f, 12f, -18f);
+        sacks.ExpResidueLattice(lat, 6f, 1601, false, 9f);
+        yield return Shot("U1-residue-lattice-3-5-7", latMid + new Vector3(-30f, -30f, -66f), latMid + new Vector3(3f, 0f, 0f), Vector3.up, 55f);
+        yield return Shot("U1b-residue-lattice-front", latMid + new Vector3(0f, 0f, -92f), latMid, Vector3.up, 50f);
+        sacks.ClearExperiments();
+        sacks.ExpResidueLattice(lat, 6f, 1601, true, 9f);
+        Vector3 bothMid = lat + new Vector3(19f, 12f, -18f);
+        yield return Shot("U2-residue-lattice-with-parity", bothMid + new Vector3(-30f, -42f, -96f), bothMid, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
