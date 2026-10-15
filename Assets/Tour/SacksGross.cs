@@ -40,6 +40,24 @@ public partial class SacksSpiral
         return c;
     }
 
+    static Color BoardCellColor(bool allowed, float fill) =>
+        allowed ? Color.Lerp(new Color(.3f, .22f, .05f), new Color(.85f, .66f, .18f), .5f + .5f * fill) : TorusForbidden;
+
+    static Vector3 BoardCell(Vector3 center, float cell, float r, float c) => center + new Vector3((c - 5.5f) * cell, (5.5f - r) * cell, 0f);
+
+    /// <summary>The board's row and column numbers and its two axis titles.</summary>
+    void TorusBoardLabels(Transform g, Vector3 center, float cell, float labelSize)
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            ExpLabel(g, i.ToString(), BoardCell(center, cell, -.95f, i), labelSize * .7f, new Color(.75f, .75f, .85f));
+            ExpLabel(g, i.ToString(), BoardCell(center, cell, i, -1.1f), labelSize * .7f, new Color(.75f, .75f, .85f));
+        }
+
+        ExpLabelWide(g, "step  n − k²  (mod 12) →", BoardCell(center, cell, -1.9f, 5.5f), labelSize * .8f, Color.white);
+        ExpLabelWide(g, "turn k ↓", BoardCell(center, cell, -1.9f, -.6f), labelSize * .8f, Color.white);
+    }
+
     static Color DiagonalColor(int allowedRows) => allowedRows == 12 ? TorusAllowed : allowedRows == 8 ? ClassBlue : allowedRows == 4 ? ClassDim : DeadColor;
 
     /// <summary>Filled quads with vertex colours (cells of boards), one mesh.</summary>
@@ -112,22 +130,11 @@ public partial class SacksSpiral
         {
             bool a = Allowed12(r, c);
             float f = cnt[r, c] / (float)max;
-            Color col = a ? Color.Lerp(new Color(.3f, .22f, .05f), new Color(.85f, .66f, .18f), .5f + .5f * f) : TorusForbidden;
-            quads.Add((Cell(r, c) + Vector3.forward * .05f, Vector3.right * cell * .46f, Vector3.up * cell * .46f, col));
+            quads.Add((Cell(r, c) + Vector3.forward * .05f, Vector3.right * cell * .46f, Vector3.up * cell * .46f, BoardCellColor(a, f)));
         }
 
         ExpQuads(g, "cells", quads, Factory.SoftGlowIntensity);
-        if (labelSize > 0f)
-        {
-            for (int i = 0; i < 12; i++)
-            {
-                ExpLabel(g, i.ToString(), Cell(-.95f, i), labelSize * .7f, new Color(.75f, .75f, .85f));
-                ExpLabel(g, i.ToString(), Cell(i, -1.1f), labelSize * .7f, new Color(.75f, .75f, .85f));
-            }
-
-            ExpLabelWide(g, "step  n − k²  (mod 12) →", Cell(-1.9f, 5.5f), labelSize * .8f, Color.white);
-            ExpLabelWide(g, "turn k ↓", Cell(-1.9f, -.6f), labelSize * .8f, Color.white);
-        }
+        if (labelSize > 0f) TorusBoardLabels(g, center, cell, labelSize);
 
         if (diagonals)
         {
@@ -377,9 +384,12 @@ public partial class SacksSpiral
     /// The 24 half-hour rays j/24 of a turn, each with its product family u(q²u + d) (q = 12/gcd(j, 12), d = jq/12) on the
     /// current surface: red where a thin strip round the ray holds no primes below nStat, orange (with the count) where it does.
     /// </summary>
+    readonly List<(LineRenderer line, bool free)> clockFamilies = new();
+
     public void ExpClock144(long nMax, int nStat, float labelSize)
     {
         Transform g = ExpGroup("Y clock 144").transform;
+        clockFamilies.Clear();
         ExpEnsureSieve(nStat + 1);
         float rMax = R * Mathf.Sqrt(nMax);
         for (int j = 0; j < 24; j++)
@@ -413,6 +423,7 @@ public partial class SacksSpiral
 
             LineRenderer l = ExpLine(g, $"u({q * q}u+{d})", .08f, col, Factory.GlowIntensity, pts.ToArray());
             if (q == 12) GlowLine(l, 1.8f, .35f);
+            clockFamilies.Add((l, free));
             if (labelSize > 0f)
                 ExpLabelWide(g, free ? $"u({q * q}u + {d})" : $"u({q * q}u + {d})  {pri}", ExpAt(rMax + .3f * labelSize + 2f, th, 0f), labelSize * .7f, col);
         }

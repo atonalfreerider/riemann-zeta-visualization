@@ -1017,7 +1017,7 @@ in [`experiments.json`](../../Assets/Resources/Narration/experiments.json); the 
 ElevenLabs voice (JohnV4) and record as one vertical video each with
 `Tools/render_chapters.py --script experiments --shapes vertical`.
 
-Four more modules are scripted, directed and animated, but not narrated or recorded yet: *Two counting problems*
+Four more modules, now narrated as well, cover the second round: *Two counting problems*
 (section P: the divisor and circle wobbles as charts, their waves added one by one, then the saddle twisting from two
 waves per turn to one while the squares slide onto the crests), *Primes of Euler's ring* (section Q: needles built
 from ζ's zeros, then the L-function's zeros joining so the inert primes sink and the split primes double), *Mirror
@@ -1025,6 +1025,16 @@ lines* (section L: `k² − m²` swinging into `k² + m²`, 1601 proved prime by
 Fermat's walk out to 1501) and *The discriminant comb* (section K: a plane sliding across the comb with its prime
 count, the yield of every plane, Euler's and Landau's lines meeting at 197 and 1601). Their shots use `fit`, so they
 frame the same subject in 16:9 and 9:16.
+
+The four 144 modules are scripted, directed and animated but not narrated: their captions run on estimated timing.
+*The 12 × 12 torus* (section V) marks numbers with their turn and step, fills the board as the primes up to ten
+million arrive (only 2 and 3 land off the 48 gold cells, glowing), sweeps the diagonals across it cell by cell (white
+flares on gold cells, red rings on the others) and rolls the board into a torus. *The saddle computes (3/p)*
+(section W) pinches the spiral to 24 arms and raises the saddle so every prime falls or rises by (3/p), then repeats
+it for (2/p), (5/p) and 144 arms on a 12-fold saddle. *Base-12 fingerprints* (section X) stamps curves onto the board
+of last two base-12 digits one value at a time, with each value written in base 12. *The 144 clock* (section Y)
+reveals the 24 half-hours with their product families, pulses the prime-free hours and lights `16k² + 11k + 2`
+beside hour 9.
 
 ## Rendering
 

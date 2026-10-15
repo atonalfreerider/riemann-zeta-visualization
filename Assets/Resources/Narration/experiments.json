@@ -638,6 +638,325 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xtorus",
+      "title": "The 12 × 12 torus",
+      "subtitle": "turn and step, counted in twelves",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0"
+      ],
+      "lines": [
+        {
+          "id": "xtorus_01",
+          "text": "Every number on the spiral has two coordinates. Its turn is the ring it sits on, and its step is how far round that ring it has come from the square that starts it. Forty-one is six squared plus five: turn six, step five.",
+          "camera": "orbit:on=centre;fit=136,170>130,164;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:turnstep:41,431,1601"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_02",
+          "text": "Count turn and step in twelves, and every number lands on a twelve by twelve board. Here come the primes up to ten million, each dropped into its cell.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=86,130>82,124;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:backdrop:off",
+            "exp:boardfill:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_03",
+          "text": "Above three, the primes land in only forty-eight of the hundred and forty-four cells: the cells where the number leaves remainder one, five, seven or eleven after division by twelve. Two and three are the only primes anywhere else.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=82,124>74,112;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_04",
+          "text": "On this board every curve of the spiral becomes a straight line. The curves k squared plus k plus c run diagonally. Follow c equal to five and eleven: every cell they cross is gold.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=86,130>82,124;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:board",
+            "exp:diagsweep:5,11:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_05",
+          "text": "One and seven cross gold in eight rows out of twelve. Three and nine, in four. Even values of c never cross gold at all, so those lines carry no primes.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=86,130>82,124;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:diagsweep:1,7,3,9:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_06",
+          "text": "On average, a line's share of the primes is three times its share of gold rows: three for five and eleven, two for one and seven, one for three and nine, nothing for the rest. Euler's forty-one, seventeen and eleven all sit in the top class.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=86,130>82,124;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:board:diagonals",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_07",
+          "text": "The vertical lines are the curves on the other side of the spiral, k squared plus C. None of them stays gold for more than half its rows, so none can beat one and a half. That is why the prime-rich lines all live on the pronic side.",
+          "camera": "orbit:on=centre;at=6998,0,0;fit=86,130>82,124;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:board:verticals"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtorus_08",
+          "text": "Roll the board up, the step the short way round and the turn the long way, and it becomes a torus. The two gold diagonals close into loops that wind once around it both ways.",
+          "camera": "orbit:on=centre;at=7000,0,0;fit=92,130>100,132;el=89.5>50;az=-90;spin=0;raise=.08;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:torusroll:line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtorus_09",
+          "text": "Back on the spiral, the gold lines are Euler's family. Everything the board shows comes from dividing by two and three. It cannot see a single prime beyond them.",
+          "camera": "orbit:on=centre;fit=136,170>130,164;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:bend:0",
+            "exp:classes",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xlegendre",
+      "title": "The saddle computes (3/p)",
+      "subtitle": "heights that are Legendre symbols",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xlegendre_01",
+          "text": "Slide every number round its own ring to the angle of its remainder after division by twenty-four. The primes gather on eight arms. Each is coloured by one question: is three a perfect square modulo that prime? Cyan if it is, magenta if not.",
+          "camera": "orbit:on=centre;fit=136,170>130,164;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:charlive:24:3:line:slide"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_02",
+          "text": "Now raise the saddle. Every cyan prime falls away, and every magenta prime rises. The height of each prime is the Legendre symbol of three, computed by the shape of the surface.",
+          "camera": "orbit:on=centre;at=0,0,-6;fit=150,206>156,212;el=89.5>34;az=-90;spin=3;raise=.12;span=14",
+          "actions": [
+            "exp:charlive:24:3:line:rise"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_03",
+          "text": "There are no exceptions among the primes up to two million. The reason is a single identity: the cosine of thirty degrees is half the square root of three.",
+          "camera": "orbit:on=centre;at=0,0,-6;fit=156,232>150,226;el=36>30;az=-90;spin=4;raise=.06;span=14",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_04",
+          "text": "Sixteen arms do the same for two. Primes one or seven more than a multiple of eight fall away; primes three or five more rise.",
+          "camera": "orbit:on=centre;at=0,0,-6;fit=156,232>150,226;el=36>30;az=-90;spin=4;raise=.06;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:charlive:16:2:line:slide:rise"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_05",
+          "text": "Ten arms compute five, but at two unequal heights, about plus zero point three and minus zero point eight: the two halves of the square root of five.",
+          "camera": "orbit:on=centre;at=0,0,-6;fit=156,232>150,226;el=36>30;az=-90;spin=4;raise=.06;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:charlive:10:5:line:slide:rise"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_06",
+          "text": "A hundred and forty-four arms on a twelve-fold saddle give the same answer for three: the forty-eight prime arms rise or fall by exactly the same amount.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=170,190>164,184;el=40>32;az=-90;spin=4;raise=.08;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:surface:12:0",
+            "exp:charlive:144:3:line:slide:rise:0.5"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlegendre_07",
+          "text": "The saddle's height is a cosine, and for these moduli a cosine is a Legendre symbol in disguise. It says which primes have three, two or five as a square, and nothing about which numbers are prime.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=164,184>176,196;el=32>44;az=-30;spin=4;raise=.08;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xfinger",
+      "title": "Base-12 fingerprints",
+      "subtitle": "the last two digits of a curve",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xfinger_01",
+          "text": "Write a number in base twelve and keep its last two digits. There are a hundred and forty-four possible endings: a twelve by twelve board, the dozens digit down the side and the units digit across.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:empty:1",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_02",
+          "text": "Every prime above three ends in one, five, seven or b, the four columns that share no factor with twelve. Here are the primes up to a million, filling exactly those columns.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:primes:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_03",
+          "text": "A curve leaves its own fingerprint. The squares, one value at a time, light only sixteen cells, and just six of them in the prime columns.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:sq:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_04",
+          "text": "Euler's k squared plus k plus forty-one lights thirty-two cells, and every one of them is in a prime column. In base twelve its values end in five or b twice as often as in one or seven.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:euler:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_05",
+          "text": "k squared plus k plus seventeen also stays inside the prime columns, through a different set of rows.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:17:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_06",
+          "text": "The pronic numbers never reach a prime column at all. A product of two neighbours is always even.",
+          "camera": "orbit:on=centre;at=8200,-4,0;fit=64,96>62,92;el=89.5;az=-90;spin=0;raise=.1;span=12",
+          "actions": [
+            "exp:fingerlive:pronic:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xfinger_07",
+          "text": "Side by side, the fingerprints show which remainders by two and three each curve avoids. That is all they can show: past three, the board is blind.",
+          "camera": "orbit:on=centre;at=8200,1,0;fit=72,262>70,256;el=89.5;az=-90;spin=0;raise=.12;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:fingerall",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xclock",
+      "title": "The 144 clock",
+      "subtitle": "product families on the 24 half-hours",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0"
+      ],
+      "lines": [
+        {
+          "id": "xclock_01",
+          "text": "Far from the centre, every curve straightens into a line pointing in a direction set by its middle coefficient. The directions that are whole multiples of a twenty-fourth of a turn are the hours of a clock.",
+          "camera": "orbit:on=centre;at=0,-8,0;fit=180,232>176,226;el=89.5;az=-90;spin=0;raise=.08;span=12",
+          "actions": [
+            "exp:clocklive:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xclock_02",
+          "text": "On every hour lies a product family, u times q squared u plus d, where q squared divides a hundred and forty-four: one, four, nine, sixteen, thirty-six or a hundred and forty-four.",
+          "camera": "orbit:on=centre;at=0,-8,0;fit=180,232>176,226;el=89.5;az=-90;spin=0;raise=.08;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xclock_03",
+          "text": "Fourteen hours hold no primes at all near their rays: the twelve even hours, and hours three and twenty-one.",
+          "camera": "orbit:on=centre;at=0,-8,0;fit=180,232>176,226;el=89.5;az=-90;spin=0;raise=.08;span=12",
+          "actions": [
+            "exp:clockpulse:red"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xclock_04",
+          "text": "The other ten hold a few primes, carried by quadratics that sit just beside the product family, like sixteen k squared plus eleven k plus two at hour nine.",
+          "camera": "orbit:on=centre;at=-22,22,0;fit=100,124>94,118;el=89.5;az=-90;spin=0;raise=.08;span=12",
+          "actions": [
+            "exp:clockpulse:orange",
+            "exp:quadglow:4:11:2"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xclock_05",
+          "text": "On the saddle, the hours bend with the surface, and each family climbs or falls along it.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=150,170>146,166;el=36>30;az=-110;spin=4;raise=.08;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:bend:1",
+            "exp:clock",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xclock_06",
+          "text": "The clock's numbers are the square divisors of a hundred and forty-four. Twelve times twelve is the natural size for the primes two and three, and nothing in it can see beyond them.",
+          "camera": "orbit:on=centre;at=0,0,-4;fit=146,166>160,180;el=30>42;az=-70;spin=4;raise=.08;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }

@@ -103,6 +103,10 @@ public partial class TourDirector
     /// exp:combslide:B:FROM:TO:SECONDS · exp:skyline:B · exp:meet
     /// Pinches (SacksPinch.cs): exp:fold:F[:comb] · exp:residue:M:S[:arms] · exp:pleat:L:S[:curves][:marks] · exp:residuelattice[:even]
     /// exp:pinchlive:fold|residue|pleat:PARAM:SECONDS (fold PARAM = the final angle multiple)
+    /// The 144 modules: exp:turnstep:N1,N2 · exp:board[:diagonals][:verticals] · exp:boardfill:SECONDS · exp:diagsweep:D1,D2:SECONDS
+    /// exp:torusroll:SECONDS · exp:classes · exp:charlive:M:3|2|5:SECONDS[:slide][:rise][:BENDTO] · exp:fingerlive:CODE:SECONDS
+    /// (CODE empty, primes, sq, euler, 17, k2p1, k2k1, pronic, u4u1) · exp:fingerall · exp:clocklive:SECONDS · exp:clock[:labels]
+    /// exp:clockpulse:red|orange · exp:quadglow:Q:B:C
     /// </summary>
     void ApplyExperimentAction(string[] p)
     {
@@ -293,6 +297,40 @@ public partial class TourDirector
             case "pleat": sacks.ExpPleat(I(2, 30), F(3, 1f), SacksSpiral.Count, .9f, 20f, Has("curves"), Has("marks")); break;
             case "residuelattice": sacks.ExpResidueLattice(c + new Vector3(6000f, 0f, 0f), 6f, SacksSpiral.Count, Has("even"), 9f); break;
             case "pinchlive": sacks.ExpPinchLive(A(2).ToLowerInvariant(), I(3, 30), Seconds(A(4), 8f), SacksSpiral.Count); break;
+            // ---- the 144 modules (SacksGross.cs, SacksGrossLive.cs) ----
+            case "turnstep":
+            {
+                List<long> ns = new();
+                foreach (string t in A(2).Split(',')) if (long.TryParse(t.Trim(), out long v)) ns.Add(v);
+                sacks.ExpTurnStepMarks(ns.ToArray(), F(3, 36f));
+                break;
+            }
+            case "board": sacks.ExpTorusBoard(c + new Vector3(SacksSpiral.BoardOffset, 0f, 0f), 6f, 10000000, Has("diagonals"), Has("verticals"), 32f); break;
+            case "boardfill": sacks.ExpBoardFillLive(c + new Vector3(SacksSpiral.BoardOffset, 0f, 0f), 6f, 10000000, Seconds(A(2), 8f), 32f); break;
+            case "diagsweep":
+            {
+                List<int> ds = new();
+                foreach (string t in A(2).Split(',')) if (int.TryParse(t.Trim(), out int v)) ds.Add(v);
+                sacks.ExpDiagonalSweepLive(c + new Vector3(SacksSpiral.BoardOffset, 0f, 0f), 6f, ds.ToArray(), Seconds(A(3), 8f), 32f);
+                break;
+            }
+            case "torusroll": sacks.ExpTorusRollLive(c + new Vector3(SacksSpiral.BoardOffset, 0f, 0f), 6f, 30f, Seconds(A(2), 8f)); break;
+            case "classes": sacks.ExpTorusClassesOnSpiral(41, SacksSpiral.Count, F(2, 40f), new[] { 41, 17, 11, 5, 1, 3 }); break;
+            case "charlive":
+            {
+                // exp:charlive:M:3|2|5:SECONDS[:slide][:rise][:BENDTO]
+                float bendTo = 1f;
+                for (int i = 5; i < p.Length; i++) if (float.TryParse(p[i].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float bt)) bendTo = bt;
+                int m = I(2, 24);
+                sacks.ExpCharacterLive(m, A(3), Seconds(A(4), 8f), Has("slide"), Has("rise"), bendTo, m <= 24 ? 40f : 0f);
+                break;
+            }
+            case "fingerlive": sacks.ExpFingerprintLive(c + new Vector3(SacksSpiral.FingerOffset, 0f, 0f), 4.2f, A(2).ToLowerInvariant(), Seconds(A(3), 8f), 24f); break;
+            case "fingerall": sacks.ExpFingerprintAll(c + new Vector3(SacksSpiral.FingerOffset, 0f, 0f), 26f); break;
+            case "clocklive": sacks.ExpClockLive(4000000, Seconds(A(2), 8f), 34f); break;
+            case "clock": sacks.ExpClock144(SacksSpiral.Count, 4000000, Has("labels") ? 34f : 0f); break;
+            case "clockpulse": sacks.ExpClockPulse(A(2).ToLowerInvariant() != "orange"); break;
+            case "quadglow": sacks.ExpQuadGlow(I(2, 1), I(3, 1), I(4, 41), new Color(.3f, 1f, .55f)); break;
             case "meet": sacks.ExpEulerLandauMeet(24f); break;
             case "flare":
                 // exp:flare:N1,N2,…[:RADIUS] — white flares at the numbers the line is talking about

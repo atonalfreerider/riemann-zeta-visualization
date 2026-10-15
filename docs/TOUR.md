@@ -38,9 +38,9 @@ Below the chapter list the side menu has an **Experiments** section: directed ex
 experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
 chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
 when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour,
-narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The first four
-modules are narrated; the last four are scripted, directed and animated but not narrated yet (their captions run on
-estimated timing until audio exists). The modules are
+narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The first eight
+modules are narrated; the four 144 modules at the end are scripted, directed and animated but not narrated (their
+captions run on estimated timing until audio exists). The modules are
 
 | module | id | what it shows |
 |---|---|---|
@@ -52,6 +52,10 @@ estimated timing until audio exists). The modules are
 | Primes of Euler's ring | `xideals` | split and inert primes; needles built from ζ's zeros, then the zeros of L(s, (·/163)) joining |
 | Mirror lines | `xmirrorlines` | k² − m² swinging into k² + m²; one pair proves 1601 prime, two pairs factor 221 and 1105; Fermat's walk to 1501 |
 | The discriminant comb | `xcomb` | a plane sliding across the comb with its prime count, the prime yield of every plane, Euler's and Landau's lines meeting at 197 and 1601 |
+| The 12 × 12 torus | `xtorus` | numbers marked with turn and step; the board filling as the primes up to 10⁷ arrive (only 2 and 3 off the 48 gold cells); diagonals swept cell by cell; the board rolled into a torus |
+| The saddle computes (3/p) | `xlegendre` | the pinch to 24 arms, then the saddle rising so every prime falls or rises by (3/p); the same for (2/p) on 16 arms, (5/p) on 10, and 144 arms on a 12-fold saddle |
+| Base-12 fingerprints | `xfinger` | the last two base-12 digits as a board; the primes filling four columns; the squares, Euler's line, k² + k + 17 and the pronic numbers stamping their cells one value at a time |
+| The 144 clock | `xclock` | the 24 half-hours appearing one by one with their product families; the prime-free hours pulsing; 16k² + 11k + 2 beside hour 9; the clock on the saddle |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
