@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1085,6 +1085,72 @@ public class ExperimentsRenderTest
         sacks.ExpCubeShell(cs, 30, 1.45f, 34f, 36f);
         Vector3 corner = cs + SacksSpiral.CubeCorner1 * (1.45f * Mathf.Pow(27000f + 2791f / 3f, 1f / 3f));
         yield return Shot("BD1-shell-at-corner-1", corner + SacksSpiral.CubeCorner1 * 84f, corner, SacksSpiral.CubeCorner1Up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // The divisor spiral lifted into a funnel and cut by spheres: sections CA–CE (SacksFunnel.cs), letters n–r,
+        // drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('n')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 ds = c + new Vector3(SacksSpiral.DivisorSpiralOffset, 0f, 0f);
+        sacks.ExpDivisorSpiral(ds, 100000, 1.45f, 1f, 620f, true);
+        yield return ShotOrtho("CA1-divisor-spiral", ds + back * 900f, ds, Vector3.up, 560f);
+        sacks.ClearExperiments();
+        sacks.ExpDivisorSpiral(ds, 100000, 1.45f, 1.05f, 0f, false);
+        sacks.ExpDivisorCurves(ds, 100000, 1.45f, 1.05f, 400, 330f);
+        Vector3 dsl = ds + new Vector3(-230f, 0f, 0f);
+        yield return ShotOrtho("CA2-prime-curves-in-the-dark-lanes", dsl + back * 900f, dsl, Vector3.up, 250f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('o')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 fo = c + new Vector3(SacksSpiral.FunnelOffset, 0f, 0f);
+        sacks.ExpFactorFunnel(fo, 20000, 20000, 1.45f, 1.2f, 170f, 4, 270f, new[] { 0f, 0f, -27f, 153f, 63f });
+        yield return Shot("CB1-factorization-funnel", fo + new Vector3(-180f, -360f, -190f), fo + new Vector3(0f, 0f, -70f), back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpFactorNeedles(fo, new long[] { 5040, 5039, 5041 }, new[] { "5,040 = 7!:  30 factor pairs", "5,039 prime: empty", "5,041 = 71²: one point" },
+            new[] { new Vector2(0f, 180f), new Vector2(-150f, 120f), new Vector2(150f, 120f) }, 6000, 1.45f, 1.1f, 165f, 260f, Vector3.up);
+        Vector3 nd = fo + new Vector3(103f, -4.5f, -88f);
+        yield return Shot("CB2-needles-of-factor-pairs", nd + new Vector3(232f, 0f, -40f), nd, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('p')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 fe = c + new Vector3(SacksSpiral.FermatOffset, 0f, 0f);
+        sacks.ExpFermatSpheres(fe, 1105, 52, new[] { 41, 49 }, 2700, 1.45f, 1f, 130f, new Vector3(-.92f, -.39f, 0f));
+        yield return Shot("CC1-spheres-find-the-factors", fe + new Vector3(-70f, 190f, -80f), fe + new Vector3(0f, 25f, -25f), back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('q')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 ls = c + new Vector3(SacksSpiral.LatticeSphereOffset, 0f, 0f);
+        sacks.ExpLatticeSpheres(ls, new long[] { 163, 59, 23, 35, 195, 1155 }, 3, 105f, 118f, 32f, 175f, new[] { "primes", "composites" });
+        yield return Shot("CD1-spheres-through-the-cubic-lattice", ls + new Vector3(-20f, -95f, -255f), ls + new Vector3(-20f, -12f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpThreeSquaresChart(ls, 5000, 300f, 160f, 36, 166f);
+        yield return Shot("CD2-three-squares-parity", ls + new Vector3(0f, -2f, 0f) + back * 222f, ls + new Vector3(0f, -2f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('r')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cf = c + new Vector3(SacksSpiral.CubeFlatOffset, 0f, 0f);
+        sacks.ExpCubeFlat(cf, 40, 1.45f, .2f, 90f);
+        yield return ShotOrtho("CE1-cube-ball-flattened", cf + back * 300f, cf, Vector3.up, 75f);
+        sacks.ClearExperiments();
+        sacks.ExpCubeFlat(cf, 40, 1.45f, .12f, 26f, 13f);
+        Vector3 cfz = cf + new Vector3(2f, 0f, 0f);
+        yield return ShotOrtho("CE2-cube-ball-flattened-centre", cfz + back * 300f, cfz, Vector3.up, 21f);
         sacks.ClearExperiments();
         }
 

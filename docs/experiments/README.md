@@ -1365,6 +1365,174 @@ The 3D pronic number 27 900 = 30²·31 lies on two lines, and 27 917 = 30²·31 
 * **No faster prime-finding.** A strand's richness is set by its residues mod small primes, the same Hardy–Littlewood
   count as in the plane, and every strand contains composites.
 
+## CA–CE. The divisor spiral, lifted into a funnel and cut by spheres
+
+The picture *Sacks spiral divisors* (Wikimedia Commons) draws every number up to 100 000 with a dot sized by its
+number of divisors d(n). Its bright lines are the factorizations. This round lifted that picture into 3D, cut it with
+planes, cones and spheres, and did the same with the cube yarn ball (BB) seen flat
+([`SacksFunnel.cs`](../../Assets/Tour/SacksFunnel.cs)). The frames are 1920 × 1080 (`ZETA_EXP_WIDE=1`).
+
+### CA. The divisor spiral: bright product lines, dark prime lanes
+
+A product of two linear factors `(ak + b)(ck + e)` with `ac = q²` has `√n ≈ qk + (ae + bc)/2q`. It therefore runs at
+a fixed direction, `(ae + bc)/2q` of a turn, and these are the bright lines of the picture:
+
+| factor ratio | directions | examples |
+|---|---|---|
+| 1 : 1 | 0, ½ | squares, `u(u + 2)` (right); pronic `u(u + 1)`, `u(u + 3)` (left) |
+| 1 : 4 | ¼, ¾ | `k(4k + 1)` at the top, `k(4k + 3)` at the bottom |
+| 1 : 9 | ⅙, ⅓, ⅔, ⅚ | `k(9k + 1)` at 60°, `k(9k + 2)` at 120° |
+| 1 : 16 | eighths | `k(16k + 1)` at 45° |
+
+(measured at k = 3000: 90.00°, 269.98°, 60.00°, 120.00°, 45.00°.)
+
+![CA1](CA1-divisor-spiral.jpg)
+
+**The prime curves are the dark lanes.** Up to 100 000 the mean of d(n) is 11.7, close to log N = 11.5. Along the
+curves:
+
+| curve | mean d(n) | kind |
+|---|---|---|
+| `k² + k + 41` (Euler) | 2.6 | prime curve |
+| `k² + k + 17` | 3.3 | prime curve |
+| `k² + k − 1` | 3.8 | prime curve |
+| `k² + 1` (Landau) | 6.4 | prime curve, even for odd k |
+| `k² + k + 2` | 9.4 | always even, but not a product |
+| squares | 16.9 | cancellation |
+| `k(4k + 1)` | 20.2 | cancellation, ratio 4 |
+| `k(9k + 1)` | 22.5 | cancellation, ratio 9 |
+| `u(u + 6)` | 24.1 | cancellation |
+| `u(u + 2)` | 26.3 | cancellation |
+| `k(k + 1)` (pronic) | 28.8 | cancellation |
+
+So the cancellation curves are two to three times as dense in divisors as an average number, and the prime curves a
+quarter to a third. Euler's line and `k² + k + 17` run beside the pronic bundle, between its bright lines.
+
+![CA2](CA2-prime-curves-in-the-dark-lanes.jpg)
+
+### CB. The factorization funnel: parabolic coordinates
+
+Lift each factor pair `n = u·v` (u ≤ v) above n's Sacks point, to the height `R(v − u)/2`. Then for every pair:
+
+* its distance from the axis is `R√(uv)`, the **geometric mean** of the factors (the Sacks radius);
+* its distance from the centre is `R(u + v)/2`, the **arithmetic mean**;
+* its height is half the **difference**, so AM² = GM² + (half the difference)²: the AM–GM inequality is Pythagoras.
+
+These are parabolic coordinates (σ² = Ru, τ² = Rv), checked to 10⁻¹³ for all pairs with u < 60, v < 200. Every
+classical surface cuts out an arithmetic set:
+
+| surface | holds the pairs with | what it shows |
+|---|---|---|
+| floor (z = 0) | u = v | the squares |
+| horizontal plane z = Rd/2 | v − u = d | the cancellation curve `u(u + d)` |
+| sphere about the centre, radius Rs/2 | u + v = s | the factorizations `(x − y)(x + y)`, x = s/2 |
+| cone about the axis | v/u fixed | one factor ratio: one bundle of CA |
+| paraboloid opening up, focus at the centre | u fixed | the multiples of u |
+| paraboloid opening down, focus at the centre | v fixed | the numbers with a divisor v |
+| vertical line above n | uv = n | the factor pairs of n |
+
+**Each bundle of the divisor spiral is the shadow of rays on its own cone.** A family `(k + b)(q²k + e)` climbs at
+slope `(q² − 1)/2q` in a straight line, at half-angle `atan(2q/(q² − 1))` from the axis:
+
+| ratio | slope | half-angle |
+|---|---|---|
+| 1 : 1 | flat | (the floor) |
+| 1 : 4 | 3/4 | 53.13° |
+| 1 : 9 | 4/3 | 36.87° |
+| 1 : 16 | 15/8 | 28.07° |
+
+These were measured at k = 5000 to four decimals. So the funnels nest by how unequal the factors are, and the bright
+lines of the flat picture separate in height.
+
+![CB1](CB1-factorization-funnel.jpg)
+
+**Factorization by intersection.** The vertical line above n pierces the funnel once for each factor pair, at height
+`R(v − u)/2`. A number where k bright lines cross in the flat picture has k pairs, and in the funnel those lines pass
+over one another at k different heights. The three needles above 5039, 5040 and 5041, neighbours on the spiral, show
+this:
+
+* 5040 = 7! has 30 factor pairs, 14 of them below the frame's top: 70·72, 63·80, 60·84, …, 21·240.
+* 5041 = 71² has a single point, on the floor.
+* The prime 5039 is empty: its only pair, 1·5039, is 3653 units up.
+
+The lowest point on a needle is the most balanced factorization, which is the first one Fermat's method finds.
+
+![CB2](CB2-needles-of-factor-pairs.jpg)
+
+### CC. Spheres find the factors
+
+The sphere of radius `Rx` about the centre crosses the needle above n at height `R√(x² − n)`. That height is a whole
+number of R exactly when `x² − n = y²`, and then the crossing is the factor pair `(x − y, x + y)`: **Fermat's method as
+spheres crossing a needle.** For 1105, the spheres x = 34 … 40 cross between the ticks:
+
+* x = 41 lands on the tick y = 24 (1105 = 17·65).
+* x = 49 lands on y = 36 (1105 = 13·85).
+* x = 113 gives 5·221, out of the frame.
+* x = 553 gives the trivial 1·1105, also out of the frame.
+
+Each sphere carries the factor points of every `x² − y²`, from the square x² on the floor up to `1·(2x − 1)` at the
+top. A prime p appears on a single sphere, x = (p + 1)/2, at its topmost point.
+
+![CC1](CC1-spheres-find-the-factors.jpg)
+
+### CD. Spheres through the cubic lattice: Euler's prime curves are the loneliest spheres
+
+The Sacks ring of n has radius √n, and it is the equator of the sphere of radius √n. That sphere meets the cubic
+lattice Z³ in `r₃(n)` points, the ways to write `n = a² + b² + c²`. For squarefree `n ≡ 3 (mod 8)`, Gauss's formula
+gives `r₃(n) = 24·h(−n)`, where h is the class number. I checked every such n up to 3000 by direct count:
+
+* **n is prime exactly when r₃(n)/24 is odd.** This held for all 507 squarefree n ≡ 3 (mod 8) up to 5000, of which
+  167 are prime. By genus theory, 2^(ω − 1) divides h(−n) when n has ω prime factors, so the point count gives a lower
+  bound on the number of prime factors:
+  * 35 = 5·7 has 48 points;
+  * 195 = 3·5·13 has 96;
+  * 1155 = 3·5·7·11 has 192.
+* **The sphere holds only 24 points** (a single orbit of `(±a, ±b, ±c)` permutations) **exactly for the Heegner primes
+  11, 19, 43, 67 and 163.** These are the discriminants of Euler's prime curves `k² + k + 3, 5, 11, 17, 41`, prime for
+  k < (p − 3)/4. For example, 163 = 1² + 9² + 9², and nothing else.
+* **Primes p ≡ 7 (mod 8) miss the lattice entirely**, for example 23.
+
+Because n ≡ 3 (mod 4), the equators of these spheres, the Sacks rings, also miss the square lattice (section AB). The
+sphere finds the points the ring cannot.
+
+![CD1](CD1-spheres-through-the-cubic-lattice.jpg)
+![CD2](CD2-three-squares-parity.jpg)
+
+### CE. The cube ball flattened looks like the divisor spiral
+
+Seen straight down its axis, the cube yarn ball of section BB looks like the divisor spiral. Bright lines leave the
+centre along the horizontal axis, with dark lanes between them. Both poles project onto the centre.
+
+* **North pole.** The families converging on it, `k³ + Bk + C`, open out to the right, at distance `R√(8|B|k/3)` from
+  the centre. Their angle closes in on 0° like 1/k: −6° at k = 39 and −0.6° at k = 400 for `k³ + k`. The two red
+  strands are `k³ + k` and `(k − 1)k(k + 1)`.
+* **South pole.** The south pole of layer k is the midpoint `(k³ + (k + 1)³)/2 = (2k + 1)(k² + k + 1)/2`, which is never
+  an integer. The two integers beside it factor, as `k(2k² + 3k + 3)/2` and `(k + 1)(2k² + k + 2)/2`, and are composite
+  apart from 17 and 5 (checked for k < 400).
+  * In the flat view they sit on a ring of radius `2R/√3` ≈ 1.674 around the centre at every layer (measured 1.674 to
+    1.675 for k = 10 to 39).
+  * They fall on the left for even k and on the right for odd k.
+  * They are the cube ball's pronic numbers: the integers just beside the pole, as `k(k + 1)` sits just beside
+    `(k + ½)²` on the flat spiral.
+
+The two corners at 120° and 240°, where the comb of section BB lives, are buried under the layers projected on top of
+them.
+
+![CE1](CE1-cube-ball-flattened.jpg)
+![CE2](CE2-cube-ball-flattened-centre.jpg)
+
+### What the funnel and the spheres give
+
+* **Exact statements, new as pictures.**
+  * The divisor spiral is the shadow of the factor pairs in parabolic coordinates.
+  * Planes, spheres, cones, paraboloids and vertical lines each cut out a classical set: equal gaps, equal sums,
+    equal ratios, multiples, and the factor pairs of one number.
+* **Factorization by intersection is Fermat's method.** It finds the most balanced pair first and is fast only when
+  the factors are close.
+* **Spheres through the lattice see class numbers.** That gives a parity test for primality of squarefree n ≡ 3
+  (mod 8), and the Heegner primes behind Euler's curves are the spheres with the fewest points. Counting lattice
+  points on a sphere costs about n steps, so none of this finds primes faster than a sieve.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -1543,8 +1711,8 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
-`e` are AA to AE, and `f` to `i` are BA to BD. Sections AA–AE and BA–BD are drawn for full horizontal frames: run them
-with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
+`e` are AA to AE, `f` to `i` are BA to BD, and `n` to `r` are CA to CE. Sections AA–AE, BA–BD and CA–CE are drawn for full
+horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).
