@@ -1688,7 +1688,7 @@ In the flat spiral these strands sit on opposite rays. The cone puts them in one
 * **No faster prime-finding.** Fermat's test is already fast (log n multiplications), but it is fooled by exactly the
   overlap shown here. Gauss sums cost p steps. The cone only rearranges the comb.
 
-## EA–EE. The circularity of ζ, and the symmetries behind the primes
+## EA–EF. The circularity of ζ, and the symmetries behind the primes
 
 **The objection is right.** The zeta chain adds arrows of length 1/n^σ at angles t·log n, so both its lengths and its
 angles are built from the counting numbers. Its zeros are computed from the same chain, so they are built from the
@@ -1845,6 +1845,61 @@ question.
 
 ![EE1](EE1-zeros-repel-like-gue-eigenvalues.jpg)
 
+### EF. Dropping onto E8: prime or not prime, by position and by intersection
+
+The goal here is a place in space where you can drop a number and read off "prime" or "not prime" from where it lands
+or what it hits ([`SacksE8Drop.cs`](../../Assets/Tour/SacksE8Drop.cs), and the narrated module *Dropping onto E8*).
+E8 offers two such tests: one by position, one by intersection.
+
+**By position: the Coxeter wheel.**
+
+* E8's Coxeter element c (the product of its eight simple reflections) has order 30. It turns the Coxeter plane by a
+  thirtieth of a circle, so the 240 roots lie on 8 rings of 30 and each turn moves every ring one step.
+* c satisfies the 30th cyclotomic polynomial: x⁸ + x⁷ − x⁵ − x⁴ − x³ + x + 1 = 0, checked exactly in rational arithmetic.
+* So cᵏ has the same eigenvalues as c exactly when gcd(k, 30) = 1, for k = 1, 7, 11, 13, 17, 19, 23, 29. These are E8's
+  exponents. Springer's theorem says the cᵏ are then conjugate to c: the same rotation of E8, seen from another side.
+* Drop the numbers onto the wheel at their hour n mod 30. Every prime above 5 lands on one of those eight spokes, so a
+  number off them is divisible by 2, 3 or 5. Position alone has told you.
+* The test stops there. 49, 77, 91, 119, 121 and 133 land on the spokes too. E8's wheel is the sieve of 2, 3 and 5,
+  which is 30 = 2·3·5 and nothing more. Another lattice gives another wheel: the Coxeter number of E7 is 18, of E6 12,
+  and of A_{p−1} it is p.
+
+![EF1](EF1-the-coxeter-wheel.jpg)
+
+**By intersection: the tower of spheres.** The sphere of norm 2n (radius √(2n)) around the origin passes through
+exactly 240·σ₃(n) points of E8. The tower stacks these spheres. Each floor is the sphere's points projected to the
+Coxeter plane, enumerated point by point (82 560 at n = 7) and counted directly from the definition of the lattice:
+
+| n | points | = 240 × | |
+|---|---|---|---|
+| 1 | 240 | 1 | the roots |
+| 2 | 2 160 | 1 + 2³ | prime: the floor |
+| 3 | 6 720 | 1 + 3³ | prime |
+| 4 | 17 520 | 1 + 2³ + 4³ | 1 920 above the floor: the divisor 2 |
+| 5 | 30 240 | 1 + 5³ | prime |
+| 6 | 60 480 | 1 + 2³ + 3³ + 6³ | 8 400 above the floor: the divisors 2 and 3 |
+| 7 | 82 560 | 1 + 7³ | prime |
+
+For n > 1 the count is at least 240(1 + n³), and it equals that floor exactly when n is prime. **One intersection, a
+sphere with the lattice, decides primality**, and the lattice was defined by symmetry alone.
+
+The intersection also factors. Each proper divisor d adds 240·d³ points, a cube of points for each divisor. For n = pq
+the excess over the floor is 240(p³ + q³), and p + q is the root t > √n of t³ − 3nt − (p³ + q³) = 0. For 35 the excess is
+240 × 468, the root is 12, and 35 = 5 × 7. This gave the factors back for all 5081 products of two primes up to 20 000.
+
+Under the sphere the floors split further into orbits of E8's symmetry group, and here the primes are not special.
+Enumerating the shells for n ≤ 12 gives:
+
+* one orbit for n = 1, 2, 3, 5 and 6;
+* two orbits for the rest, including the primes 7 and 11 (82 560 = 13 440 + 69 120).
+
+**The cost.** A sphere of norm 2n holds about 240n³ points, so counting them is far slower than trial division. E8 knows
+every prime but gives no shortcut to them. The same is true of every exact geometric test found in these experiments: the
+geometry encodes divisibility exactly, and reading it costs at least as much as dividing.
+
+![EF2](EF2-the-tower-of-spheres.jpg)
+![EF3](EF3-one-cube-per-divisor.jpg)
+
 ### What the symmetries give
 
 * **The circularity is real.** ζ, its chain and its zeros are one object, and the explicit formula only translates
@@ -1857,7 +1912,12 @@ question.
   * In both, the multiplicative structure is an output, though the counting numbers stay on as labels.
 * **Physics.** Supersymmetric cancellation is Möbius inversion (ED). The zeros sit in the unitary symmetry class (EE),
   and the operator behind them is the missing piece.
-* **No faster prime-finding.** Counting an E8 shell costs about as much as finding divisors. j needs high precision.
+* **Position and intersection (EF).**
+  * E8's Coxeter wheel sieves out 2, 3 and 5 by position alone: every prime above 5 lands on one of eight spokes.
+  * The sphere of norm 2n holds the fewest possible E8 points exactly when n is prime, and the extra points of n = pq
+    give p and q back.
+* **No faster prime-finding.** Counting an E8 shell point by point (about 240n³ points) is far slower than trial
+  division. j needs high precision.
   GUE statistics describe the zeros only on average.
 
 ## What the sections give, as algorithms
@@ -2032,6 +2092,15 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
 * *The lattice race* (AE) draws the race mod 4 and its rebuild from the zeros of Dirichlet's β live, flaring at
   26 861, 616 841 and 12 306 137. The race mod 12 follows, with its near miss at 48 231 785.
 
+*Dropping onto E8* (section EF) is narrated with the same voice. It builds E8's 240 roots ring by ring in the Coxeter plane
+and walks the Coxeter element once round the 30 hours, lighting the eight hours coprime to 30 as they are named. Then it
+drops the numbers 1 to 600 onto the wheel at their hours: every prime above 5 lands on a gold spoke, and red rings mark
+the composites that land there too.
+
+The second half stacks the spheres of norm 2n as a tower, with the floor count of each on the caption board. The primes
+sit on the floor 240(1 + n³), and 4 and 6 rise above it by their divisors' cubes. It shows the counts as one cube of
+points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's extra points.
+
 ## Rendering
 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
@@ -2039,7 +2108,7 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
-are EA to EE. Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EE are drawn for full horizontal frames: run them with
+are EA to EE (`6` is EF). Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EF are drawn for full horizontal frames: run them with
 `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,

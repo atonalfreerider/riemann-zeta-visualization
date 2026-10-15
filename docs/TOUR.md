@@ -64,6 +64,7 @@ modules are narrated. The modules are
 | A twelve-dimensional torus | `xresidue` | the 144 shadows of the residue torus of 2 … 37 recoloured panel by panel as Euler's line (never on a cross) and the pronic numbers (on every cross) pass through; the 36 shadows close up |
 | The modular surface | `xmodular` | the curves' roots in the upper half plane: points, their j-invariants, closed geodesics and the cusp geodesics of the cancellation curves; the fundamental domain close up |
 | The lattice race | `xrace` | the race mod 4 rebuilt live from the zeros of Dirichlet's β, with flares at 26 861, 616 841 and 12 306 137; the four lattice classes mod 12 and the near miss at 48 231 785 |
+| Dropping onto E8 | `xe8` | E8's roots ring by ring in the Coxeter plane; the Coxeter element walking the 30 hours, the eight hours coprime to 30 lit as they are named; 1 … 600 dropped on the wheel at n mod 30, every prime above 5 on a gold spoke; the tower of spheres of norm 2n with their point counts, primes on the floor 240(1 + n³); one cube per divisor for 6, 7 and 35, and 35 = 5 × 7 recovered from the count |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
@@ -79,7 +80,8 @@ shapes `exp:goldbachlive`, `exp:goldbachsky`, `exp:mobiusband`, `exp:mobiuspoint
 `exp:eulerlattice`, `exp:residuetorus:COUNT:CELL[:a;b]`, `exp:residuelive:CODE:SECONDS`,
 `exp:modular:UNIT:U:V:CMAX:LABEL:ARCS`, `exp:race:mod4|mod12:W:H:L[:x1,x2]` and `exp:racelive:SECONDS[:x1,x2]`, the generic
 `exp:reveal:GROUP:SECONDS` and `exp:hide:GROUP` (a group's items appear one by one, each with its caption-board note and
-flares), and more,
+flares), the E8 module's `exp:e8wheel`, `exp:e8walk:SECONDS[:T1,…,T8]`, `exp:e8tower`, `exp:e8cubes:N:X:Z:VOXEL:GAP:DOT:LABEL`,
+`exp:e8solve:N` and `exp:e8close`, and more,
 and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
 see `ExperimentTour.cs`).
 

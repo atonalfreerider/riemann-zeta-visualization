@@ -415,6 +415,26 @@ public partial class TourDirector
                 sacks.ExpRaceLive(Seconds(A(2), 8f), ms.ToArray());
                 break;
             }
+            // ---- the E8 drop module (SacksE8Drop.cs) ----
+            case "e8wheel": sacks.ExpE8Wheel(c + new Vector3(SacksSpiral.E8DropOffset, 0f, 0f), 8f, 600, 15f, 33f, .55f, F(2, 66f), new long[] { 49, 77, 91, 119, 121, 133 }); break;
+            case "e8walk":
+            {
+                // exp:e8walk:SECONDS[:T1,T2,…] — the walk once round, the eight hours lit at T1 … T8 (seconds from the start)
+                List<float> times = new();
+                foreach (string t in A(3).Split(',')) if (float.TryParse(t.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float v)) times.Add(v);
+                sacks.ExpE8WalkLive(Seconds(A(2), 8f), times.Count > 0 ? times.ToArray() : null);
+                break;
+            }
+            case "e8tower":
+                sacks.ExpE8Tower(c + new Vector3(SacksSpiral.E8DropOffset + 300f, 0f, 0f), 7, 30f, 34f, 1f, F(2, 80f),
+                    new[] { "E8 tower A", "E8 tower B", "E8 tower C" }, new[] { 3, 5 });
+                break;
+            case "e8cubes":
+                // exp:e8cubes:N:X:Z:VOXEL:GAP:DOT:LABEL — the cubes of n's divisors, based at (offset + 600 + X, 0, Z)
+                sacks.ExpDivisorCubes(c + new Vector3(SacksSpiral.E8DropOffset + 600f + F(3, 0f), 0f, F(4, 0f)), I(2, 6), F(5, 2.2f), F(6, 3f), F(7, .5f), F(8, 75f));
+                break;
+            case "e8solve": sacks.ExpE8SolveBoard(I(2, 35)); break;
+            case "e8close": SacksSpiral.ExpE8CloseBoard(); break;
             case "dialholes": sacks.ExpDialHolesPulse(); break;
             case "sieveboard": sacks.ExpSieveBoard(c + new Vector3(SacksSpiral.MachineOffset + 160f, 0f, 0f), I(2, 50399), I(3, 225), I(4, 320), SieveMods, 2.2f, 36f, I(5, 48)); break;
             case "knot": sacks.ExpTorusKnot(c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f), 30f, 12f, 5, 7, 1000000, Has("euler"), 48f, false); break;

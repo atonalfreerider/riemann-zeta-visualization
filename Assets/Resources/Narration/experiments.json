@@ -1801,6 +1801,126 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xe8",
+      "title": "Dropping onto E8",
+      "subtitle": "prime or not prime, by position and by intersection",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xe8_01",
+          "text": "E eight is a lattice in eight dimensions, built from symmetry alone: every coordinate whole, or every coordinate half-whole, with an even sum. Seen in its Coxeter plane, its two hundred and forty nearest points lie on eight rings of thirty.",
+          "camera": "orbit:on=centre;at=36300,0,0;el=89.5;az=-90;spin=0;raise=.05;fit=32,60>30,56;span=12",
+          "actions": [
+            "exp:e8wheel:66",
+            "exp:hide:E8 spiral",
+            "exp:hide:E8 impostors",
+            "exp:reveal:E8 rings:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_02",
+          "text": "One turn of its Coxeter element moves each ring a single step, a thirtieth of a circle. Thirty is two times three times five, and only eight of the thirty steps turn E eight the same way: one, seven, eleven, thirteen, seventeen, nineteen, twenty-three and twenty-nine.",
+          "camera": "orbit:on=centre;at=36300,0,0;el=89.5;az=-90;spin=0;raise=.05;fit=30,56>84,156;hold=9.5;span=3",
+          "actions": [
+            "exp:e8walk:12:12.9,13.8,14.8,15.9,17.1,18.4,19.7,21.0"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_03",
+          "text": "Drop every number onto the wheel at its step. Every prime above five lands on one of those eight spokes, so a number off them is divisible by two, three or five, and position alone has told us.",
+          "camera": "orbit:on=centre;at=36300,0,0;el=89.5;az=-90;spin=0;raise=.05;fit=84,156;span=12",
+          "actions": [
+            "exp:reveal:E8 spiral:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_04",
+          "text": "But forty-nine, seventy-seven and ninety-one land on the spokes as well. Position stops at thirty. For the rest, we drop through the lattice itself.",
+          "camera": "orbit:on=centre;at=36300,0,0;el=89.5;az=-90;spin=0;raise=.05;fit=84,156;span=12",
+          "actions": [
+            "exp:reveal:E8 impostors:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_05",
+          "text": "Take the sphere of radius root two n around the centre, and count the lattice points it passes through. For a prime, the count is two hundred and forty times one plus n cubed: the fewest a sphere can hold.",
+          "camera": "orbit:on=centre;el=22;az=-90;spin=1;raise=.08;at=36600,0,34;fit=96,180;span=12",
+          "actions": [
+            "exp:e8tower:80",
+            "exp:hide:E8 tower B",
+            "exp:hide:E8 tower C",
+            "exp:reveal:E8 tower A:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_06",
+          "text": "Four holds one thousand nine hundred and twenty more than that floor, two hundred and forty times two cubed, for its divisor two. Five is back on the floor.",
+          "camera": "orbit:on=centre;el=22;az=-90;spin=1;raise=.08;at=36600,0,34>36600,0,119;fit=96,180;span=6",
+          "actions": [
+            "exp:reveal:E8 tower B:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_07",
+          "text": "Six holds eight thousand four hundred more: two cubed plus three cubed, times two hundred and forty. Seven sits on the floor again.",
+          "camera": "orbit:on=centre;el=22;az=-90;spin=1;raise=.08;at=36600,0,119>36600,0,187;fit=96,180;span=6",
+          "actions": [
+            "exp:reveal:E8 tower C:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_08",
+          "text": "So every sphere counts cubes, one cube for each divisor. Seven has only the smallest cube and the largest. Six has cubes in between, and they are its factors.",
+          "camera": "orbit:on=centre;at=36919,0,6;fit=60,108;el=18;az=-72;spin=1;raise=.05;span=12",
+          "actions": [
+            "exp:e8cubes:6:0:-8:2.2:4:.5:75",
+            "exp:e8cubes:7:0:30:2.2:4:.5:75",
+            "exp:hide:E8 cubes 6",
+            "exp:hide:E8 cubes 7",
+            "exp:reveal:E8 cubes 7:3",
+            "delay:6.3:exp:reveal:E8 cubes 6:3.5",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_09",
+          "text": "For thirty-five, the extra cubes are five cubed plus seven cubed, four hundred and sixty-eight. That one count gives the factors back. It did so for all five thousand and eighty-one products of two primes below twenty thousand.",
+          "camera": "orbit:on=centre;at=37231,0,-13;fit=82,146;el=18;az=-72;spin=1;raise=.05;span=12",
+          "actions": [
+            "exp:e8cubes:35:300:0:.9:6:.4:75",
+            "exp:hide:E8 cubes 35",
+            "exp:reveal:E8 cubes 35:6.5",
+            "delay:6:exp:e8solve:35",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xe8_10",
+          "text": "Nothing about primes went into E eight, only symmetry, yet one intersection, a sphere with the lattice, decides prime or not prime. The catch is that counting a sphere takes longer than trying the divisors. The symmetry knows the primes. It does not yet give a shortcut.",
+          "camera": "orbit:on=centre;at=36300,0,0;fit=84,156;el=89.5;az=-90;spin=6;raise=.05;span=12",
+          "actions": [
+            "exp:e8close",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }

@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EE)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EF)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1287,6 +1287,42 @@ public class ExperimentsRenderTest
         sacks.ExpZeroSpacing(zs, 260f, 130f, 170f);
         Vector3 zsl = zs + new Vector3(-46f, 9f, 0f);
         yield return Shot("EE1-zeros-repel-like-gue-eigenvalues", zsl + back * 196f, zsl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Dropping onto E8: section EF (SacksE8Drop.cs), digit 6, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('6')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 ew = c + new Vector3(SacksSpiral.E8DropOffset, 0f, 0f);
+        sacks.ExpE8Wheel(ew, 8f, 600, 15f, 33f, .55f, 60f, new long[] { 49, 77, 91, 119, 121, 133 });
+        sacks.ExpE8HourMarks();
+        sacks.ExpWorldLegend(ew + new Vector3(-112f, 40f, -.3f), Vector3.down * 5f,
+            new[] { "E8's Coxeter element turns its plane by 1/30 of a circle", "c<sup>k</sup> turns it the same way only for the 8 gold hours:",
+                    "the numbers below 30 sharing no factor with 30 = 2·3·5", "", "the numbers 1 … 600 dropped at their hour n mod 30:",
+                    "every prime above 5 (gold) lands on a gold spoke", "red rings: composites that land there too" }, 25f, new Color(.85f, .88f, .95f), false);
+        Vector3 ewl = ew + new Vector3(-36f, 0f, 0f);
+        yield return Shot("EF1-the-coxeter-wheel", ewl + back * 98f, ewl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 et = c + new Vector3(SacksSpiral.E8DropOffset + 300f, 0f, 0f);
+        sacks.ExpE8Tower(et, 7, 30f, 34f, 1f, 180f, new[] { "E8 tower" }, new int[0]);
+        sacks.ExpWorldLegend(et + new Vector3(68f, 0f, -12f), Vector3.forward * 12f,
+            new[] { "floor n:  E8's points on the sphere of norm 2n", "", "gold, n prime:  240(1 + n³) points,", "the fewest a sphere can hold", "",
+                    "red, n composite:  240·d³ more", "for each divisor d", "", "4:  1,920 more  (2³)", "6:  8,400 more  (2³ + 3³)" }, 75f, new Color(.85f, .88f, .95f), false);
+        Vector3 etl = et + new Vector3(60f, 0f, 102f);
+        yield return ShotOrtho("EF2-the-tower-of-spheres", etl + new Vector3(0f, -362f, -169f), etl, back, 122f);
+        sacks.ClearExperiments();
+        Vector3 ec = c + new Vector3(SacksSpiral.E8DropOffset + 600f, 0f, 0f);
+        sacks.ExpDivisorCubes(ec, 6, 2.2f, 4f, .5f, 60f);
+        sacks.ExpDivisorCubes(ec + new Vector3(0f, 0f, 36f), 7, 2.2f, 4f, .5f, 60f);
+        sacks.ExpDivisorCubes(ec + new Vector3(52f, 0f, 36f), 35, .9f, 6f, .4f, 60f);
+        sacks.ExpWorldLegend(ec + new Vector3(-6f, 0f, -36f), Vector3.forward * 5.5f,
+            new[] { "one cube of d × d × d points for each divisor d of n", "the sphere of norm 2n holds 240 × (the sum of the cubes) points of E8",
+                    "a prime has only the cubes of 1 and n" }, 30f, new Color(.85f, .88f, .95f), false);
+        Vector3 ecl = ec + new Vector3(50f, 0f, 4f);
+        yield return Shot("EF3-one-cube-per-divisor", ecl + new Vector3(-22f, -100f, -40f), ecl, back, 55f);
         sacks.ClearExperiments();
         }
 
