@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EI)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EI, FA–FE)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1406,6 +1406,91 @@ public class ExperimentsRenderTest
         sacks.ExpCaption(sd + new Vector3(-178f, 62f, -40f), down2 * 8f,
             "twin primes (white links) straddle the ridges (gold lines) of each wheel;  the blue lines are the valleys|E6:  hours 0 and 6      E7:  hours 0, 6, 12      E8:  hours 0, 12, 18 — never 6 or 24, where 5 sits", 72f);
         yield return Shot("EI2-twin-saddles-of-e6-e7-e8", sdrPos, sdr, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Unique factorization as geometry: sections FA–FD (SacksFactorLattice.cs), letters w–z, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('w')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        // a point in the plane through look, facing the camera, at (x right, y up) world units: for captions beside 3D scenes
+        Vector3 ScreenAt(Vector3 pos, Vector3 look, Vector3 up, float x, float y)
+        {
+            Vector3 fwd = (look - pos).normalized, u = (up - Vector3.Dot(up, fwd) * fwd).normalized;
+            return look + Vector3.Cross(u, fwd) * x + u * y;
+        }
+
+        Vector3 ScreenDownOf(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fwd = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, fwd) * fwd).normalized;
+        }
+
+        Vector3 fl = c + new Vector3(SacksSpiral.FactorLatticeOffset, 0f, 0f);
+        Vector3 e2 = Vector3.right, e3 = Vector3.up, e5 = back;
+        sacks.ExpFactorLattice(fl, 14f, 5, 3, 2, 360, e2, e3, e5, new long[] { 2, 2, 2, 3, 3, 5 }, new long[] { 6, 30, 360 }, 1.1f, 95f);
+        Vector3 flc = fl + new Vector3(36f, 20f, -12f), flPos = flc + new Vector3(-32f, -92f, -58f);
+        sacks.ExpCaption(ScreenAt(flPos, flc, back, -96f, 40f), ScreenDownOf(flPos, flc, back) * 5.2f,
+            "every n = 2<sup>a</sup>·3<sup>b</sup>·5<sup>c</sup> is the lattice point (a, b, c)|multiplying by a prime:  one step along its axis|ringed:  6 closes the square of 2 and 3,|30 the cube of 2, 3 and 5|the 24 divisors of 360 = 2³·3²·5 fill a 4 × 3 × 2 box|white:  one of the 60 paths from 1 to 360", 46f);
+        yield return Shot("FA1-the-factor-lattice", flPos, flc, back, 55f);
+        sacks.ClearExperiments();
+        Vector3 sh = c + new Vector3(SacksSpiral.ShadowOffset, 0f, 0f);
+        float s = 26f;
+        Vector3 W = (e2 * Mathf.Log(2f) + e3 * Mathf.Log(3f) + e5 * Mathf.Log(5f)).normalized;
+        Vector3 camUp = (e5 - Vector3.Dot(e5, W) * W).normalized;
+        Vector3 fwd = Vector3.Cross(W, camUp).normalized;
+        sacks.ExpLatticeShadow(sh, s, 3, 2, 1, e2, e3, e5, 1.1f, 110f, camUp, camUp);
+        float axisLen = s * Mathf.Log(360f) / new Vector3(Mathf.Log(2f), Mathf.Log(3f), Mathf.Log(5f)).magnitude;
+        Vector3 shc = sh + W * (axisLen * .5f) - camUp * 6f;
+        sacks.ExpCaption(shc + camUp * 44f - W * 56f + fwd * -40f, -camUp * 4.8f,
+            "the number line is the shadow of the factor lattice|each divisor of 360 drops straight onto the direction (log 2, log 3, log 5), landing at log n|no two share a shadow:  log 2, log 3, log 5 are rationally independent —|that is unique factorization", 46f);
+        yield return ShotOrtho("FA2-the-number-line-is-a-shadow", shc - fwd * 300f, shc, camUp, 52f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('x')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 hy = c + new Vector3(SacksSpiral.HyperbolaOffset, 0f, 0f);
+        sacks.ExpLandingHyperbolas(hy + new Vector3(-112f, -30f, 0f), hy + new Vector3(18f, -30f, 0f), 86f, 36, new long[] { 12, 23, 35 }, 5, 7, .8f, 110f);
+        sacks.ExpCaption(hy + new Vector3(-118f, 76f, -.3f), Vector3.down * 7f,
+            "two factors:  the hyperbola xy = n holds every factor pair of n, and meets the number line at n|left:  from (5, 7) along xy = 35 to 35 on y = 1 — the prime 23's hyperbola meets the lattice only at its ends|right:  in log–log coordinates every hyperbola is the straight line u + v = log n:  the slide rule", 60f);
+        yield return Shot("FB1-hyperbolas-and-the-slide-rule", hy + new Vector3(2f, 10f, 0f) + back * 142f, hy + new Vector3(2f, 10f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('y')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 zo = c + new Vector3(SacksSpiral.ZonotopeOffset, 0f, 0f);
+        sacks.ExpPrimeStar(zo + new Vector3(-112f, 26f, 0f), 9f, .9f, 96f);
+        sacks.ExpDivisorZonotope(zo + new Vector3(-36f, -32f, 0f), 1001, 11.5f, new long[] { 7, 11, 13 }, .9f, 96f, true, "1001 = 7·11·13|8 divisors:  a cube, 6 paths");
+        sacks.ExpDivisorZonotope(zo + new Vector3(16f, -42f, 0f), 2310, 11.5f, new long[] { 2, 3, 5, 7, 11 }, .9f, 96f, false, "2310 = 2·3·5·7·11|32 divisors:  a 5-cube's shadow, 120 paths");
+        sacks.ExpDivisorZonotope(zo + new Vector3(68f, -32f, 0f), 360, 11.5f, new long[] { 2, 2, 2, 3, 3, 5 }, .9f, 96f, true, "360 = 2³·3²·5|24 divisors:  a 4 × 3 × 2 box, 60 paths");
+        sacks.ExpCaption(zo + new Vector3(-130f, 72f, -.3f), Vector3.down * 7f,
+            "n factors:  every edge is one multiplication d → d·p, a step of length log p in p's own direction|the divisors of n are the corners of a zonotope;  every order of n's prime factors is an edge path from 1 landing on n", 60f);
+        yield return Shot("FC1-divisor-zonotopes", zo + new Vector3(-10f, 8f, 0f) + back * 158f, zo + new Vector3(-10f, 8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('z')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 iw = c + new Vector3(SacksSpiral.IndexWheelOffset, 0f, 0f);
+        sacks.ExpIndexWheel(iw, 3000, 5f, 5.8f, new[] { new long[] { 5, 7 }, new long[] { 7, 11, 13 } }, .55f, 100f);
+        sacks.ExpCaption(iw + new Vector3(-155f, 50f, -.3f), Vector3.down * 6.5f,
+            "a multiplicative wheel:  mod 31, hour k holds 3<sup>k</sup>|multiplying by p turns ind(p) hours and moves out by log p|the paths pass through the partial products|and land on the product in either order:|35 = 5·7  and  1001 = 7·11·13|(E8's wheel adds hours when numbers add)", 58f);
+        Vector3 iwl = iw + new Vector3(-38f, 0f, 0f);
+        yield return Shot("FD1-the-multiplicative-wheel", iwl + back * 132f, iwl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 qs = c + new Vector3(SacksSpiral.IndexWheelOffset + 600f, 0f, 0f);
+        sacks.ExpSieveTable(qs, 773203, new long[] { 2, 3, 7, 17, 19, 23, 29, 31, 41, 47 }, 12, new long[] { 880, 881, 887, 888 }, 6f, 100f);
+        sacks.ExpCaption(qs + new Vector3(-20f, 34f, -.3f), Vector3.down * 5.9f,
+            "the lattice read backwards:  a quadratic sieve on 773,203|each row:  x² − N factored over the base, its exponents (amber:  odd)|the four lit rows add to an all-even vector:  their product is a square Y²|so X² ≡ Y² (mod N), and gcd(X − Y, N) is a factor", 52f);
+        Vector3 qsl = qs + new Vector3(78f, -26f, 0f);
+        yield return Shot("FE1-the-lattice-read-backwards", qsl + back * 124f, qsl, Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 

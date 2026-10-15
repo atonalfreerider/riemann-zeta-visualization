@@ -2040,6 +2040,155 @@ many.
   division. j needs high precision.
   GUE statistics describe the zeros only on average.
 
+## FA–FE. The curves that land on products: unique factorization as geometry
+
+The fact behind this round is the **fundamental theorem of arithmetic**: every n > 1 is a product of primes in exactly one
+way, n = Π p^(a_p). (The prime number theorem is a different statement; it counts how many primes there are.)
+
+Unique factorization means each n is one point of a lattice with **one axis per prime**: its exponent vector
+(a₂, a₃, a₅, a₇, …). In that lattice:
+
+* multiplying is adding vectors, so multiplying by p is one step along p's axis;
+* d divides n exactly when each of d's exponents is at most n's;
+* gcd and lcm are the coordinatewise minimum and maximum;
+* n has Π(a_p + 1) divisors, the lattice points of a box.
+
+So the curves that "go from p and q and land on pq" exist exactly in the pictures where multiplication becomes addition.
+This round drew five of them ([`SacksFactorLattice.cs`](../../Assets/Tour/SacksFactorLattice.cs)). Every number below was
+checked in Python, PSLQ with mpmath. The frames are 1920 × 1080 (`ZETA_EXP_WIDE=1`).
+
+### FA. The factor lattice, and the number line as its shadow
+
+For the primes 2, 3, 5 the lattice is three-dimensional. Each n = 2^a·3^b·5^c is the point (a, b, c):
+
+* 2 and 3 complete a square at 6, and 2, 3, 5 a cube at 30.
+* The 24 divisors of 360 = 2³·3²·5 fill a 4 × 3 × 2 box.
+* There are 6!/(3!·2!·1!) = 60 orders of its six prime factors, each an edge path from 1 to 360. White in FA1 is one of
+  them.
+
+**The number line is this lattice's shadow.** Project each point (a, b, c) onto the direction (log 2, log 3, log 5): it
+lands at a·log 2 + b·log 3 + c·log 5 = log n. FA2 views that projection face-on. Every divisor of 360 drops straight
+down onto the line, and the shadows come out in the order 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, …, 360.
+
+No two points ever share a shadow. Two would collide only if some integers a, b, c, not all zero, gave
+a·log 2 + b·log 3 + c·log 5 = 0, which would mean 2^a·3^b·5^c = 1. **Unique factorization is exactly the statement that
+the logarithms of the primes are linearly independent over the rationals**, so the shadow loses no information. What
+the shadow hides is the direction each number came from. The Sacks spiral, the Ulam spiral and every wheel in these
+experiments are pictures of the number line, so they are pictures of this shadow.
+
+![FA1](FA1-the-factor-lattice.jpg)
+![FA2](FA2-the-number-line-is-a-shadow.jpg)
+
+### FB. Two factors: the hyperbola that lands on the product
+
+In the plane of pairs (x, y), the hyperbola xy = n passes through every factor pair of n. It reaches the number line
+y = 1 at n, and it contains exactly d(n) lattice points:
+
+| n | lattice points on xy = n |
+|---|---|
+| 12 | 6 |
+| 35 | 4: (1, 35), (5, 7), (7, 5), (35, 1) |
+| 23 (prime) | 2: its two ends |
+
+**Starting at (p, q) and following xy = pq lands on pq.** In log–log coordinates (u, v) = (log x, log y) every hyperbola
+becomes the straight line u + v = log n, and the landing is a straight slide. This is the slide rule: shift a log scale
+by log 5, and its 7 stands over 35.
+
+For k factors the same holds one dimension up. The hypersurface x₁x₂⋯x_k = n carries the ordered factorizations, and in
+logarithms it is the flat hyperplane u₁ + ⋯ + u_k = log n.
+
+![FB1](FB1-hyperbolas-and-the-slide-rule.jpg)
+
+### FC. n factors: zonotopes
+
+Give each prime its own direction in the plane and a length of log p. Then each n sits at the sum of its prime vectors,
+so every multiplication d → d·p is an edge of length log p in p's direction. **The divisors of n are the corners of a
+zonotope, a projected box, and every order of n's prime factors is an edge path from 1 that lands on n:**
+
+| n | divisors | shape | paths from 1 |
+|---|---|---|---|
+| 1001 = 7·11·13 | 8 | a cube | 6 |
+| 2310 = 2·3·5·7·11 | 32 | the shadow of a 5-cube | 120 |
+| 360 = 2³·3²·5 | 24 | a 4 × 3 × 2 box | 60 |
+
+The repeated factors of 360 show up as repeated steps along the same edge direction.
+
+![FC1](FC1-divisor-zonotopes.jpg)
+
+### FD. A multiplicative wheel
+
+E8's wheel puts n at its hour n mod 30, where hours add when the numbers add. For a wheel where hours add when the
+numbers multiply, take the hours from a discrete logarithm.
+
+* Modulo 31, 3 is a primitive root, so the 30 hours can hold 3⁰, 3¹, …, 3²⁹ mod 31.
+* Then ind₃(ab) = ind₃(a) + ind₃(b). For example ind(7) + ind(11) = 28 + 23 ≡ 21 = ind(77).
+* With the radius set to log n, multiplying by p turns ind₃(p) hours and moves out by log p.
+* The two paths for 1001 pass through the partial products (7 then 77, or 13 then 143) and land on the same point,
+  as do the two paths for 35.
+
+The zeta chain is built the same way. Its arrows n^(−s) are a multiplicative map, (pq)^(−s) = p^(−s)·q^(−s), so the arrow
+of every composite is the product of its primes' arrows. The Euler product ζ(s) = Π_p (1 − p^(−s))^(−1) says that
+summing over the whole lattice equals multiplying over its axes, one factor per prime.
+
+![FD1](FD1-the-multiplicative-wheel.jpg)
+
+### FE. Reading the lattice backwards is factoring
+
+Going forward is easy: multiplying is a straight step. Going backward means recovering a number's lattice point from its
+shadow, and that is factoring. Two exact ways to do it:
+
+**From the single coordinate log n, by integer relations.** Given log n and the logs of a candidate list of primes, PSLQ
+finds integers with log n = Σ a_p log p:
+
+* For 360 it returns (3, 2, 1).
+* For 2310 it returns (1, 1, 1, 1, 1).
+* For 2¹⁰·3⁷·5³·7²·11·13 it returns (10, 7, 3, 2, 1, 1).
+
+The precision needed grows with the size of the prime list. Five random smooth numbers per row, with exponents up to e:
+
+| primes in the list | e | digits needed | n up to |
+|---|---|---|---|
+| 6 (up to 13) | 3 | at most 16 | 10⁵ |
+| 6 (up to 13) | 9 | at most 16 | 10²⁹ |
+| 10 (up to 29) | 3 | at most 16 | 10²⁰ |
+| 10 (up to 29) | 9 | 20 | 10⁵⁹ |
+| 16 (up to 53) | 3 | 32 | 10³³ |
+| 16 (up to 53) | 9 | 40 | 10¹¹⁴ |
+| 25 (up to 97) | 3 | 52 | 10⁶² |
+| 25 (up to 97) | 9 | 64 | 10¹⁵⁹ |
+
+It finds nothing when a prime factor is missing from the list (6120 = 2³·3²·5·17, 2018 = 2·1009). And computing log n to
+that precision already needs n exactly, at which point dividing by the same primes is just as quick.
+
+**The quadratic sieve** is the practical form of the same idea, in the lattice mod 2. It collects values x² − N that
+factor over a small base, writes their exponent vectors, and looks for a set of rows that add to an all-even vector.
+That set's product is a square Y², while the product of the x's is X, so X² ≡ Y² (mod N) and gcd(X − Y, N) is a factor
+of N.
+
+FE1 is the sieve on N = 773 203:
+
+* 12 values of x² − N, for x from 880 to 1020, factor over {2, 3, 7, 17, 19, 23, 29, 31, 41, 47}.
+* The rows for x = 880, 881, 887 and 888 add to the even vector (2, 4, 2, 2, 2, 2, 2, 0, 0, 0).
+* X = 880·881·887·888 ≡ 637 167 and Y = 2·3²·7·17·19·23·29 ≡ 83 461 (mod N).
+* gcd(X − Y, N) = 1103, so 773 203 = 701 × 1103.
+
+The classic small example is 1649: 41² − 1649 = 2⁵ and 43² − 1649 = 2³·5², which gives 1649 = 17 × 97. The number field
+sieve, the fastest known classical method, works the same way in a larger lattice. Its cost grows faster than any power
+of log N, so it is not polynomial.
+
+![FE1](FE1-the-lattice-read-backwards.jpg)
+
+### What the factor lattice gives
+
+* **The architecture is real and exact.** It is the exponent lattice, with one axis per prime. It is the integers' own
+  multiplicative structure, not a pattern found in it.
+* **Curves that land on products** exist in every picture that turns multiplication into addition: the log scale and
+  the slide rule, the hyperbolas xy = n, the prime star, the discrete-log wheels, and the arrows of the zeta chain.
+* **The number line and every spiral drawn from it are its shadow.** Unique factorization says the shadow is faithful,
+  but it hides which direction each number came from.
+* **Going backwards is factoring.** The lattice gives exact methods (PSLQ over a known base, the quadratic and number
+  field sieves), but none of them is polynomial in the number of digits.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -2228,7 +2377,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
-are EA to EE (`6` is EF, and `7` to `9` are EG to EI). Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EI are drawn for full horizontal frames: run them with
+are EA to EE (`6` is EF, and `7` to `9` are EG to EI), and `w` to `z` are FA to FE. Sections AA–AE, BA–BD, CA–CE, DA–DD, EA–EI and FA–FE are drawn for full horizontal frames: run them with
 `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
