@@ -542,7 +542,7 @@ the ordinary rate and nothing special. Far out, the rulings parallel to the diag
 one-to-sixteen families `16k² + k + C`, at offsets `−πR(1 − 64C)/64` from the diagonal. The saddle's straight lines
 carry those quadratics the way the axis planes carry `k² + C`.
 
-![N4](N4-tangent-plane-1601-top.jpg)
+![N5](N5-tangent-plane-1601-top.jpg)
 ![N6](N6-diagonal-families-on-straight-lines.jpg)
 
 ## O. Twisting and folding the saddle
