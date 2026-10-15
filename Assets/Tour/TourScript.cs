@@ -56,6 +56,7 @@ public class LineTiming
 public static class TourScriptLoader
 {
     public const string ScriptResource = "Narration/script";
+    public const string ExperimentsResource = "Narration/experiments";
     public const string AudioFolder = "Narration/Audio/";
     public const string TimingFolder = "Narration/Timing/";
 
@@ -69,6 +70,16 @@ public static class TourScriptLoader
         }
 
         return JsonUtility.FromJson<TourScriptData>(asset.text);
+    }
+
+    /// <summary>The experiment modules (the side menu's Experiments section), or an empty script.</summary>
+    public static TourScriptData LoadExperiments()
+    {
+        TextAsset asset = Resources.Load<TextAsset>(ExperimentsResource);
+        if (asset == null) return new TourScriptData { chapters = Array.Empty<TourChapter>() };
+        TourScriptData data = JsonUtility.FromJson<TourScriptData>(asset.text);
+        if (data?.chapters == null) data = new TourScriptData { chapters = Array.Empty<TourChapter>() };
+        return data;
     }
 
     /// <summary>Word timings produced by Tools/generate_narration.py (ElevenLabs alignment), or null.</summary>

@@ -32,6 +32,27 @@ chain, numbers, the red / blue / green curves, trail height, reset view — **Fo
 in the chosen format. The panel is a screen overlay, so it never appears in recordings; while recording, the
 window shows the frame being recorded, letterboxed.
 
+## Experiments section
+
+Below the chapter list the side menu has an **Experiments** section: directed explainer modules for the thought
+experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
+chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
+when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour;
+no narration has been recorded for them, so the captions use the estimated timing. The modules are
+
+| module | id | what it shows |
+|---|---|---|
+| Cancellation curves | `xcurves` | the product curves, Euler's line cut by them in two families, the zeta wave along the line |
+| Level contours | `xlevels` | the saddle sliced by horizontal planes: hyperbolas, the numbers on them, the trail, the three product families |
+| The bend as a probe | `xprobe` | a fixed plane sweeping the valley and ridge families as the bend goes from flat to twice the tour's |
+| Mirrors, not oracles | `xmirror` | the vortex eyes of the chain at a zero, their mirror points, the traces through the zero planes |
+
+Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
+`exp:contours:H1,H2:planes`, `exp:family:ridge|valley|level|all`, `exp:euler:KMAX`, `exp:zetawave`,
+`exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`; see `ExperimentTour.cs`) and their
+camera cues start with `exp_` (`CameraRig.cs`). To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
+storyboard command below.
+
 ## Running it
 
 | Where | How |

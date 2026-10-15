@@ -176,6 +176,34 @@ public class CameraRig : MonoBehaviour
             float a = Time.time * 0.15f;
             return new CueState { Position = new Vector3(Mathf.Sin(a) * d, h + 2f, -Mathf.Cos(a) * d), LookAt = new Vector3(0, h, 0), Up = up, Fov = 60 };
         };
+        // ---- experiments (the side menu's Experiments section; ExperimentTour.cs) ---------------------
+        Vector3 back = Vector3.back;
+        Vector3 Sc() => annotations.Sacks.Center;
+        Vector3 Panel() => Sc() + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f);
+        Vector3 Tower() => Sc() + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f);
+        float TowerH() => Mathf.Max(1f, annotations.Sacks.ExpTowerHeight);
+        cues["exp_full"] = () => new CueState { Position = Sc() + back * 205f, LookAt = Sc(), Up = up, Fov = 55 };
+        cues["exp_centre"] = () => new CueState { Position = Sc() + back * 100f, LookAt = Sc(), Up = up, Fov = 55 };
+        cues["exp_core"] = () => new CueState { Position = Sc() + back * 40f, LookAt = Sc(), Up = up, Fov = 50 };
+        cues["exp_oblique"] = () => new CueState { Position = Sc() + new Vector3(-40f, -70f, -45f), LookAt = Sc() + back * 2f, Up = back, Fov = 60 };
+        cues["exp_side_y"] = () => new CueState { Position = Sc() + new Vector3(0f, -200f, 15f), LookAt = Sc() + new Vector3(0f, 0f, 15f), Up = back, Fov = 55 };
+        cues["exp_side_x"] = () => new CueState { Position = Sc() + new Vector3(-200f, 0f, 15f), LookAt = Sc() + new Vector3(0f, 0f, 15f), Up = back, Fov = 55 };
+        cues["exp_levels_oblique"] = () => new CueState { Position = Sc() + new Vector3(-150f, -150f, -90f), LookAt = Sc() + back * 4f, Up = back, Fov = 55 };
+        cues["exp_levels_side"] = () => new CueState { Position = Sc() + new Vector3(0f, -210f, -10f), LookAt = Sc() + back * 4f, Up = back, Fov = 55 };
+        cues["exp_flat_wide"] = () => new CueState { Position = Sc() + new Vector3(12f, -58f, -215f), LookAt = Sc() + new Vector3(12f, -58f, 0f), Up = up, Fov = 55 };
+        cues["exp_flat_close"] = () => new CueState { Position = Sc() + new Vector3(44f, -62f, -100f), LookAt = Sc() + new Vector3(44f, -62f, 0f), Up = up, Fov = 55 };
+        cues["exp_flat_first"] = () => new CueState { Position = Sc() + new Vector3(58f, -16f, -60f), LookAt = Sc() + new Vector3(58f, -16f, 0f), Up = up, Fov = 55 };
+        cues["exp_panel"] = () => new CueState { Position = Panel() + back * 48f, LookAt = Panel(), Up = up, Fov = 50 };
+        cues["exp_tower_oblique"] = () => new CueState { Position = Tower() + new Vector3(-34f, -52f, -TowerH() * .5f), LookAt = Tower() + back * (TowerH() * .5f), Up = back, Fov = 55 };
+        cues["exp_tower_side"] = () => new CueState { Position = Tower() + new Vector3(0f, -64f, -TowerH() * .5f), LookAt = Tower() + back * (TowerH() * .5f), Up = back, Fov = 55 };
+        cues["exp_tower_top"] = () => new CueState { Position = Tower() + back * (TowerH() + 40f), LookAt = Tower() + back * TowerH(), Up = up, Fov = 45 };
+        cues["exp_all_down"] = () =>
+        {
+            // all ten thousand zeros looked at down the axis (the stack is flat, so an ordinary field of view hardly smears the rings)
+            Vector3 f = Tower() + annotations.Sacks.ExpTowerFocus;
+            return new CueState { Position = f + back * (TowerH() + 39f), LookAt = f, Up = up, Fov = 30f };
+        };
+
         cues["wave"] = () =>
         {
             float w = annotations.WaveViewMax;

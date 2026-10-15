@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Meta.Numerics;
 using TMPro;
@@ -87,13 +88,142 @@ public partial class SacksSpiral
             sizes.Add(p ? primeSize : sq ? primeSize * .8f : compositeSize);
         }
 
-        ExpPointCloud(backdropRoot.transform, "numbers", pts, cols, sizes, Factory.SoftGlowIntensity);
+        MeshRenderer mr = ExpPointCloud(backdropRoot.transform, "numbers", pts, cols, sizes, Factory.SoftGlowIntensity);
+        backdropMesh = mr.GetComponent<MeshFilter>().sharedMesh;
+        backdropNs = new int[nMax - 1];
+        for (int n = 2; n <= nMax; n++) backdropNs[n - 2] = n;
+        backdropSizes = sizes.ToArray();
     }
 
     public void ClearBackdrop()
     {
         if (backdropRoot != null) Destroy(backdropRoot);
         backdropRoot = null;
+        backdropMesh = null;
+    }
+
+    Mesh backdropMesh;
+    int[] backdropNs;
+    float[] backdropSizes;
+
+    /// <summary>Move the backdrop's dots onto the current surface (after the bend changed) without rebuilding it.</summary>
+    public void ExpRefreshBackdrop()
+    {
+        if (backdropMesh == null || backdropNs == null) return;
+        Vector3[] axes = { Vector3.right, Vector3.up, Vector3.forward };
+        Vector3[] verts = new Vector3[backdropNs.Length * 6];
+        for (int i = 0; i < backdropNs.Length; i++)
+        {
+            Vector3 p = OnSpiral(backdropNs[i], 0f, 0f);
+            float sz = backdropSizes[i];
+            verts[6 * i] = p + axes[0] * sz; verts[6 * i + 1] = p - axes[0] * sz;
+            verts[6 * i + 2] = p + axes[1] * sz; verts[6 * i + 3] = p - axes[1] * sz;
+            verts[6 * i + 4] = p + axes[2] * sz; verts[6 * i + 5] = p - axes[2] * sz;
+        }
+
+        backdropMesh.SetVertices(verts);
+        backdropMesh.RecalculateBounds();
+    }
+
+    /// <summary>Undo ExpCleanStage and the bend changes: the spiral as the home view expects it, experiments gone.</summary>
+    public void ExpRestoreStage()
+    {
+        ClearExperiments();
+        ClearBackdrop();
+        bend = 1f;
+        Flat = false;
+        for (int i = 0; i < labels.Count && i < GridCount; i++) labels[i].gameObject.SetActive(true);
+        Layout();
+    }
+
+    public const float ExpPanelOffset = 2000f;
+    public const float ExpTowerOffset = 1500f;
+
+    /// <summary>Height of the last vortex tower built (the camera cues frame it with this).</summary>
+    public float ExpTowerHeight { get; private set; } = 44f;
+
+    /// <summary>Where the down-the-axis view of the last tower should look (the point −1 when the Gram phase is taken out).</summary>
+    public Vector3 ExpTowerFocus { get; set; } = Vector3.zero;
+
+    /// <summary>The product families of section H: ridge = u(u + d) in orange, valley = u(4u + odd) in blue, level = u(16u + odd) in white.</summary>
+    public void ExpFamilies(string which, float labelSize)
+    {
+        bool all = which == "all";
+        if (all || which == "ridge") ExpProductFamily(1, new[] { 0, 1, 2, 3, 4 }, Count, new Color(1f, .6f, .4f), .05f, labelSize);
+        if (all || which == "valley") ExpProductFamily(2, new[] { 1, 3, 5, 7 }, Count, new Color(.45f, .75f, 1f), .05f, labelSize);
+        if (all || which == "level") ExpProductFamily(4, new[] { 1, 3, 5, 7 }, Count, new Color(.9f, .9f, 1f), .05f, labelSize);
+    }
+
+    /// <summary>
+    /// Animate the bend from one value to another while the level planes at <paramref name="heights"/> keep cutting the
+    /// surface: the contour and the numbers on it are rebuilt every frame, the backdrop follows the surface in place.
+    /// </summary>
+    public IEnumerator ExpBendSweep(float from, float to, float seconds, float[] heights, bool families)
+    {
+        float t = 0f;
+        while (true)
+        {
+            float u = seconds <= 0f ? 1f : Mathf.Clamp01(t / seconds);
+            float b = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, u));
+            ExpSetBend(b);
+            ExpRefreshBackdrop();
+            ClearExperiments();
+            if (families) ExpFamilies("all", 0f);
+            foreach (float h in heights)
+            {
+                Color col = h > 0 ? new Color(1f, .45f, .3f) : h < 0 ? new Color(.35f, .65f, 1f) : new Color(.85f, .85f, .95f);
+                ExpSectionCurve('z', h, col, .08f);
+                ExpSectionNumbersCloud('z', h, 1f, col, Count);
+            }
+
+            ExpLabel(ExpRoot(), $"bend {b:0.00}", origin + new Vector3(0f, -Extent - 9f, 0f) + Vector3.back * 2f, 12f, Color.white);
+            if (u >= 1f) break;
+            t += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    /// <summary>The numbers within tol of a plane as one mesh (for rebuilding every frame).</summary>
+    public int ExpSectionNumbersCloud(char axis, float c, float tol, Color color, int nMax)
+    {
+        List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
+        for (int n = 2; n <= nMax; n++)
+        {
+            Vector3 p = SpiralPos(n, bend) - origin;
+            float dist = axis == 'x' ? Mathf.Abs(p.x - c) : axis == 'y' ? Mathf.Abs(p.y - c) : Mathf.Abs(p.z - c);
+            if (dist > tol) continue;
+            float w = 1f - dist / tol;
+            pts.Add(SpiralPos(n, bend) + Vector3.back * .3f);
+            cols.Add(IsPrime(n) ? Factory.Palette.Zero : color);
+            sizes.Add(.22f + .28f * w);
+        }
+
+        if (pts.Count > 0) ExpPointCloud(ExpGroup("H numbers cloud " + axis + " " + c).transform, "in plane", pts, cols, sizes, Factory.GlowIntensity);
+        return pts.Count;
+    }
+
+    // ---- the vortices of every zero, computed once on a background thread ------------------------------------
+    static List<Vortex> vortexAll;
+    static System.Threading.Tasks.Task<List<Vortex>> vortexTask;
+
+    public static void ExpPrepareVortices(double[] zeros)
+    {
+        if (vortexAll != null || vortexTask != null) return;
+        EnsureVortexTables((int)(zeros[^1] / System.Math.PI) + 40);
+        vortexTask = System.Threading.Tasks.Task.Run(() =>
+        {
+            List<Vortex> l = new();
+            for (int j = 0; j < zeros.Length; j++) l.AddRange(DetectVortices(zeros[j], j + 1, 12, Complex.Zero));
+            return l;
+        });
+    }
+
+    /// <summary>The vortices of every zero (k ≤ 12); waits for the background pass if it is still running.</summary>
+    public static List<Vortex> ExpVortices(double[] zeros)
+    {
+        ExpPrepareVortices(zeros);
+        if (vortexAll == null) vortexAll = vortexTask.Result;
+        return vortexAll;
     }
 
     public void ShowBackdrop(bool on)
@@ -1408,6 +1538,7 @@ public partial class SacksSpiral
         }
 
         ExpLine(g, "axis", .008f * xyScale, new Color(.5f, .5f, .6f), Factory.NoGlow, new[] { center + Vector3.back * heightOfT(zs[first - 1]), center + Vector3.back * heightOfT(zs[last - 1]) });
+        ExpTowerHeight = heightOfT(zs[last - 1]) - heightOfT(zs[first - 1]);
     }
 
     /// <summary>The chain at one dial value, flat, with its detected vortices ringed (colour by k, brightness by certainty) and the mirror points as crosses.</summary>

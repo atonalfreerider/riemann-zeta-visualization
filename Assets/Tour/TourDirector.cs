@@ -12,7 +12,7 @@ using UnityEngine.InputSystem;
 ///
 /// Keys:  T start/stop tour · N skip to next line · F9 start/stop recording · P toggle portrait · M side menu
 /// </summary>
-public class TourDirector : MonoBehaviour
+public partial class TourDirector : MonoBehaviour
 {
     public static TourDirector Instance { get; private set; }
 
@@ -94,6 +94,7 @@ public class TourDirector : MonoBehaviour
         audioSource.spatialBlend = 0f;
 
         script = TourScriptLoader.Load();
+        experiments = TourScriptLoader.LoadExperiments();
         if (!VRMode.Enabled)
         {
             SideMenu.Create(this);
@@ -223,6 +224,7 @@ public class TourDirector : MonoBehaviour
         Captions.Clear();
         Rig.Release();
         if (Recorder.IsRecording) StopRecording();
+        EndExperiment();
         CurrentChapterId = "";
         CurrentChapterIndex = -1;
         CurrentLineId = "";
@@ -485,6 +487,7 @@ public class TourDirector : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         Running = false;
         Rig.Release();
+        EndExperiment();
         bool explore = exploreAfterTour && !Storyboard && !Recorder.IsOffscreen;
         if (Recorder.IsRecording) StopRecording();
         else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
@@ -545,6 +548,8 @@ public class TourDirector : MonoBehaviour
         Captions.HideBoard();
         Captions.ShowEquations("off");
         Captions.SetFootnote("");
+        Annotations.Sacks.ClearExperiments();
+        Annotations.Sacks.ClearBackdrop();
     }
 
     // ---- seeking within a chapter (the scrubber) ------------------------------------------------------
@@ -955,6 +960,7 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "sweep") Annotations.SweepGhostBeta(float.Parse(parts[2], CultureInfo.InvariantCulture), float.Parse(parts[3], CultureInfo.InvariantCulture), Mathf.Max(2f, currentLineSeconds * 0.9f), parts.Length > 4 && parts[4] == "pingpong");
                         else Annotations.SetGhostZero(true, double.Parse(arg, CultureInfo.InvariantCulture), parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 14.134725);
                         break;
+                    case "exp": ApplyExperimentAction(parts); break;
                     case "show":
                     case "hide":
                         SetVisible(arg, verb == "show");

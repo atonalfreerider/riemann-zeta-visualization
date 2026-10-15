@@ -343,6 +343,15 @@ the zeros' Gram clock drawn as a curve through the planes.
 7. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
    not already predict. It makes the predictions visibly the same picture.
 
+## Explainer modules
+
+The side menu's **Experiments** section plays four directed modules built from these experiments: *Cancellation
+curves* (section A), *Level contours* (H10), *The bend as a probe* (H11, with the bend animated from flat to twice
+the tour's while a plane at height ±15 sweeps the curves) and *Mirrors, not oracles* (section I). Their lines live
+in [`experiments.json`](../../Assets/Resources/Narration/experiments.json); the actions and camera cues are in
+[`ExperimentTour.cs`](../../Assets/Tour/ExperimentTour.cs) and `CameraRig.cs`. No narration has been recorded for
+them, and no video: the captions run on estimated timing.
+
 ## Rendering
 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \

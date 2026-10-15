@@ -35,6 +35,7 @@ public class SideMenu : MonoBehaviour
     Image landscapeButton, portraitButton, homeButton, graphButton;
     TextMeshProUGUI status;
     readonly List<Image> chapterRows = new();
+    readonly List<Image> experimentRows = new();
     Button stopRecordingButton;
 
     public static SideMenu Create(TourDirector director)
@@ -195,6 +196,17 @@ public class SideMenu : MonoBehaviour
             Button(row, "", () => { director.RecordTour(director.Chapters[index].id, false, director.Portrait); open = false; }, 1f, TextAlignmentOptions.Center, VRIcons.Circle(), RecordColor);
         }
 
+        Header(content, "EXPERIMENTS   thought experiments on the saddle");
+        TourChapter[] experiments = director.ExperimentChapters;
+        for (int i = 0; i < experiments.Length; i++)
+        {
+            int index = i;
+            RectTransform row = Row(content);
+            experimentRows.Add(Button(row, experiments[i].title, () => { director.PlayExperiment(index); open = false; }, 5.2f, TextAlignmentOptions.Left, Icon(VRIcons.Id.Play)));
+        }
+
+        Label(content, "Scripted in Narration/experiments.json; captions only, no narration recorded. Findings in docs/experiments.", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 50).textWrappingMode = TextWrappingModes.Normal;
+
         Header(content, "RECORD");
         RectTransform recordRow = Row(content);
         Button(recordRow, "Record whole tour", () => { director.RecordTour("", true, director.Portrait); open = false; }, 2f, TextAlignmentOptions.Left, VRIcons.Circle(), RecordColor);
@@ -250,7 +262,12 @@ public class SideMenu : MonoBehaviour
         graphButton.color = ButtonColor;
         for (int i = 0; i < chapterRows.Count; i++)
         {
-            chapterRows[i].color = director.Running && director.CurrentChapterIndex == i ? ButtonActive : ButtonColor;
+            chapterRows[i].color = director.Running && !director.PlayingExperiment && director.CurrentChapterIndex == i ? ButtonActive : ButtonColor;
+        }
+
+        for (int i = 0; i < experimentRows.Count; i++)
+        {
+            experimentRows[i].color = director.Running && director.PlayingExperiment && director.CurrentChapterIndex == i ? ButtonActive : ButtonColor;
         }
 
         FrameRecorder r = director.Recorder;

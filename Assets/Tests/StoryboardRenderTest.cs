@@ -48,6 +48,7 @@ public class StoryboardRenderTest
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_WIDTH"), out int w)) director.Recorder.Width = w;
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_HEIGHT"), out int hgt)) director.Recorder.Height = hgt;
 
+        if (Environment.GetEnvironmentVariable("ZETA_SCRIPT") == "experiments") director.UseExperimentsScript(); // the Experiments modules instead of the tour
         if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.GetComponent<Canvas>().enabled = false; // clean frames for thumbnails
         yield return null;
         director.StartTour();
