@@ -52,6 +52,7 @@ estimated timing until audio exists). The modules are
 | Primes of Euler's ring | `xideals` | split and inert primes; needles built from ζ's zeros, then the zeros of L(s, (·/163)) joining |
 | Mirror lines | `xmirrorlines` | k² − m² swinging into k² + m²; one pair proves 1601 prime, two pairs factor 221 and 1105; Fermat's walk to 1501 |
 | The discriminant comb | `xcomb` | a plane sliding across the comb with its prime count, the prime yield of every plane, Euler's and Landau's lines meeting at 197 and 1601 |
+| Pinching the spiral | `xpinch` | the fold and its one comb of every discriminant, the residue arms mod 30 and mod 4 on the saddle, the pleat gathering primes onto k² + k + 11 and k² + k + 17 (leftover composites in white), the residue lattice mod 3, 5, 7 |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
