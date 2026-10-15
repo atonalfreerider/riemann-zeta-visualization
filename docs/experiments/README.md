@@ -631,6 +631,40 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
     sieve along a line) are classical. What the sections add is one geometry in which they are all the same
     statement about quadratics and their discriminants.
 
+## Surprises, and what is worth exploring next
+
+**What was surprising.**
+
+1. *The un-cancellation idea has an exact classical form, with the logic inverted.* On the mirror side of the
+   squares ray a **single** pair of lines through a number proves it prime, and a **second** pair proves it composite
+   and hands over a factor (Euler). The test works only for Euler's 65 idoneal numbers: for `N = 11` it fails 1 047
+   times below 20 000. Whether intersections decide primality is a question about class groups.
+2. *Which side of the ray a line lies on says nothing about its primes.* The visual split into a composite side and
+   a prime side is wrong. Lines between the cancellation curves (`Δ > 0`, not a square) are as prime-rich as those
+   beyond the ray: `k² + k − 1` beats Landau's `k² + 1` by 2.5 to 1. Only a square discriminant, or a fixed prime
+   divisor such as 2, empties a line. At only `k ≤ 3 000` the Hardy–Littlewood constant already predicts each line's
+   count with correlation 0.9995.
+3. *1601 is a meeting point.* The tour's spiral stops at 1601, chosen as the last prime of Euler's run. Euler's line
+   and Landau's `k² + 1` share exactly two values, 197 and 1601.
+
+**Worth exploring.**
+
+1. **The circle problem lives on the half-twisted saddle.** The number of lattice points in a circle of radius `√x`
+   wobbles around `πx`. Hardy's formula writes that wobble as `(x^¼/π) Σ r₂(n) n^(−3/4) cos(2π√(nx) − 3π/4)`, which
+   reproduces it with correlation 0.987 at 3 000 terms. Its first harmonic runs at **one** wave per turn of the Sacks
+   spiral, the half-twisted surface of section O, against the divisor problem's two. So two pairings appear. The
+   cancellation curves count divisors and go with the plain saddle. The mirror lines count sums of two squares and
+   go with the half-twist. Rendering both Voronoi sums as stacks of twisted surfaces would put the two lattice-point
+   problems side by side.
+2. **L-function zeros along a single line.** The crossings of the cancellation curves with a line of discriminant
+   `Δ` happen at the primes that split in `Q(√Δ)`. Those primes are governed by the zeros of the Dirichlet
+   L-function `L(s, χ_Δ)`, as the primes are by the zeros of `ζ`. A master wave built from the zeros of `L(s, χ_{−163})`
+   and run along Euler's line should spike at its crossings. That would join the zeta half of the project to the
+   quadratic half.
+3. **The class group as families of curves.** For a discriminant with class number `h` there are `h` reduced forms,
+   and so `h` families of mirror lines. Drawing all of them would show why Euler's one-pair test works only when each
+   genus holds one class, and the class number would appear as a count of curve families on the saddle.
+
 ## Explainer modules
 
 The side menu's **Experiments** section plays four directed modules built from these experiments: *Cancellation
