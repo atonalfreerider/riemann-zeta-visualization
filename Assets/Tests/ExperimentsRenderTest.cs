@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD, EA–EE)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1221,6 +1221,72 @@ public class ExperimentsRenderTest
 
         sacks.ExpConeComb(cc, 1.45f, 100f, 200f, 30f, strands.ToArray(), .45f, 130f);
         yield return Shot("DD2-one-comb-ordered-by-discriminant", cc + new Vector3(0f, 3f, 0f) + back * 104f, cc + new Vector3(0f, 3f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Symmetries behind the primes: sections EA–EE (SacksSymmetry.cs), digits 1–5, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('1')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 sp = c + new Vector3(SacksSpiral.StarPolygonOffset, 0f, 0f);
+        sacks.ExpStarPolygons(sp, 5, 13, 30f, 26f, 10.5f, 140f);
+        sacks.ExpWorldLegend(sp + new Vector3(-160f, 101f, -.3f), Vector3.down * 6.5f,
+            new[] { "the star polygon {n/k} joins every k-th of n points:  one closed path when gcd(n, k) = 1, otherwise gcd(n, k) pieces",
+                    "only for a prime n is every star one path:  Z/n then has no smaller symmetry inside it" }, 42f, new Color(.85f, .88f, .95f), false);
+        Vector3 spl = sp + new Vector3(-14f, 8f, 0f);
+        yield return Shot("EA1-star-polygons", spl + back * 205f, spl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('2')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 e8 = c + new Vector3(SacksSpiral.E8Offset, 0f, 0f);
+        sacks.ExpE8Petrie(e8, 70f, 1.4f, 174f);
+        yield return Shot("EB1-e8-roots-in-the-coxeter-plane", e8 + back * 200f, e8, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpE8ShellChart(e8, 60, 300f, 150f, 180f);
+        Vector3 e8c = e8 + new Vector3(42f, -7f, 0f);
+        yield return Shot("EB2-e8-shells-and-the-primes", e8c + back * 215f, e8c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('3')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 jo = c + new Vector3(SacksSpiral.JOffset, 0f, 0f);
+        sacks.ExpJPortrait(jo, 320f, 178f, -1.5, 1.5, .15, 1.82, 480, 268, 170f);
+        yield return ShotOrtho("EC1-j-from-e8-phase-portrait", jo + back * 300f, jo, Vector3.up, 104f);
+        sacks.ClearExperiments();
+        sacks.ExpJIntegerChart(jo, 320f, 140f, 170f);
+        Vector3 jc = jo + new Vector3(4f, -16f, 0f);
+        yield return Shot("EC2-where-j-is-an-integer", jc + back * 212f, jc, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('4')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 su = c + new Vector3(SacksSpiral.SusyOffset, 0f, 0f);
+        sacks.ExpSusyLadder(su, 36, 9f, 11f, 1.3f, 150f, new[] { 12, 30 });
+        sacks.ExpWorldLegend(su + new Vector3(-166f, 82f, -.3f), Vector3.down * 6f,
+            new[] { "the supersymmetric primon gas:  every N = m·d with d squarefree is a state;  the primes of d are fermions, the primes of m bosons",
+                    "the supercharge moves N's smallest prime between m and d, pairing each bosonic state with a fermionic one:  Σ μ(d) over d | N is 0 for every N > 1" },
+            39f, new Color(.85f, .88f, .95f), false);
+        Vector3 sul = su + new Vector3(-20f, 8f, 0f);
+        yield return Shot("ED1-supersymmetric-primon-gas", sul + back * 205f, sul, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('5')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 zs = c + new Vector3(SacksSpiral.SpacingOffset, 0f, 0f);
+        sacks.ExpZeroSpacing(zs, 260f, 130f, 170f);
+        Vector3 zsl = zs + new Vector3(-46f, 9f, 0f);
+        yield return Shot("EE1-zeros-repel-like-gue-eigenvalues", zsl + back * 196f, zsl, Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 

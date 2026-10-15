@@ -1688,6 +1688,178 @@ In the flat spiral these strands sit on opposite rays. The cone puts them in one
 * **No faster prime-finding.** Fermat's test is already fast (log n multiplications), but it is fooled by exactly the
   overlap shown here. Gauss sums cost p steps. The cone only rearranges the comb.
 
+## EA–EE. The circularity of ζ, and the symmetries behind the primes
+
+**The objection is right.** The zeta chain adds arrows of length 1/n^σ at angles t·log n, so both its lengths and its
+angles are built from the counting numbers. Its zeros are computed from the same chain, so they are built from the
+counting numbers too.
+
+Euler's product ζ(s) = Π (1 − p^(−s))^(−1) restates unique factorization. The explicit formula is an exact transform in
+both directions: earlier sections rebuilt the prime staircase and the prime races from the zeros. The zeros and the
+primes are one object seen two ways, so nothing about the primes can come out of the zeros that the integers did not
+put in.
+
+The better question is whether some structure, defined without multiplication or divisibility, produces the primes.
+This round tried five candidates, from the most elementary to the deepest
+([`SacksSymmetry.cs`](../../Assets/Tour/SacksSymmetry.cs)). The frames are 1920 × 1080 (`ZETA_EXP_WIDE=1`), and every
+number below was checked in Python first, with mpmath for the 60- and 80-digit values.
+
+### EA. Cyclic symmetry: the primes are the rotations with nothing smaller inside
+
+Place n points on a circle and join every k-th one. This star polygon {n/k} is one closed path when gcd(n, k) = 1;
+otherwise it falls into gcd(n, k) separate copies. For example, {6/2} is two triangles and {12/3} is three squares. **A
+prime n is exactly an n for which every star is one path.** In group language, every nonzero step generates the
+rotations Z/n, so Z/n has no proper subgroup: the primes are the orders of the simple abelian groups. The
+Jordan–Hölder theorem makes this a factorization. Every chain of subgroups of Z/12 has the steps Z/2, Z/2 and Z/3 in
+some order, so the uniqueness of composition factors is unique factorization.
+
+Fermat's little theorem is the same symmetry acting on strings. Rotation acts freely on the 2^p − 2 non-constant binary
+strings of length p, so they fall into orbits of exactly p, and p divides 2^p − 2. For n = 6 the 64 strings fall into
+orbits of sizes 1, 1, 2, 3, 3 and nine of 6. These are the divisors of 6. The pseudoprimes of section DB satisfy the
+arithmetic consequence without the symmetry: rotations of 341-long strings are not free, because there are strings of
+period 11 and 31, yet 341 still divides 2^341 − 2.
+
+This restates primality rather than explaining it ("no proper subgroup" is "no proper divisor"). It does show that
+primality is a statement about symmetry: the primes are the atoms of cyclic symmetry, as the simple groups are the
+atoms of all finite symmetry.
+
+![EA1](EA1-star-polygons.jpg)
+
+### EB. E8: a lattice made of symmetry alone, whose shells count divisors
+
+E8 is the set of points in 8 dimensions whose coordinates are all integers or all half-integers, with an even
+coordinate sum. Up to rotation it is the only even lattice in 8 dimensions with one point per unit of volume. That
+definition uses symmetry only; primes and divisibility never appear. Its 240 shortest vectors are the roots of the
+exceptional Lie group E8. In the Coxeter plane they lie on 8 rings of 30, joined by the 6720 edges of the polytope 4₂₁
+(EB1).
+
+**Counting its points shell by shell gives the divisor sums.** I counted the shells straight from the definition, by
+multiplying one-coordinate series, with no divisors anywhere. The shell of norm 2n holds 240, 2160, 6720, 17 520,
+30 240, 60 480, 82 560, 140 400, … points, and for every n ≤ 60 that is exactly 240·σ₃(n), where
+σ₃(n) = Σ_{d|n} d³.
+
+Since σ₃(n) ≥ 1 + n³ with equality only when n has no divisors but 1 and itself, **the primes are the thinnest shells**:
+
+* Between 2 and 60, the shells holding exactly 240(1 + n³) points are the 17 primes and nothing else.
+* In EB2 the primes sit on the floor 1 + 1/n³.
+* The even n sit above 1 + 1/2³, and the odd multiples of 3 above 1 + 1/3³.
+* Nothing goes past ζ(3) = 1.202.
+
+The reason is symmetry. Because the lattice is even and self-dual, Poisson summation makes its theta series a modular
+form of weight 4. That space has only one form, so θ_E8 = E4 = 1 + 240 Σ σ₃(n) qⁿ. The Hecke operators come from the
+modular symmetry acting on sublattices, and they make the coefficients multiplicative. The lattice's Dirichlet series
+then has an Euler product, Σ σ₃(n) n^(−s) = ζ(s)·ζ(s − 3). **The Riemann zeta function, with its product over the
+primes, comes out of the E8 lattice.**
+
+The shells are still numbered by n, so the counting numbers remain as additive labels. What the symmetry derives is the
+multiplicative structure: the divisors, multiplicativity and the Euler product. That structure is what defines the
+primes. ζ's chain puts it in by hand, through n^(−s); the lattice produces it.
+
+E8 is not itself a supersymmetry group, since supersymmetry algebras are graded. It does appear in the supersymmetric
+heterotic string, as the gauge group E8 × E8, whose partition function contains the theta series of E8. The link to
+the primes is through the lattice and its modular form.
+
+![EB1](EB1-e8-roots-in-the-coxeter-plane.jpg)
+![EB2](EB2-e8-shells-and-the-primes.jpg)
+
+### EC. From E8 to Euler's 41: the j-function
+
+The j-function is j(τ) = E4(τ)³ / Δ(τ), with E4 the theta series of E8 and Δ = q Π (1 − qⁿ)²⁴. It is also a comparison
+of two 24-dimensional lattices. E4³ − 720Δ reproduces the shells of the Leech lattice: 1, 0, 196 560, 16 773 120,
+398 034 000, 4 629 381 120, all checked. So j = 720·θ(E8⊕E8⊕E8) / (θ(E8⊕E8⊕E8) − θ(Leech)).
+
+Its phase portrait (EC1) is the modular symmetry made visible: every tile is a copy of the fundamental domain under
+τ → τ + 1 and τ → −1/τ. Hue is the argument of j, and the brightness steps every factor of 12 in |j|. Around ρ the hue
+turns three times, because j has a triple zero there; at i, j = 1728 = 12³.
+
+**Where j is an integer.** For every discriminant −D down to −170 I evaluated j at τ_D = (1 + i√D)/2 (or i√D/2) to 80
+digits (EC2).
+
+* j is an integer for exactly the 13 discriminants of class number 1: D = 3, 4, 7, 8, 11, 12, 16, 19, 27, 28, 43, 67
+  and 163.
+* Everywhere else it is irrational, up to 0.498 from the nearest integer. The nearest misses are 0.001 at D = 148 and
+  0.002 at D = 103.
+
+The odd fundamental ones are the discriminants of Euler's prime curves:
+
+| D | j(τ_D) | curve |
+|---|---|---|
+| 7 | −15³ | k² + k + 2 |
+| 11 | −32³ | k² + k + 3 |
+| 19 | −96³ | k² + k + 5 |
+| 43 | −960³ | k² + k + 11 |
+| 67 | −5280³ | k² + k + 17 |
+| 163 | −640 320³ | k² + k + 41 |
+
+By Rabinowitsch's theorem, k² + k + A is prime for every k = 0, …, A − 2 exactly when 4A − 1 has class number 1. So one
+symmetry fact, that the ideal class group of Q(√−163) is trivial, both makes j(τ_163) an integer and makes Euler's
+polynomial prime forty times running. It has two side effects, both checked:
+
+* e^(π√163) = 640 320³ + 744 − 7.4993·10⁻¹³ (to 40 digits).
+* The Chudnovsky series for π, which gives 13, 27, 41 and 55 correct digits from 1 to 4 terms, is built on 640 320.
+
+Of everything here, this is the closest to a symmetry that defines a prime curve. It explains why Euler's line is so
+rich, but not where the primes on it fall.
+
+![EC1](EC1-j-from-e8-phase-portrait.jpg)
+![EC2](EC2-where-j-is-an-integer.jpg)
+
+### ED. Supersymmetry: the primon gas, and Möbius inversion as cancellation
+
+Julia and Spector turned the Euler product into a gas.
+
+* **The bosonic gas.** There is one boson mode per prime p, with energy log p. Its states are the integers
+  n = Π p^(a_p), with energy log n, and its partition function is Σ n^(−β) = ζ(β).
+* **The fermionic gas.** Each prime mode can be occupied at most once, so its states are the squarefree n. Weighted by
+  (−1)^F, the parity of the fermion number, the sum is Σ μ(n) n^(−β) = 1/ζ(β).
+* **The supersymmetric gas.** Each prime carries both a boson and a fermion. Its states at level N are the splits
+  N = m·d with d squarefree: the primes of d are fermions, those of m bosons.
+
+The supercharge moves N's smallest prime between m and d. For every N up to 100 000 I checked that this is an
+involution with no fixed point that flips (−1)^F. So each level holds 2^(ω(N)−1) bosonic states and as many fermionic
+ones, and only the vacuum N = 1 is left unpaired.
+
+That is **Möbius inversion as supersymmetric cancellation**: Σ_{d|N} μ(d) = 0 for every N > 1, the Witten index is 1,
+and ζ·(1/ζ) = 1. The primes and prime powers are the levels with one pair, and the number of pairs counts the distinct
+prime factors. The cancellation curves of the earlier sections are the levels where many pairs cancel.
+
+Here the primes are the input, the particle species. The gas is the Euler product written as physics, so it does not
+escape the circle. Its fermionic Witten index up to energy log x is Mertens' M(x), the sieve's running sign from
+section H ("Double cancellations"). The Riemann hypothesis says it grows no faster than x^(½+ε); it stays below 0.9√x for 2 ≤ x ≤ 10⁵.
+
+![ED1](ED1-supersymmetric-primon-gas.jpg)
+
+### EE. The zeros' symmetry class
+
+The zeros are computed from the integers, but their local statistics belong to a symmetry class. Unfolded to a mean
+spacing of 1, the gaps between the first 10 000 zeros follow the eigenvalues of large random Hermitian matrices with
+unitary symmetry (GUE), not random points:
+
+* Only 0.96% of the gaps are below 0.25, against 22% for random (Poisson) points and 4.8% for the orthogonal ensemble.
+* The pair correlation follows Montgomery's 1 − (sin πu / πu)².
+
+This is the Hilbert–Pólya idea: the zeros might be the eigenvalues of a self-adjoint operator without time-reversal
+symmetry. No such operator is known; Berry and Keating's H = xp and Connes' adelic flow are the best-known proposals. If
+one were found, and defined without the integers, it would be the non-circular symmetry asked for. It is the main open
+question.
+
+![EE1](EE1-zeros-repel-like-gue-eigenvalues.jpg)
+
+### What the symmetries give
+
+* **The circularity is real.** ζ, its chain and its zeros are one object, and the explicit formula only translates
+  between them.
+* **Restatements.** The primes are the simple cyclic groups (EA). This is exact and fundamental, but equivalent to
+  the definition.
+* **Derivations.**
+  * E8, defined by symmetry alone, produces the divisor sums, multiplicativity and the Euler product of ζ (EB).
+  * The modular symmetry produces Euler's prime curves through class number one (EC).
+  * In both, the multiplicative structure is an output, though the counting numbers stay on as labels.
+* **Physics.** Supersymmetric cancellation is Möbius inversion (ED). The zeros sit in the unitary symmetry class (EE),
+  and the operator behind them is the missing piece.
+* **No faster prime-finding.** Counting an E8 shell costs about as much as finding divisors. j needs high precision.
+  GUE statistics describe the zeros only on average.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -1866,9 +2038,9 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
-`e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, and `j`, `s`, `u`, `v` are DA to DD. Sections AA–AE,
-BA–BD, CA–CE and DA–DD are drawn for full horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in
-this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
+`e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
+are EA to EE. Sections AA–AE, BA–BD, CA–CE, DA–DD and EA–EE are drawn for full horizontal frames: run them with
+`ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).
