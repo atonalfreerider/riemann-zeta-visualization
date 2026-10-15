@@ -171,6 +171,7 @@ know about the primes, and it is erased, arm by arm, by the next ones.
 `±x`, where the squares and pronic rays run, and rises along `±y`, where the one-to-four products climb. An earlier
 version of this page called the x axis the ridge and the y axis the valley, which is how the surface looks from the
 other side (`+z`, the side the tour's saddle wire is labelled from); the pictures here are taken from the trail's side.
+The narrated Experiments modules keep the recorded ridge/valley wording, which is the `+z` reading.
 
 The saddle is `z = b · K (x² − y²)` with the bend `b` (1 in the tour, 0 flat). Its sections by the three
 coordinate planes are a parabola falling away from the trail (`y = 0`), a parabola rising toward it (`x = 0`), and hyperbolas
