@@ -229,37 +229,38 @@
       "lines": [
         {
           "id": "xmirror_01",
-          "text": "This is the chain at the hundredth zero: every link one term of the series, curling into vortices before it settles. Let's find their eyes with nothing but the turning angles.",
-          "camera": "orbit:on=panel;d=52>46;el=82>66;az=-90;spin=3;span=10",
+          "text": "This is the chain at the hundred and fifty-ninth zero: every link one term of the series, curling into vortices before it settles. Let's find their eyes with nothing but the turning angles.",
+          "camera": "orbit:on=panellive;d=58>50;el=62>50;az=-90;spin=4;span=10",
           "actions": [
-            "exp:chainlive:222:229:line"
+            "exp:chainlive:318:326:line"
           ],
           "pause": 0.6
         },
         {
           "id": "xmirror_02",
           "text": "Where the turn between links flips through a half-turn, the chain folds back on itself. That knot is an eye. Where the turn flips through zero the chain runs straight: a spoke, the edge of a vortex.",
-          "camera": "orbit:on=panel;d=46>38;el=66>52;az=-60;spin=4;span=11",
+          "camera": "orbit:on=panellive;d=50>42;el=50>40;az=-50;spin=4;span=11",
           "actions": [
-            "exp:chainlive:229:z100:line:rings"
+            "exp:chainlive:326:z159:line:rings"
           ],
           "pause": 0.6
         },
         {
           "id": "xmirror_03",
           "text": "A vortex drawn by dozens of links is certain; one drawn by two or three is a guess, so its ring is faded. Now the crosses: the chain's own first vertices, reflected and turned by twice the Gram phase.",
-          "camera": "orbit:on=panel;at=0,0,0>-2,2,0;d=38>32;el=55>70;az=-15;spin=4;span=11",
+          "camera": "orbit:on=panellive;d=42>36;el=45>62;az=-5;spin=4;span=11",
           "actions": [
-            "exp:chainlive:z100:z100:1:rings:mirrors"
+            "exp:chainlive:z159:z160:line:rings:mirrors"
           ],
           "pause": 0.6
         },
         {
           "id": "xmirror_04",
           "text": "They land inside the rings. At the thousandth zero, with far more links, every eye out to the twelfth sits on its mirror to a thousandth. The far end of the chain is its near end in a mirror.",
-          "camera": "orbit:on=panel;d=40>50;el=72>58;az=25;spin=-3;span=9",
+          "camera": "orbit:on=panellive;d=46>52;el=60>48;az=40;spin=-3;span=9",
           "actions": [
-            "exp:chainlive:z100:z1000:line:rings:mirrors"
+            "exp:chainlive:1412:z1000:line:rings:mirrors",
+            "exp:snap"
           ],
           "pause": 0.8
         },

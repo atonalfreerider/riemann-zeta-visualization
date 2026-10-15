@@ -532,6 +532,7 @@ public class CameraRig : MonoBehaviour
                 "panel" => c + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f),
                 "tower" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f),
                 "live" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + Vector3.back * s.ExpLiveHeight,
+                "panellive" => c + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f) + Vector3.back * s.ExpPanelHeight,
                 "towerfocus" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + s.ExpTowerFocus + Vector3.back * Mathf.Max(1f, s.ExpTowerHeight),
                 _ => c
             };

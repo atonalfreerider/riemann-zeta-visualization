@@ -22,6 +22,13 @@ public partial class SacksSpiral
     readonly List<TextBox> liveRingLabels = new();
     float liveScale = -1f;
     Vector3 liveShift;
+    // the t axis the panel climbs: a pole through the chain's origin, the zeros marked on it
+    GameObject liveAxis;
+    double liveAxisLo, liveAxisHi;
+    const float LiveRise = 1.2f; // height per unit of t
+
+    /// <summary>How far the live chain's plane has climbed its t axis (the camera follows it).</summary>
+    public float ExpPanelHeight { get; private set; }
 
     /// <summary>The dial value the live chain last showed (the next sweep can start from it).</summary>
     public double ExpLiveT { get; private set; } = -1d;
@@ -53,7 +60,10 @@ public partial class SacksSpiral
         liveCrosses.Clear();
         liveRingLabels.Clear();
         liveScale = -1f;
+        liveAxis = null;
         ExpLiveHeight = 0f;
+        ExpPanelHeight = 0f;
+        Board("");
     }
 
     void StartLive(IEnumerator routine)
@@ -77,6 +87,8 @@ public partial class SacksSpiral
     IEnumerator ChainLive(double t0, double t1, float seconds, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize)
     {
         EnsureLivePanel(center, halfWidth, halfHeight, labelSize);
+        double lo = System.Math.Min(t0, t1), hi = System.Math.Max(t0, t1);
+        if (liveAxis == null || lo < liveAxisLo || hi > liveAxisHi) BuildLiveAxis(lo - 1.0, hi + 2.5, labelSize);
         float time = 0f;
         while (true)
         {
@@ -105,11 +117,43 @@ public partial class SacksSpiral
         liveTip.transform.SetParent(g, false);
         liveZeta = Factory.NewSphere("zeta", .45f, Factory.Palette.Zero, Factory.GlowIntensity);
         liveZeta.transform.SetParent(g, false);
-        liveDial = TextBoxLabel("", labelSize, Color.white);
-        liveDial.transform.SetParent(g, false);
-        liveZero = TextBoxLabel("", labelSize * .8f, Factory.Palette.Zero);
-        liveZero.transform.SetParent(g, false);
         liveScale = -1f;
+    }
+
+    /// <summary>The t axis from <paramref name="lo"/> to <paramref name="hi"/>: a pole along the saddle normal with every zero in range marked and labelled.</summary>
+    void BuildLiveAxis(double lo, double hi, float labelSize)
+    {
+        if (liveAxis != null) Destroy(liveAxis);
+        liveAxis = new GameObject("t axis");
+        liveAxis.transform.SetParent(LiveRoot(), false);
+        liveAxisLo = lo;
+        liveAxisHi = hi;
+        float top = (float)(hi - lo) * LiveRise;
+        LineRenderer pole = Factory.NewLine("pole", .08f, Factory.Palette.ImAxis, Factory.SoftGlowIntensity);
+        pole.transform.SetParent(liveAxis.transform, false);
+        pole.useWorldSpace = false;
+        pole.positionCount = 2;
+        pole.SetPositions(new[] { Vector3.zero, Vector3.back * top });
+        TextBox name = TextBoxLabel("t", labelSize * .45f, Factory.Palette.ImAxis);
+        name.transform.SetParent(liveAxis.transform, false);
+        name.transform.localPosition = Vector3.back * (top + 1.2f);
+        double[] zs = Main.Instance.zetaZeroValues;
+        int labelled = 0;
+        for (int j = 0; j < zs.Length && zs[j] <= hi; j++)
+        {
+            if (zs[j] < lo) continue;
+            float h = (float)(zs[j] - lo) * LiveRise;
+            GameObject dot = Factory.NewSphere("zero " + (j + 1), .5f, Factory.Palette.Zero, Factory.GlowIntensity);
+            dot.transform.SetParent(liveAxis.transform, false);
+            dot.transform.localPosition = Vector3.back * h;
+            if (labelled++ < 12)
+            {
+                TextBox l = TextBoxLabel($"zero #{j + 1}   t = {zs[j]:0.000}", labelSize * .3f, Factory.Palette.Zero);
+                l.transform.SetParent(liveAxis.transform, false);
+                l.Alignment = TextAlignmentOptions.Left;
+                l.transform.localPosition = Vector3.back * h + Vector3.right * 1.2f;
+            }
+        }
     }
 
     LineRenderer PoolLine(List<LineRenderer> pool, int i, string name, float width)
@@ -164,9 +208,11 @@ public partial class SacksSpiral
         l.startColor = l.endColor = col;
     }
 
-    void DrawLivePanel(double t, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize, float dt)
+    void DrawLivePanel(double t, Vector3 baseCenter, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize, float dt)
     {
         ExpLiveT = t;
+        ExpPanelHeight = (float)(t - liveAxisLo) * LiveRise;
+        Vector3 center = baseCenter + Vector3.back * ExpPanelHeight;
         int N = (int)(t / System.Math.PI) + 12;
         Complex[] S = ChainSums(t, N);
         double minRe = 0, maxRe = 0, minIm = 0, maxIm = 0;
@@ -186,13 +232,14 @@ public partial class SacksSpiral
         }
         else
         {
-            float k = 1f - Mathf.Exp(-dt * 7f); // quick enough to keep a fast-growing chain in frame, slow enough not to jitter
+            float k = 1f - Mathf.Exp(-dt * 30f); // the box moves continuously with t: follow it almost exactly, just without a hard edge
             liveScale = Mathf.Lerp(liveScale, targetScale, k);
             liveShift = Vector3.Lerp(liveShift, targetShift, k);
         }
 
         float scale = liveScale;
         Vector3 o = center + liveShift * scale;
+        if (liveAxis != null) liveAxis.transform.position = new Vector3(o.x, o.y, baseCenter.z);
         Vector3 P(Complex z) => o + new Vector3((float)z.Re * scale, (float)z.Im * scale, 0f);
         Vector3[] pts = new Vector3[N + 1];
         pts[0] = o;
@@ -213,14 +260,12 @@ public partial class SacksSpiral
         if (j > 0 && (j >= zs.Length || System.Math.Abs(zs[j - 1] - t) < System.Math.Abs(zs[j] - t))) near = j - 1;
         double gap = System.Math.Abs(zs[near] - t);
         bool atZero = gap < 0.004;
-        liveDial.Text = $"t = {t:0.000}";
-        liveDial.transform.position = center + Vector3.up * (halfHeight + .55f * labelSize);
-        liveZero.Text = atZero
-            ? $"zero #{near + 1}:  ζ = 0"
-            : $"between zeros #{System.Math.Max(1, j)} and #{j + 1}";
-        liveZero.Color = atZero ? Factory.Palette.Zero : new Color(.75f, .75f, .85f);
-        liveZero.transform.position = center + Vector3.up * (halfHeight + .2f * labelSize);
-        liveZeta.transform.localScale = Vector3.one * (atZero ? .7f : .45f);
+        // the dial on the screen's board: where t is, and the zero it is at or between
+        string gold = ColorUtility.ToHtmlStringRGB(Factory.Palette.Zero);
+        Board($"t = {t:0.000}\n<size=58%>" + (atZero
+            ? $"<color=#{gold}>zero #{near + 1}:  ζ(½ + it) = 0, the gold centre is on the axis</color>"
+            : $"between zeros #{System.Math.Max(1, j)} and #{j + 1}:  the gold centre ζ(½ + it) is off the axis") + "</size>");
+        liveZeta.transform.localScale = Vector3.one * (atZero ? .8f : .45f);
 
         int used = 0, crosses = 0;
         if (rings)
