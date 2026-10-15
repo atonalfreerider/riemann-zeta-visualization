@@ -77,10 +77,12 @@ public class CaptionDisplay : MonoBehaviour
         }
         else
         {
+            // drawn by a camera at the origin over the main camera's frame: steady however far out the main camera is
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = cam;
-            canvas.planeDistance = 0.5f;
+            canvas.worldCamera = CaptionCamera.Create(cam);
+            canvas.planeDistance = 1f;
             canvas.sortingOrder = 100;
+            gameObject.layer = CaptionCamera.Layer;
 
             CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

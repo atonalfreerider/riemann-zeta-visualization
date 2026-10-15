@@ -650,7 +650,7 @@ public partial class TourDirector : MonoBehaviour
         {
             EndSeek();
         }
-        Rig.SetCue(line.camera);
+        Rig.SetCue(line.camera, PlayingExperiment ? 4f : 2.5f);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);
