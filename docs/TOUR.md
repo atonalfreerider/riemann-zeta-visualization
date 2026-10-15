@@ -38,9 +38,8 @@ Below the chapter list the side menu has an **Experiments** section: directed ex
 experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
 chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
 when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour,
-narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The first eight
-modules are narrated; the four 144 modules at the end are scripted, directed and animated but not narrated (their
-captions run on estimated timing until audio exists). The modules are
+narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). All the
+modules are narrated. The modules are
 
 | module | id | what it shows |
 |---|---|---|

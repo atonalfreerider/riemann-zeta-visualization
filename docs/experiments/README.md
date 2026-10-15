@@ -1026,7 +1026,7 @@ Fermat's walk out to 1501) and *The discriminant comb* (section K: a plane slidi
 count, the yield of every plane, Euler's and Landau's lines meeting at 197 and 1601). Their shots use `fit`, so they
 frame the same subject in 16:9 and 9:16.
 
-The four 144 modules are scripted, directed and animated but not narrated: their captions run on estimated timing.
+The four 144 modules are scripted, directed, animated and narrated with the same voice.
 *The 12 × 12 torus* (section V) marks numbers with their turn and step, fills the board as the primes up to ten
 million arrive (only 2 and 3 land off the 48 gold cells, glowing), sweeps the diagonals across it cell by cell (white
 flares on gold cells, red rings on the others) and rolls the board into a torus. *The saddle computes (3/p)*
