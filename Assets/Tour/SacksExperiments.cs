@@ -53,6 +53,7 @@ public partial class SacksSpiral
     {
         if (experimentsRoot != null) Destroy(experimentsRoot);
         experimentsRoot = null;
+        ExpStopLive();
     }
 
     /// <summary>Hide every stage element except the saddle's routes: the experiments draw their own number field.</summary>
@@ -1446,7 +1447,7 @@ public partial class SacksSpiral
     /// traces joining the same k through consecutive zero planes, optional plane rings, the trail ζ(½ + it) between them,
     /// and the mirror points. With <paramref name="derotate"/> every eye is multiplied by e^{2iθ(t)} (the Gram phase taken out).
     /// </summary>
-    public void ExpVortexTower(List<Vortex> all, int first, int last, Vector3 center, float xyScale, System.Func<double, float> heightOfT,
+    public Transform ExpVortexTower(List<Vortex> all, int first, int last, Vector3 center, float xyScale, System.Func<double, float> heightOfT,
         bool derotate, bool planes, bool trail, bool mirrors, int kMax, float labelSize, int kMin = 0, float pointSize = .06f, bool ribbons = true, float glow = Factory.GlowIntensity)
     {
         Transform g = ExpGroup($"I vortex tower {first}-{last}{(derotate ? " derotated" : "")}").transform;
@@ -1539,6 +1540,7 @@ public partial class SacksSpiral
 
         ExpLine(g, "axis", .008f * xyScale, new Color(.5f, .5f, .6f), Factory.NoGlow, new[] { center + Vector3.back * heightOfT(zs[first - 1]), center + Vector3.back * heightOfT(zs[last - 1]) });
         ExpTowerHeight = heightOfT(zs[last - 1]) - heightOfT(zs[first - 1]);
+        return g;
     }
 
     /// <summary>The chain at one dial value, flat, with its detected vortices ringed (colour by k, brightness by certainty) and the mirror points as crosses.</summary>

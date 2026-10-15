@@ -49,8 +49,13 @@ narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:ridge|valley|level|all`, `exp:euler:KMAX`, `exp:zetawave`,
-`exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`; see `ExperimentTour.cs`) and their
-camera cues start with `exp_` (`CameraRig.cs`). To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
+`exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`, `exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors]`
+(the chain redrawn every frame as the dial turns, its vortex eyes detected live; FROM / TO are dial values, `zN` for zero
+N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
+`exp:snap` (cut to the line's shot instead of flying there); see `ExperimentTour.cs`). Their shots are written into the
+script as moving orbits, `orbit:on=centre|panel|tower|live|towerfocus;at=x,y,z[>x,y,z];d=FROM>TO;el=FROM>TO;az=A;spin=DEG_PER_S;fov=F;span=S;h=FRAC`
+(distance, elevation above the saddle and look point eased over `span` seconds while the camera circles; see
+`CameraRig.OrbitCue`), and each module opens already framed on its first shot. To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
 storyboard command below; to record them as narrated videos, one per module, run
 `python Tools/render_chapters.py --unity <Unity.exe> --script experiments --shapes vertical --out <folder>`.
 

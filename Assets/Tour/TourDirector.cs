@@ -656,6 +656,7 @@ public partial class TourDirector : MonoBehaviour
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);
         currentLineSeconds = Storyboard ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
         ApplyActions(line.actions);
+        if (PlayingExperiment && CurrentLineIndex == 0) Rig.Snap(); // an experiment opens framed on its subject, not flying in
         if (timing == null)
         {
             timing = TourScriptLoader.Estimate(line.text);

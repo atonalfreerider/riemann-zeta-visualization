@@ -5,55 +5,69 @@
       "id": "xcurves",
       "title": "Cancellation curves",
       "subtitle": "why Euler's line of primes stops where it does",
-      "setup": ["exp:stage", "exp:curves:12"],
+      "setup": [
+        "exp:stage",
+        "exp:curves:12"
+      ],
       "lines": [
         {
           "id": "xcurves_01",
           "text": "Every composite number is a product: u times u plus d. Fix the gap d, let u run, and the products line up on one curve of the spiral. These are the cancellation curves.",
-          "camera": "exp_full",
+          "camera": "orbit:on=centre;d=215>195;el=72>58;az=-90;spin=2.5;span=11",
           "actions": [],
           "pause": 0.6
         },
         {
           "id": "xcurves_02",
           "text": "Each curve is born at the number d plus one, the little ring, and everything after its birth is composite. A prime sits on exactly one curve: the one born at it.",
-          "camera": "exp_centre",
+          "camera": "orbit:on=centre;d=120>95;el=62>48;az=-62;spin=3;span=10",
           "actions": [],
           "pause": 0.5
         },
         {
           "id": "xcurves_03",
           "text": "Gap zero is the squares, gap one the pronic numbers. On the saddle every one of these curves climbs the ridge, because a product of two nearly equal numbers lands near the x axis.",
-          "camera": "exp_oblique",
-          "actions": ["exp:routes:on"],
+          "camera": "orbit:on=centre;at=0,0,-4;d=110>145;el=20>34;az=-30;spin=5;span=11",
+          "actions": [
+            "exp:routes:on"
+          ],
           "pause": 0.5
         },
         {
           "id": "xcurves_04",
           "text": "Flatten the saddle and follow Euler's line, k squared plus k plus forty-one, past its forty primes. Wherever it meets a cancellation curve the value is composite, and the meetings come in two families.",
-          "camera": "exp_flat_wide",
-          "actions": ["exp:routes:off", "exp:bend:0", "exp:clear", "exp:euler:110"],
+          "camera": "orbit:on=centre;at=12,-58,0;d=225>195;el=78>58;az=-90;spin=2;span=12",
+          "actions": [
+            "exp:routes:off",
+            "exp:bend:0",
+            "exp:clear",
+            "exp:euler:110"
+          ],
           "pause": 0.8
         },
         {
           "id": "xcurves_05",
           "text": "Family one: at k equal to forty plus a square, the value is the product of two neighbouring values of the line itself. Forty-one times forty-three, forty-three times forty-seven, and on it goes.",
-          "camera": "exp_flat_first",
+          "camera": "orbit:on=centre;at=58,-16,0>50,-26,0;d=72>58;el=74>60;az=-72;spin=2;span=12",
           "actions": [],
           "pause": 0.6
         },
         {
           "id": "xcurves_06",
           "text": "Family two reaches in from a sister line, four j squared plus one hundred and sixty-three: a value of the sister times a value of Euler. Both families are products in one quadratic ring, the ring of root minus one sixty-three, and that is all the arithmetic there is.",
-          "camera": "exp_flat_close",
+          "camera": "orbit:on=centre;at=44,-62,0>32,-58,0;d=112>92;el=70>54;az=-100;spin=-2;span=13",
           "actions": [],
           "pause": 0.8
         },
         {
           "id": "xcurves_07",
           "text": "Now ask the zeros instead. The master wave of all ten thousand zeros, evaluated along the line, spikes at every prime value and dips at every crossing. The zeros and the curves agree point by point.",
-          "camera": "exp_flat_close",
-          "actions": ["exp:clear", "exp:euler:110:plain", "exp:zetawave"],
+          "camera": "orbit:on=centre;at=44,-62,0;d=118>100;el=26>40;az=-150;spin=6;span=13",
+          "actions": [
+            "exp:clear",
+            "exp:euler:110:plain",
+            "exp:zetawave"
+          ],
           "pause": 1.0
         }
       ]
@@ -62,48 +76,68 @@
       "id": "xlevels",
       "title": "Level contours",
       "subtitle": "slicing the saddle at a height",
-      "setup": ["exp:stage"],
+      "setup": [
+        "exp:stage"
+      ],
       "lines": [
         {
           "id": "xlevels_01",
           "text": "The saddle is z equals x squared minus y squared, scaled down. Slice it with a horizontal plane and the cut is a hyperbola: opening left and right above the middle, up and down below it.",
-          "camera": "exp_full",
+          "camera": "orbit:on=centre;d=230>205;el=38>28;az=-90;spin=5;span=12",
           "actions": [],
           "pause": 0.5
         },
         {
           "id": "xlevels_02",
           "text": "Here are the cuts at heights fifteen and thirty on the ridge side, opening along the squares and pronic rays. Every number lit on one contour shares the same value of n times the cosine of four pi root n.",
-          "camera": "exp_full",
-          "actions": ["exp:contours:15,30"],
+          "camera": "orbit:on=centre;d=215>200;el=60>80;az=-30;spin=4;span=13",
+          "actions": [
+            "exp:contours:15,30"
+          ],
           "pause": 0.6
         },
         {
           "id": "xlevels_03",
           "text": "Below the middle, on the valley side, the contours open along the y axis instead. The valley is where the one-to-four products live: u times four u plus an odd number.",
-          "camera": "exp_full",
-          "actions": ["exp:contours:-15,-30", "exp:family:valley"],
+          "camera": "orbit:on=centre;d=200>215;el=80>70;az=20;spin=4;span=12",
+          "actions": [
+            "exp:contours:-15,-30",
+            "exp:family:valley"
+          ],
           "pause": 0.6
         },
         {
           "id": "xlevels_04",
           "text": "Seen from the side the planes are real cuts through the surface. The valley planes also cut the trail of zeta rising from the centre: a plane at minus h meets the trail at the dial value four h.",
-          "camera": "exp_levels_oblique",
-          "actions": ["exp:clear", "exp:contours:30,15,-15,-30:planes", "exp:trail:140"],
+          "camera": "orbit:on=centre;at=0,0,-6;d=240>205;el=22>32;az=-135;spin=6;span=13",
+          "actions": [
+            "exp:clear",
+            "exp:contours:30,15,-15,-30:planes",
+            "exp:trail:140"
+          ],
           "pause": 0.8
         },
         {
           "id": "xlevels_05",
           "text": "At height zero the hyperbola collapses into the two diagonals, and a third family hugs them: the one-to-sixteen products. Each direction of the saddle collects its own family of products.",
-          "camera": "exp_full",
-          "actions": ["exp:clear", "exp:contours:0", "exp:family:level", "exp:family:ridge", "exp:family:valley"],
+          "camera": "orbit:on=centre;d=210>190;el=78>64;az=-60;spin=3;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:contours:0",
+            "exp:family:level",
+            "exp:family:ridge",
+            "exp:family:valley"
+          ],
           "pause": 0.6
         },
         {
           "id": "xlevels_06",
           "text": "And the quantity shared along every contour, n cosine four pi root n, is the first harmonic of Voronoi's formula for the divisor function. The saddle is not decoration: its level lines are the contour lines of the divisor wave.",
-          "camera": "exp_levels_side",
-          "actions": ["exp:clear", "exp:contours:30,15,-15,-30:planes"],
+          "camera": "orbit:on=centre;at=0,0,-4;d=235>225;el=6>18;az=-90;spin=5;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:contours:30,15,-15,-30:planes"
+          ],
           "pause": 1.0
         }
       ]
@@ -112,55 +146,73 @@
       "id": "xprobe",
       "title": "The bend as a probe",
       "subtitle": "a fixed plane sweeps the curves as the saddle bends",
-      "setup": ["exp:stage", "exp:bend:0", "exp:family:all"],
+      "setup": [
+        "exp:stage",
+        "exp:bend:0",
+        "exp:family:all"
+      ],
       "lines": [
         {
           "id": "xprobe_01",
           "text": "Start flat. The ridge family in orange, the valley family in blue, the diagonal family in white, all drawn on a flat spiral. A plane at height fifteen touches nothing yet.",
-          "camera": "exp_full",
+          "camera": "orbit:on=centre;d=215>205;el=70>55;az=-90;spin=3;span=10",
           "actions": [],
           "pause": 0.5
         },
         {
           "id": "xprobe_02",
           "text": "Bend the saddle a quarter of the way. The plane at minus fifteen now cuts the valley near the rim, around n equals thirteen hundred and seventy, and lights every number it crosses.",
-          "camera": "exp_full",
-          "actions": ["exp:sweep:0:0.25:6:15,-15:families"],
+          "camera": "orbit:on=centre;d=215;el=55>45;az=-60;spin=4;span=10",
+          "actions": [
+            "exp:sweep:0:0.25:6:15,-15:families"
+          ],
           "pause": 0.5
         },
         {
           "id": "xprobe_03",
           "text": "Half the bend, and the contour has moved inward to n near six hundred and eighty. The valley curves dive faster now, so the plane reads them off closer to the centre.",
-          "camera": "exp_full",
-          "actions": ["exp:sweep:0.25:0.5:6:15,-15:families"],
+          "camera": "orbit:on=centre;d=220;el=45>35;az=-20;spin=4;span=10",
+          "actions": [
+            "exp:sweep:0.25:0.5:6:15,-15:families"
+          ],
           "pause": 0.5
         },
         {
           "id": "xprobe_04",
           "text": "The tour's own bend, one. The contour sits at n three hundred and forty, and each blue curve crosses it in exactly one place: the plane is reading the curves like the teeth of a comb.",
-          "camera": "exp_full",
-          "actions": ["exp:sweep:0.5:1:6:15,-15:families"],
+          "camera": "orbit:on=centre;d=225;el=35>28;az=20;spin=4;span=11",
+          "actions": [
+            "exp:sweep:0.5:1:6:15,-15:families"
+          ],
           "pause": 0.5
         },
         {
           "id": "xprobe_05",
           "text": "Bend it twice as hard and the contour closes in to n near one hundred and seventy. Nothing on the vertical planes has moved: the ridge still holds the squares and the pronics, the valley still holds the one-to-four products.",
-          "camera": "exp_full",
-          "actions": ["exp:sweep:1:2:6:15,-15:families"],
+          "camera": "orbit:on=centre;d=230>240;el=28>22;az=62;spin=4;span=13",
+          "actions": [
+            "exp:sweep:1:2:6:15,-15:families"
+          ],
           "pause": 0.6
         },
         {
           "id": "xprobe_06",
           "text": "So the bend is a probe, not a parameter of the arithmetic. It decides which contour a plane picks, never which numbers sit on which curve. Sweeping it maps where every curve crosses that height.",
-          "camera": "exp_levels_oblique",
-          "actions": ["exp:clear", "exp:family:all", "exp:contours:15,-15:planes"],
+          "camera": "orbit:on=centre;at=0,0,-6;d=240>215;el=18>30;az=110;spin=5;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:family:all",
+            "exp:contours:15,-15:planes"
+          ],
           "pause": 0.8
         },
         {
           "id": "xprobe_07",
           "text": "Back to the tour's saddle. What the plane found on the way is the geometry of the curves themselves: where each family climbs, dives, or stays level.",
-          "camera": "exp_full",
-          "actions": ["exp:sweep:2:1:4:15,-15:families"],
+          "camera": "orbit:on=centre;d=215>205;el=40>62;az=160;spin=4;span=9",
+          "actions": [
+            "exp:sweep:2:1:4:15,-15:families"
+          ],
           "pause": 1.0
         }
       ]
@@ -169,69 +221,94 @@
       "id": "xmirror",
       "title": "Mirrors, not oracles",
       "subtitle": "the vortices of the chain at a zero",
-      "setup": ["exp:stage", "exp:backdrop:off", "exp:vortexprep", "exp:vortexpanel:100"],
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off",
+        "exp:vortexprep"
+      ],
       "lines": [
         {
           "id": "xmirror_01",
           "text": "This is the chain at the hundredth zero: every link one term of the series, curling into vortices before it settles. Let's find their eyes with nothing but the turning angles.",
-          "camera": "exp_panel",
-          "actions": [],
+          "camera": "orbit:on=panel;d=52>46;el=82>66;az=-90;spin=3;span=10",
+          "actions": [
+            "exp:chainlive:222:229:line"
+          ],
           "pause": 0.6
         },
         {
           "id": "xmirror_02",
           "text": "Where the turn between links flips through a half-turn, the chain folds back on itself. That knot is an eye. Where the turn flips through zero the chain runs straight: a spoke, the edge of a vortex.",
-          "camera": "exp_panel",
-          "actions": [],
+          "camera": "orbit:on=panel;d=46>38;el=66>52;az=-60;spin=4;span=11",
+          "actions": [
+            "exp:chainlive:229:z100:line:rings"
+          ],
           "pause": 0.6
         },
         {
           "id": "xmirror_03",
           "text": "A vortex drawn by dozens of links is certain; one drawn by two or three is a guess, so its ring is faded. Now the crosses: the chain's own first vertices, reflected and turned by twice the Gram phase.",
-          "camera": "exp_panel",
-          "actions": [],
+          "camera": "orbit:on=panel;at=0,0,0>-2,2,0;d=38>32;el=55>70;az=-15;spin=4;span=11",
+          "actions": [
+            "exp:chainlive:z100:z100:1:rings:mirrors"
+          ],
           "pause": 0.6
         },
         {
           "id": "xmirror_04",
           "text": "They land inside the rings. At the thousandth zero, with far more links, every eye out to the twelfth sits on its mirror to a thousandth. The far end of the chain is its near end in a mirror.",
-          "camera": "exp_panel",
-          "actions": ["exp:vortexpanel:1000"],
+          "camera": "orbit:on=panel;d=40>50;el=72>58;az=25;spin=-3;span=9",
+          "actions": [
+            "exp:chainlive:z100:z1000:line:rings:mirrors"
+          ],
           "pause": 0.8
         },
         {
           "id": "xmirror_05",
           "text": "Stack the zeros as planes and trace each eye through them. Vortex one, in cyan, winds once around the axis per zero on a circle of radius exactly one. Vortex two rides an epicycle on it.",
-          "camera": "exp_tower_oblique",
-          "actions": ["exp:tower:1:40"],
+          "camera": "orbit:on=live;d=62>78;el=24>36;az=-120;spin=12;span=12",
+          "actions": [
+            "exp:towergrow:1:40:line",
+            "exp:snap"
+          ],
           "pause": 0.8
         },
         {
           "id": "xmirror_06",
           "text": "Take the Gram phase out and the whole tower collapses: vortex one to a single point, vortex two to a circle, vortex three to an epicycle. These are the chain's first terms, nothing more.",
-          "camera": "exp_tower_side",
-          "actions": ["exp:tower:1:40:derotate"],
+          "camera": "orbit:on=tower;h=.5;d=82>72;el=10>26;az=-60;spin=8;span=12",
+          "actions": [
+            "exp:tower:1:40:derotate"
+          ],
           "pause": 0.8
         },
         {
           "id": "xmirror_07",
           "text": "All ten thousand zeros seen down the axis: the unit circle of vortex one, the rings of the rest. This is as much structure as there is.",
-          "camera": "exp_all_down",
-          "actions": ["exp:towerall"],
+          "camera": "orbit:on=towerfocus;d=58>42;el=89.5;az=-90;spin=6;fov=30;span=9",
+          "actions": [
+            "exp:towerall",
+            "exp:snap"
+          ],
           "pause": 0.8
         },
         {
           "id": "xmirror_08",
           "text": "With the phase removed: the point, the circle, the epicycles. The eye angle at a zero reads that zero's Gram offset. It correlates with the next gap at minus a quarter, and with the next zero's offset not at all.",
-          "camera": "exp_all_down",
-          "actions": ["exp:towerall:derotate:4"],
+          "camera": "orbit:on=towerfocus;d=58>42;el=89.5;az=-30;spin=-6;fov=30;span=12",
+          "actions": [
+            "exp:towerall:derotate:4"
+          ],
           "pause": 0.8
         },
         {
           "id": "xmirror_09",
           "text": "So each vortex is a mirror of the zero it sits at: the chain's own beginning, reflected through that zero's phase. It is not an oracle for the zero to come. Mirrors, not oracles.",
-          "camera": "exp_tower_oblique",
-          "actions": ["exp:tower:1000:1040"],
+          "camera": "orbit:on=tower;h=.5;d=88>72;el=14>30;az=0;spin=8;span=14",
+          "actions": [
+            "exp:tower:1000:1040",
+            "exp:snap"
+          ],
           "pause": 1.4
         }
       ]

@@ -7,7 +7,8 @@ using UnityEngine;
 /// (docs/experiments/README.md), scripted in Assets/Resources/Narration/experiments.json with the same line format as
 /// the tour. A module runs through the tour machinery (captions, camera cues, actions) as a single chapter; the
 /// stage is restored when it ends. Actions start with "exp:" and are listed in ApplyExperimentAction.
-/// No narration has been recorded for these lines: the captions use the estimated timing.
+/// The lines are narrated like the tour (Tools/generate_narration.py --script experiments); their shots are mostly
+/// "orbit:" specs (CameraRig.OrbitCue), and a module opens already framed on its first shot.
 /// </summary>
 public partial class TourDirector
 {
@@ -93,7 +94,8 @@ public partial class TourDirector
     /// exp:stage · exp:clear · exp:backdrop:on|off · exp:routes:on|off · exp:bend:B · exp:sweep:FROM:TO:SECONDS:H1,H2[:families]
     /// exp:contours:H1,H2[:planes] · exp:family:ridge|valley|level|all · exp:section:x|y|z:C · exp:trail:TMAX[:gram][:half]
     /// exp:curves:MAXD · exp:euler:KMAX[:plain] · exp:zetawave · exp:vortexprep · exp:vortexpanel:J · exp:tower:A:B[:derotate]
-    /// exp:towerall[:derotate][:KMAX]
+    /// exp:towerall[:derotate][:KMAX] · exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors] · exp:towergrow:A:B:SECONDS
+    /// (FROM / TO: a dial value, zN for zero N, or "here" for where the live chain is; SECONDS: a number or "line")
     /// </summary>
     void ApplyExperimentAction(string[] p)
     {
@@ -174,6 +176,32 @@ public partial class TourDirector
                 sacks.ClearExperiments();
                 sacks.ExpVortexTower(SacksSpiral.ExpVortices(zs), a, b, tower, 4f, t => (float)(t - t0) * scale, derotate, true, !derotate, !derotate, b - a > 100 ? 8 : 8, 2.2f);
                 sacks.ExpTowerFocus = derotate ? new Vector3(-4f, 0f, 0f) : Vector3.zero;
+                break;
+            }
+            case "snap": Rig.Snap(); break; // put last in a line that rebuilds the picture elsewhere: cut, don't fly
+            case "chainlive":
+            {
+                double Dial(string s)
+                {
+                    s = s.ToLowerInvariant();
+                    if (s == "here" && sacks.ExpLiveT > 0) return sacks.ExpLiveT;
+                    if (s.StartsWith("z") && int.TryParse(s.Substring(1), out int zj)) return zs[Mathf.Clamp(zj, 1, zs.Length) - 1];
+                    return double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out double v) ? v : zs[99];
+                }
+
+                float seconds = A(4).ToLowerInvariant() == "line" ? currentLineSeconds * .92f : F(4, 6f);
+                sacks.ExpChainLive(Dial(A(2)), Dial(A(3)), seconds, panel, 9.5f, 15f, Has("rings"), Has("mirrors"), 6f);
+                break;
+            }
+            case "towergrow":
+            {
+                int a = Mathf.Clamp(I(2, 1), 1, zs.Length), b = Mathf.Clamp(I(3, a + 39), a + 1, zs.Length);
+                double t0 = zs[a - 1];
+                float scale = 44f / Mathf.Max(1f, (float)(zs[b - 1] - t0));
+                float seconds = A(4).ToLowerInvariant() == "line" ? currentLineSeconds * .9f : F(4, 10f);
+                sacks.ClearExperiments();
+                sacks.ExpTowerFocus = Vector3.zero;
+                sacks.ExpTowerGrow(a, b, seconds, tower, 4f, t => (float)(t - t0) * scale, 9f);
                 break;
             }
             case "towerall":

@@ -439,8 +439,16 @@ public class CameraRig : MonoBehaviour
         if (string.IsNullOrEmpty(name)) return;
         if (!cues.TryGetValue(name, out Func<CueState> cue))
         {
-            Debug.LogWarning($"CameraRig: unknown cue '{name}'");
-            return;
+            if (name.StartsWith("orbit:"))
+            {
+                cue = OrbitCue(name.Substring(6));
+                cues[name] = cue;
+            }
+            else
+            {
+                Debug.LogWarning($"CameraRig: unknown cue '{name}'");
+                return;
+            }
         }
 
         if (!Active)
@@ -452,6 +460,81 @@ public class CameraRig : MonoBehaviour
         activeCueName = name;
         cueStartTime = Time.time;
         smoothTime = Mathf.Max(0.15f, transitionSeconds * 0.4f);
+    }
+
+    /// <summary>
+    /// A moving shot written into the script itself, for the experiment modules: "orbit:on=centre;at=x,y,z;d=210>180;
+    /// el=60>35;az=-90;spin=3;fov=55;span=12;h=.5". It circles a point on the saddle's normal (−Z) at elevation el
+    /// (degrees above the saddle; 90 looks straight down) and distance d, turning at spin degrees per second from az;
+    /// "A>B" eases a value from A to B over span seconds (distance, elevation, and the look point's at). on: centre
+    /// (the saddle), panel, tower, live (the tower plane the live chain is climbing through) or towerfocus; h raises
+    /// the look point by that fraction of the current tower's height.
+    /// </summary>
+    Func<CueState> OrbitCue(string spec)
+    {
+        Dictionary<string, string> p = new();
+        foreach (string part in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            int eq = part.IndexOf('=');
+            if (eq > 0) p[part.Substring(0, eq).Trim().ToLowerInvariant()] = part.Substring(eq + 1).Trim();
+        }
+
+        static float Num(string s, float d) => float.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float v) ? v : d;
+        (float a, float b) Range(string key, float d)
+        {
+            if (!p.TryGetValue(key, out string s)) return (d, d);
+            string[] ab = s.Split('>');
+            float a = Num(ab[0], d);
+            return (a, ab.Length > 1 ? Num(ab[1], a) : a);
+        }
+
+        Vector3 Vec(string s)
+        {
+            string[] c = s.Split(',');
+            return new Vector3(c.Length > 0 ? Num(c[0], 0f) : 0f, c.Length > 1 ? Num(c[1], 0f) : 0f, c.Length > 2 ? Num(c[2], 0f) : 0f);
+        }
+
+        (Vector3 a, Vector3 b) At()
+        {
+            if (!p.TryGetValue("at", out string s)) return (Vector3.zero, Vector3.zero);
+            string[] ab = s.Split('>');
+            Vector3 a = Vec(ab[0]);
+            return (a, ab.Length > 1 ? Vec(ab[1]) : a);
+        }
+
+        string on = p.TryGetValue("on", out string o) ? o.ToLowerInvariant() : "centre";
+        (float d0, float d1) = Range("d", 200f);
+        (float e0, float e1) = Range("el", 45f);
+        (Vector3 at0, Vector3 at1) = At();
+        float az0 = Num(p.TryGetValue("az", out string az) ? az : "", -90f);
+        float spin = Num(p.TryGetValue("spin", out string sp) ? sp : "", 3f);
+        float fov = Num(p.TryGetValue("fov", out string fv) ? fv : "", 55f);
+        float span = Mathf.Max(.1f, Num(p.TryGetValue("span", out string sn) ? sn : "", 12f));
+        float hFrac = Num(p.TryGetValue("h", out string hh) ? hh : "", 0f);
+        return () =>
+        {
+            SacksSpiral s = annotations.Sacks;
+            Vector3 c = s.Center;
+            Vector3 basePoint = on switch
+            {
+                "panel" => c + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f),
+                "tower" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f),
+                "live" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + Vector3.back * s.ExpLiveHeight,
+                "towerfocus" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + s.ExpTowerFocus + Vector3.back * Mathf.Max(1f, s.ExpTowerHeight),
+                _ => c
+            };
+            float age = Time.time - cueStartTime;
+            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(age / span));
+            Vector3 look = basePoint + Vector3.Lerp(at0, at1, u) + Vector3.back * (hFrac * Mathf.Max(1f, s.ExpTowerHeight));
+            float d = Mathf.Lerp(d0, d1, u);
+            float el = Mathf.Clamp(Mathf.Lerp(e0, e1, u), -80f, 89.5f) * Mathf.Deg2Rad;
+            float a = (az0 + spin * age) * Mathf.Deg2Rad;
+            Vector3 hdir = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
+            Vector3 position = look + (hdir * Mathf.Cos(el) + Vector3.back * Mathf.Sin(el)) * d;
+            // "up the screen" is the saddle's normal tipped back by the elevation, so a shot can pass overhead smoothly
+            Vector3 upDir = (Vector3.back * Mathf.Cos(el) - hdir * Mathf.Sin(el)).normalized;
+            return new CueState { Position = position, LookAt = look, Up = upDir, Fov = fov };
+        };
     }
 
     /// <summary>Jump straight to the active cue's current target (no smoothing).</summary>
