@@ -50,6 +50,21 @@ every module one after the other).
 
 The menu follows you if you walk or turn away from it for a moment, and it never moves while a finger is near it.
 
+### Experiments
+
+![The Experiments tab (desktop simulation)](vr/experiments-tab.jpg)
+
+The **Experiments** tab holds the 16 thought experiments on the saddle (`Assets/Resources/Narration/experiments.json`, the same
+modules as the desktop side menu): cancellation curves, level contours, the bend as a probe, mirrors, the two counting problems,
+the primes of Euler's ring, mirror lines, the discriminant comb, the pinches, the 12 × 12 torus, the Legendre symbol, base-12
+fingerprints, the 144 clock, mirrors for prime pairs, the sieve machine and the twisted tori. Each plays alone with its
+narration and camera moves (there are no captions in VR); every shot places the model in front of you like a tour chapter, so
+**Follow**, pinch and the Space tab work the same way.
+
+Checked in the desktop simulation: every line of every module runs without an error in the headset's eye shape
+(`VRExperimentsTest`). Frame times of the experiment modules have not been measured on a headset yet:
+`python Tools/quest.py run --experiment all --seconds 1700` plays them all and prints a `[VRPERF]` line per narration line.
+
 ### Comfort
 
 * The tour's camera moves are slowed down and limited to about 50° per second in passthrough and 30° per second in
