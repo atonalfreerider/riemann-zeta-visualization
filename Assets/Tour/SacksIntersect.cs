@@ -69,10 +69,25 @@ public partial class SacksSpiral
     /// paraboloid for Δ &lt; 0, the saddle for Δ &gt; 0) with its values at x = k + B/2: gold where prime, red where composite.
     /// x is scaled by xs, the depth y by ys, the height by hs; a legend column stands to the right.
     /// </summary>
+    // the frame of the last norm-surface build, so a module can add slices to it later (exp:normslice)
+    Vector3 normO;
+    float normXs = 2.5f, normYs = 6f, normHs = .18f, normX = 10f, normY = 7f, normLegendRow;
+    Vector3 normLegend;
+
+    Vector3 NormW(float x, float y, float n) => normO + new Vector3(x * normXs, y * normYs, -n * normHs);
+
     public void ExpNormSurfaces(Vector3 o, float xs, float ys, float hs, float X, float Y, NormSlice[] slices, float labelSize)
     {
+        ExpNormBase(o, xs, ys, hs, X, Y, labelSize);
+        Transform rv = RevealItems(ExpGroup("AA slices").transform);
+        foreach (NormSlice sl in slices) AddNormSlice(rv, sl, labelSize);
+    }
+
+    /// <summary>The two surfaces and the squares where they meet; the frame is kept for later slices.</summary>
+    public void ExpNormBase(Vector3 o, float xs, float ys, float hs, float X, float Y, float labelSize)
+    {
+        normO = o; normXs = xs; normYs = ys; normHs = hs; normX = X; normY = Y;
         Transform g = ExpGroup("AA norm surfaces").transform;
-        Vector3 W(float x, float y, float n) => o + new Vector3(x * xs, y * ys, -n * hs);
         const int steps = 80;
         for (int sgn = 1; sgn >= -1; sgn -= 2)
         {
@@ -80,62 +95,78 @@ public partial class SacksSpiral
             for (float y = 0f; y <= Y + 1e-3f; y += .5f)
             {
                 Vector3[] line = new Vector3[steps + 1];
-                for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; line[st] = W(x, y, x * x + sgn * y * y); }
+                for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; line[st] = NormW(x, y, x * x + sgn * y * y); }
                 ExpLine(g, sgn > 0 ? "paraboloid" : "saddle", .05f, col, Factory.NoGlow, line);
             }
 
             for (float x = -X; x <= X + 1e-3f; x += 1f)
             {
                 Vector3[] line = new Vector3[41];
-                for (int st = 0; st <= 40; st++) { float y = Y * st / 40f; line[st] = W(x, y, x * x + sgn * y * y); }
+                for (int st = 0; st <= 40; st++) { float y = Y * st / 40f; line[st] = NormW(x, y, x * x + sgn * y * y); }
                 ExpLine(g, sgn > 0 ? "paraboloid" : "saddle", .05f, col, Factory.NoGlow, line);
             }
         }
 
         Vector3[] meet = new Vector3[steps + 1];
-        for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; meet[st] = W(x, 0f, x * x); }
+        for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; meet[st] = NormW(x, 0f, x * x); }
         GlowLine(ExpLine(g, "the squares: where they meet", .2f, Color.white, AttentionIntensity, meet), 1.6f, .45f);
         List<Vector3> sq = new(); List<Color> sqc = new(); List<float> sqs = new();
-        for (int k = -(int)X; k <= (int)X; k++) { sq.Add(W(k, 0f, k * k) + Vector3.back * .2f); sqc.Add(SquareColor); sqs.Add(.45f); }
+        for (int k = -(int)X; k <= (int)X; k++) { sq.Add(NormW(k, 0f, k * k) + Vector3.back * .2f); sqc.Add(SquareColor); sqs.Add(.45f); }
         ExpPointCloud(g, "squares", sq, sqc, sqs, Factory.GlowIntensity);
-        float row = 0f;
-        Vector3 legend = o + new Vector3(X * xs + 20f, Y * ys * .5f, -(X * X + .3f * Y * Y) * hs);
+        normLegendRow = 0f;
+        normLegend = o + new Vector3(X * xs + 20f, Y * ys * .5f, -(X * X + .3f * Y * Y) * hs);
         if (labelSize > 0f)
         {
-            ExpLabelWide(g, "paraboloid  x² + y²", legend, labelSize * .8f, ParaboloidColor, TextAlignmentOptions.Left);
-            ExpLabelWide(g, "saddle  x² − y²", legend + Vector3.forward * (.17f * labelSize), labelSize * .8f, SaddleWireColor, TextAlignmentOptions.Left);
-            ExpLabelWide(g, "they meet along the squares  k²", legend + Vector3.forward * (.34f * labelSize), labelSize * .65f, Color.white, TextAlignmentOptions.Left);
-            row = .6f * labelSize;
+            ExpLabelWide(g, "paraboloid  x² + y²", normLegend, labelSize * .8f, ParaboloidColor, TextAlignmentOptions.Left);
+            ExpLabelWide(g, "saddle  x² − y²", normLegend + Vector3.forward * (.17f * labelSize), labelSize * .8f, SaddleWireColor, TextAlignmentOptions.Left);
+            ExpLabelWide(g, "they meet along the squares  k²", normLegend + Vector3.forward * (.34f * labelSize), labelSize * .65f, Color.white, TextAlignmentOptions.Left);
+            normLegendRow = .6f * labelSize;
         }
 
-        foreach (NormSlice sl in slices)
-        {
-            float y = sl.Y, shift = -sl.Disc * .25f;
-            Vector3[] line = new Vector3[steps + 1];
-            for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; line[st] = W(x, y, x * x + shift); }
-            ExpLine(g, "slice " + sl.Name, .14f, sl.Color, Factory.SoftGlowIntensity, line);
-            List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
-            int primes = 0, values = 0;
-            for (long k = -(long)X - sl.B; k <= (long)X; k++)
-            {
-                float x = k + sl.B * .5f;
-                if (Mathf.Abs(x) > X + 1e-3f) continue;
-                long n = sl.Value(k);
-                pts.Add(W(x, y, n) + Vector3.back * .25f);
-                bool p = ExpPrime(n);
-                cols.Add(n < 2 ? new Color(.45f, .45f, .5f) : p ? PrimeDot : DeadColor);
-                sizes.Add(.55f);
-                if (x >= 0f) { values++; if (p) primes++; }
-            }
+        Board(Tint(ParaboloidColor, "x² + y²") + "  and  " + Tint(SaddleWireColor, "x² − y²") + "\n" + Small("a bowl and a saddle that meet along the squares"));
+    }
 
-            ExpPointCloud(g, "values " + sl.Name, pts, cols, sizes, Factory.GlowIntensity);
-            if (labelSize > 0f)
-            {
-                string surf = sl.Disc < 0 ? "paraboloid" : "saddle";
-                ExpLabelWide(g, $"{sl.Name}    Δ = {sl.Disc}    {surf}, y = {sl.Y:0.##}    {primes}/{values} prime",
-                    legend + Vector3.forward * row, labelSize * .6f, sl.Color, TextAlignmentOptions.Left);
-                row += .13f * labelSize;
-            }
+    /// <summary>Slices added to the last norm-surface frame (exp:normslice), revealed one by one with exp:reveal.</summary>
+    public void ExpNormSlicesAdd(int[] indices)
+    {
+        Transform rv = RevealItems(ExpGroup("AA slices").transform);
+        foreach (int i in indices) if (i >= 0 && i < DefaultNormSlices.Length) AddNormSlice(rv, DefaultNormSlices[i], 0f);
+    }
+
+    void AddNormSlice(Transform rv, NormSlice sl, float labelSize)
+    {
+        const int steps = 80;
+        float X = normX;
+        Transform item = new GameObject("slice " + sl.Name).transform;
+        item.SetParent(rv, false);
+        RevealNote note = item.gameObject.AddComponent<RevealNote>();
+        float y = sl.Y, shift = -sl.Disc * .25f;
+        Vector3[] line = new Vector3[steps + 1];
+        for (int st = 0; st <= steps; st++) { float x = -X + 2f * X * st / steps; line[st] = NormW(x, y, x * x + shift); }
+        ExpLine(item, "slice " + sl.Name, .14f, sl.Color, Factory.SoftGlowIntensity, line);
+        List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
+        int primes = 0, values = 0;
+        for (long k = -(long)X - sl.B; k <= (long)X; k++)
+        {
+            float x = k + sl.B * .5f;
+            if (Mathf.Abs(x) > X + 1e-3f) continue;
+            long n = sl.Value(k);
+            Vector3 p = NormW(x, y, n) + Vector3.back * .25f;
+            pts.Add(p);
+            bool pr = ExpPrime(n);
+            cols.Add(n < 2 ? new Color(.45f, .45f, .5f) : pr ? PrimeDot : DeadColor);
+            sizes.Add(.55f);
+            if (x >= 0f) { values++; if (pr) { primes++; note.FlareAt.Add(p); } }
+        }
+
+        ExpPointCloud(item, "values " + sl.Name, pts, cols, sizes, Factory.GlowIntensity);
+        string surf = sl.Disc < 0 ? "paraboloid" : "saddle";
+        note.Text = $"{Tint(sl.Color, sl.Name)}    Δ = {sl.Disc}\n" + Small($"{surf} slice at y = {sl.Y:0.##}:   {primes} of {values} prime");
+        if (labelSize > 0f)
+        {
+            ExpLabelWide(item, $"{sl.Name}    Δ = {sl.Disc}    {surf}, y = {sl.Y:0.##}    {primes}/{values} prime",
+                normLegend + Vector3.forward * normLegendRow, labelSize * .6f, sl.Color, TextAlignmentOptions.Left);
+            normLegendRow += .13f * labelSize;
         }
     }
 
@@ -162,9 +193,13 @@ public partial class SacksSpiral
         }
 
         int sq = 0, fac = 0;
+        Transform rv = RevealItems(g);
+        Transform facItem = new GameObject("factor points").transform, sqItem = new GameObject("square points").transform;
+        facItem.SetParent(rv, false); sqItem.SetParent(rv, false);
+        RevealNote facNote = facItem.gameObject.AddComponent<RevealNote>(), sqNote = sqItem.gameObject.AddComponent<RevealNote>();
         for (int a = -(int)r - 1; a <= (int)r + 1; a++)
             for (int b = -(int)r - 1; b <= (int)r + 1; b++)
-                if ((long)a * a + (long)b * b == n) { ExpDot(g, "sum of squares", P(a, b) + Vector3.back * .2f, .9f, PrimeDot); sq++; }
+                if ((long)a * a + (long)b * b == n) { Vector3 p = P(a, b) + Vector3.back * .2f; ExpDot(sqItem, "sum of squares", p, .9f, PrimeDot); sqNote.FlareAt.Add(p); sq++; }
 
         for (long a = -n; a <= n; a++)
         {
@@ -172,11 +207,18 @@ public partial class SacksSpiral
             long b = n / a;
             float x = (a + b) * .5f, y = (b - a) * .5f;
             if (Mathf.Abs(y) > ext) continue;
-            ExpDot(g, "factor pair", P(x, y) + Vector3.back * .25f, .8f, Color.white, AttentionIntensity);
+            Vector3 fp = P(x, y) + Vector3.back * .25f;
+            ExpDot(facItem, "factor pair", fp, .8f, Color.white, AttentionIntensity);
+            facNote.FlareAt.Add(fp);
             fac++;
             if (labelSize > 0f && a > 0)
-                ExpLabelWide(g, $"{a}·{b}", P(x, y) + new Vector3(1.5f, 0f, -.4f), labelSize * .6f, new Color(.9f, .9f, 1f), TextAlignmentOptions.Left);
+                ExpLabelWide(facItem, $"{a}·{b}", P(x, y) + new Vector3(1.5f, 0f, -.4f), labelSize * .6f, new Color(.9f, .9f, 1f), TextAlignmentOptions.Left);
         }
+
+        int divisors = 0;
+        for (long a = 1; a <= n; a++) if (n % a == 0) divisors++;
+        facNote.Text = $"n = {n}:  {Tint(SaddleWireColor, "x² − y² = n")}\n" + Small($"one point for every factorization a·b:  {2 * divisors} points");
+        sqNote.Text = $"n = {n}:  {Tint(ParaboloidColor, "x² + y² = n")}\n" + Small($"one point for every sum of two squares:  {sq} points");
 
         if (labelSize > 0f)
         {
@@ -227,13 +269,17 @@ public partial class SacksSpiral
         int L = Mathf.CeilToInt(reach) + 1;
         List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
         int sqHits = 0, triHits = 0;
+        Transform rv = RevealItems(g);
+        Transform ringItem = new GameObject("ring").transform, sqItem = new GameObject("square hits").transform, triItem = new GameObject("triangular hits").transform;
+        ringItem.SetParent(rv, false); sqItem.SetParent(rv, false); triItem.SetParent(rv, false);
+        RevealNote ringNote = ringItem.gameObject.AddComponent<RevealNote>(), sqNote = sqItem.gameObject.AddComponent<RevealNote>(), triNote = triItem.gameObject.AddComponent<RevealNote>();
         for (int i = -L; i <= L; i++)
             for (int j = -L; j <= L; j++)
             {
                 float d = Mathf.Sqrt(i * i + j * j);
                 if (d > reach || (band > 0f && Mathf.Abs(d - r) > band)) continue;
                 Vector3 p = center + new Vector3(i, j, 0f) * unit;
-                if ((long)i * i + (long)j * j == n) { ExpDot(g, "a² + b²", p + Vector3.back * .3f, Mathf.Max(unit * .34f, 1.1f), PrimeDot); sqHits++; }
+                if ((long)i * i + (long)j * j == n) { ExpDot(sqItem, "a² + b²", p + Vector3.back * .3f, Mathf.Max(unit * .34f, 1.1f), PrimeDot); sqNote.FlareAt.Add(p); sqHits++; }
                 else { pts.Add(p); cols.Add(new Color(.42f, .48f, .68f)); sizes.Add(Mathf.Max(unit * .07f, .16f)); }
             }
 
@@ -243,19 +289,24 @@ public partial class SacksSpiral
                 float x = a + b * .5f, y = b * .8660254f, d = Mathf.Sqrt(x * x + y * y);
                 if (d > reach || (band > 0f && Mathf.Abs(d - r) > band)) continue;
                 Vector3 p = center + new Vector3(x, y, 0f) * unit;
-                if ((long)a * a + (long)a * b + (long)b * b == n) { ExpDot(g, "a² + ab + b²", p + Vector3.back * .35f, Mathf.Max(unit * .28f, .95f), TriangularColor); triHits++; }
+                if ((long)a * a + (long)a * b + (long)b * b == n) { ExpDot(triItem, "a² + ab + b²", p + Vector3.back * .35f, Mathf.Max(unit * .28f, .95f), TriangularColor); triNote.FlareAt.Add(p); triHits++; }
                 else { pts.Add(p + Vector3.forward * .05f); cols.Add(new Color(.25f, .55f, .6f)); sizes.Add(Mathf.Max(unit * .055f, .13f)); }
             }
 
         ExpPointCloud(g, "lattices", pts, cols, sizes, Factory.SoftGlowIntensity);
         Vector3[] ring = new Vector3[201];
         for (int s = 0; s <= 200; s++) { float a = s / 200f * 2f * Mathf.PI; ring[s] = center + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r * unit + Vector3.back * .1f; }
-        ExpLine(g, "ring", .1f, new Color(.92f, .92f, 1f), Factory.SoftGlowIntensity, ring);
+        ExpLine(ringItem, "ring", .1f, new Color(.92f, .92f, 1f), Factory.SoftGlowIntensity, ring);
         double s0 = System.Math.Sqrt(n);
         float th = 2f * Mathf.PI * (float)(s0 - System.Math.Floor(s0));
         Vector3 sacks = center + new Vector3(Mathf.Cos(th), Mathf.Sin(th), 0f) * r * unit + Vector3.back * .4f;
-        ExpDot(g, "Sacks point", sacks, Mathf.Max(unit * .22f, .8f), Color.white, AttentionIntensity);
-        ExpRing(g, "Sacks point ring", sacks, Mathf.Max(unit * .45f, 1.6f), Color.white, .1f, AttentionIntensity);
+        ExpDot(ringItem, "Sacks point", sacks, Mathf.Max(unit * .22f, .8f), Color.white, AttentionIntensity);
+        ExpRing(ringItem, "Sacks point ring", sacks, Mathf.Max(unit * .45f, 1.6f), Color.white, .1f, AttentionIntensity);
+        string cls12 = n % 12 == 1 ? "both lattices" : n % 12 == 5 ? "the square lattice only" : n % 12 == 7 ? "the triangular lattice only" : n % 12 == 11 ? "neither lattice" : "";
+        ringNote.Text = $"the ring of {n}\n" + Small($"radius √{n};  {n} ≡ {n % 12} (mod 12)");
+        sqNote.Text = $"{n} = a² + b²:  {Tint(PrimeDot, sqHits + " square points")}\n" + Small(sqHits == 0 ? "the ring misses the square lattice" : "one for each way to write it");
+        triNote.Text = $"{Tint(PrimeDot, sqHits + " square")}  +  {Tint(TriangularColor, triHits + " triangular points")}\n" +
+                       Small(ExpPrime(n) && cls12.Length > 0 ? $"a prime ≡ {n % 12} (mod 12) meets {cls12}" : $"{n} = a² + ab + b² in {triHits} ways");
         if (labelSize > 0f)
         {
             string cls = n % 12 == 1 ? "both lattices" : n % 12 == 5 ? "square lattice only" : n % 12 == 7 ? "triangular lattice only" : n % 12 == 11 ? "neither lattice" : "";
@@ -271,13 +322,13 @@ public partial class SacksSpiral
     /// the squares and row 1 Euler's values: the ring of k² + k + 41 passes through (k + ½, √163/2). Upper halves of the rings
     /// for k ≤ kMax, gold while prime.
     /// </summary>
-    public void ExpEulerLattice(Vector3 o, float unit, int kMax, float labelSize)
+    public void ExpEulerLattice(Vector3 o, float unit, int kMax, float labelSize, bool full = false)
     {
         Transform g = ExpGroup("AB Euler lattice").transform;
         float h = Mathf.Sqrt(163f) * .5f;
         float X = kMax + 2.5f;
         List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
-        for (int b = -1; b <= 7; b++)
+        for (int b = full ? -7 : -1; b <= 7; b++)
         {
             float y = b * h;
             ExpLine(g, "row " + b, .05f, new Color(.25f, .27f, .36f), Factory.NoGlow, new[] { o + new Vector3(-X, y, 0f) * unit, o + new Vector3(X, y, 0f) * unit });
@@ -290,22 +341,40 @@ public partial class SacksSpiral
         }
 
         ExpPointCloud(g, "lattice", pts, cols, sizes, Factory.SoftGlowIntensity);
+        Transform rv = RevealItems(g);
+        int run = 0;
         for (int k = 0; k <= kMax; k++)
         {
             long n = (long)k * k + k + 41;
             float r = Mathf.Sqrt(n);
             bool prime = ExpPrime(n);
-            Vector3[] arc = new Vector3[121];
-            for (int s = 0; s <= 120; s++) { float a = s / 120f * Mathf.PI; arc[s] = o + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r * unit; }
-            ExpLine(g, "ring " + n, prime ? .07f : .12f, prime ? PrimeDot * .75f : DeadColor, prime ? Factory.SoftGlowIntensity : Factory.GlowIntensity, arc);
+            if (prime && run == k) run++;
+            Transform item = new GameObject($"k = {k}").transform;
+            item.SetParent(rv, false);
+            RevealNote note = item.gameObject.AddComponent<RevealNote>();
+            int segs = full ? 240 : 120;
+            Vector3[] arc = new Vector3[segs + 1];
+            for (int s = 0; s <= segs; s++) { float a = s / (float)segs * (full ? 2f : 1f) * Mathf.PI; arc[s] = o + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r * unit; }
+            ExpLine(item, "ring " + n, prime ? .07f : .12f, prime ? PrimeDot * .75f : DeadColor, prime ? Factory.SoftGlowIntensity : Factory.GlowIntensity, arc);
             Vector3 hit = o + new Vector3(k + .5f, h, 0f) * unit + Vector3.back * .2f, mirror = o + new Vector3(-k - .5f, h, 0f) * unit + Vector3.back * .2f;
-            ExpDot(g, "k + ½", hit, unit * .38f, prime ? PrimeDot : DeadColor);
-            ExpDot(g, "−k − ½", mirror, unit * .38f, prime ? PrimeDot : DeadColor);
+            ExpDot(item, "k + ½", hit, unit * .38f, prime ? PrimeDot : DeadColor);
+            ExpDot(item, "−k − ½", mirror, unit * .38f, prime ? PrimeDot : DeadColor);
+            if (full)
+            {
+                ExpDot(item, "k + ½ below", o + new Vector3(k + .5f, -h, 0f) * unit + Vector3.back * .2f, unit * .38f, prime ? PrimeDot : DeadColor);
+                ExpDot(item, "−k − ½ below", o + new Vector3(-k - .5f, -h, 0f) * unit + Vector3.back * .2f, unit * .38f, prime ? PrimeDot : DeadColor);
+            }
+
+            note.FlareAt.Add(hit);
+            note.Text = $"k = {k}:  {n}" + (prime ? $"  {Tint(PrimeDot, "prime")}" : $" = 41²  {Tint(DeadColor, "composite")}") + "\n" +
+                        Small($"the ring of k² + k + 41 through ({k} + ½, √163/2)" + (prime && run == k + 1 ? $"      {k + 1} primes in a row" : ""));
             if (labelSize > 0f && (k == 0 || k == kMax - 1 || k == kMax))
                 ExpLabelWide(g, k == kMax && !prime ? $"{n} = 41²" : n.ToString(), o + new Vector3(0f, r + .9f, -.3f) * unit, labelSize * .5f, prime ? PrimeDot : DeadColor);
         }
 
         GlowLine(ExpLine(g, "row 1: Euler's line", .12f, EulerColor, Factory.GlowIntensity, new[] { o + new Vector3(-X, h, -.1f) * unit, o + new Vector3(X, h, -.1f) * unit }), 1.4f, .4f);
+        if (full) GlowLine(ExpLine(g, "row −1", .12f, EulerColor, Factory.GlowIntensity, new[] { o + new Vector3(-X, -h, -.1f) * unit, o + new Vector3(X, -h, -.1f) * unit }), 1.4f, .4f);
+        Board("Euler's lattice  Z[(1 + √−163)/2]\n" + Small("row 0: a²      row 1: a² + a + 41      row 2: a² + 2a + 164"));
         if (labelSize > 0f)
         {
             ExpLabelWide(g, "row 1:  a² + a + 41", o + new Vector3(X + 1f, h, 0f) * unit, labelSize * .7f, EulerColor, TextAlignmentOptions.Left);
@@ -385,6 +454,11 @@ public partial class SacksSpiral
                     }
             }
 
+        // the layout and the base colours, for exp:residuelive
+        residueP = P; residueCount = count; residueOffsets = new int[count * count];
+        for (int i = 0, q0 = 0; i < count; i++) for (int j = 0; j < count; j++) { residueOffsets[i * count + j] = q0; q0 += P[i] * P[j]; }
+        residueBaseQuads = new Color[quads.Count];
+        for (int q = 0; q < quads.Count; q++) residueBaseQuads[q] = quads[q].Item4;
         string[] codesAll = string.IsNullOrEmpty(overlays) ? new string[0] : overlays.Split(',');
         if (codesAll.Length == 1 && count > 6)
         {
@@ -414,7 +488,8 @@ public partial class SacksSpiral
             overlays = "";
         }
 
-        ExpQuads(g, "cells", quads, Factory.SoftGlowIntensity);
+        residueCells = ExpQuads(g, "cells", quads, Factory.SoftGlowIntensity).GetComponent<MeshFilter>();
+        Board($"{count * count} shadows of a residue torus\n" + Small("red: the cancellation crosses"));
         if (!string.IsNullOrEmpty(overlays))
         {
             string[] codes = overlays.Split(',');
@@ -440,7 +515,7 @@ public partial class SacksSpiral
                             if (i == j && r != s) continue;
                             pts.Add(Cell(i, r, j, s) + off + Vector3.back * .1f);
                             cols.Add(CurveOverlayColor(code));
-                            sizes.Add(cell * (codes.Length > 1 ? .26f : .32f));
+                            sizes.Add(cell * (codes.Length > 1 ? .36f : .32f));
                         }
                     }
 
@@ -469,6 +544,19 @@ public partial class SacksSpiral
     // ================================================================================================
     // AD. the modular surface
     // ================================================================================================
+
+    /// <summary>2 log ε for the smallest t² − D u² = 4 (u ≥ 1), the length of the closed geodesic of discriminant D; 0 if not found quickly.</summary>
+    static double GeodesicLength(long D)
+    {
+        if (D <= 0 || IsSquareNumber(D)) return 0;
+        for (long u = 1; u <= 400000; u++)
+        {
+            long t2 = D * u * u + 4, t = (long)System.Math.Round(System.Math.Sqrt(t2));
+            if (t * t == t2) return 2 * System.Math.Log((t + u * System.Math.Sqrt(D)) / 2);
+        }
+
+        return 0;
+    }
 
     static Vector3 HalfPlane(Vector3 o, float unit, double u, double v) => o + new Vector3((float)u * unit, (float)v * unit, 0f);
 
@@ -519,17 +607,18 @@ public partial class SacksSpiral
             if (labelSize > 0f) ExpLabelWide(g, m.ToString(), HalfPlane(o, unit, m, -.12) + Vector3.down * (.1f * labelSize), labelSize * .45f, axis);
         }
 
-        void Semicircle(string name, double c, double r, float width, Color col, float glow)
+        void Semicircle(string name, double c, double r, float width, Color col, float glow, Transform parent = null)
         {
+            parent ??= g;
             List<Vector3> pts = new();
             for (int s = 0; s <= 96; s++)
             {
                 double a = s / 96.0 * System.Math.PI, u = c + r * System.Math.Cos(a), v = r * System.Math.Sin(a);
-                if (u < -U || u > U || v > V) { if (pts.Count > 1) ExpLine(g, name, width, col, glow, pts.ToArray()); pts.Clear(); continue; }
+                if (u < -U || u > U || v > V) { if (pts.Count > 1) ExpLine(parent, name, width, col, glow, pts.ToArray()); pts.Clear(); continue; }
                 pts.Add(HalfPlane(o, unit, u, v));
             }
 
-            if (pts.Count > 1) ExpLine(g, name, width, col, glow, pts.ToArray());
+            if (pts.Count > 1) ExpLine(parent, name, width, col, glow, pts.ToArray());
         }
 
         if (farey)
@@ -558,43 +647,73 @@ public partial class SacksSpiral
         ExpLine(g, "fd arc", .08f, fd, Factory.SoftGlowIntensity, arc.ToArray());
         ExpLine(g, "Re = 0", .05f, faint * 1.6f, Factory.NoGlow, new[] { HalfPlane(o, unit, 0, 0), HalfPlane(o, unit, 0, V) });
 
-        // indefinite curves: semicircles
+        // indefinite curves: semicircles, one reveal item each, smallest first (group "AD arcs")
+        Transform arcs = ExpGroup("AD arcs").transform;
+        List<(double r, string name, double c, int disc, bool cancel, bool even, double yield)> arcList = new();
         for (int C = 1; C <= arcMax; C++)
         {
-            // k² − C: roots ±√C
             bool cancel = IsSquareNumber(C);
-            double y = cancel ? 0 : PrimeYield(0, -C);
-            Semicircle($"k² − {C}", 0, System.Math.Sqrt(C), cancel ? .13f : .07f, cancel ? DeadColor : YieldColor(y), cancel ? Factory.GlowIntensity : Factory.SoftGlowIntensity);
+            arcList.Add((System.Math.Sqrt(C), $"k² − {C}", 0, 4 * C, cancel, false, cancel ? 0 : PrimeYield(0, -C)));
         }
 
         for (int C = 0; C <= arcMax; C++)
         {
             // k² + k − C: roots (−1 ± √(1 + 4C))/2; k² + k is even, so k² + k − C has C's parity: even C is always even (grey)
-            bool cancel = IsSquareNumber(1 + 4L * C);
-            bool even = C % 2 == 0;
-            double y = cancel || even ? 0 : PrimeYield(1, -C);
-            Color col = cancel ? DeadColor : even ? evenColor : YieldColor(y);
-            Semicircle($"k² + k − {C}", -.5, System.Math.Sqrt(1 + 4.0 * C) * .5, cancel ? .13f : .07f, col, cancel ? Factory.GlowIntensity : Factory.SoftGlowIntensity);
+            bool cancel = IsSquareNumber(1 + 4L * C), even = C % 2 == 0;
+            arcList.Add((System.Math.Sqrt(1 + 4.0 * C) * .5, C == 0 ? "k(k + 1)" : $"k² + k − {C}", -.5, 1 + 4 * C, cancel, even && !cancel, cancel || even ? 0 : PrimeYield(1, -C)));
         }
 
-        // definite curves: points
+        arcList.Sort((a, b) => a.r.CompareTo(b.r));
+        foreach (var ac in arcList)
+        {
+            Transform item = new GameObject(ac.name).transform;
+            item.SetParent(arcs, false);
+            RevealNote note = item.gameObject.AddComponent<RevealNote>();
+            Color col = ac.cancel ? DeadColor : ac.even ? evenColor : YieldColor(ac.yield);
+            Semicircle(ac.name, ac.c, ac.r, ac.cancel ? .13f : .07f, col, ac.cancel ? Factory.GlowIntensity : Factory.SoftGlowIntensity, item);
+            double root = System.Math.Sqrt(ac.disc) * .5;
+            if (ac.cancel)
+                note.Text = $"{Tint(DeadColor, ac.name)}   Δ = {ac.disc}, a square\n" + Small($"roots {ac.c - root:0.#} and {ac.c + root:0.#}: a geodesic into two cusps");
+            else
+            {
+                double len = GeodesicLength(ac.disc);
+                note.Text = $"{ac.name}   Δ = {ac.disc}\n" + Small(ac.even ? "always even" : len > 0 ? $"a closed geodesic of length {len:0.00}" : "a closed geodesic");
+            }
+        }
+
+        // definite curves: points, one reveal item each, lowest first (group "AD points")
+        Transform points = ExpGroup("AD points").transform;
+        List<(double v, string name, double u, int disc, bool even, double yield)> ptList = new();
         for (int C = 1; C <= cMax; C++)
         {
-            double y0 = PrimeYield(0, C), v0 = System.Math.Sqrt(C);
-            if (v0 <= V) ExpDot(g, $"k² + {C}", HalfPlane(o, unit, 0, v0) + Vector3.back * .2f, .35f + .22f * (float)y0, YieldColor(y0));
-            bool even = C % 2 == 0;
-            double y1 = even ? 0 : PrimeYield(1, C), v1 = System.Math.Sqrt(4.0 * C - 1) * .5;
-            if (v1 <= V) ExpDot(g, $"k² + k + {C}", HalfPlane(o, unit, -.5, v1) + Vector3.back * .2f, .35f + .22f * (float)y1, even ? evenColor : YieldColor(y1));
+            double v0 = System.Math.Sqrt(C), v1 = System.Math.Sqrt(4.0 * C - 1) * .5;
+            if (v0 <= V) ptList.Add((v0, $"k² + {C}", 0, -4 * C, false, PrimeYield(0, C)));
+            if (v1 <= V) ptList.Add((v1, $"k² + k + {C}", -.5, 1 - 4 * C, C % 2 == 0, C % 2 == 0 ? 0 : PrimeYield(1, C)));
         }
 
-        ExpGlowMark(g, HalfPlane(o, unit, -.5, System.Math.Sqrt(163) * .5), 1.1f);
+        ptList.Sort((a, b) => a.v.CompareTo(b.v));
+        foreach (var pt in ptList)
+        {
+            Transform item = new GameObject(pt.name).transform;
+            item.SetParent(points, false);
+            RevealNote note = item.gameObject.AddComponent<RevealNote>();
+            Vector3 at = HalfPlane(o, unit, pt.u, pt.v) + Vector3.back * .2f;
+            ExpDot(item, pt.name, at, .35f + .22f * (float)pt.yield, pt.even ? evenColor : YieldColor(pt.yield));
+            if (pt.yield > 3) note.FlareAt.Add(at);
+            note.Text = $"{pt.name}   Δ = {pt.disc}\n" + Small(pt.even ? "always even" : $"the point at height {pt.v:0.##};  prime yield {pt.yield:0.0}");
+        }
+
+        if (System.Math.Sqrt(163) * .5 <= V) ExpGlowMark(g, HalfPlane(o, unit, -.5, System.Math.Sqrt(163) * .5), 1.1f);
+        Board("the upper half plane\n" + Small("points Δ < 0 · semicircles Δ > 0 · red: Δ a square"));
+        Transform tags = ExpGroup("AD tags").transform;
         if (labelSize > 0f)
         {
             Color lab = new(.9f, .9f, 1f);
             void Tag(double u, double v, string text, bool left)
             {
+                if (v > V) return;
                 Vector3 at = HalfPlane(o, unit, u, v) + new Vector3(left ? -1.1f : 1.1f, 0f, -.3f);
-                ExpLabelWide(g, text, at, labelSize * .5f, lab, left ? TextAlignmentOptions.Right : TextAlignmentOptions.Left);
+                ExpLabelWide(tags, text, at, labelSize * .5f, lab, left ? TextAlignmentOptions.Right : TextAlignmentOptions.Left);
             }
 
             Tag(-.5, System.Math.Sqrt(163) * .5, "k² + k + 41   j = −640320³", true);
@@ -606,10 +725,10 @@ public partial class SacksSpiral
             if (arcMax >= 2 && unit >= 30f)
             {
                 // a closed geodesic and a cusp geodesic, labelled at their tops
-                ExpLabelWide(g, "k² + k − 1:  closed geodesic, length 2 log φ² = 1.92", HalfPlane(o, unit, -.5, System.Math.Sqrt(5) * .5) + new Vector3(0f, .9f, -.3f),
-                    labelSize * .42f, YieldColor(2.5), TextAlignmentOptions.Center);
-                ExpLabelWide(g, "k(k + 1): from cusp −1 to cusp 0", HalfPlane(o, unit, -.5, .5) + new Vector3(0f, .9f, -.3f),
-                    labelSize * .42f, DeadColor, TextAlignmentOptions.Center);
+                ExpLabelWide(tags, "k² + k − 1:  closed, length 1.92", HalfPlane(o, unit, -.5, System.Math.Sqrt(5) * .5) + new Vector3(0f, 1.2f + .06f * labelSize, -.3f),
+                    labelSize * .55f, YieldColor(2.5), TextAlignmentOptions.Center);
+                ExpLabelWide(tags, "k(k + 1): cusp −1 to cusp 0", HalfPlane(o, unit, -.5, .5) + new Vector3(0f, 1.2f + .06f * labelSize, -.3f),
+                    labelSize * .55f, DeadColor, TextAlignmentOptions.Center);
             }
         }
     }
@@ -619,6 +738,8 @@ public partial class SacksSpiral
     // ================================================================================================
 
     static List<double[]> raceRows;
+    double raceLx0 = 4;
+    bool raceMod4;
     static Dictionary<string, List<double>> raceZeros;
 
     static void LoadRace()
@@ -675,11 +796,12 @@ public partial class SacksSpiral
         return rootsDiff * .5 * pis * System.Math.Log(x) / System.Math.Sqrt(x);
     }
 
-    public void ExpRaceChart(Vector3 o, float width, float height, float labelSize, bool mod4, bool waves, double[] markers = null)
+    public void ExpRaceChart(Vector3 o, float width, float height, float labelSize, bool mod4, bool waves, double[] markers = null, bool legend = true)
     {
         LoadRace();
         Transform g = ExpGroup("AE race").transform;
         double lx0 = mod4 ? 3 : 4, lx1 = 8;
+        raceLx0 = lx0; raceMod4 = mod4;
         Color axis = new(.55f, .55f, .65f);
         (int a, Color col, string chiA, string chiB, string name)[] lanes = mod4
             ? new[] { (3, new Color(1f, .45f, .35f), "m4", "", "3 mod 4  (misses the square lattice)  vs  1 mod 4") }
@@ -740,7 +862,8 @@ public partial class SacksSpiral
                 }
         }
 
-        if (labelSize > 0f)
+        Board((mod4 ? "3 mod 4 against 1 mod 4" : "the race mod 12") + "\n" + Small("coloured: measured      white: prime squares + cosine waves of the zeros"));
+        if (labelSize > 0f && legend)
             ExpLabelWide(g, "coloured: measured   white: bias from prime squares + cosine waves of the L-function zeros",
                 o + new Vector3(0f, -height * .5f - .45f * labelSize - 2f, 0f), labelSize * .45f, new Color(.85f, .85f, .95f));
     }

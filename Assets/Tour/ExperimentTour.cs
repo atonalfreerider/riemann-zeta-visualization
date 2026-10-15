@@ -369,6 +369,52 @@ public partial class TourDirector
                 break;
             case "dialring": sacks.ExpDialRingPulse(c + new Vector3(SacksSpiral.MachineOffset, 0f, 0f), I(2, 10)); break;
             case "noboard": SacksSpiral.ExpClearBoard(); break;
+            // ---- the AA–AE modules (SacksIntersect.cs, SacksIntersectLive.cs) ----
+            case "reveal": sacks.ExpRevealLive(A(2), Seconds(A(3), 6f)); break;
+            case "hide": sacks.ExpHideItems(A(2)); break;
+            case "normbase": sacks.ExpNormBase(c + new Vector3(SacksSpiral.NormSurfaceOffset, 0f, 0f), 2.5f, 6f, .18f, 10f, 7f, 0f); break;
+            case "normslice":
+            {
+                List<int> ids = new();
+                foreach (string t in A(2).Split(',')) if (int.TryParse(t.Trim(), out int v)) ids.Add(v);
+                sacks.ExpNormSlicesAdd(ids.ToArray());
+                break;
+            }
+            case "levelset": sacks.ExpFactorLevelSets(c + new Vector3(SacksSpiral.NormSurfaceOffset + 70f * I(3, 0), -200f, 0f), 30f, I(2, 13), 0f); break;
+            case "ringlattice":
+            {
+                // exp:ringlattice:N:XOFFSET — a prime's ring at 4 units per lattice step; a big number's ring at radius 20
+                long n = I(2, 13);
+                bool big = n > 100;
+                sacks.ExpRingLattice(c + new Vector3(SacksSpiral.RingLatticeOffset + F(3, 0f), 0f, 0f), big ? 20f / Mathf.Sqrt(n) : 4f, n, 0f, big ? 1.3f : 0f);
+                break;
+            }
+            case "eulerlattice": sacks.ExpEulerLattice(c + new Vector3(SacksSpiral.RingLatticeOffset, -300f, 0f), 1f, 40, 0f, true); break;
+            case "residuetorus":
+                // exp:residuetorus:COUNT:CELL[:OVERLAYS separated by ;]
+                sacks.ExpResidueTorusMatrix(c + new Vector3(SacksSpiral.ResidueTorusOffset, 0f, 0f), F(3, .5f), 1000000, I(2, 12), A(4).Replace(';', ','), I(2, 12) > 6 ? 64f : 40f);
+                break;
+            case "residuelive": sacks.ExpResidueOverlayLive(A(2).ToLowerInvariant(), Seconds(A(3), 8f)); break;
+            case "modular":
+                // exp:modular:UNIT:U:V:CMAX:LABELSIZE:ARCMAX
+                sacks.ExpModularPlane(c + new Vector3(SacksSpiral.ModularOffset, 0f, 0f), F(2, 12f), F(3, 3.6f), F(4, 7.2f), I(5, 49), true, F(6, 0f), I(7, 24));
+                break;
+            case "race":
+            {
+                // exp:race:mod4|mod12:WIDTH:HEIGHT:LABELSIZE[:M1,M2,…]
+                List<double> ms = new();
+                foreach (string t in A(6).Split(',')) if (double.TryParse(t.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out double v)) ms.Add(v);
+                sacks.ExpRaceChart(c + new Vector3(SacksSpiral.RaceOffset, 0f, 0f), F(3, 92f), F(4, 110f), F(5, 70f), A(2).ToLowerInvariant() == "mod4", true, ms.Count > 0 ? ms.ToArray() : null, false);
+                break;
+            }
+            case "racelive":
+            {
+                // exp:racelive:SECONDS[:M1,M2,…]
+                List<double> ms = new();
+                foreach (string t in A(3).Split(',')) if (double.TryParse(t.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out double v)) ms.Add(v);
+                sacks.ExpRaceLive(Seconds(A(2), 8f), ms.ToArray());
+                break;
+            }
             case "dialholes": sacks.ExpDialHolesPulse(); break;
             case "sieveboard": sacks.ExpSieveBoard(c + new Vector3(SacksSpiral.MachineOffset + 160f, 0f, 0f), I(2, 50399), I(3, 225), I(4, 320), SieveMods, 2.2f, 36f, I(5, 48)); break;
             case "knot": sacks.ExpTorusKnot(c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f), 30f, 12f, 5, 7, 1000000, Has("euler"), 48f, false); break;

@@ -59,6 +59,11 @@ modules are narrated. The modules are
 | Mirrors for prime pairs | `xgoldbach` | Goldbach pairs as chords across the pronic ray and Euler's line, mirror by mirror with a running count; five curves' mirror strength against Hardy and Littlewood's prediction; the chords arriving on the Möbius band of unordered pairs |
 | The sieve machine | `xsieve` | Fermat's search through a dial of residue rings (mod 3 to 19) turning one hole per step: 1 501 = 19 × 79 at a = 49, the ring for 19 that never closes, 50 399 = 101 × 499 at a = 300, and the record of every candidate |
 | Twisted tori | `xtwist` | a walk along the (5, 7) torus knot of residues with flares at the primes; Euler's line on 12 beads; the spiral winding onto the umbilic torus so turn k lands in position k mod 3; the multiples of 3 of k² + k + 1 and k² + k + 3 on whole stacks; the untwisted torus for contrast |
+| Two norm surfaces | `xnorms` | the bowl x² + y² and the saddle x² − y² meeting along the squares; every curve laid on as a slice with its discriminant and prime count; the level sets of 13 and 65 with their factor points and square points |
+| Rings through lattices | `xlattices` | the rings of 13, 17, 19 and 23 over the square and triangular lattices (one prime per class mod 12), 1105 and 1729; Euler's lattice drawn ring by ring to 41² |
+| A twelve-dimensional torus | `xresidue` | the 144 shadows of the residue torus of 2 … 37 recoloured panel by panel as Euler's line (never on a cross) and the pronic numbers (on every cross) pass through; the 36 shadows close up |
+| The modular surface | `xmodular` | the curves' roots in the upper half plane: points, their j-invariants, closed geodesics and the cusp geodesics of the cancellation curves; the fundamental domain close up |
+| The lattice race | `xrace` | the race mod 4 rebuilt live from the zeros of Dirichlet's β, with flares at 26 861, 616 841 and 12 306 137; the four lattice classes mod 12 and the near miss at 48 231 785 |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
@@ -70,7 +75,11 @@ N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with th
 `exp:meet`, the pinches `exp:fold`, `exp:residue`, `exp:pleat`, `exp:residuelattice` and `exp:pinchlive`, the twisted
 shapes `exp:goldbachlive`, `exp:goldbachsky`, `exp:mobiusband`, `exp:mobiuspoints`, `exp:mobiuslive`, `exp:sievedial`,
 `exp:dialring`, `exp:sieveboard`, `exp:knot`, `exp:knotwalk`, `exp:umbilic`, `exp:umbiliclive`, `exp:umbiliccurve` and
-`exp:noboard`, and more,
+`exp:noboard`, the intersecting geometries `exp:normbase`, `exp:normslice:I,J`, `exp:levelset:N:I`, `exp:ringlattice:N:X`,
+`exp:eulerlattice`, `exp:residuetorus:COUNT:CELL[:a;b]`, `exp:residuelive:CODE:SECONDS`,
+`exp:modular:UNIT:U:V:CMAX:LABEL:ARCS`, `exp:race:mod4|mod12:W:H:L[:x1,x2]` and `exp:racelive:SECONDS[:x1,x2]`, the generic
+`exp:reveal:GROUP:SECONDS` and `exp:hide:GROUP` (a group's items appear one by one, each with its caption-board note and
+flares), and more,
 and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
 see `ExperimentTour.cs`).
 
@@ -80,7 +89,7 @@ squares and pronics, the wave sum as each wave arrives, the plane sliding across
 Fermat's step ring and the curve he finds), events flare white (the square that ends Fermat's search, the numbers the
 narration points at), and the growing needles throw white sparks at their tips while zeros join. Their shots are written into the
 script as moving orbits, `orbit:on=centre|panel|tower|live|towerfocus;at=x,y,z[>x,y,z];d=FROM>TO;el=FROM>TO;az=A;spin=DEG_PER_S;fov=F;span=S;h=FRAC`
-(distance, elevation above the saddle and look point eased over `span` seconds while the camera circles; see
+(distance, elevation above the saddle and look point eased over `span` seconds, after waiting `hold=S` seconds, while the camera circles; see
 `CameraRig.OrbitCue`). `fit=W,H[>W2,H2]` replaces the distance with the one that frames a W × H box at the current
 aspect, so one shot works in 16:9 and 9:16, and `raise=F` lifts the subject by F of the frame's height above the captions, and each module opens already framed on its first shot. To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
 storyboard command below; to record them as narrated videos, one per module, run

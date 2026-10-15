@@ -1371,6 +1371,436 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xnorms",
+      "title": "Two norm surfaces",
+      "subtitle": "every curve is a slice of a bowl or a saddle",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xnorms_01",
+          "text": "Here are two surfaces: a bowl, x squared plus y squared, and a saddle, x squared minus y squared. They meet along one parabola, where y is zero: the squares.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=70,110>66,104;el=36>34;az=-124;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:normbase",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_02",
+          "text": "Every curve on the spiral is a slice of one of them. Cut the bowl at a distance of root one sixty-three over two and read the heights at half steps: forty-one, forty-three, forty-seven. That is Euler's line.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=66,104>64,100;el=34>33;az=-116;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:normslice:0",
+            "exp:reveal:AA slices:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_03",
+          "text": "Every curve with a negative discriminant is a slice of the bowl. k squared plus k plus seventeen lies at four point oh nine, and Landau's k squared plus one at one.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=64,100>64,100;el=33>33;az=-107;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:normslice:1,2",
+            "exp:reveal:AA slices:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_04",
+          "text": "Curves with a positive discriminant are slices of the saddle. At a half-integer distance the slice factors: k times k plus one at one half, u times u plus four at two, u times u plus six at three. After their first value, every one is composite.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=64,100>66,104;el=33>34;az=-99;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:normslice:3,5,7",
+            "exp:reveal:AA slices:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_05",
+          "text": "At an irrational distance the saddle's slices carry primes again. k squared plus k minus one, at root five over two, has seven primes among its first ten values.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=66,104>66,104;el=34>35;az=-88;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:normslice:4,6",
+            "exp:reveal:AA slices:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_06",
+          "text": "The level curves hold the factorizations. On the saddle, x squared minus y squared equals thirteen passes through one point for each way to write thirteen as a times b. A prime has just four.",
+          "camera": "orbit:on=centre;at=12000,-200,0;fit=68,130>66,126;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:levelset:13:0",
+            "exp:reveal:AA level sets 13:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_07",
+          "text": "On the bowl the same height is a circle, the Sacks ring of thirteen, through its sums of two squares. Sixty-five, five times thirteen, has eight factor points and sixteen square points.",
+          "camera": "orbit:on=centre;at=12000,-200,0>12070,-200,0;fit=68,130>66,126;el=89.5;az=-90;spin=0;raise=.05;hold=4.6;span=1.8",
+          "actions": [
+            "exp:levelset:65:1",
+            "exp:hide:AA level sets 65",
+            "delay:7.9:exp:reveal:AA level sets 65:2.5"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xnorms_08",
+          "text": "So the cancellation curves are the saddle's half-integer slices. The prime curves are everywhere else, and richest on the bowl.",
+          "camera": "orbit:on=centre;at=12000,18,-8;fit=70,110>74,116;el=34>40;az=-100;spin=.8;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:normbase",
+            "exp:normslice:0,1,2,3,4,5,6,7",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xlattices",
+      "title": "Rings through lattices",
+      "subtitle": "four classes of primes mod 12",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xlattices_01",
+          "text": "The Sacks ring of a number n is a circle of radius root n. Lay the square lattice and the triangular lattice under the ring of thirteen: it passes through eight square points, its sums of two squares, and twelve triangular ones.",
+          "camera": "orbit:on=centre;at=12800,0,0;fit=56,110>52,104;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:13:0",
+            "exp:reveal:AB ring 13:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_02",
+          "text": "Every prime falls into one of four patterns, set by its remainder mod twelve. Seventeen meets only the square lattice.",
+          "camera": "orbit:on=centre;at=12880,0,0;fit=56,110>52,104;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:17:80",
+            "exp:reveal:AB ring 17:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_03",
+          "text": "Nineteen meets only the triangular lattice: twelve points, and none on the square grid.",
+          "camera": "orbit:on=centre;at=12960,0,0;fit=56,110>52,104;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:19:160",
+            "exp:reveal:AB ring 19:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_04",
+          "text": "And twenty-three meets neither. Its ring threads between every point of both lattices.",
+          "camera": "orbit:on=centre;at=13040,0,0;fit=56,110>52,104;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:23:240",
+            "exp:reveal:AB ring 23:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_05",
+          "text": "For composite numbers the counts multiply. Eleven oh five, five times thirteen times seventeen, is the first ring with thirty-two square points.",
+          "camera": "orbit:on=centre;at=13120,0,0;fit=48,96>46,92;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:1105:320",
+            "exp:reveal:AB ring 1105:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_06",
+          "text": "Seventeen twenty-nine, seven times thirteen times nineteen, is the first with forty-eight triangular points. It is twelve cubed plus one.",
+          "camera": "orbit:on=centre;at=13200,0,0;fit=48,96>46,92;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:ringlattice:1729:400",
+            "exp:reveal:AB ring 1729:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_07",
+          "text": "Euler's lattice is long and thin: the integers along one row, and the next row at a height of root one sixty-three over two.",
+          "camera": "orbit:on=centre;at=12800,-300,0;fit=90,170>86,164;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:eulerlattice",
+            "exp:hide:AB Euler lattice",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_08",
+          "text": "Euler's values are squared distances to that row. The ring of k squared plus k plus forty-one passes through the point k plus a half, for every k.",
+          "camera": "orbit:on=centre;at=12800,-300,0;fit=86,164>88,166;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:reveal:AB Euler lattice:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xlattices_09",
+          "text": "Forty rings in a row are prime. The forty-first is sixteen eighty-one, forty-one squared.",
+          "camera": "orbit:on=centre;at=12800,-300,0;fit=88,166>92,172;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xresidue",
+      "title": "A twelve-dimensional torus",
+      "subtitle": "144 shadows of the sieve",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xresidue_01",
+          "text": "Write every number by its remainders modulo the first twelve primes, from two to thirty-seven. That makes it a point on a torus with twelve dimensions.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=114,212>110,206;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:residuetorus:12:0.5",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_02",
+          "text": "A twelve-dimensional torus casts a hundred and forty-four flat shadows, one for each pair of those primes. Each shadow is a grid of remainder pairs.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=110,206>108,202;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_03",
+          "text": "Below forty-one squared, a number above thirty-seven is prime exactly when it lands on no zero row and no zero column. The tour's spiral stops at sixteen oh one, inside that range.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=108,202>110,206;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_04",
+          "text": "Now follow Euler's line through all hundred and forty-four shadows. Its values light up a plaid of cells, and never a cross.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=114,212>110,206;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:residuelive:euler:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_05",
+          "text": "Minus one sixty-three is not a square modulo any prime up to thirty-seven, so none of them can divide k squared plus k plus forty-one.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=110,206>106,200;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_06",
+          "text": "The pronic numbers do the opposite. They land on both arms of every cross.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=114,212>110,206;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:residuelive:pronic:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_07",
+          "text": "Close up on the first thirty-six shadows. Green is Euler's line, red the pronic numbers, and orange Landau's k squared plus one, which meets only the crosses of two, five and thirteen.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=84,160>80,154;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:residuetorus:6:1.5:euler;pronic;landau",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xresidue_08",
+          "text": "Twelve dimensions turn the sieve of Eratosthenes into a shape, and Euler's line is a curve that stays off every cross.",
+          "camera": "orbit:on=centre;at=13600,0,0;fit=80,154>86,162;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xmodular",
+      "title": "The modular surface",
+      "subtitle": "points, closed geodesics and cusps",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xmodular_01",
+          "text": "Every curve k squared plus B k plus C has two roots. Put them in the upper half plane, where the modular group draws its tiling.",
+          "camera": "orbit:on=centre;at=14400,42,0;fit=92,170>88,164;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:modular:12:3.6:7.2:49:56:24",
+            "exp:hide:AD points",
+            "exp:hide:AD arcs",
+            "exp:hide:AD tags",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_02",
+          "text": "A curve with a negative discriminant has a pair of complex roots, so it becomes a single point. The squares side stands on the line through zero, and the pronic side on the left edge of the fundamental domain.",
+          "camera": "orbit:on=centre;at=14400,42,0;fit=88,164>86,160;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:reveal:AD points:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_03",
+          "text": "Landau's k squared plus one is the point i, and k squared plus k plus one is the corner rho. Euler's curve sits high on the left edge, at a height of root one sixty-three over two.",
+          "camera": "orbit:on=centre;at=14400,42,0;fit=86,160>88,164;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:reveal:AD tags:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_04",
+          "text": "A curve with a positive discriminant has two real roots, joined by a semicircle: a geodesic.",
+          "camera": "orbit:on=centre;at=14400,42,0;fit=92,170>88,164;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:reveal:AD arcs:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_05",
+          "text": "When the discriminant is a perfect square, both roots are integers and the geodesic runs into two cusps. Those are the cancellation curves, in red.",
+          "camera": "orbit:on=centre;at=14400,42,0;fit=88,164>86,160;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_06",
+          "text": "Otherwise the geodesic closes up on the modular surface. k squared plus k minus one closes after a length of two log phi squared.",
+          "camera": "orbit:on=centre;at=14400,46,0;fit=118,200>112,192;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:modular:40:1.4:2.4:12:64:12",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_07",
+          "text": "The floor of the fundamental domain is itself a cancellation geodesic, k squared minus one, and the points of Landau's curve and of k squared plus k plus one stand on it.",
+          "camera": "orbit:on=centre;at=14400,46,0;fit=112,192>110,188;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xmodular_08",
+          "text": "At the class-number-one points the j-invariant is a perfect cube: twelve cubed at i, zero at rho, and minus six hundred forty thousand three hundred twenty cubed at Euler's point. That is why e to the pi root one sixty-three is almost an integer.",
+          "camera": "orbit:on=centre;at=14400,56,0;fit=92,160>96,166;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:modular:12:3.6:7.2:49:56:24",
+            "exp:snap"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xrace",
+      "title": "The lattice race",
+      "subtitle": "cosine waves of L-function zeros",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xrace_01",
+          "text": "Primes whose rings miss the square lattice race against primes whose rings hit it: three mod four against one mod four.",
+          "camera": "orbit:on=centre;at=15200,-4,0;fit=100,170>98,166;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:race:mod4:92:70:70:26861,616841,12306137",
+            "exp:racelive:line:26861,616841,12306137",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_02",
+          "text": "Scaled by log x over root x, the gap hovers near two. The bias comes from prime squares: the square of every odd prime is one mod four.",
+          "camera": "orbit:on=centre;at=15200,-4,0;fit=98,166>96,162;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_03",
+          "text": "The white curve rebuilds the race from that bias plus one cosine wave for each zero of Dirichlet's beta function, the L-function of the square lattice.",
+          "camera": "orbit:on=centre;at=15200,-4,0;fit=96,162>98,166;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_04",
+          "text": "The waves dip to zero at twenty-six thousand eight hundred sixty-one, the first time the hits take the lead, and again near six hundred sixteen thousand and near twelve million.",
+          "camera": "orbit:on=centre;at=15200,-4,0;fit=98,166>100,170;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_05",
+          "text": "Mod twelve, primes fall into four lattice classes: both lattices, square only, triangular only, and neither.",
+          "camera": "orbit:on=centre;at=15200,4,0;fit=100,200>98,196;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:race:mod12:92:105:70:48231785",
+            "exp:racelive:line:48231785",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_06",
+          "text": "The class that meets both lattices has never led, up to a hundred million. The zeros of three L-functions rebuild each lane.",
+          "camera": "orbit:on=centre;at=15200,4,0;fit=98,196>96,192;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xrace_07",
+          "text": "Its closest call is at forty-eight million two hundred thirty-one thousand seven hundred eighty-five, and the cosine waves put their lowest point at the same place.",
+          "camera": "orbit:on=centre;at=15200,4,0;fit=96,192>100,200;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }

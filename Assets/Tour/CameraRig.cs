@@ -512,6 +512,7 @@ public class CameraRig : MonoBehaviour
         float spin = Num(p.TryGetValue("spin", out string sp) ? sp : "", 3f);
         float fov = Num(p.TryGetValue("fov", out string fv) ? fv : "", 55f);
         float span = Mathf.Max(.1f, Num(p.TryGetValue("span", out string sn) ? sn : "", 12f));
+        float hold = Num(p.TryGetValue("hold", out string hd) ? hd : "", 0f); // seconds to wait before moving from the first value to the second
         float hFrac = Num(p.TryGetValue("h", out string hh) ? hh : "", 0f);
         float raise = Num(p.TryGetValue("raise", out string rs) ? rs : "", 0f);
         Vector2 fit0 = Vector2.zero, fit1 = Vector2.zero;
@@ -537,7 +538,7 @@ public class CameraRig : MonoBehaviour
                 _ => c
             };
             float age = Time.time - cueStartTime;
-            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(age / span));
+            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((age - hold) / span));
             Vector3 look = basePoint + Vector3.Lerp(at0, at1, u) + Vector3.back * (hFrac * Mathf.Max(1f, s.ExpTowerHeight));
             float d = Mathf.Lerp(d0, d1, u);
             float tanV = Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
