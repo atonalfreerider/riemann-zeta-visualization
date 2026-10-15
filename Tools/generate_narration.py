@@ -89,6 +89,8 @@ def words_from_alignment(text, alignment):
 PRONOUNCE = [
     (re.compile(r"\bEuler"), "Oiler"),             # Leonhard Euler: "oil-er", never "you-ler"
     (re.compile(r"\b([Cc])osine"), r"\1o-sign"),  # "co-sign"
+    (re.compile(r"\bVoronoi"), "Voronoy"),          # Georgy Voronoi: "vo-ro-NOY"
+    (re.compile(r"\b([Pp])ronic"), r"\1ro-nick"),  # "PRO-nick"
 ]
 
 
@@ -129,6 +131,8 @@ def main():
     parser.add_argument("--voice", default="JohnV4", help="ElevenLabs voice name (default: JohnV4)")
     parser.add_argument("--model", default="eleven_multilingual_v2")
     parser.add_argument("--only", help="chapter id or line id to generate")
+    parser.add_argument("--script", default="script",
+                        help="which script in Assets/Resources/Narration: script (the tour, default) or experiments")
     parser.add_argument("--force", action="store_true", help="regenerate existing files")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--speed", type=float, default=0.95, help="delivery speed, 0.7 to 1.2 (default 0.95: unhurried, not dragging)")
@@ -136,7 +140,8 @@ def main():
     parser.add_argument("--style", type=float, default=0.45, help="style exaggeration, 0 to 1 (default 0.45)")
     args = parser.parse_args()
 
-    script = json.loads(SCRIPT.read_text(encoding="utf-8"))
+    script_path = SCRIPT.with_name(f"{args.script}.json")
+    script = json.loads(script_path.read_text(encoding="utf-8"))
     lines = []
     for chapter in script["chapters"]:
         for line in chapter["lines"]:

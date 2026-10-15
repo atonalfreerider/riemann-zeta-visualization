@@ -37,8 +37,8 @@ window shows the frame being recorded, letterboxed.
 Below the chapter list the side menu has an **Experiments** section: directed explainer modules for the thought
 experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
 chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
-when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour;
-no narration has been recorded for them, so the captions use the estimated timing. The modules are
+when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour,
+narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). The modules are
 
 | module | id | what it shows |
 |---|---|---|
@@ -51,7 +51,8 @@ Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:S
 `exp:contours:H1,H2:planes`, `exp:family:ridge|valley|level|all`, `exp:euler:KMAX`, `exp:zetawave`,
 `exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`; see `ExperimentTour.cs`) and their
 camera cues start with `exp_` (`CameraRig.cs`). To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
-storyboard command below.
+storyboard command below; to record them as narrated videos, one per module, run
+`python Tools/render_chapters.py --unity <Unity.exe> --script experiments --shapes vertical --out <folder>`.
 
 ## Running it
 

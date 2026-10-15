@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 /// session. Each recording starts from a freshly loaded scene, so a chapter looks the same here as when it is started
 /// alone from the VR chapter menu or from Zeta ▸ Play Tour from Chapter.
 ///
-///   ZETA_OUT=/path/out  [ZETA_CHAPTERS=hook,zeno]  [ZETA_SHAPES=vertical,horizontal]  [ZETA_FPS=30]
+///   ZETA_OUT=/path/out  [ZETA_CHAPTERS=hook,zeno]  [ZETA_SHAPES=vertical,horizontal]  [ZETA_FPS=30]  [ZETA_SCRIPT=experiments]
 ///   Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ChapterRecordingTest
 ///
 /// Output: &lt;ZETA_OUT&gt;/NN-chapter-shape/{video.mp4,timeline.json}; Tools/render_chapters.py then adds the narration.
@@ -37,7 +37,9 @@ public class ChapterRecordingTest
         int fps = int.TryParse(Environment.GetEnvironmentVariable("ZETA_FPS"), out int f) ? f : 30;
         bool noCaptions = Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1";
 
-        TourScriptData script = TourScriptLoader.Load();
+        // ZETA_SCRIPT=experiments records the experiment modules (Narration/experiments.json) instead of the tour
+        bool experiments = Environment.GetEnvironmentVariable("ZETA_SCRIPT") == "experiments";
+        TourScriptData script = experiments ? TourScriptLoader.LoadExperiments() : TourScriptLoader.Load();
         Assert.IsNotNull(script.chapters);
 
         foreach (string shape in shapes)
@@ -66,6 +68,7 @@ public class ChapterRecordingTest
                 director.Recorder.Height = vertical ? 1920 : 1080;
                 director.Recorder.Fps = fps;
                 if (noCaptions) director.Captions.GetComponent<Canvas>().enabled = false;
+                if (experiments) director.UseExperimentsScript();
 
                 yield return null;
                 director.StartTour();

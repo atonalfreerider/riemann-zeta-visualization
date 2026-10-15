@@ -349,8 +349,9 @@ The side menu's **Experiments** section plays four directed modules built from t
 curves* (section A), *Level contours* (H10), *The bend as a probe* (H11, with the bend animated from flat to twice
 the tour's while a plane at height ±15 sweeps the curves) and *Mirrors, not oracles* (section I). Their lines live
 in [`experiments.json`](../../Assets/Resources/Narration/experiments.json); the actions and camera cues are in
-[`ExperimentTour.cs`](../../Assets/Tour/ExperimentTour.cs) and `CameraRig.cs`. No narration has been recorded for
-them, and no video: the captions run on estimated timing.
+[`ExperimentTour.cs`](../../Assets/Tour/ExperimentTour.cs) and `CameraRig.cs`. They are narrated with the tour's
+ElevenLabs voice (JohnV4) and record as one vertical video each with
+`Tools/render_chapters.py --script experiments --shapes vertical`.
 
 ## Rendering
 

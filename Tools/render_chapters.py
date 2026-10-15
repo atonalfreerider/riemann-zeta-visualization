@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--project", default=str(ROOT), help="Unity project to open (default: this one)")
     parser.add_argument("--out", default=str(ROOT / "Recordings/chapters"))
     parser.add_argument("--chapters", help="comma-separated chapter ids (default: all)")
+    parser.add_argument("--script", default="script", help="script (the tour, default) or experiments (the experiment modules)")
     parser.add_argument("--shapes", default="vertical,horizontal")
     parser.add_argument("--fps", default="30")
     parser.add_argument("--no-captions", action="store_true")
@@ -44,6 +45,8 @@ def main():
         env = dict(os.environ, ZETA_OUT=str(out), ZETA_SHAPES=args.shapes, ZETA_FPS=args.fps)
         if args.chapters:
             env["ZETA_CHAPTERS"] = args.chapters
+        if args.script != "script":
+            env["ZETA_SCRIPT"] = args.script
         if args.no_captions:
             env["ZETA_NO_CAPTIONS"] = "1"
         log = args.log or str(out / "unity.log")
