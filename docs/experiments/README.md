@@ -784,6 +784,130 @@ geometry. They cannot do better than the sieve: the brightest pinched curve alwa
 primes it cannot see. Seeing more primes needs a finer pinch, and the gain grows only with the logarithm of the
 largest prime used.
 
+## V–Y. 144 = 12 × 12 as a basis
+
+Twelve is the smallest number whose remainders decide divisibility by both 2 and 3, the two primes that do most of
+the cancelling. 144 = 12 × 12 gives two independent copies of that clock. Four ways of grouping the spiral's curves
+with it follow.
+
+### V. The 12 × 12 torus: every curve becomes a straight line
+
+Every number has a turn `k = ⌊√n⌋` (which ring of the spiral it sits on) and a step `n − k²` (how far it is round
+that ring from the squares ray). Taken mod 12, both put `n` on a 12 × 12 board, and the board wraps into a torus:
+the turn goes the long way round, the step the short way. On this board every curve `k² + Bk + C` is a **straight
+line of slope B**. The squares-side curves `k² + C` are vertical lines, and the pronic-side curves `k² + k + c` are
+diagonals.
+
+A prime above 3 can sit only where `k² + step` is 1, 5, 7 or 11 mod 12. That happens in exactly 48 of the 144 cells,
+4 per row, in a pattern that repeats every 6 rows. Up to 10⁷ each of those cells holds between 13 626 and 13 997
+primes, and the other 96 hold only 2 and 3.
+
+On average, a line's prime density is therefore **three times the share of rows it spends in allowed cells**. The diagonal of
+`k² + k + c` depends only on `c mod 12`:
+
+| c mod 12 | rows in allowed cells | predicted density | measured (50 lines each, k ≤ 3 000) |
+|---|---|---|---|
+| 5, 11 | 12 of 12 | 3 | 2.99, 3.00 |
+| 1, 7 | 8 of 12 | 2 | 1.94, 2.03 |
+| 3, 9 | 4 of 12 | 1 | 1.00, 0.99 |
+| even | 0 | 0 | 0 |
+
+Density is relative to `1/log n`. **The Euler lines are the two diagonals that never leave the allowed cells.**
+41 ≡ 5, 17 ≡ 5 and 11 ≡ 11 (mod 12) all belong there. The vertical lines `k² + C` spend at most 6 rows of 12 in
+allowed cells: C ≡ 1 (mod 3) gives 1.5 (measured 1.48 to 1.51), C ≡ 0 gives 1.0 and C ≡ 2 gives 0.5. So no
+squares-side curve can match a pronic-side one, the same factor of 2 found in section T.
+
+![V1](V1-torus-board-diagonals.jpg)
+![V1b](V1b-torus-board-verticals.jpg)
+![V2](V2-torus-3-4.jpg)
+![V2b](V2b-torus-top.jpg)
+![V3](V3-classes-on-the-spiral.jpg)
+![V3b](V3b-classes-on-the-saddle.jpg)
+
+### W. The saddle computes Legendre symbols
+
+The saddle's height is `K r² cos 2θ`. Pinch the spiral by residues (section S), so that `n` sits at angle `2πn/m`.
+Then a number's height is `K r² cos(4πn/m)`, a twelfth-root-of-unity sum in disguise. For two moduli this cosine is
+exactly a quadratic character:
+
+* **m = 24:** `cos(πn/6) = ±0.866` with the sign of **(3/p)**, the Legendre symbol that says whether 3 is a square
+  mod `p`. Primes `≡ ±1 (mod 12)` fall away from the trail; primes `≡ ±5 (mod 12)` rise.
+* **m = 16:** `cos(πn/4) = ±0.707` with the sign of **(2/p)**. Primes `≡ ±1 (mod 8)` fall, `≡ ±3 (mod 8)` rise.
+* On the saddle turned 45° (`z = 2Kxy`), m = 8 gives `(−1/p)` and m = 6 gives `(−3/p)`.
+
+All four agree with the Legendre symbol for every prime up to 2 000 000, with no exception. The 144-hour pinch on a
+12-fold saddle (`z = K r² cos 12θ`) computes the same cosine, `cos(πn/6)`: its 48 prime arms sit at exactly ±0.866 of
+the height, by (3/p). Up to 10⁷ there are 332 225 primes with (3/p) = +1 and 332 352 with (3/p) = −1. By class, 1 mod 12 has
+166 011, 5 has 166 169, 7 has 166 183 and 11 has 166 214: the residue class 1 lags, which is Chebyshev's bias again.
+
+The identities behind this are `cos(πn/6) = (√3/2)·(3/n)` and `cos(πn/4) = (√2/2)·(2/n)` for n prime to 6 and to 2.
+They hold because `√3 = 2 cos(π/6)` and `√2 = 2 cos(π/4)` are Gauss sums. A pinch to 10 arms computes `(5/p)` too,
+but at two unequal heights, `(√5 − 1)/4 = 0.309` and `−(√5 + 1)/4 = −0.809`, since `cos(2π/5)` and `cos(4π/5)` are
+the two halves of the Gauss sum `√5` (checked for every prime up to 2 000 000).
+
+![W1](W1-saddle-computes-3-over-p.jpg)
+![W1b](W1b-saddle-computes-3-over-p-top.jpg)
+![W2](W2-saddle-computes-2-over-p.jpg)
+![W3](W3-144-arms-12-fold-saddle.jpg)
+
+### X. Fingerprints mod 144: the last two base-12 digits
+
+`n mod 144` is the last two digits of `n` written in base 12, the dozen digit and the unit digit. Laid out as a
+12 × 12 board, every prime above 3 ends in 1, 5, 7 or b, so the primes fill exactly four columns: the 48 unit cells,
+with 13 768 to 13 902 primes each up to 10⁷. A curve's fingerprint is the set of cells its values visit:
+
+| curve | cells visited | of the 48 unit cells |
+|---|---|---|
+| squares `k²` | 16 | 6 (1, 25, 49, 73, 97, 121: every `p²` is 1 mod 24) |
+| `k² + 1` | 16 | 8 |
+| pronic `k(k + 1)` | 32 | 0 (always even) |
+| Euler `k² + k + 41` | 32 | **32** |
+| `k² + k + 17` | 32 | **32** (24 cells shared with Euler's) |
+| `k² + k + 1` | 32 | 24 |
+| product `u(4u + 1)` | 64 | 8 |
+
+Euler's line only ever visits unit cells. It fills the columns 5 and b completely and the columns 1 and 7 in four
+rows each: in base 12 its values end in 5 or b twice as often as in 1 or 7.
+
+![X1](X1-fingerprints-mod-144.jpg)
+![X2](X2-fingerprints-close.jpg)
+
+### Y. The 144 clock: product families on the 24 half-hours
+
+A family `q²k² + Bk + C` straightens toward the direction `B/2q` of a turn. The directions that are multiples of
+1/24 turn, the 24 half-hours of a clock, are exactly those with `q` dividing 12, so with `q²` dividing 144. On each
+half-hour lies a product family `u(q²u + d)`:
+
+| hours (24ths of a turn) | family |
+|---|---|
+| 0, 12 | squares `u·u`, pronic `u(u + 1)` |
+| 6, 18 | `u(4u + 1)`, `u(4u + 3)` |
+| 4, 8, 16, 20 | `u(9u + 1)`, `u(9u + 2)`, `u(9u + 4)`, `u(9u + 5)` |
+| 3, 9, 15, 21 | `u(16u + 1)`, `u(16u + 3)`, `u(16u + 5)`, `u(16u + 7)` |
+| 2, 10, 14, 22 | `u(36u + 1)`, `u(36u + 5)`, `u(36u + 7)`, `u(36u + 11)` |
+| odd hours prime to 3 | `u(144u + d)`, d = 1, 5, 7, 11, 13, 17, 19, 23 |
+
+In a strip of half-width `R/2` round each ray (n ≤ 4·10⁶), 14 rays hold no primes at all: the 12 even hours (`q`
+dividing 6) and hours 3 and 21. The other ten strips hold 16 to 75 primes. Each of them also contains a prime-carrying family with a
+small non-square discriminant: `16k² + 11k + 2` (Δ = −7) beside `u(16u + 3)` at hour 9, and `144k² − 23k + 1`
+(Δ = −47) beside `u(144u + 1)` at hour 1.
+
+![Y1](Y1-clock-144-top.jpg)
+![Y2](Y2-clock-144-on-the-saddle.jpg)
+
+### What the 12 × 12 basis shows
+
+144 is the natural size for these pictures. It holds two copies of the twelve-clock that decides divisibility by 2
+and 3, and its square divisors are exactly the leading coefficients of the families on the 24 half-hours. In that
+basis:
+
+* the curves become straight lines on a torus;
+* their prime densities become a count of allowed cells (3, 2, 1 or 0 for the pronic side, at most 1.5 for the squares side);
+* the saddle's own height evaluates (3/p) and (2/p).
+
+All of it is the local behaviour at 2 and 3. It explains why Euler's lines are three times as prime as an average line,
+but no grouping by 144 can see a prime larger than 3.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -840,7 +964,11 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
     `e^γ log P`. The fold merges the two half-combs into one comb of discriminants with a period-8 stripe from the
     prime 2, and the pleat shows why the Euler lines live on the pronic side. The brightest pinched curve always
     keeps composites built from primes it cannot see.
-12. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+12. With 144 = 12 × 12 as a basis, every curve becomes a straight line on a 12 × 12 torus, and its prime density is a
+    count of allowed cells: 3, 2, 1 or 0 for the pronic side by `c mod 12`, at most 1.5 for the squares side. Pinched
+    to 24 or 16 arms, the saddle's height computes the Legendre symbols (3/p) and (2/p) exactly. All of this is the
+    local behaviour at 2 and 3, and no grouping by 144 can see a larger prime.
+13. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
     not already predict. The algorithms that do come out of the sections (Euler's criterion, Fermat's method, the
     sieve along a line) are classical. What the sections add is one geometry in which they are all the same
     statement about quadratics and their discriminants.

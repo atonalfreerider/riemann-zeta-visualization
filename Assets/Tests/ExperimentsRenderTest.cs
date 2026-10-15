@@ -756,6 +756,102 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        // ---------------------------------------------------------------------------------------------
+        // 144 = 12 × 12 as a basis: sections V–Y (SacksGross.cs)
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('V')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        Vector3 board = c + new Vector3(7000f, 0f, 0f);
+        sacks.ExpTorusBoard(board, 6f, 10000000, true, false, 32f);
+        yield return Shot("V1-torus-board-diagonals", board + new Vector3(4f, 2f, 0f) + back * 180f, board + new Vector3(4f, 2f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpTorusBoard(board, 6f, 10000000, false, true, 32f);
+        yield return Shot("V1b-torus-board-verticals", board + new Vector3(4f, 2f, 0f) + back * 180f, board + new Vector3(4f, 2f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 donut = c + new Vector3(7600f, 0f, 0f);
+        sacks.ExpTorus(donut, 30f, 12f, 10000, 0f);
+        yield return Shot("V2-torus-3-4", donut + new Vector3(0f, -150f, -88f), donut, Vector3.back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpTorus(donut, 30f, 12f, 10000, 20f);
+        yield return Shot("V2b-torus-top", donut + back * 185f, donut, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetBend(0f);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        sacks.ExpTorusClassesOnSpiral(41, SacksSpiral.Count, 30f, new[] { 41, 17, 11, 5, 1, 3 });
+        yield return Shot("V3-classes-on-the-spiral", c + back * 225f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        sacks.ExpTorusClassesOnSpiral(41, SacksSpiral.Count, 0f, null);
+        yield return Shot("V3b-classes-on-the-saddle", c + new Vector3(-40f, -95f, -70f), c + back * 2f, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('W')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(1f);
+        sacks.ExpCharacterPinch(24, n => n % 12 == 1 || n % 12 == 11 ? 1 : n % 3 == 0 ? 0 : -1, SacksSpiral.Count, 26f,
+            "24 arms: each prime's height has the sign of (3/p)\ncyan p ≡ ±1 (mod 12): 3 is a square mod p, falls\nmagenta p ≡ ±5 (mod 12): rises");
+        yield return Shot("W1-saddle-computes-3-over-p", c + new Vector3(-130f, -130f, -55f), c + back * 6f, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpCharacterPinch(24, n => n % 12 == 1 || n % 12 == 11 ? 1 : n % 3 == 0 ? 0 : -1, SacksSpiral.Count, 26f, "");
+        yield return Shot("W1b-saddle-computes-3-over-p-top", c + back * 245f, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpCharacterPinch(16, n => n % 2 == 0 ? 0 : n % 8 == 1 || n % 8 == 7 ? 1 : -1, SacksSpiral.Count, 26f,
+            "16 arms: each prime's height has the sign of (2/p)\ncyan p ≡ ±1 (mod 8): falls\nmagenta p ≡ ±3 (mod 8): rises");
+        yield return Shot("W2-saddle-computes-2-over-p", c + new Vector3(-130f, -130f, -55f), c + back * 6f, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetSurface(12, 0f);
+        sacks.ExpSetBend(.5f);
+        sacks.ExpSurfaceWire(sacks.Extent, new Color(.3f, .32f, .42f), 8f, 24);
+        sacks.ExpCharacterPinch(144, n => n % 12 == 1 || n % 12 == 11 ? 1 : n % 3 == 0 ? 0 : -1, SacksSpiral.Count, 26f,
+            "144 arms on a 12-fold saddle\nthe 48 prime arms sit at ±0.87 of the height, by (3/p)");
+        yield return Shot("W3-144-arms-12-fold-saddle", c + new Vector3(-120f, -150f, -60f), c + back * 4f, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(1f);
+        }
+
+        if (Wanted('X')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 fp = c + new Vector3(8200f, 0f, 0f);
+        float fx = 16.5f, cellF = 2.2f, fl = 26f;
+        sacks.ExpFingerprint(fp + new Vector3(-fx, 66f, 0f), cellF, null, 10000000, "primes", fl, true);
+        sacks.ExpFingerprint(fp + new Vector3(fx, 66f, 0f), cellF, k => k * k, 1440, "k²", fl);
+        sacks.ExpFingerprint(fp + new Vector3(-fx, 22f, 0f), cellF, k => k * k + k + 41, 1440, "k² + k + 41", fl);
+        sacks.ExpFingerprint(fp + new Vector3(fx, 22f, 0f), cellF, k => k * k + k + 17, 1440, "k² + k + 17", fl);
+        sacks.ExpFingerprint(fp + new Vector3(-fx, -22f, 0f), cellF, k => k * k + 1, 1440, "k² + 1", fl);
+        sacks.ExpFingerprint(fp + new Vector3(fx, -22f, 0f), cellF, k => k * k + k + 1, 1440, "k² + k + 1", fl);
+        sacks.ExpFingerprint(fp + new Vector3(-fx, -66f, 0f), cellF, k => k * (k + 1), 1440, "k(k + 1)", fl);
+        sacks.ExpFingerprint(fp + new Vector3(fx, -66f, 0f), cellF, k => k * (4 * k + 1), 1440, "u(4u + 1)", fl);
+        yield return Shot("X1-fingerprints-mod-144", fp + new Vector3(0f, 2f, 0f) + back * 188f, fp + new Vector3(0f, 2f, 0f), Vector3.up, 55f);
+        Vector3 top2 = fp + new Vector3(0f, 44f, 0f);
+        yield return Shot("X2-fingerprints-close", top2 + back * 118f, top2, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('Y')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(0f);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        sacks.ExpClock144(SacksSpiral.Count, 4000000, 34f);
+        yield return Shot("Y1-clock-144-top", c + new Vector3(0f, -8f, 0f) + back * 300f, c + new Vector3(0f, -8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        sacks.ExpClock144(SacksSpiral.Count, 4000000, 0f);
+        yield return Shot("Y2-clock-144-on-the-saddle", c + new Vector3(-40f, -95f, -70f), c + back * 2f, back, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
