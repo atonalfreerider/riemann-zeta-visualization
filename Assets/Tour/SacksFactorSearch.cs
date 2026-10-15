@@ -42,7 +42,8 @@ public partial class SacksSpiral
     /// positions, coloured by its smallest prime factor (gold for a prime), ringed bright where it sits on a spoke and dark where
     /// it has fallen off.
     /// </summary>
-    public void ExpEStack(Vector3 o, int[] ranks, int nMax, float gap, float from, float to, float dot, float labelSize, long[] threads, int[] labelLayers)
+    public void ExpEStack(Vector3 o, int[] ranks, int nMax, float gap, float from, float to, float dot, float labelSize, long[] threads, int[] labelLayers,
+        string[] threadGroups = null, string[] threadNotes = null)
     {
         Transform g = ExpGroup("GA E stack").transform;
         ExpEnsureSieve(nMax + 2);
@@ -82,7 +83,7 @@ public partial class SacksSpiral
             if (labelSize > 0f)
             {
                 string sieves = h == 8 ? "removes 2" : h == 30 ? "removes 2, 3, 5" : "removes 2, 3";
-                ExpLabelWide(g, $"{ELabel(ranks[layer])}:  {h} hours", c + new Vector3(-to * 1.4f, 0f, -labelSize * .022f), labelSize * .44f, Color.white, TextAlignmentOptions.Right);
+                ExpLabelWide(g, $"E{ranks[layer]}:  {h} hours", c + new Vector3(-to * 1.4f, 0f, -labelSize * .022f), labelSize * .44f, Color.white, TextAlignmentOptions.Right);
                 ExpLabelWide(g, sieves, c + new Vector3(-to * 1.4f, 0f, labelSize * .03f), labelSize * .32f, new Color(.8f, .83f, .93f), TextAlignmentOptions.Right);
             }
         }
@@ -90,16 +91,25 @@ public partial class SacksSpiral
         for (int t = 0; t < threads.Length; t++)
         {
             long n = threads[t];
+            Transform gt = g;
+            if (threadGroups != null)
+            {
+                Transform grp = FindExpGroup(threadGroups[t]) ?? ExpGroup(threadGroups[t]).transform;
+                gt = RevealItem(grp, $"thread {n}", threadNotes != null ? threadNotes[t] : null);
+                RevealNote rn = gt.GetComponent<RevealNote>();
+                for (int layer = 0; layer < ranks.Length; layer++) if (Gcd(n, CoxeterNumberOf(ranks[layer])) != 1) { rn.FlareAt.Add(Pos(layer, n)); break; }
+            }
+
             bool prime = ExpPrime(n);
             long spf = prime ? n : Factorize(n)[0];
             Color col = prime ? PrimeGold : spf == 3 ? new Color(.4f, 1f, .55f) : spf == 5 ? new Color(.45f, .65f, 1f) : E8Composite;
             List<Vector3> line = new();
             for (int layer = 0; layer < ranks.Length; layer++) line.Add(Pos(layer, n) + Vector3.back * .3f);
-            ExpLine(g, $"thread {n}", dot * .3f, col, Factory.GlowIntensity, line.ToArray());
+            ExpLine(gt, $"thread {n}", dot * .3f, col, Factory.GlowIntensity, line.ToArray());
             for (int layer = 0; layer < ranks.Length; layer++)
             {
                 bool on = Gcd(n, CoxeterNumberOf(ranks[layer])) == 1;
-                RingAround(g, $"thread {n} ring {layer}", Pos(layer, n) + Vector3.back * .35f, Vector3.back, dot * 2f, on ? col : new Color(.25f, .25f, .3f),
+                RingAround(gt, $"thread {n} ring {layer}", Pos(layer, n) + Vector3.back * .35f, Vector3.back, dot * 2f, on ? col : new Color(.25f, .25f, .3f),
                     dot * (on ? .22f : .3f), on ? AttentionIntensity : Factory.NoGlow);
             }
 
@@ -107,7 +117,7 @@ public partial class SacksSpiral
             {
                 int layer = labelLayers[t];
                 Vector3 at = Pos(layer, n), outDir = (at - (o + Vector3.forward * (gap * layer))).normalized;
-                ExpLabelWide(g, prime ? n.ToString() : $"{n} = {string.Join("·", Factorize(n))}", at + outDir * (dot * 3f + labelSize * .055f) + Vector3.back * .4f,
+                ExpLabelWide(gt, prime ? n.ToString() : $"{n} = {string.Join("·", Factorize(n))}", at + outDir * (dot * 3f + labelSize * .055f) + Vector3.back * .4f,
                     labelSize * .3f, col);
             }
         }
@@ -237,8 +247,11 @@ public partial class SacksSpiral
         float x = 0f, hMax = 0f;
         foreach (long n in ns) hMax = Mathf.Max(hMax, Mathf.Log(n));
         List<(Vector3, Vector3)> grid = new();
+        // each path takes its steps' width, or its title's if that is wider
+        string Title(long n) => ExpPrime(n) ? $"{n}:  prime" : $"{n} = {FactorString(n)}";
+        float Advance(long n) => Mathf.Max(Factorize(n).Count * xStep, .052f * labelSize * .34f * System.Text.RegularExpressions.Regex.Replace(Title(n), "<[^>]+>", "").Length + xStep * .3f) + groupGap;
         float totalW = 0f;
-        foreach (long n in ns) totalW += Factorize(n).Count * xStep + groupGap;
+        foreach (long n in ns) totalW += Advance(n);
         foreach (int m in new[] { 1, 10, 100, 1000 })
         {
             float y = Mathf.Log(m) * yScale;
@@ -254,9 +267,9 @@ public partial class SacksSpiral
             float h = Mathf.Log(n);
             Vector3 start = o + new Vector3(x, h * yScale, 0f);
             ExpDot(g, $"start {n0}", start + Vector3.back * .2f, dot * 1.5f, ExpPrime(n0) ? PrimeGold : Color.white, AttentionIntensity);
+            float x0 = x;
             if (labelSize > 0f)
-                ExpLabelWide(g, ExpPrime(n0) ? $"{n0}:  prime" : $"{n0} = {FactorString(n0)}", start + new Vector3(0f, labelSize * .05f, 0f), labelSize * .34f,
-                    ExpPrime(n0) ? PrimeGold : Color.white, TextAlignmentOptions.Left);
+                ExpLabelWide(g, Title(n0), start + new Vector3(0f, labelSize * .05f, 0f), labelSize * .34f, ExpPrime(n0) ? PrimeGold : Color.white, TextAlignmentOptions.Left);
             while (n > 1)
             {
                 long p = Factorize(n)[0];
@@ -276,7 +289,7 @@ public partial class SacksSpiral
                 n = m; h = h1; x += xStep;
             }
 
-            x += groupGap;
+            x = x0 + Advance(n0);
         }
     }
 

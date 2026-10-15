@@ -2525,6 +2525,26 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
 * *The lattice race* (AE) draws the race mod 4 and its rebuild from the zeros of Dirichlet's β live, flaring at
   26 861, 616 841 and 12 306 137. The race mod 12 follows, with its near miss at 48 231 785.
 
+Two more narrated modules go with sections GA and GB.
+
+*E5 to E8, from mirrors* builds the E-series from reflections:
+
+* one mirror and its root;
+* two mirrors at 60°, whose two reflections make a third of a turn, generating six images and six roots;
+* two mirrors at 90°, and the diagram that records which mirrors meet at 60°;
+* the diagrams growing from E5 (a fork, the same as D5) to E8, with the ninth dot that would never close up;
+* the 40, 72, 126 and 240 roots on their Coxeter planes, the Coxeter element turning each by one hour, and the hour
+  counts as roots divided by mirrors (8, 12, 18, 30);
+* the stack of the four wheels, where 9 and 15 fall off at E6, 25 and 35 at E8, and 49, 77 and 91 never fall off.
+
+*The paths back* grows the factor columns of E8's wheel, plain and then cut by prime. It walks the paths of 397 (prime),
+360 = 2³·3²·5, 256 = 2⁸, 343 = 7³, 210 = 2·3·5·7 and 324 = 2²·3⁴ drop by drop, and ends on the six paths unrolled side by
+side. During each walk, a strip above the captions shows the number's column laid on its side, top first:
+
+* one piece per prime factor, lit as its drop is taken;
+* the values at the cuts (360, 180, 90, 45, 15, 5, 1);
+* the exponent under each run of equal pieces (2³, 3², 5).
+
 *Dropping onto E8* (section EF) is narrated with the same voice. It builds E8's 240 roots ring by ring in the Coxeter plane
 and walks the Coxeter element once round the 30 hours, lighting the eight hours coprime to 30 as they are named. Then it
 drops the numbers 1 to 600 onto the wheel at their hours: every prime above 5 lands on a gold spoke, and red rings mark

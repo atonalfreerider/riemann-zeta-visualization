@@ -54,6 +54,7 @@ public partial class SacksSpiral
         if (experimentsRoot != null) Destroy(experimentsRoot);
         experimentsRoot = null;
         ExpStopLive();
+        StripOff();
     }
 
     /// <summary>Hide every stage element except the saddle's routes: the experiments draw their own number field.</summary>

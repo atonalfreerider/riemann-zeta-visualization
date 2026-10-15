@@ -8,6 +8,7 @@ public class RevealNote : MonoBehaviour
 {
     public string Text;
     public readonly List<Vector3> FlareAt = new();
+    public System.Action OnShow;
 }
 
 /// <summary>
@@ -66,19 +67,8 @@ public partial class SacksSpiral
         float per = seconds * .92f / Mathf.Max(1, items.Count), clock = 0f;
         for (int i = 0; i < items.Count; i++)
         {
-            GameObject o = items[i];
-            if (o == null) yield break;
-            o.SetActive(true);
-            float draw = Mathf.Min(per * .85f, 1.2f);
-            foreach (LineRenderer l in o.GetComponentsInChildren<LineRenderer>())
-                if (l.positionCount > 4 && !l.loop) StartCoroutine(DrawLine(l, draw));
-            RevealNote note = o.GetComponent<RevealNote>();
-            if (note != null)
-            {
-                if (!string.IsNullOrEmpty(note.Text)) Board(note.Text);
-                foreach (Vector3 p in note.FlareAt) Flare(p, 1.2f, 1.2f, 1);
-            }
-
+            if (items[i] == null) yield break;
+            ShowRevealItem(items[i], Mathf.Min(per * .85f, 1.2f));
             float until = (i + 1) * per;
             while (clock < until)
             {
@@ -88,6 +78,56 @@ public partial class SacksSpiral
         }
 
         liveRoutine = null;
+    }
+
+    /// <summary>Show the items of a group at the given times, in seconds from now (exp:reveal:GROUP:T1,T2,…); items past the last time stay hidden.</summary>
+    public void ExpRevealAt(string groupName, float[] times)
+    {
+        Transform g = FindExpGroup(groupName);
+        if (g == null)
+        {
+            Debug.LogWarning("exp:reveal: no group " + groupName);
+            return;
+        }
+
+        Transform items = g.Find("reveal") ?? g;
+        List<GameObject> list = new();
+        foreach (Transform t in items) list.Add(t.gameObject);
+        foreach (GameObject o in list) o.SetActive(false);
+        StartLive(RevealAtLive(list, times));
+    }
+
+    IEnumerator RevealAtLive(List<GameObject> items, float[] times)
+    {
+        float clock = 0f;
+        int n = Mathf.Min(items.Count, times.Length);
+        for (int i = 0; i < n; i++)
+        {
+            while (clock < times[i])
+            {
+                yield return null;
+                clock += Time.deltaTime;
+            }
+
+            if (items[i] == null) yield break;
+            float next = i + 1 < n ? times[i + 1] : times[i] + 1.5f;
+            ShowRevealItem(items[i], Mathf.Clamp((next - times[i]) * .85f, .15f, 1.2f));
+        }
+
+        liveRoutine = null;
+    }
+
+    /// <summary>One reveal item appearing: its long lines drawing in over <paramref name="draw"/> seconds, its note on the board, its flares.</summary>
+    void ShowRevealItem(GameObject o, float draw)
+    {
+        o.SetActive(true);
+        foreach (LineRenderer l in o.GetComponentsInChildren<LineRenderer>())
+            if (l.positionCount > 4 && !l.loop) StartCoroutine(DrawLine(l, draw));
+        RevealNote note = o.GetComponent<RevealNote>();
+        if (note == null) return;
+        if (!string.IsNullOrEmpty(note.Text)) Board(note.Text);
+        note.OnShow?.Invoke();
+        foreach (Vector3 p in note.FlareAt) Flare(p, 1.2f, 1.2f, 1);
     }
 
     /// <summary>Draw a line in from its first point to its last.</summary>

@@ -370,7 +370,18 @@ public partial class TourDirector
             case "dialring": sacks.ExpDialRingPulse(c + new Vector3(SacksSpiral.MachineOffset, 0f, 0f), I(2, 10)); break;
             case "noboard": SacksSpiral.ExpClearBoard(); break;
             // ---- the AA–AE modules (SacksIntersect.cs, SacksIntersectLive.cs) ----
-            case "reveal": sacks.ExpRevealLive(A(2), Seconds(A(3), 6f)); break;
+            case "reveal":
+                if (A(3).Contains(","))
+                {
+                    // explicit times, one per item: exp:reveal:GROUP:T1,T2,…
+                    List<float> times = new();
+                    foreach (string t in A(3).Split(','))
+                        if (float.TryParse(t, NumberStyles.Float, CultureInfo.InvariantCulture, out float v)) times.Add(v);
+                    sacks.ExpRevealAt(A(2), times.ToArray());
+                }
+                else sacks.ExpRevealLive(A(2), Seconds(A(3), 6f));
+                break;
+            case "strip": SacksSpiral.StripOff(); break;
             case "hide": sacks.ExpHideItems(A(2)); break;
             case "normbase": sacks.ExpNormBase(c + new Vector3(SacksSpiral.NormSurfaceOffset, 0f, 0f), 2.5f, 6f, .18f, 10f, 7f, 0f); break;
             case "normslice":
@@ -435,6 +446,32 @@ public partial class TourDirector
                 break;
             case "e8solve": sacks.ExpE8SolveBoard(I(2, 35)); break;
             case "e8close": SacksSpiral.ExpE8CloseBoard(); break;
+            // ---- the modules "E5 to E8, from mirrors" and "The paths back" (SacksEConstruction.cs) ----
+            case "mirrorscene": sacks.ExpMirrorScene(c + new Vector3(SacksSpiral.MirrorOffset, 0f, 0f), 2.4f, .6f, F(2, 120f)); break;
+            case "dihedral":
+                // exp:dihedral:M:X:Y — two mirrors at 180°/M, centred at (DihedralOffset + X, Y)
+                sacks.ExpDihedralScene(c + new Vector3(SacksSpiral.DihedralOffset + F(3, 0f), F(4, 0f), 0f), I(2, 3), 2.3f, .6f, 120f);
+                break;
+            case "dynkin": sacks.ExpDynkinE(c + new Vector3(SacksSpiral.DynkinOffset, 0f, 0f), 7f, 17f, .6f, 125f); break;
+            case "coxpanels": sacks.ExpCoxeterPanels(c + new Vector3(SacksSpiral.CoxPanelsOffset, 0f, 0f), new[] { 5, 6, 7, 8 }, 2, 50f, 62f, 20f, .5f, 125f); break;
+            case "coxwalk": sacks.ExpCoxeterWalkPanels(Seconds(A(2), 8f)); break;
+            case "estack": sacks.ExpEStackModule(c + new Vector3(SacksSpiral.EStackOffset, 0f, 0f), 125f); break;
+            case "fcolumns": sacks.ExpFactorColumnsLive(c + new Vector3(SacksSpiral.FactorFunnelOffset, 0f, 0f), 400, 2.6f, 5f, .55f, 140f, 20); break;
+            case "stair":
+            {
+                // exp:stair:N[:a,b,…] — n's path back, split into reveal groups "stair N #k" of a, b, … items
+                List<int> sp = new();
+                foreach (string t in A(3).Split(',')) if (int.TryParse(t.Trim(), out int v)) sp.Add(v);
+                sacks.ExpFactorStairLive(c + new Vector3(SacksSpiral.FactorFunnelOffset, 0f, 0f), I(2, 360), 2.6f, 5f, .55f, 140f, sp.Count > 0 ? sp.ToArray() : null);
+                break;
+            }
+            case "descent": sacks.ExpDescentRows(c + new Vector3(SacksSpiral.FactorFunnelOffset + 600f, 0f, 0f), 105f); break;
+            case "say":
+            {
+                string[] parts = string.Join(":", p, 2, p.Length - 2).Split('|');
+                SacksSpiral.ExpSay(parts[0], parts.Length > 1 ? parts[1] : null);
+                break;
+            }
             case "dialholes": sacks.ExpDialHolesPulse(); break;
             case "sieveboard": sacks.ExpSieveBoard(c + new Vector3(SacksSpiral.MachineOffset + 160f, 0f, 0f), I(2, 50399), I(3, 225), I(4, 320), SieveMods, 2.2f, 36f, I(5, 48)); break;
             case "knot": sacks.ExpTorusKnot(c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f), 30f, 12f, 5, 7, 1000000, Has("euler"), 48f, false); break;
