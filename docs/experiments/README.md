@@ -1037,6 +1037,174 @@ The sorting is the residue lattice of section U, drawn on a surface.
   torus shows the turn mod 3 as the three stacks of a twisted tube. Neither can find a prime that the residues have not
   already allowed.
 
+## AA–AE. Intersecting geometries
+
+This round crossed the spiral's curves with other geometries: two quadric surfaces, two lattices, a 12-dimensional
+torus, the modular surface, and the cosine waves of L-function zeros. The question was where the intersections carry
+the prime, cancellation and anti-cancellation curves ([`SacksIntersect.cs`](../../Assets/Tour/SacksIntersect.cs)). The
+frames are 1920 × 1080 (`ZETA_EXP_WIDE=1`).
+
+### AA. The paraboloid and the saddle
+
+Every curve `k² + Bk + C` equals `x² − Δ/4` at `x = k + B/2`. Put `y = √|Δ|/2`: that is `x² + y²` when `Δ < 0` and
+`x² − y²` when `Δ > 0`. So **every curve is a vertical slice of the paraboloid `z = x² + y²` or of the saddle
+`z = x² − y²`**, read at half-integer steps. The two surfaces meet along `y = 0`, where both are `x²`: the squares.
+
+| slice | Δ | surface, y | prime, k = 0 … 9 or 10 |
+|---|---|---|---|
+| `k² + k + 41` | −163 | paraboloid, 6.38 | 10/10 (40/40 for k < 40) |
+| `k² + k + 17` | −67 | paraboloid, 4.09 | 10/10 |
+| `k² + 1` | −4 | paraboloid, 1 | 5/11 |
+| `k(k + 1)` | 1 | saddle, ½ | 1/10 |
+| `k² + k − 1` | 5 | saddle, 1.12 | 7/10 |
+| `u(u + 4)` | 16 | saddle, 2 | 1/11 |
+| `k² + k − 3` | 13 | saddle, 1.80 | 3/10 |
+| `u(u + 6)` | 36 | saddle, 3 | 1/11 |
+
+The cancellation curves are the saddle's slices at half-integer `y = d/2`, where `x² − d²/4 = u(u + d)` factors; each is
+prime only at its birth `d + 1`. The saddle's slices at irrational `y` and all the paraboloid's slices are irreducible, so
+they carry primes unless a fixed prime divides every value (`k² + k + C` with `C` even is always even).
+
+The level sets carry factorizations. On the saddle, `x² − y² = n` passes through `((a + b)/2, (b − a)/2)` for every
+factorization `n = a·b`: `2·d(n)` points, four for a prime. On the paraboloid, `x² + y² = n` is the Sacks ring of `n`, and
+it passes through `r₂(n)` integer points (sums of two squares).
+
+| n | factor points | square points |
+|---|---|---|
+| 13 | 4 | 8 |
+| 23 | 4 | 0 |
+| 25 | 6 | 12 (5·5 lies on both, where the surfaces meet) |
+| 65 | 8 | 16 |
+
+The two lattice-point problems of section P live on these surfaces. Counting the integer points under the paraboloid's
+level sets is the circle problem, and under the saddle's is the divisor problem.
+
+![AA1](AA1-paraboloid-and-saddle.jpg)
+![AA3](AA3-factor-pairs-and-squares.jpg)
+
+### AB. Sacks rings through two lattices
+
+The ring of `n` meets the square lattice in `r₂(n) = 4 Σ χ₋₄(d)` points and the triangular lattice in
+`r₃(n) = 6 Σ χ₋₃(d)` points, summed over the divisors `d` of `n`. For a prime the four classes mod 12 are four intersection
+patterns:
+
+| p mod 12 | square points | triangular points | primes ≤ 1601 |
+|---|---|---|---|
+| 1 | 8 | 12 | 56 |
+| 5 | 8 | 0 | 64 |
+| 7 | 0 | 12 | 65 |
+| 11 | 0 | 0 | 65 |
+
+The ring of a prime `p ≡ 11 (mod 12)` threads between every point of both lattices. Composite counts multiply: 65 has
+16 square points, 91 has 24 triangular, 1105 = 5·13·17 is the first number with 32 square points, and
+1729 = 7·13·19 = 12³ + 1 is the first with 48 triangular points (and has no square points). The Sacks point of `n` lies on
+the same ring.
+
+**Euler's line is the first row of its lattice.** In the lattice `Z[(1 + √−163)/2]` the norm of `a + bτ` is
+`a² + ab + 41b²`. Row 0 holds the squares, and row 1 holds Euler's values: the ring of `k² + k + 41` passes through
+the lattice point `(k + ½, √163/2)`. All forty rings for `k < 40` are prime, and the forty-first, 1681 = 41², is the
+first composite.
+
+![AB1](AB1-rings-of-primes-meet-two-lattices.jpg)
+![AB2](AB2-rings-of-composites.jpg)
+![AB3](AB3-euler-lattice-row.jpg)
+
+### AC. The 12-dimensional residue torus and its 144 shadows
+
+`n ↦ (n mod 2, n mod 3, …, n mod 37)` is a point of a 12-dimensional torus. Primes above 37 avoid every hyperplane
+"≡ 0". Below 41² = 1681 that is exactly primality, so for the tour's spiral, which stops at 1601, this torus decides it.
+
+The 144 pairwise shadows `Z/pᵢ × Z/pⱼ` show it panel by panel. Primes up to 10⁶ fill the unit cells evenly: the 5 × 7
+panel's 24 cells hold 6 171 to 6 241 each. Each panel's cancellation cross holds only `pᵢ` and `pⱼ`. The curves differ
+sharply:
+
+* `k² + k + 41` never lands on a cross, because −163 is a non-residue modulo every prime up to 37 (checked for k < 10⁵).
+* `k(k + 1)` lands on both arms of every cross.
+* `k² + 1` lands only on the crosses of 2, 5, 13, 17, 29 and 37, that is 2 and the primes ≡ 1 (mod 4).
+
+![AC1](AC1-144-shadows-euler.jpg)
+![AC2](AC2-144-shadows-pronic.jpg)
+![AC3](AC3-36-shadows-close.jpg)
+
+### AD. The curves on the modular surface
+
+Send `k² + Bk + C` to the roots of `x² + Bx + C` in the upper half-plane. For `Δ < 0` that is the point
+`τ = (−B + i√|Δ|)/2`, at the paraboloid slice's height. For `Δ > 0` it is the geodesic semicircle of radius `√Δ/2`
+about `−B/2`, at the saddle slice's height. The squares side (`B = 0`) lives on `Re τ = 0`, and the pronic side
+(`B = 1`) on `Re τ = −½`, the left edge of the modular fundamental domain. The curves fall into three kinds:
+
+* **Points**, for definite forms: the anti-cancellation side.
+* **Closed geodesics**, for `Δ > 0` not a square, of length `2 log ε`. Examples: `k² + k − 1` has length 1.92
+  (`2 log φ²`), `k² − 2` has 3.53, and `k² − 3` has 2.63.
+* **Geodesics that run into the cusps**, for `Δ` a square, where both roots are integers. These are the cancellation
+  curves: `k(k + 1)` runs from cusp −1 to cusp 0.
+
+The floor of the fundamental domain, `|τ| = 1`, is the cancellation geodesic of `k² − 1 = (k − 1)(k + 1)`. Landau's point
+`i` and the point `ρ` of `k² + k + 1` stand on it.
+
+| curve | j at its point | prime yield |
+|---|---|---|
+| `k² + k + 1` | 0 | 2.25 |
+| `k² + 1` | 1728 = 12³ | 1.37 |
+| `k² + 2` | 20³ | 0.70 |
+| `k² + k + 11` | −960³ | 3.23 |
+| `k² + k + 17` | −5280³ | 4.24 |
+| `k² + k + 41` | −640320³ | 6.57 |
+
+Prime yield is primes per `Σ 1/log value` over 3 000 values, that is relative to random numbers of the same size.
+Euler's `j` is why `e^{π√163}` = 262 537 412 640 768 743.99999999999925 is almost an integer. The curves `k² + k + C`
+with `C` even are always even (grey).
+
+![AD1](AD1-curves-on-the-modular-surface.jpg)
+![AD2](AD2-fundamental-domain-close.jpg)
+
+### AE. The prime race between the lattice classes
+
+The four classes of AB race. Each chart plots `(log x/√x)·φ(q)·(π(x; q, a) − π(x; q, 1))`. The prediction has two parts:
+
+* **A bias from prime squares**, `((N₁ − N_a)/2)·π(√x)·log x/√x`. Mod 12 all four units square to 1, so the bias is
+  about `4·(1 + 2/log x)`.
+* **A sum of cosine waves `2 S_χ(x)`**, one for each character that separates `a` from 1, where
+  `S_χ(x) = Σ_γ x^{iγ}/(½ + iγ)` runs over the zeros of `L(s, χ)`. Class 5 needs `χ₋₃` and `χ₁₂`, class 7 needs
+  `χ₋₄` and `χ₁₂`, and class 11 needs `χ₋₄` and `χ₋₃`.
+
+The zeros below height 500 come from mpmath, and their counts match N(T): 379 for `L(s, χ₋₄)` (Dirichlet's beta), 356
+for `L(s, χ₋₃)` and 466 for `L(s, χ₁₂)` ([`Tools/lzeros12.py`](../../Tools/lzeros12.py),
+[`Tools/race12.py`](../../Tools/race12.py)).
+
+| race, to 10⁸ | result | wave fit, rms |
+|---|---|---|
+| mod 12, class 1 ("both lattices") against 5, 7, 11 | class 1 never leads | 0.28, 0.25, 0.26 |
+| mod 4, class 1 ("hits the square lattice") against 3 | 128 lead intervals | 0.16 |
+
+The closest mod-12 call is class 7 against class 1 at 48 231 785, measured at 0.56. The waves put their lowest point,
+0.49, at the same x. Mod 4, class 1 first leads at 26 861, then in clusters at 616 841–633 797 and
+12 306 137–12 382 313. The waves of the 379 zeros of β(s) dip to 0.07 at 26 861.
+
+Read geometrically: primes whose rings miss a lattice stay ahead of primes whose rings hit it. The lead changes happen
+where the cosine waves of that lattice's L-function zeros overpower the bias from prime squares.
+
+![AE1](AE1-prime-race-mod-12.jpg)
+![AE2](AE2-prime-race-mod-4.jpg)
+
+### What did not intersect
+
+* **The zeta phase against the Sacks angle.** I took the numbers with `γ log n ≡ 2π√n (mod 2π)` within ±0.15, for the
+  first 30 zeros and n up to 10⁶: 1.43 million pairs. Primes came out at 0.997 of the expected count, against 0.995 for a
+  shifted control.
+* **A 12-fold saddle crossing the 2-fold one.** They cross along rays at tenths and fourteenths of a turn. The prime
+  density along those rays is 0.96 to 1.06 of `1/log n`, the same as at a generic angle (1.00).
+
+### What the intersections give
+
+* **Exact restatements.** The quadratic curves are slices of the two norm surfaces. Lattice points on the rings are
+  representation numbers, and they multiply. The 12-dimensional torus is the sieve. The modular picture sorts the curves
+  into points, closed geodesics and cusp geodesics. The race is set by L-function zeros.
+* **New as pictures.** Euler's line is the first row of its lattice. The cancellation curves are the geodesics that end
+  in cusps. The floor of the fundamental domain is the geodesic of `k² − 1`. The race mod 12 is a race between lattice
+  classes, and the cosine waves locate its near-miss at 48 231 785.
+* **No faster prime-finding.** None of it finds primes faster than a sieve.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -1105,7 +1273,12 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
     line, as Hardy and Littlewood's singular series predicts to within 1.5 %. The twisted tori (a torus knot of the
     residues mod 35, the umbilic torus sorting the turns mod 3) sort numbers by residues and add no sieving power. Lehmer's
     ring sieve factors 1 501 and 50 399 at the first candidate that passes every ring.
-14. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+14. Every curve is a slice of the paraboloid `x² + y²` (definite: anti-cancellation side) or the saddle `x² − y²`
+    (indefinite: cancellation side and the prime-carrying Δ > 0 curves), and the two meet along the squares. On the
+    modular surface the same curves are points, closed geodesics and geodesics into the cusps. The Sacks ring of a prime
+    meets the square and triangular lattices in a pattern fixed by p mod 12, and the prime race between those patterns
+    is driven by the zeros of three L-functions.
+15. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
     not already predict. The algorithms that do come out of the sections (Euler's criterion, Fermat's method, the
     sieve along a line) are classical. What the sections add is one geometry in which they are all the same
     statement about quadratics and their discriminants.
@@ -1128,6 +1301,8 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 4. *The curves without primes are the best mirrors for pairs of primes.* Mirrors on the pronic ray reflect 2.15 times
    as many Goldbach pairs as mirrors on Euler's line (section Z1). The prime-free curves are built from small factors,
    and a small factor of the mirror can spoil a pair in only one way.
+5. *The floor of the modular fundamental domain is a cancellation curve.* The arc `|τ| = 1` is the geodesic of
+   `k² − 1 = (k − 1)(k + 1)`, and Landau's point `i` and the point `ρ` of `k² + k + 1` stand on it (section AD).
 
 **Worth exploring.** The first two are now sections P and Q above.
 
@@ -1190,7 +1365,9 @@ on the caption board at the top of the screen, so they read at any camera angle.
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-`ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4. The frames are 1080 × 1920; the copies in this folder are
+`ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, and `a` to
+`e` are AA to AE. Sections AA–AE are drawn for full horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the
+copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).

@@ -50,8 +50,10 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        director.Recorder.Width = 1080;
-        director.Recorder.Height = 1920;
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE)
+        bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
+        director.Recorder.Width = wideFrames ? 1920 : 1080;
+        director.Recorder.Height = wideFrames ? 1080 : 1920;
         director.Recorder.BeginOffscreen(outDir);
         Vector3 c = sacks.Center;
         Vector3 back = Vector3.back;
@@ -946,6 +948,89 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         sacks.ExpUmbilic(umb, 4f, 0f, 40, new long[] { 1 }, 0, 0f);
         yield return Shot("Z4e-untwisted-k2-k-1", umb + new Vector3(0f, -150f, -88f), umb, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Intersecting geometries: sections AA–AE (SacksIntersect.cs), lowercase letters a–e, drawn for 1920 × 1080
+        // (ZETA_EXP_WIDE=1). Landscape at fov 55: the frame is 1.85 d wide and 1.04 d tall.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('a')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 na = c + new Vector3(SacksSpiral.NormSurfaceOffset, 0f, 0f);
+        sacks.ExpNormSurfaces(na, 2.5f, 6f, .18f, 10f, 7f, SacksSpiral.DefaultNormSlices, 30f);
+        Vector3 look = na + new Vector3(24f, 18f, -8f);
+        yield return Shot("AA1-paraboloid-and-saddle", look + new Vector3(-36f, -62f, -50f), look, back, 55f);
+        sacks.ClearExperiments();
+        long[] lv = { 13, 23, 25, 65 };
+        for (int i = 0; i < lv.Length; i++) sacks.ExpFactorLevelSets(na + new Vector3(-84f + 56f * i, 0f, 0f), 25f, lv[i], 40f);
+        yield return Shot("AA3-factor-pairs-and-squares", na + new Vector3(5f, -6f, 0f) + back * 134f, na + new Vector3(5f, -6f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('b')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 rb = c + new Vector3(SacksSpiral.RingLatticeOffset, 0f, 0f);
+        long[] pr = { 13, 17, 19, 23 };
+        for (int i = 0; i < pr.Length; i++) sacks.ExpRingLattice(rb + new Vector3(-87f + 58f * i, 0f, 0f), 4f, pr[i], 40f);
+        yield return Shot("AB1-rings-of-primes-meet-two-lattices", rb + new Vector3(0f, -8f, 0f) + back * 132f, rb + new Vector3(0f, -8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        long[] co = { 65, 91, 1105, 1729 };
+        for (int i = 0; i < co.Length; i++) sacks.ExpRingLattice(rb + new Vector3(-87f + 58f * i, 0f, 0f), 22f / Mathf.Sqrt(co[i]), co[i], 40f, 1.3f);
+        yield return Shot("AB2-rings-of-composites", rb + new Vector3(0f, -8f, 0f) + back * 132f, rb + new Vector3(0f, -8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpEulerLattice(rb, 1f, 40, 22f);
+        Vector3 el = rb + new Vector3(12f, 18f, 0f);
+        yield return Shot("AB3-euler-lattice-row", el + back * 66f, el, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('c')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 rt = c + new Vector3(SacksSpiral.ResidueTorusOffset, 0f, 0f);
+        sacks.ExpResidueTorusMatrix(rt, .5f, 1000000, 12, "euler", 40f,
+            "the residue torus of 2, 3, 5, …, 37|144 shadows: panel (i, j) is Z/p<sub>i</sub> × Z/p<sub>j</sub>|red: the cancellation cross (0 mod p<sub>i</sub> or p<sub>j</sub>)|white: the primes p<sub>i</sub>, p<sub>j</sub> themselves|green: the residues of k² + k + 41|— never on a cross");
+        Vector3 rtl = rt + new Vector3(-30f, 0f, 0f);
+        yield return Shot("AC1-144-shadows-euler", rtl + back * 124f, rtl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpResidueTorusMatrix(rt, .5f, 1000000, 12, "pronic", 40f,
+            "the residue torus of 2, 3, 5, …, 37|144 shadows: panel (i, j) is Z/p<sub>i</sub> × Z/p<sub>j</sub>|red: the residues of k(k + 1)|white: where they land on a cross|— every panel, both arms");
+        yield return Shot("AC2-144-shadows-pronic", rtl + back * 124f, rtl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpResidueTorusMatrix(rt, 1.5f, 1000000, 6, "euler,pronic,landau", 34f,
+            "36 shadows: 2, 3, 5, 7, 11, 13|green: k² + k + 41 (never on a cross)|red: k(k + 1) (on every cross)|orange: k² + 1 (on the crosses of 2, 5, 13)");
+        Vector3 rtc = rt + new Vector3(-22f, 3f, 0f);
+        yield return Shot("AC3-36-shadows-close", rtc + back * 88f, rtc, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('d')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 md = c + new Vector3(SacksSpiral.ModularOffset, 0f, 0f);
+        sacks.ExpModularPlane(md, 12f, 7.5f, 7f, 49, true, 40f, 24);
+        Vector3 mdl = md + new Vector3(0f, 40f, 0f);
+        yield return Shot("AD1-curves-on-the-modular-surface", mdl + back * 104f, mdl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpModularPlane(md, 40f, 2.4f, 2.7f, 12, true, 64f);
+        Vector3 mdz = md + new Vector3(0f, 44f, 0f);
+        yield return Shot("AD2-fundamental-domain-close", mdz + back * 110f, mdz, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('e')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 ra = c + new Vector3(SacksSpiral.RaceOffset, 0f, 0f);
+        sacks.ExpRaceChart(ra, 190f, 92f, 44f, false, true, new[] { 48231785.0 });
+        Vector3 ral = ra + new Vector3(0f, -4f, 0f);
+        yield return Shot("AE1-prime-race-mod-12", ral + back * 118f, ral, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpRaceChart(ra, 190f, 80f, 44f, true, true, new[] { 26861.0, 616841.0, 12306137.0 });
+        yield return Shot("AE2-prime-race-mod-4", ral + back * 118f, ral, Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 
