@@ -1080,6 +1080,297 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xgoldbach",
+      "title": "Mirrors for prime pairs",
+      "subtitle": "the curves without primes reflect the most",
+      "setup": [
+        "exp:stage",
+        "exp:bend:0"
+      ],
+      "lines": [
+        {
+          "id": "xgoldbach_01",
+          "text": "Every number is a mirror. Step the same distance to either side of a number on the pronic ray, and the two numbers you land on sit symmetric across the ray.",
+          "camera": "orbit:on=centre;at=0,0,0;fit=124,236>118,226;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:goldbachlive:pronic:10:40:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_02",
+          "text": "When both are prime, they are a Goldbach pair: two primes that add up to twice the mirror, joined by a chord across the ray. Across thirty turns, from turn ten on, the pronic mirrors reflect fifty-four pairs.",
+          "camera": "orbit:on=centre;at=0,0,0;fit=118,226>114,218;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_03",
+          "text": "Now Euler's line, k squared plus k plus forty-one, the most prime-rich curve on the spiral. Over the same thirty turns its mirrors reflect only sixteen pairs, and half of its mirrors reflect none at all.",
+          "camera": "orbit:on=centre;at=0,0,0;fit=124,236>118,226;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:goldbachlive:euler:10:40:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_04",
+          "text": "Over two thousand turns the gap holds. The pronic mirrors reflect two point one five times as many prime pairs as Euler's, the squares one and a half times as many, and Euler's line is the weakest mirror of all.",
+          "camera": "orbit:on=centre;at=10180,0,0;fit=92,100>88,96;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:goldbachsky",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_05",
+          "text": "The white ticks are a prediction, not a measurement. Hardy and Littlewood's form of Goldbach's conjecture multiplies a mirror's pairs by p minus one over p minus two for every odd prime p that divides it. The ticks land on the bars.",
+          "camera": "orbit:on=centre;at=10180,0,0;fit=88,96>86,94;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "delay:0.3:exp:goldbachticks",
+            "delay:11.8:exp:goldbachticks"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_06",
+          "text": "The reason is simple. When p divides the mirror, p can spoil a pair only when it also divides the step: one way instead of two. Pronic numbers are always even, and two times in three divisible by three. Euler's values have no prime factor below forty-one.",
+          "camera": "orbit:on=centre;at=10180,0,0;fit=86,94>92,100;el=89.5;az=-90;spin=0;raise=.05;span=14",
+          "actions": [],
+          "pause": 0.8
+        },
+        {
+          "id": "xgoldbach_07",
+          "text": "A chord is an unordered pair of angles, and the unordered pairs of points on a circle form a Möbius band. Its single edge is where the two angles meet.",
+          "camera": "orbit:on=centre;at=10600,0,0;fit=90,154>86,148;el=48>44;az=-100;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:mobiusband:labels",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_08",
+          "text": "Every chord of the squares and pronic mirrors lands on one rung of the band: the reflection across the x axis.",
+          "camera": "orbit:on=centre;at=10600,0,0;fit=86,148>84,146;el=44>42;az=-90;spin=1;raise=.05;span=12",
+          "actions": [
+            "exp:mobiuspoints:squares:10:60",
+            "exp:mobiuslive:pronic:10:60:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_09",
+          "text": "Euler's chords scatter over the whole band, because the direction of its mirror swings from one turn to the next.",
+          "camera": "orbit:on=centre;at=10600,0,0;fit=84,146>84,146;el=42>42;az=-82;spin=1;raise=.05;span=12",
+          "actions": [
+            "exp:mobiuslive:euler:10:60:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xgoldbach_10",
+          "text": "So cancellation and anti-cancellation trade places. The curves that never hold a prime are the best mirrors for pairs of primes, and a mirror's own small factors predict how good it is.",
+          "camera": "orbit:on=centre;at=10600,0,0;fit=84,146>94,160;el=42>50;az=-74;spin=1;raise=.05;span=14",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xsieve",
+      "title": "The sieve machine",
+      "subtitle": "Fermat's walk through rings of residues",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xsieve_01",
+          "text": "To factor a number n, Fermat looked for a square, a squared, that is n more than another square, b squared. Then n is a minus b times a plus b. The search starts at the first a whose square passes n.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=70,144>66,138;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:sievedial:1501:49:0",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_02",
+          "text": "Most a can be ruled out without taking a square root. Each ring is one modulus, from three to nineteen. Its gold holes are the residues of a where a squared minus n can still be a square; the dark ones are ruled out.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=66,138>64,134;el=89.5;az=-90;spin=0;raise=.05;span=14",
+          "actions": [
+            "delay:5.9:exp:dialholes"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_03",
+          "text": "Step a by one, and every ring turns by one hole. Light from the centre runs out through the window until a closed ring stops it.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=70,144>66,138;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:sievedial:1501:49:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_04",
+          "text": "At a equals forty-nine every ring is open, and forty-nine squared minus fifteen hundred and one is nine hundred, thirty squared. So fifteen hundred and one is nineteen times seventy-nine.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=66,138>64,134;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_05",
+          "text": "One ring never closed. The ring for nineteen is gold all the way round, because nineteen divides fifteen hundred and one. For a prime ring, no dark holes means the prime is a factor.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=64,134>70,144;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:dialring:10"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_06",
+          "text": "For fifty thousand three hundred and ninety-nine, the light first escapes at a equals three hundred, the seventy-sixth candidate. Three hundred squared minus fifty thousand three hundred and ninety-nine is a hundred and ninety-nine squared, so it is a hundred and one times four hundred and ninety-nine.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=70,144>66,138;el=89.5;az=-90;spin=0;raise=.05;span=12",
+          "actions": [
+            "exp:sievedial:50399:300:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_07",
+          "text": "Here is the record: one row per candidate, one column per ring. Only one row passes every column, and it is the answer.",
+          "camera": "orbit:on=centre;at=9157,2,0;fit=66,204>64,198;el=89.5;az=-90;spin=0;raise=.065;span=12",
+          "actions": [
+            "exp:sieveboard:50399:225:320:48",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xsieve_08",
+          "text": "D. H. Lehmer built sieves like this, first from bicycle chains, then in 1932 from gears and a photocell. They are fast when the two factors are close together. When the factors are far apart, a has to climb a long way, and the rings only shorten the climb by a constant factor.",
+          "camera": "orbit:on=centre;at=9000,2,0;fit=70,144>78,156;el=89.5;az=-90;spin=0;raise=.05;span=14",
+          "actions": [
+            "exp:noboard"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "xtwist",
+      "title": "Twisted tori",
+      "subtitle": "a knot of residues and the umbilic torus",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off"
+      ],
+      "lines": [
+        {
+          "id": "xtwist_01",
+          "text": "Here is a different twist. Put each number n a seventh of a turn further around a torus, and a fifth of a turn further around its tube. The numbers wind a torus knot through thirty-five beads.",
+          "camera": "orbit:on=centre;at=9800,0,0;fit=92,156>88,150;el=50>46;az=-90;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:knot",
+            "exp:knotwalk:1:35:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_02",
+          "text": "Every prime except five and seven lands on one of twenty-four beads. The other eleven beads lie on two red circles, the multiples of five on one and the multiples of seven on the other.",
+          "camera": "orbit:on=centre;at=9800,0,0;fit=88,150>86,146;el=46>44;az=-80;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:knotwalk:36:105:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_03",
+          "text": "Euler's line visits only twelve of the twenty-four and never touches a red circle: its discriminant, minus a hundred and sixty-three, has no square root modulo five or seven.",
+          "camera": "orbit:on=centre;at=9800,0,0;fit=86,146>86,146;el=46>50;az=-70;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:knot:euler"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_04",
+          "text": "This torus is the sieve machine with two rings: turning both by one notch steps along the knot. A torus of residues sorts the numbers; it cannot find a prime the residues have not already allowed.",
+          "camera": "orbit:on=centre;at=9800,0,0;fit=86,146>96,160;el=50>54;az=-60;spin=1;raise=.05;span=14",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_05",
+          "text": "Now wind the spiral itself around a torus, one lap per turn. This is Ferguson's umbilic torus. Its tube is a three-cornered deltoid that twists a third of a turn every lap, so its single edge runs around three times before it closes.",
+          "camera": "orbit:on=centre;at=11400,0,0;fit=86,138>82,132;el=40>36;az=-90;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:umbiliclive:1:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_06",
+          "text": "Cut at the squares ray, every cross-section has three positions, and turn k always lands in position k mod three. The turns sort into three stacks.",
+          "camera": "orbit:on=centre;at=11400,0,0;fit=82,132>80,128;el=36>34;az=-80;spin=1;raise=.05;span=14",
+          "actions": [],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_07",
+          "text": "Then each curve meets three on whole stacks. k squared plus k plus one is a multiple of three on every turn of one stack, and all its primes sit on the other two.",
+          "camera": "orbit:on=centre;at=11388,-26,-2;fit=64,80>60,76;el=34>30;az=-90;spin=.5;raise=.05;span=12",
+          "actions": [
+            "exp:umbiliccurve:1:1:flare"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_08",
+          "text": "k squared plus k plus three is the reverse: two stacks cancelled, and all eight of its primes on the third. A curve whose constant is two more than a multiple of three, like Euler's, is never cancelled by three at all.",
+          "camera": "orbit:on=centre;at=11388,-26,-2;fit=60,76>60,76;el=30>32;az=-86;spin=.5;raise=.05;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:umbilic:1",
+            "exp:umbiliccurve:3:1:flare"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_09",
+          "text": "Without the twist, every turn lies on the same face, and the cancelled values mix with the primes.",
+          "camera": "orbit:on=centre;at=11400,0,0;fit=86,138>82,132;el=40>36;az=-90;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:umbilic:0:1"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xtwist_10",
+          "text": "A half twist of a flat strip is a Möbius band, which sorts the turns by parity, and a tube with q corners sorts them mod q. The twisted shapes make residues visible, and that is all they do: the sorting is the residue lattice, drawn on a surface.",
+          "camera": "orbit:on=centre;at=11400,0,0;fit=82,132>92,146;el=36>46;az=-80;spin=1;raise=.05;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:umbilic:1:1,3"
+          ],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }

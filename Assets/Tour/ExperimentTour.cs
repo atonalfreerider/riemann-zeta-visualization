@@ -108,6 +108,9 @@ public partial class TourDirector
     /// (CODE empty, primes, sq, euler, 17, k2p1, k2k1, pronic, u4u1) · exp:fingerall · exp:clocklive:SECONDS · exp:clock[:labels]
     /// exp:clockpulse:red|orange · exp:quadglow:Q:B:C
     /// </summary>
+    /// <summary>The moduli of the sieve machine's rings (exp:sievedial, exp:sieveboard).</summary>
+    static readonly int[] SieveMods = { 3, 4, 5, 7, 8, 9, 11, 13, 16, 17, 19 };
+
     void ApplyExperimentAction(string[] p)
     {
         SacksSpiral sacks = Annotations.Sacks;
@@ -332,6 +335,37 @@ public partial class TourDirector
             case "clockpulse": sacks.ExpClockPulse(A(2).ToLowerInvariant() != "orange"); break;
             case "quadglow": sacks.ExpQuadGlow(I(2, 1), I(3, 1), I(4, 41), new Color(.3f, 1f, .55f)); break;
             case "meet": sacks.ExpEulerLandauMeet(24f); break;
+            // ---- mirrors for prime pairs, the sieve machine, twisted tori (SacksTwisted.cs) ----
+            case "goldbach": sacks.ExpMirrorChords(A(2).ToLowerInvariant(), I(3, 10), I(4, 40), .3f, true, true); break;
+            case "goldbachlive": sacks.ExpMirrorLive(A(2).ToLowerInvariant(), I(3, 10), I(4, 40), Seconds(A(5), 8f), .3f); break;
+            case "goldbachsky": sacks.ExpMirrorSkyline(c + new Vector3(SacksSpiral.SkylineOffset, 0f, 0f), 11f, 44f, 34f, false); break;
+            case "goldbachticks": sacks.ExpSkylineTicksPulse(); break;
+            case "mobiusband": sacks.ExpMobiusBand(c + new Vector3(SacksSpiral.MobiusOffset, 0f, 0f), 30f, 12f, 0f); break;
+            case "mobiuspoints": sacks.ExpMobiusPoints(c + new Vector3(SacksSpiral.MobiusOffset, 0f, 0f), 30f, 12f, A(2).ToLowerInvariant(), I(3, 10), I(4, 60)); break;
+            case "mobiuslive": sacks.ExpMobiusLive(c + new Vector3(SacksSpiral.MobiusOffset, 0f, 0f), 30f, 12f, A(2).ToLowerInvariant(), I(3, 10), I(4, 60), Seconds(A(5), 8f), 0f); break;
+            case "sievedial":
+                // exp:sievedial:N:A1:SECONDS (SECONDS 0 holds the dial still at the first candidate)
+                sacks.ExpLehmerLive(c + new Vector3(SacksSpiral.MachineOffset, 0f, 0f), I(2, 1501), I(3, 60), SieveMods, Seconds(A(4), 0f), 44f, false);
+                break;
+            case "dialring": sacks.ExpDialRingPulse(c + new Vector3(SacksSpiral.MachineOffset, 0f, 0f), I(2, 10)); break;
+            case "noboard": SacksSpiral.ExpClearBoard(); break;
+            case "dialholes": sacks.ExpDialHolesPulse(); break;
+            case "sieveboard": sacks.ExpSieveBoard(c + new Vector3(SacksSpiral.MachineOffset + 160f, 0f, 0f), I(2, 50399), I(3, 225), I(4, 320), SieveMods, 2.2f, 36f, I(5, 48)); break;
+            case "knot": sacks.ExpTorusKnot(c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f), 30f, 12f, 5, 7, 1000000, Has("euler"), 48f, false); break;
+            case "knotwalk":
+                // exp:knotwalk:N0:N1:SECONDS
+                sacks.ExpKnotWalkLive(c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f), 30f, 12f, 5, 7, I(3, 35), Seconds(A(4), 8f), 0f, I(2, 1));
+                break;
+            case "umbilic":
+            {
+                // exp:umbilic:TWIST[:C1,C2,…]
+                List<long> cs = new();
+                foreach (string t in A(3).Split(',')) if (long.TryParse(t.Trim(), out long v)) cs.Add(v);
+                sacks.ExpUmbilic(c + new Vector3(SacksSpiral.UmbilicOffset, 0f, 0f), 4f, F(2, 1f), 40, cs.ToArray(), 0, 0f);
+                break;
+            }
+            case "umbiliclive": sacks.ExpUmbilicLive(c + new Vector3(SacksSpiral.UmbilicOffset, 0f, 0f), 4f, F(2, 1f), 40, Seconds(A(3), 8f), 0f); break;
+            case "umbiliccurve": sacks.ExpUmbilicCurve(c + new Vector3(SacksSpiral.UmbilicOffset, 0f, 0f), 4f, F(3, 1f), I(2, 1), 40, Has("flare")); break;
             case "flare":
                 // exp:flare:N1,N2,…[:RADIUS] — white flares at the numbers the line is talking about
                 foreach (string t in A(2).Split(',')) if (long.TryParse(t.Trim(), out long fn)) sacks.FlareNumber(fn, F(3, 2.4f), 2.4f, 3);

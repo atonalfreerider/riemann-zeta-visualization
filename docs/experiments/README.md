@@ -908,6 +908,135 @@ basis:
 All of it is the local behaviour at 2 and 3. It explains why Euler's lines are three times as prime as an average line,
 but no grouping by 144 can see a prime larger than 3.
 
+## Z1–Z4. Mirrors, a sieve machine, and twisted tori
+
+This round asked whether a toroidal, umbilic or Möbius transformation of the spiral can separate the primes, the
+cancellation curves and the anti-cancellation curves well enough to find primes or to factor. Four constructions were
+tried ([`SacksTwisted.cs`](../../Assets/Tour/SacksTwisted.cs)). The first gave a quantitative surprise, the second is a
+factoring machine, and the last two sort numbers by residues and do nothing more.
+
+### Z1. Every number is a mirror for prime pairs
+
+Take a number `m` and step `j` to either side. Within one turn of the spiral, `m − j` and `m + j` sit symmetric
+across the ray through `m`. When both are prime they are a Goldbach pair of `2m`, drawn as a chord across the ray.
+Counting the pairs with `j ≤ k` on the mirrors of each curve gives the reverse of what the prime curves suggest.
+
+| mirror curve | pairs per mirror, relative to Euler's line | Hardy–Littlewood prediction |
+|---|---|---|
+| `k(k + 1)` (pronic, a cancellation curve) | 2.152 | 2.125 |
+| `u(u + 6)` | 1.723 | 1.700 |
+| `u(u + 30)` | 1.610 | 1.600 |
+| `k²` (squares) | 1.517 | 1.504 |
+| `k² + 1` (Landau) | 1.179 | 1.161 |
+| `k² + k − 1` | 1.100 | 1.098 |
+| `k² + k + 17` | 1.028 | 1.021 |
+| `k² + k + 41` (Euler) | 1.000 | 1.000 |
+
+The counts run over `k` from 1 000 to 3 000 and are normalised by `k / log² m`. The pronic mirrors hold 48 726 pairs
+and Euler's 22 638. The prediction is the singular series of Goldbach's conjecture in Hardy and Littlewood's form.
+Every odd prime `p` that divides the mirror multiplies its pairs by `(p − 1)/(p − 2)`, because such a `p` spoils a pair
+`m ± j` only when `p | j`, one residue class of `j` instead of two. Pronic numbers are always even, and divisible by 3
+two times in three. Euler's values have no prime factor below 41. So **the cancellation curves are the best mirrors
+for prime pairs, and the anti-cancellation curves are the worst.**
+
+Inside the tour's spiral, over turns 10 to 39, the pronic mirrors reflect 54 pairs, the squares 37 and Euler's line 16.
+Fifteen of Euler's thirty mirrors reflect none. The chords of the squares and pronic mirrors are all perpendicular to
+the x axis, a barcode across the spiral. Euler's chords point every which way, because the direction of its ray swings
+from turn to turn.
+
+![Z1a](Z1a-mirror-chords-pronic.jpg)
+![Z1b](Z1b-mirror-chords-squares.jpg)
+![Z1c](Z1c-mirror-chords-euler.jpg)
+![Z1e](Z1e-mirror-skyline.jpg)
+
+**The Möbius band of chords.** A chord is an unordered pair of angles `{θ₁, θ₂}`. The unordered pairs of points on a
+circle form a Möbius band whose single edge is the diagonal `θ₁ = θ₂`. With centre `c = θ₁ + d/2` and half-width
+`w = d/2`, where `d = θ₂ − θ₁ mod 2π`, the band is the strip `(c, w)` glued by `(c, w) ~ (c + π, π − w)`. Every chord
+of the squares and pronic mirrors lands on one rung, `c ≡ 0 (mod π)`, which is the reflection across the x axis. For
+`k` from 10 to 59 that is 61 squares chords and 95 pronic chords, entering the rung from opposite ends. Euler's 35
+chords scatter over the band.
+
+![Z1f](Z1f-mobius-chords.jpg)
+![Z1g](Z1g-mobius-chords-top.jpg)
+
+### Z2. The sieve machine
+
+Fermat factors `n` by finding `a` with `a² − n = b²`, so that `n = (a − b)(a + b)`. Most candidates `a` can be thrown
+out before any square root is taken, because `a² − n` must be a square modulo every `m`. The machine has one ring per
+modulus (3, 4, 5, 7, 8, 9, 11, 13, 16, 17 and 19) with a hole at every residue of `a`, gold where `a² − n` can still be
+a square. Stepping `a` turns every ring by one hole. Light from the centre runs out through the window at twelve
+o'clock until a closed ring stops it.
+
+| n | candidates `a` | left after each ring | first `a` through | factors |
+|---|---|---|---|---|
+| 1 501 | 39–60 (22) | 14, 7, 4, 1, 1, 1, 1, 1, 1, 1, 1 | 49, with 49² − 1 501 = 30² | 19 × 79 |
+| 50 399 | 225–320 (96) | 32, 16, 10, 4, 3, 3, 2, 2, 2, 2, 1 | 300, with 300² − 50 399 = 199² | 101 × 499 |
+
+For 1 501 the ring for 19 is gold all the way round. When a prime `p` divides `n`, `a² − n ≡ a²` is always a square
+mod `p`. When it does not, at most `(p + 1)/2` of the `p` holes are open. A prime ring with no dark holes names a
+factor by itself.
+
+This is D. H. Lehmer's sieve, which he built from bicycle chains and, in 1932, from gears and a photocell. Its rings
+are the circles of a torus (Z3), and turning them together walks a torus knot through the cells. It is fast when the
+factors are close to `√n`. When they are far apart, `a` has to climb about `(p + q)/2 − √n` steps, and the rings shorten
+the climb only by a constant factor.
+
+![Z2a](Z2a-sieve-board-1501.jpg)
+![Z2b](Z2b-sieve-board-50399.jpg)
+![Z2c](Z2c-sieve-dial-midway.jpg)
+![Z2d](Z2d-sieve-dial-1501.jpg)
+![Z2e](Z2e-sieve-dial-50399.jpg)
+
+### Z3. The torus knot of residues
+
+Put `n` at angle `2πn/7` around a torus and `2πn/5` around its tube. The integers wind the (5, 7) torus knot through 35
+beads, one for each residue mod 35. Every prime other than 5 and 7 lies on one of the 24 beads coprime to 35, with
+3 250 to 3 293 primes on each up to 10⁶. The other 11 beads lie on two circles, the multiples of 5 on a parallel and
+the multiples of 7 on a meridian, and hold only 5 and 7 themselves. Euler's `k² + k + 41` visits 12 of the 24 beads and
+never touches either circle, since its discriminant −163 is not a square mod 5 or mod 7.
+
+![Z3a](Z3a-torus-knot-5-7.jpg)
+![Z3b](Z3b-torus-knot-5-7-euler.jpg)
+![Z3c](Z3c-torus-knot-walk-40.jpg)
+
+### Z4. The umbilic torus sorts the turns mod 3
+
+Ferguson's umbilic torus, `x = sin u (7 + cos(u/3 − 2v) + 2 cos(u/3 + v))`, `y = cos u (…)`,
+`z = sin(u/3 − 2v) + 2 sin(u/3 + v)`, has a deltoid cross-section that turns a third of a turn per lap. Its single cusp
+edge runs around three times before it closes. Wind the spiral onto it, one lap per turn (`u = 2π√n`), just off the
+cusp edge and drifting across the face so that the turns stack. Cut at the squares ray, every cross-section has three
+positions, and turn `k` lies in position `k mod 3`. The colours of the three stacks trade places at the cut, because the
+surface has only one face.
+
+On this surface every curve meets 3 on whole stacks. For the values that lie on their own turn (`k ≥ C`):
+
+| curve | multiples of 3 | primes |
+|---|---|---|
+| `k² + k + 1` | all 14 values in position 1 | 8 in position 0, 7 in position 2 |
+| `k² + k + 3` | all 25 values in positions 0 and 2 | all 8 in position 1 |
+| `k² + k + C` with `C ≡ 2 (mod 3)`, such as 17 and 41 | none | in all three |
+
+Without the twist, every turn lies on the same face and the multiples of 3 mix with the primes. A half twist of a flat
+strip is a Möbius band, which sorts the turns by parity, and a tube with `q` cusps twisting by `1/q` sorts them mod `q`.
+The sorting is the residue lattice of section U, drawn on a surface.
+
+![Z4a](Z4a-umbilic-torus-turns.jpg)
+![Z4b](Z4b-umbilic-k2-k-1.jpg)
+![Z4c](Z4c-umbilic-k2-k-1-close.jpg)
+![Z4d](Z4d-umbilic-k2-k-3-close.jpg)
+![Z4e](Z4e-untwisted-k2-k-1.jpg)
+
+### What the twisted shapes do
+
+* **The mirrors are new as a picture, and quantitative.** The pronic ray reflects 2.15 times as many Goldbach pairs as
+  Euler's line. The singular series predicts every curve's mirror strength to within 1.5 %. For pairs of primes,
+  cancellation and anti-cancellation trade places.
+* **The sieve machine factors, but it is classical.** It is Fermat's method with Lehmer's residue filter, and its cost
+  still grows like the distance between the factors.
+* **The torus knot and the umbilic torus make residue classes visible.** The knot shows `n mod 35`, and the umbilic
+  torus shows the turn mod 3 as the three stacks of a twisted tube. Neither can find a prime that the residues have not
+  already allowed.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -923,10 +1052,14 @@ Everything that came out of the sections as an *algorithm* is classical. The sad
    of `Δ` (correlation 0.9995).
 4. **Long prime runs need class number one (Rabinowitsch).** `k² + k + c` is prime for all `k ≤ c − 2` only for
    `c` = 2, 3, 5, 11, 17, 41, a finite list (Heegner, Stark).
+5. **Fermat's walk through residue rings (Lehmer).** Keeping only the `a` for which `a² − n` is a square modulo 3, 4,
+   5, …, 19 leaves one candidate of 22 for 1 501 and one of 96 for 50 399, and that candidate is the factorization. A
+   prime modulus all of whose residues survive divides `n`. The filter shortens Fermat's walk by a constant factor and
+   does not change how it grows.
 
 A purely algebraic description of all primes does exist. Jones, Sato, Wada and Wiens (1976) wrote down a polynomial
 of degree 25 in 26 variables whose positive values are exactly the primes. It re-encodes Wilson's theorem, and it is
-useless for finding primes. None of the four methods above beats a modern primality test (Miller–Rabin, ECPP, AKS).
+useless for finding primes. None of the five methods above beats a modern primality test or factoring algorithm (Miller–Rabin, ECPP, AKS).
 What the saddle sections add is a single picture in which the sieve, Fermat's and Euler's methods, and the
 Hardy–Littlewood constants are all one statement about quadratic curves and their discriminants.
 
@@ -968,7 +1101,11 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
     count of allowed cells: 3, 2, 1 or 0 for the pronic side by `c mod 12`, at most 1.5 for the squares side. Pinched
     to 24 or 16 arms, the saddle's height computes the Legendre symbols (3/p) and (2/p) exactly. All of this is the
     local behaviour at 2 and 3, and no grouping by 144 can see a larger prime.
-13. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
+13. Mirrors reverse the roles of the curves. The pronic ray reflects 2.15 times as many Goldbach pairs as Euler's
+    line, as Hardy and Littlewood's singular series predicts to within 1.5 %. The twisted tori (a torus knot of the
+    residues mod 35, the umbilic torus sorting the turns mod 3) sort numbers by residues and add no sieving power. Lehmer's
+    ring sieve factors 1 501 and 50 399 at the first candidate that passes every ring.
+14. None of this predicts a prime or a zero that the sieve, the explicit formula or the functional equation does
     not already predict. The algorithms that do come out of the sections (Euler's criterion, Fermat's method, the
     sieve along a line) are classical. What the sections add is one geometry in which they are all the same
     statement about quadratics and their discriminants.
@@ -988,6 +1125,9 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
    count with correlation 0.9995.
 3. *1601 is a meeting point.* The tour's spiral stops at 1601, chosen as the last prime of Euler's run. Euler's line
    and Landau's `k² + 1` share exactly two values, 197 and 1601.
+4. *The curves without primes are the best mirrors for pairs of primes.* Mirrors on the pronic ray reflect 2.15 times
+   as many Goldbach pairs as mirrors on Euler's line (section Z1). The prime-free curves are built from small factors,
+   and a small factor of the mirror can spoil a pair in only one way.
 
 **Worth exploring.** The first two are now sections P and Q above.
 
@@ -1036,12 +1176,21 @@ of last two base-12 digits one value at a time, with each value written in base 
 reveals the 24 half-hours with their product families, pulses the prime-free hours and lights `16k² + 11k + 2`
 beside hour 9.
 
+Three modules cover the twisted shapes, narrated with the same voice. *Mirrors for prime pairs* (section Z1) draws the
+Goldbach chords mirror by mirror on the pronic ray and then on Euler's line, with the running count on the caption
+board. It then shows the mirror strength of five curves against their predictions and the chords arriving on the
+Möbius band. *The sieve machine* (section Z2) turns the dial for 1 501 and for 50 399, lays a white ring over the ring
+for 19 that never closes, and ends on the record of every candidate. *Twisted tori* (sections Z3 and Z4) walks the
+torus knot with a flare at every prime, winds the spiral onto the umbilic torus turn by turn, lights the multiples of 3
+of `k² + k + 1` and `k² + k + 3` on whole stacks, and unwinds the twist for contrast. Their counts and status lines are
+on the caption board at the top of the screen, so they read at any camera angle.
+
 ## Rendering
 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-`ZETA_EXP_ONLY=AH` renders only the named sections. The frames are 1080 × 1920; the copies in this folder are
+`ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4. The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).

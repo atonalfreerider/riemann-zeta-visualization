@@ -852,6 +852,103 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        // ---------------------------------------------------------------------------------------------
+        // Mirrors, the sieve machine, the torus knot, the umbilic torus: sections Z1–Z4 (SacksTwisted.cs),
+        // run with the lowercase letters m, l, k, t
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('m')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(true);
+        sacks.ExpSetSurface(2, 0f);
+        sacks.ExpSetBend(0f);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        sacks.ExpMirrorChords("pronic", 10, 40, .3f, true, true);
+        yield return Shot("Z1a-mirror-chords-pronic", c + back * Full, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpMirrorChords("squares", 10, 40, .3f, true, true);
+        yield return Shot("Z1b-mirror-chords-squares", c + back * Full, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpMirrorChords("euler", 10, 40, .3f, true, true);
+        yield return Shot("Z1c-mirror-chords-euler", c + back * Full, c, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSetBend(1f);
+        sacks.ShowBackdrop(false);
+        Vector3 sky = c + new Vector3(SacksSpiral.SkylineOffset, 0f, 0f);
+        sacks.ExpMirrorSkyline(sky, 11f, 44f, 26f);
+        yield return Shot("Z1e-mirror-skyline", sky + new Vector3(-16f, 6f, 0f) + back * 148f, sky + new Vector3(-16f, 6f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 mob = c + new Vector3(SacksSpiral.MobiusOffset, 0f, 0f);
+        sacks.ExpMobiusChords(mob, 30f, 12f, new[] { "pronic", "squares", "euler" }, 10, 60, 0f);
+        yield return Shot("Z1f-mobius-chords", mob + new Vector3(0f, -150f, -88f), mob, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpMobiusChords(mob, 30f, 12f, new[] { "pronic", "squares", "euler" }, 10, 60, 30f);
+        yield return Shot("Z1g-mobius-chords-top", mob + new Vector3(0f, -14f, 0f) + back * 215f, mob + new Vector3(0f, -14f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ShowBackdrop(true);
+        sacks.ExpNumberField(SacksSpiral.Count);
+        }
+
+        if (Wanted('l')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 mach = c + new Vector3(SacksSpiral.MachineOffset, 0f, 0f);
+        int[] mods = { 3, 4, 5, 7, 8, 9, 11, 13, 16, 17, 19 };
+        sacks.ExpSieveBoard(mach, 1501, 39, 60, mods, 2.4f, 22f);
+        yield return Shot("Z2a-sieve-board-1501", mach + new Vector3(-3f, 1f, 0f) + back * 82f, mach + new Vector3(-3f, 1f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSieveBoard(mach, 50399, 225, 320, mods, 2f, 24f, 48);
+        yield return Shot("Z2b-sieve-board-50399", mach + new Vector3(-3f, 1f, 0f) + back * 125f, mach + new Vector3(-3f, 1f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 dial = mach + new Vector3(0f, 300f, 0f), dialView = dial + new Vector3(0f, -8f, 0f);
+        sacks.ExpLehmerLive(dial, 1501, 60, mods, 4f, 30f);
+        yield return new WaitForSeconds(.9f);
+        yield return Shot("Z2c-sieve-dial-midway", dialView + back * 125f, dialView, Vector3.up, 55f);
+        yield return new WaitForSeconds(3f);
+        yield return Shot("Z2d-sieve-dial-1501", dialView + back * 125f, dialView, Vector3.up, 55f);
+        sacks.ExpLehmerLive(dial, 50399, 320, mods, 6f, 30f);
+        yield return new WaitForSeconds(14f);
+        yield return Shot("Z2e-sieve-dial-50399", dialView + back * 125f, dialView, Vector3.up, 55f);
+        sacks.ExpStopLive();
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('k')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 knot = c + new Vector3(SacksSpiral.KnotOffset, 0f, 0f);
+        sacks.ExpTorusKnot(knot, 30f, 12f, 5, 7, 1000000, false, 0f);
+        yield return Shot("Z3a-torus-knot-5-7", knot + new Vector3(0f, -150f, -88f), knot, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpTorusKnot(knot, 30f, 12f, 5, 7, 1000000, true, 30f);
+        yield return Shot("Z3b-torus-knot-5-7-euler", knot + new Vector3(0f, -125f, -125f), knot + new Vector3(0f, -6f, 0f), back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpTorusKnot(knot, 30f, 12f, 5, 7, 1000000, false, 30f);
+        sacks.ExpKnotWalkLive(knot, 30f, 12f, 5, 7, 40, 4f, 30f);
+        yield return new WaitForSeconds(5f);
+        yield return Shot("Z3c-torus-knot-walk-40", knot + new Vector3(0f, -125f, -125f), knot + new Vector3(0f, -6f, 0f), back, 55f);
+        sacks.ExpStopLive();
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('t')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 umb = c + new Vector3(SacksSpiral.UmbilicOffset, 0f, 0f);
+        sacks.ExpUmbilic(umb, 4f, 1f, 40, null, 0, 0f);
+        yield return Shot("Z4a-umbilic-torus-turns", umb + new Vector3(0f, -150f, -88f), umb, back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpUmbilic(umb, 4f, 1f, 40, new long[] { 1 }, 0, 0f);
+        yield return Shot("Z4b-umbilic-k2-k-1", umb + new Vector3(0f, -150f, -88f), umb, back, 55f);
+        yield return Shot("Z4c-umbilic-k2-k-1-close", umb + new Vector3(0f, -82f, -48f), umb + new Vector3(0f, -26f, 0f), back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpUmbilic(umb, 4f, 1f, 40, new long[] { 3 }, 0, 0f);
+        yield return Shot("Z4d-umbilic-k2-k-3-close", umb + new Vector3(0f, -82f, -48f), umb + new Vector3(0f, -26f, 0f), back, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpUmbilic(umb, 4f, 0f, 40, new long[] { 1 }, 0, 0f);
+        yield return Shot("Z4e-untwisted-k2-k-1", umb + new Vector3(0f, -150f, -88f), umb, back, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();

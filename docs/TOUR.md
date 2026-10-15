@@ -56,6 +56,9 @@ modules are narrated. The modules are
 | The saddle computes (3/p) | `xlegendre` | the pinch to 24 arms, then the saddle rising so every prime falls or rises by (3/p); the same for (2/p) on 16 arms, (5/p) on 10, and 144 arms on a 12-fold saddle |
 | Base-12 fingerprints | `xfinger` | the last two base-12 digits as a board; the primes filling four columns; the squares, Euler's line, k² + k + 17 and the pronic numbers stamping their cells one value at a time |
 | The 144 clock | `xclock` | the 24 half-hours appearing one by one with their product families; the prime-free hours pulsing; 16k² + 11k + 2 beside hour 9; the clock on the saddle |
+| Mirrors for prime pairs | `xgoldbach` | Goldbach pairs as chords across the pronic ray and Euler's line, mirror by mirror with a running count; five curves' mirror strength against Hardy and Littlewood's prediction; the chords arriving on the Möbius band of unordered pairs |
+| The sieve machine | `xsieve` | Fermat's search through a dial of residue rings (mod 3 to 19) turning one hole per step: 1 501 = 19 × 79 at a = 49, the ring for 19 that never closes, 50 399 = 101 × 499 at a = 300, and the record of every candidate |
+| Twisted tori | `xtwist` | a walk along the (5, 7) torus knot of residues with flares at the primes; Euler's line on 12 beads; the spiral winding onto the umbilic torus so turn k lands in position k mod 3; the multiples of 3 of k² + k + 1 and k² + k + 3 on whole stacks; the untwisted torus for contrast |
 
 Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
 `exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
@@ -64,7 +67,10 @@ Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:S
 N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
 `exp:snap` (cut to the line's shot instead of flying there), and for the section modules `exp:latticechart[live]`,
 `exp:twistlive`, `exp:idealwave`, `exp:mirrorswing`, `exp:eulershow`, `exp:fermatwalk`, `exp:combslide`, `exp:skyline`,
-`exp:meet`, the pinches `exp:fold`, `exp:residue`, `exp:pleat`, `exp:residuelattice` and `exp:pinchlive`, and more,
+`exp:meet`, the pinches `exp:fold`, `exp:residue`, `exp:pleat`, `exp:residuelattice` and `exp:pinchlive`, the twisted
+shapes `exp:goldbachlive`, `exp:goldbachsky`, `exp:mobiusband`, `exp:mobiuspoints`, `exp:mobiuslive`, `exp:sievedial`,
+`exp:dialring`, `exp:sieveboard`, `exp:knot`, `exp:knotwalk`, `exp:umbilic`, `exp:umbiliclive`, `exp:umbiliccurve` and
+`exp:noboard`, and more,
 and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
 see `ExperimentTour.cs`).
 
