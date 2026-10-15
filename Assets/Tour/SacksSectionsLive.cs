@@ -60,11 +60,13 @@ public partial class SacksSpiral
         axis.positionCount = ray.Count;
         axis.SetPositions(ray.ToArray());
         LineRenderer[] lines = new LineRenderer[mMax];
+        AttentionHalo[] halos = new AttentionHalo[mMax];
         TextBox[] labels = new TextBox[mMax];
         for (int m = 1; m <= mMax; m++)
         {
             lines[m - 1] = Factory.NewLine("swing " + m, .08f, CancelCurveColor, Factory.GlowIntensity);
             lines[m - 1].transform.SetParent(g, false);
+            halos[m - 1] = Halo(lines[m - 1], 2.6f, 0f);
             labels[m - 1] = TextBoxLabel("", labelSize, CancelCurveColor);
             labels[m - 1].transform.SetParent(g, false);
         }
@@ -84,6 +86,7 @@ public partial class SacksSpiral
                 lines[m - 1].positionCount = pts.Count;
                 lines[m - 1].SetPositions(pts.ToArray());
                 lines[m - 1].startColor = lines[m - 1].endColor = col;
+                halos[m - 1].Strength = Mathf.Sin(Mathf.PI * um); // white while it is on the move
                 string sign = C < 0 ? "−" : "+";
                 labels[m - 1].Text = $"k² {sign} {System.Math.Abs(C):0.0}";
                 if (um <= 0f) labels[m - 1].Text = $"k² − {m * m}";
@@ -131,6 +134,7 @@ public partial class SacksSpiral
         step.transform.SetParent(g, false);
         LineRenderer marker = Factory.NewLine("step ring", .08f, SquareColor, Factory.GlowIntensity);
         marker.transform.SetParent(g, false);
+        AttentionHalo markerHalo = Halo(marker, 2.4f, 0f);
         int steps = (int)(mEnd - m0) + 1;
         float per = Mathf.Max(.35f, seconds * .7f / steps);
         for (long m = m0; m <= mEnd; m++)
@@ -145,6 +149,12 @@ public partial class SacksSpiral
             step.Color = square ? Factory.Palette.Zero : SquareColor;
             step.transform.position = pm + new Vector3(0f, 1.8f + .1f * labelSize, -.8f);
             label.Text = $"{n}:  step {m - m0 + 1}";
+            markerHalo.Pulse(per * .9f);
+            if (square)
+            {
+                Flare(pm, 2.6f, 2.2f, 2);
+                Flare(pn, 2.6f, 2.2f, 2);
+            }
             yield return new WaitForSeconds(per);
         }
 
@@ -154,6 +164,7 @@ public partial class SacksSpiral
         int samples = Mathf.CeilToInt((uMax - 1f) * RouteSteps);
         LineRenderer curve = Factory.NewLine("found curve", .1f, CurveColor((int)d), Factory.GlowIntensity);
         curve.transform.SetParent(g, false);
+        AttentionHalo curveHalo = Halo(curve, 2.6f, 1f);
         for (int i = 0; i <= samples; i++)
         {
             double uu = 1.0 + (uMax - 1.0) * i / samples;
@@ -166,6 +177,7 @@ public partial class SacksSpiral
             }
         }
 
+        curveHalo.Pulse(2.5f);
         label.Text = $"{n} = {u} × {v}, on the cancellation curve C<sub>{d}</sub>   ({steps - 1} step{(steps - 1 == 1 ? "" : "s")} out from √{n})";
         label.Color = CurveColor((int)d);
         liveRoutine = null;
@@ -205,6 +217,7 @@ public partial class SacksSpiral
         section.transform.SetParent(g, false);
         LineRenderer curve = Factory.NewLine("its quadratic", .08f, Color.white, Factory.GlowIntensity);
         curve.transform.SetParent(g, false);
+        AttentionHalo sectionHalo = Halo(section, 2.2f, .7f), curveHalo = Halo(curve, 2.6f, 0f);
         TextBox label = TextBoxLabel("", labelSize, Color.white);
         label.transform.SetParent(g, false);
         Transform dotsRoot = null;
@@ -242,6 +255,7 @@ public partial class SacksSpiral
                 curve.positionCount = pts.Count;
                 curve.SetPositions(pts.ToArray());
                 curve.startColor = curve.endColor = col;
+                curveHalo.Pulse(1.1f);
                 if (dotsRoot != null) Destroy(dotsRoot.gameObject);
                 dotsRoot = new GameObject("values").transform;
                 dotsRoot.SetParent(g, false);
@@ -264,7 +278,11 @@ public partial class SacksSpiral
             }
 
             label.transform.position = origin + new Vector3(sx * (L * .55f), y + .16f * labelSize + 1f, 0f) + Vector3.back * 8f;
-            if (u >= 1f) break;
+            if (u >= 1f)
+            {
+                sectionHalo.Decay = .8f;
+                break;
+            }
             time += Time.deltaTime;
             yield return null;
         }

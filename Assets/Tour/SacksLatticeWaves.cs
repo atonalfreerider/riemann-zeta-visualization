@@ -230,6 +230,8 @@ public partial class SacksSpiral
         LineRenderer sum = Factory.NewLine("sum", .1f, LatticeSeriesColor, Factory.GlowIntensity);
         sum.transform.SetParent(g, false);
         sum.positionCount = samples;
+        AttentionHalo sumHalo = Halo(sum, 1.5f, 0f);
+        sumHalo.Decay = 1.4f;
         TextBox label = TextBoxLabel("", labelSize * .8f, LatticeSeriesColor);
         label.transform.SetParent(g, false);
         label.transform.position = center + new Vector3(0, -height * .5f - .22f * labelSize - 1.2f, 0);
@@ -250,6 +252,7 @@ public partial class SacksSpiral
                 done = target;
                 for (int i = 0; i < samples; i++) v[i] = System.Math.Pow(xs[i], .25) / System.Math.PI * acc[i];
                 sum.SetPositions(ChartPoints(xs, v, maxE, center, width, height, .1f));
+                sumHalo.Strength = .65f; // a wave just arrived
                 label.Text = $"{done:N0} wave{(done == 1 ? "" : "s")}:  correlation with the wobble {Correlation(e, v):0.000}";
             }
 
@@ -375,6 +378,8 @@ public partial class SacksSpiral
         LineRenderer pronics = Factory.NewLine("pronics", .1f, PronicColor, Factory.SoftGlowIntensity);
         squares.transform.SetParent(g, false);
         pronics.transform.SetParent(g, false);
+        AttentionHalo squaresHalo = Halo(squares, 1.6f, 0f), pronicsHalo = Halo(pronics, 1.6f, 0f);
+        AttentionHalo waveHalo = null;
         int kMax = Mathf.FloorToInt(Mathf.Sqrt(nMax));
         LineRenderer wave = null;
         const int samples = 900;
@@ -384,6 +389,7 @@ public partial class SacksSpiral
             wave = Factory.NewLine("first wave", .08f, LatticeFirstColor, Factory.GlowIntensity);
             wave.transform.SetParent(g, false);
             wave.positionCount = samples;
+            waveHalo = Halo(wave, 2.2f, 0f);
         }
 
         TextBox label = TextBoxLabel("", labelSize, Color.white);
@@ -440,6 +446,9 @@ public partial class SacksSpiral
                 }
             }
 
+            float moving = Mathf.Sin(Mathf.PI * u);
+            squaresHalo.Strength = pronicsHalo.Strength = moving * .45f;
+            if (waveHalo != null) waveHalo.Strength = moving * .5f;
             float turns = (4f * Mathf.PI - twistR) / (2f * Mathf.PI);
             label.Text = $"twist {twistR / Mathf.PI:0.00}π per turn:  {turns:0.00} wave{(Mathf.Abs(turns - 1f) < .005f ? "" : "s")} per turn of the spiral";
             if (u >= 1f) break;
@@ -691,6 +700,7 @@ public partial class SacksSpiral
 
             done = target;
             DrawIdealNeedles(g, acc, nMax, scale);
+            NeedleSparks(g, acc, nMax, scale, Mathf.Sin(Mathf.PI * u));
             label.Text = mode == "zeta" ? $"zeros of ζ: {done:N0}"
                 : mode == "l" ? $"zeros of ζ: {zCount:N0}\nzeros of L(s, χ<sub>−163</sub>): {done:N0}"
                 : $"zeros of L(s, χ<sub>−163</sub>): {done:N0}";
@@ -700,6 +710,34 @@ public partial class SacksSpiral
         }
 
         liveRoutine = null;
+    }
+
+    Transform needleSparks;
+
+    /// <summary>White sparks at the tips of the tallest needles while the zeros are joining (strength 0 removes them).</summary>
+    void NeedleSparks(Transform g, double[] wave, int nMax, float scale, float strength)
+    {
+        if (needleSparks != null) Destroy(needleSparks.gameObject);
+        needleSparks = null;
+        if (strength < .02f) return;
+        double max = 1e-9;
+        for (int n = 2; n <= nMax; n++) max = System.Math.Max(max, System.Math.Abs(wave[n] * IdealFactor(n)));
+        List<Vector3> pts = new(); List<Color> cols = new(); List<float> sizes = new();
+        for (int n = 2; n <= nMax; n++)
+        {
+            double h = wave[n] * IdealFactor(n);
+            float f = (float)(System.Math.Abs(h) / max);
+            if (f < .25f) continue;
+            pts.Add(ExpNumberAt(n, .05f) + Vector3.back * ((float)h * scale));
+            float w = strength * f;
+            cols.Add(new Color(w, w, w, w));
+            sizes.Add(.18f + .3f * f);
+        }
+
+        if (pts.Count == 0) return;
+        needleSparks = new GameObject("needle sparks").transform;
+        needleSparks.SetParent(g, false);
+        ExpPointCloud(needleSparks, "sparks", pts, cols, sizes, AttentionIntensity);
     }
 
     /// <summary>Euler's line k² + k + 41 up to nMax on the current surface, values dotted.</summary>

@@ -60,7 +60,14 @@ Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:S
 N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
 `exp:snap` (cut to the line's shot instead of flying there), and for the section modules `exp:latticechart[live]`,
 `exp:twistlive`, `exp:idealwave`, `exp:mirrorswing`, `exp:eulershow`, `exp:fermatwalk`, `exp:combslide`, `exp:skyline`,
-`exp:meet` and more; see `ExperimentTour.cs`). Their shots are written into the
+`exp:meet` and more, and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
+see `ExperimentTour.cs`).
+
+Anything that moves or happens in a module draws the eye with white bloom (`ExperimentAttention.cs`): a moving line
+gets a wide white halo that shines while it moves and fades when it settles (the swinging mirror lines, the twisting
+squares and pronics, the wave sum as each wave arrives, the plane sliding across the comb and each quadratic it reads,
+Fermat's step ring and the curve he finds), events flare white (the square that ends Fermat's search, the numbers the
+narration points at), and the growing needles throw white sparks at their tips while zeros join. Their shots are written into the
 script as moving orbits, `orbit:on=centre|panel|tower|live|towerfocus;at=x,y,z[>x,y,z];d=FROM>TO;el=FROM>TO;az=A;spin=DEG_PER_S;fov=F;span=S;h=FRAC`
 (distance, elevation above the saddle and look point eased over `span` seconds while the camera circles; see
 `CameraRig.OrbitCue`). `fit=W,H[>W2,H2]` replaces the distance with the one that frames a W × H box at the current

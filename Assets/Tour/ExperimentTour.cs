@@ -284,6 +284,10 @@ public partial class TourDirector
             case "combslide": sacks.ExpCombSlideLive(I(2, 0), F(3, -9f), F(4, 7f), Seconds(A(5), 8f), 3000, 20f); break;
             case "skyline": sacks.ExpSkyline(I(2, 0), -30, 60, 3000, c + new Vector3(2600f, 0f, 0f), 2.1f, 42f, 18f); break;
             case "meet": sacks.ExpEulerLandauMeet(24f); break;
+            case "flare":
+                // exp:flare:N1,N2,…[:RADIUS] — white flares at the numbers the line is talking about
+                foreach (string t in A(2).Split(',')) if (long.TryParse(t.Trim(), out long fn)) sacks.FlareNumber(fn, F(3, 2.4f), 2.4f, 3);
+                break;
             default:
                 Debug.LogWarning($"Experiments: unknown action exp:{verb}");
                 break;

@@ -429,7 +429,8 @@
           "text": "Only a prime that splits can divide one of Euler's numbers, and the first prime that splits is forty-one. That is why his first forty values are all prime. Gold marks the primes that split, blue the primes that stay whole.",
           "camera": "orbit:on=centre;fit=88,88>84,84;el=66>56;az=-70;spin=3;raise=.06;span=12",
           "actions": [
-            "exp:eulerroute:800"
+            "exp:eulerroute:800",
+            "delay:2:exp:flare:41"
           ],
           "pause": 0.6
         },
@@ -456,7 +457,8 @@
           "text": "Below forty-one nothing is left standing except four, nine, sixteen and twenty-five: squares of primes that stay whole, which are the sizes of those primes inside the ring.",
           "camera": "orbit:on=centre;at=6,1,-3;fit=34,26>30,23;el=40>48;az=-95;spin=3;raise=.08;span=12",
           "actions": [
-            "exp:numberlabels:4,9,16,25,41,43,47,53:7"
+            "exp:numberlabels:4,9,16,25,41,43,47,53:7",
+            "delay:2.5:exp:flare:4,9,16,25"
           ],
           "pause": 0.8
         },
@@ -521,7 +523,8 @@
           "actions": [
             "exp:clear",
             "exp:gaussfield",
-            "exp:eulershow:1601"
+            "exp:eulershow:1601",
+            "delay:1:exp:flare:1601"
           ],
           "pause": 0.6
         },
@@ -530,7 +533,8 @@
           "text": "Two pairs prove a composite, and hand over a factor. Two twenty-one is fourteen squared plus five squared and also eleven squared plus ten squared. One greatest common divisor turns those into seventeen.",
           "camera": "orbit:on=centre;at=12,-22,0;fit=36,36>33,33;el=80>70;az=-85;spin=2;raise=.07;span=12",
           "actions": [
-            "exp:eulershow:221"
+            "exp:eulershow:221",
+            "delay:1:exp:flare:221"
           ],
           "pause": 0.6
         },
@@ -539,7 +543,8 @@
           "text": "Eleven oh five sits on four pairs, and its factors fall out the same way: thirteen, five and seventeen.",
           "camera": "orbit:on=centre;at=2,42,0;fit=98,58>94,56;el=80>72;az=-95;spin=2;raise=.07;span=11",
           "actions": [
-            "exp:eulershow:1105"
+            "exp:eulershow:1105",
+            "delay:1:exp:flare:1105"
           ],
           "pause": 0.6
         },
@@ -627,7 +632,8 @@
             "exp:bend:0",
             "exp:backdrop:on",
             "exp:meet",
-            "exp:snap"
+            "exp:snap",
+            "delay:4:exp:flare:197,1601"
           ],
           "pause": 1.2
         }
