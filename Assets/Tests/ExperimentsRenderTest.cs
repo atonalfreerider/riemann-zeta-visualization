@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD, CA–CE, DA–DD)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1151,6 +1151,76 @@ public class ExperimentsRenderTest
         sacks.ExpCubeFlat(cf, 40, 1.45f, .12f, 26f, 13f);
         Vector3 cfz = cf + new Vector3(2f, 0f, 0f);
         yield return ShotOrtho("CE2-cube-ball-flattened-centre", cfz + back * 300f, cfz, Vector3.up, 21f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // Exponential sequences, centroids, the Fermat spiral and the Sacks spiral on a cone: sections DA–DD
+        // (SacksCardioid.cs), letters j, s, u, v, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('j')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cd = c + new Vector3(SacksSpiral.CardioidOffset, 0f, 0f);
+        sacks.ExpDoublingCardioid(cd, 163, 2, 45f, cd + new Vector3(88f, 0f, 0f), 9f, 105f, "x² + x + 41");
+        Vector3 cdl = cd + new Vector3(42f, 0f, 0f);
+        yield return Shot("DA1-doubling-cardioid-and-euler-centroid", cdl + back * 118f, cdl, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 cg = c + new Vector3(SacksSpiral.CentroidGridOffset, 0f, 0f);
+        sacks.ExpCentroidGrid(cg, new (long, long, string, string)[]
+        {
+            (11, 2, "11", "x² + x + 3"), (19, 2, "19", "x² + x + 5"), (43, 3, "43", "x² + x + 11"), (67, 2, "67", "x² + x + 17"),
+            (23, 5, "23", "x² + x + 6: always even"), (31, 3, "31", "x² + x + 8: always even"), (341, 2, "341 = 11 · 31", "2<sup>340</sup> ≡ 1: 10 steps"), (561, 2, "561 = 3 · 11 · 17", "Carmichael: 40 steps"),
+        }, 4, 62f, 64f, 22f, 150f, "dots: the centroids of the even (green) and odd (blue) steps of g<sup>k</sup> mod n|times (n − 1)/2 they are the roots of");
+        yield return Shot("DA2-centroids-of-exponential-walks", cg + new Vector3(0f, -1f, 0f) + back * 146f, cg + new Vector3(0f, -1f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('s')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 fs = c + new Vector3(SacksSpiral.FermatSpiralOffset, 0f, 0f);
+        sacks.ExpFermatSpiral(fs, 30000, 2, 1.45f, 1.2f, 330f, new long[] { 1 }, new long[0], 0f, 1e9f, 3f, new[] { 170f }, new[] { "residue 1: every prime, and the pseudoprimes" });
+        yield return ShotOrtho("DB1-fermat-spiral", fs + back * 600f, fs, Vector3.up, 262f);
+        sacks.ClearExperiments();
+        sacks.ExpFermatSpiral(fs, 30000, 2, 1.45f, .32f, 30f, new long[] { 1, 2, 4, 8, 16, 32, 64, 128 }, new long[] { 341, 561, 645, 1105, 1387, 1729, 1905, 2047, 2465, 2701 }, 0f, 76f, 2.5f,
+            new[] { 6f, 9f, 13f, 18f, 25f, 33f, 42f, 56f }, new[] { "residue 1: p", "2: 2p", "4: 3p", "8: 4p", "16: 5p, p ≡ 1 (mod 4)", "32: 6p", "64: 7p, p ≡ 1 (mod 3)", "128: 8p" });
+        Vector3 fz = fs + new Vector3(40f, 9f, 0f);
+        yield return ShotOrtho("DB2-fermat-spiral-near-the-prime-ray", fz + back * 600f, fz, Vector3.up, 21f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('u')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 st = c + new Vector3(SacksSpiral.FermatStackOffset, 0f, 0f);
+        sacks.ExpFermatStack(st, 30000, new long[] { 2, 3, 5, 7 }, 1.45f, 70f, 1.1f, 300f, new long[] { 561, 2465, 8911 });
+        // top left of the frame (worked out from the camera below)
+        sacks.ExpWorldLegend(st + new Vector3(-119f, 79.5f, -268f), new Vector3(-2.3f, -6.4f, 12.7f) * 1.1f,
+            new[] { "gold edge: the primes, in every base", "red: composites that pass the test in that base" }, 102f, new Color(.8f, .83f, .93f));
+        Vector3 stl = st + new Vector3(120f, -45f, -135f);
+        yield return Shot("DC1-fermat-test-in-four-bases", stl + new Vector3(-110f, -300f, -170f), stl, back, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('v')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cc = c + new Vector3(SacksSpiral.ConeCombOffset, 0f, 0f);
+        sacks.ExpConeSpiral(cc, 6000, 1.45f, 2, new[] { (0, 0), (1, 0), (0, 1), (1, 1), (0, -1), (1, -1), (0, -2), (1, -2), (1, 41) }, .35f, 150f, 3);
+        Vector3 ccl = cc + new Vector3(0f, 58f, -8f);
+        yield return Shot("DD1-sacks-spiral-wrapped-on-a-cone", ccl + new Vector3(-74f, 82f, -129f), ccl + new Vector3(12f, 0f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        var strands = new List<(int, int, string)>();
+        for (int D = -23; D <= 25; D++)
+        {
+            int m4 = ((D % 4) + 4) % 4;
+            if (m4 == 0) strands.Add((0, -D / 4, ""));
+            else if (m4 == 1) strands.Add((1, (1 - D) / 4, ""));
+        }
+
+        sacks.ExpConeComb(cc, 1.45f, 100f, 200f, 30f, strands.ToArray(), .45f, 130f);
+        yield return Shot("DD2-one-comb-ordered-by-discriminant", cc + new Vector3(0f, 3f, 0f) + back * 104f, cc + new Vector3(0f, 3f, 0f), Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 

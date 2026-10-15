@@ -1533,6 +1533,161 @@ them.
   (mod 8), and the Heegner primes behind Euler's curves are the spheres with the fewest points. Counting lattice
   points on a sphere costs about n steps, so none of this finds primes faster than a sieve.
 
+## DA–DD. Exponential walks, centroids and cardioids; the Fermat spiral; the spiral on a cone
+
+This round looked at exponential sequences drawn on circles, at the centroids of their points, and at where
+cancellation (composites) and anti-cancellation (primes) overlap exactly. It also wrapped the Sacks spiral round a cone
+([`SacksCardioid.cs`](../../Assets/Tour/SacksCardioid.cs)). The frames are 1920 × 1080 (`ZETA_EXP_WIDE=1`), and every
+number was checked in Python first.
+
+### DA. The doubling cardioid, and a centroid that solves Euler's polynomial
+
+Put p points round a circle and join each k to 2k mod p. These chords envelop a cardioid, the classic times table.
+The exponential sequence 1, 2, 4, 8, … mod p walks along these chords. For p = 163, 2 is a primitive root, so the walk
+passes through all 162 nonzero residues before it returns to 1. Its even steps 2^(2j) are exactly the squares mod 163,
+and its odd steps are the non-squares.
+
+**The centroid of the even steps is a root of Euler's polynomial, scaled.** For a prime p ≡ 3 (mod 4), Gauss's sum
+over the squares is `s = Σ e^(2πi a/p) = (−1 + i√p)/2`. It satisfies `s² + s + (p + 1)/4 = 0`. The centroid of the 81
+even steps is s/81, so for 163:
+
+* the even steps' centroid is (−1 + i√163)/162;
+* the odd steps' centroid is (−1 − i√163)/162;
+* multiplied by 81, the two centroids are the roots of x² + x + 41.
+
+This was checked to 10⁻¹³ for p = 3, 7, 11, 19, 23, 31, 43, 67 and 163. The centroid's distance from the centre is
+√(p + 1)/(p − 1) (0.07905 for 163).
+
+The small multiples (DA2) show the same for other primes. For p ≡ 3 (mod 8), (p + 1)/4 is odd: 11, 19, 43 and 67 give
+x² + x + 3, 5, 11 and 17. These are Euler's prime curves, the Heegner list of sections CD and AB. For p ≡ 7 (mod 8),
+(p + 1)/4 is even: 23 and 31 give x² + x + 6 and x² + x + 8, which are always even, so they are cancellation curves.
+
+A composite's walk is not of this form. 2^k mod 341 returns to 1 after only 10 steps, and 10 divides 340, so 341
+passes Fermat's test. The Carmichael number 561 returns after 40 steps, which divide 560. Their centroids follow no
+Gauss formula: for 341 it is 0.445 + 0.174i, for 175 exactly 0.
+
+![DA1](DA1-doubling-cardioid-and-euler-centroid.jpg)
+![DA2](DA2-centroids-of-exponential-walks.jpg)
+
+### DB. The Fermat spiral: where cancellation and anti-cancellation coincide
+
+Put n at the Sacks radius R√n, but at the angle where the exponential walk ends: 2π·(2^(n−1) mod n)/n. Each n stands at
+the end of the walk on its own ring.
+
+* **Every prime lands at residue 1** (Fermat's little theorem), on the curve r²θ = 2πR², a lituus that hugs the
+  positive x-axis. The primes form one bright line, as the squares do in the Sacks spiral.
+* **The composites on that line are the base-2 pseudoprimes:** 341, 561, 645, 1105, 1387, 1729, 1905, 2047, 2465,
+  2701, … (36 below 20 000, 40 below 30 000). This is the exact overlap of cancellation and anti-cancellation: numbers
+  that factor but sit on the prime curve.
+* **Composites with a small cofactor m have their own curves.** For n = m·p, the residue is 2^(m−1) mod p. It equals
+  2^(m−1) for every prime p when m = 2, 3, 4, 6, 8, 9 or 10. For m = 5 it does so only when p ≡ 1 (mod 4), and for m = 7
+  only when p ≡ 1 (mod 3) (checked for all 426 primes up to 3000). Those numbers lie on the lituuses r²θ = 2πR²·2^(m−1),
+  just above the prime curve:
+  * residue 2 holds the numbers 2p;
+  * residue 4 holds 3p;
+  * residue 8 holds 4p;
+  * and so on.
+
+  These are the cancellation curves of the Fermat spiral. The other composites mp follow lituuses that bend into the
+  rays at j/m of a turn: the remaining 5p at multiples of 72°, the remaining 7p at multiples of 51.4°. These are the
+  faint lines across DB1.
+
+![DB1](DB1-fermat-spiral.jpg)
+![DB2](DB2-fermat-spiral-near-the-prime-ray.jpg)
+
+### DC. The Fermat test in four bases, stacked
+
+Stack the Fermat spirals of bases 2, 3, 5 and 7 as shelves. Each shelf is drawn as the fan within 40° of the prime line.
+The primes stand on the same line in every base, so they form one wall. The pseudoprimes differ from base to base:
+
+| base | composites at residue 1 below 30 000 | first |
+|---|---|---|
+| 2 | 40 | 341, 561, 645, 1105, 1387, … |
+| 3 | 41 | 91, 121, 286, 671, 703, … |
+| 5 | 39 | 4, 124, 217, 561, 781, … |
+| 7 | 38 | 6, 25, 325, 561, 703, … |
+
+Only a composite that passes in every base stands on the wall all the way up. Up to 120 000 there are just four:
+
+* 29 341 = 13·37·61
+* 46 657 = 13·37·97
+* 75 361 = 11·13·17·31
+* 115 921 = 13·37·241
+
+All four are Carmichael numbers with no factor below 11. A Carmichael number that shares a prime with a base drops off
+the wall at that shelf only:
+
+* 561 = 3·11·17 drops off in base 3.
+* 2465 = 5·17·29 drops off in base 5.
+* 8911 = 7·19·67 drops off in base 7.
+
+This is why the Miller–Rabin test, which also checks square roots of 1, is used instead.
+
+![DC1](DC1-fermat-test-in-four-bases.jpg)
+
+### DD. The Sacks spiral wrapped round a cone: one comb, ordered by discriminant
+
+Wrap the plane round a cone of half-angle 30° (sin α = ½). A full turn of the cone uses only half a turn of the plane,
+so the plane wraps twice, and the map preserves lengths everywhere except at the apex. The Sacks spiral's squares ray (angle 0)
+and its pronic ray (angle π) then land on the same generator of the cone.
+
+Each quadratic family keeps its flat offset −πRΔ/4 from its ray. So on the cone **every k² + Bk + C runs beside that
+one generator at offset −πRΔ/4, whichever side of the flat spiral it came from.** Measured at k = 200 and 2000 against
+the prediction:
+
+| strand | Δ | offset (R = 1.45) |
+|---|---|---|
+| k² | 0 | 0.000 |
+| k(k + 1) | 1 | −1.139 |
+| k² − 1 | 4 | −4.555 |
+| k² + k − 1 | 5 | −5.694 |
+| k² − 2 | 8 | −9.111 |
+| k(k + 3) | 9 | −10.249 |
+| k² + 1 | −4 | +4.555 |
+| k² + k + 1 | −3 | +3.416 |
+| k² + k + 17 | −67 | +76.30 |
+| k² + k + 41 | −163 | +185.63 |
+
+On a cone of half-angle 14.48° (sin α = ¼) the ratio-4 families 4k² + Bk + C join the same generator, at −πRΔ/16.
+
+**Where cancellation and anti-cancellation overlap.** The comb on the cone interleaves the two families:
+
+* Δ ≡ 0 (mod 4): the squares side, k² + C.
+* Δ ≡ 1 (mod 4): the pronic side, k² + k + C.
+
+A strand factors exactly when Δ is a square, at Δ = 0, 1, 4, 9, 16, 25, …. So the cancellation strands sit among the
+prime-rich ones, only 1.14 apart. Prime counts among the 69 values in DD2's window (n from 4756 to 19 025):
+
+| Δ | strand | primes |
+|---|---|---|
+| 4 | (k − 1)(k + 1) | 0 |
+| 5 | k² + k − 1 | 20, the most in the window |
+| 8 | k² − 2 | 14 |
+| 9 | (k − 1)(k + 2) | 0 |
+| −19 | k² + k + 5 | 17 |
+| −3 | k² + k + 1 | 16 |
+| 13 | k² + k − 3 | 16 |
+| 16 | (k − 2)(k + 2) | 0 |
+| 25 | (k − 2)(k + 3) | 0 |
+| −23, −15, −7, 17 | k² + k + even | 0, always even |
+
+In the flat spiral these strands sit on opposite rays. The cone puts them in one row, ordered by discriminant alone.
+
+![DD1](DD1-sacks-spiral-wrapped-on-a-cone.jpg)
+![DD2](DD2-one-comb-ordered-by-discriminant.jpg)
+
+### What the exponential walks and the cone give
+
+* **Exact links.**
+  * The exponential walk's centroid solves Euler's polynomial (Gauss sums).
+  * Fermat's test turns the primes into one curve and the small-cofactor composites into a family of parallel
+    lituuses.
+  * Wrapping the plane on a cone merges the two sides of the discriminant comb.
+* **Overlap, made visible.** Pseudoprimes are composites on the prime curve. Carmichael numbers stay on it in every
+  base coprime to them. The perfect-square discriminants put cancellation strands right beside the richest prime strand.
+* **No faster prime-finding.** Fermat's test is already fast (log n multiplications), but it is fooled by exactly the
+  overlap shown here. Gauss sums cost p steps. The cone only rearranges the comb.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -1711,8 +1866,9 @@ Five modules cover the intersecting geometries (sections AA–AE), narrated with
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
-`e` are AA to AE, `f` to `i` are BA to BD, and `n` to `r` are CA to CE. Sections AA–AE, BA–BD and CA–CE are drawn for full
-horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
+`e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, and `j`, `s`, `u`, `v` are DA to DD. Sections AA–AE,
+BA–BD, CA–CE and DA–DD are drawn for full horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in
+this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).
