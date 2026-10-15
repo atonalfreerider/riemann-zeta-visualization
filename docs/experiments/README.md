@@ -1205,6 +1205,166 @@ where the cosine waves of that lattice's L-function zeros overpower the bias fro
   classes, and the cosine waves locate its near-miss at 48 231 785.
 * **No faster prime-finding.** None of it finds primes faster than a sieve.
 
+## BA–BD. The Sacks spiral wound into a ball of yarn
+
+The flat Sacks spiral puts n at radius R√n and turns once per square. The numbers fill the disc evenly, and the squares
+line up on one ray. This round wound the counting numbers in three dimensions in two ways
+([`SacksYarn.cs`](../../Assets/Tour/SacksYarn.cs)). In each, I looked for the pronic curves and for Euler's line, and for
+the intersections that carry prime, cancellation and anti-cancellation curves. The frames are 1920 × 1080
+(`ZETA_EXP_WIDE=1`).
+
+### BA. The Sacks yarn ball: every quadratic family becomes a helix
+
+Wind each turn of the spiral (k² to (k + 1)²) as one wrap. A wrap is a loop in a plane through the squares axis, and
+each turn's plane is rotated 24° further about that axis. The yarn is continuous, because every wrap starts and ends on
+the axis, at a square. The pronic numbers `k(k + 1)` sit half a turn round, at the other end of the axis.
+
+A quadratic family keeps the offset it has in the flat spiral, `πR|Δ|/4` from its ray, but the plane it lives in turns
+about the axis. So **every family `k² + Bk + C` becomes a helix round the axis, of radius `πR|Δ|/4`**, and the families
+with equal `|Δ|` share one cylinder. On the squares side, `k² + m` and `k² − m` (`Δ = ∓4m`) wind round the cylinder of
+radius `πRm` as a double helix, half a turn apart. When m is a square the second strand factors: `k² − 1 = (k − 1)(k + 1)`
+and `k² − 4 = (k − 2)(k + 2)` are cancellation helices beside the prime-rich `k² + 1` and `k² + 4`. The distances
+measured from the axis, against `πRm`:
+
+| cylinder (R = 1.45) | strands | distance from the axis | primes for k ≤ 1000 |
+|---|---|---|---|
+| `πR` = 4.555 | `k² + 1` / `k² − 1` | 4.553 / 4.553 at k = 59 | 112 / 1 (only 3) |
+| `2πR` = 9.111 | `k² + 2` / `k² − 2` | 9.095 / 9.092 at k = 59 | 68 / 157 |
+| `4πR` = 18.22 | `k² + 4` / `k² − 4` | 18.210 / 18.209 at k = 200 | 125 / 1 (only 5) |
+
+**Euler's line is not a helix inside this ball.** Its `Δ = −163` gives a radius of `πR·163/4` = 185.6, wider than the
+whole 60-turn ball (radius 87). Inside the ball its values still jump from wrap to wrap: they sit 4.6 from the axis at
+k = 39, where `1601 = 40² + 1` lies on Landau's helix (the meeting point of the two lines, see
+*Surprises* below), then 72.8 at k = 59. They reach 152.8 at k = 120 and 182.5 at
+k = 400.
+
+![BA1](BA1-sacks-yarn-ball.jpg)
+![BA2](BA2-double-helices.jpg)
+
+### BB. The cube yarn ball: three corners of a tetrahedron
+
+To fill a ball evenly, the radius has to grow like the cube root, so put n at radius `R∛n`. Layer k holds the numbers
+from k³ to (k + 1)³, that is 3k² + 3k + 1 of them. They are wound on the layer's sphere like yarn: down from the north
+pole to the south pole and back up, going round `3k + 1` times. The height runs `z = 1 − 4t`, then `−3 + 4t`, with
+`t = (n − k³)/(3k² + 3k + 1)`, which covers the sphere at even area. Near height −⅓ each unit of n then moves the same
+distance along the yarn on every layer, `2πR·√8/3 ≈ 5.92R`. The cubes sit on the polar axis, as the squares sit on the
+flat spiral's ray. The down pass and the up pass cross each other everywhere, as in a real ball of yarn.
+
+Put a cubic family `k³ + Ak² + Bk + C` in the ball. Its place along the yarn tends to `t = A/3`, and its longitude
+settles at `120°·A`. So **every monic cubic converges on one of three corners of a regular tetrahedron inscribed in the
+ball, sorted by A mod 3**:
+
+* the north pole (A ≡ 0);
+* corner 1, at height −⅓ (19.5° below the equator) and longitude 120° (A ≡ 1);
+* corner 2, at height −⅓ and longitude 240° (A ≡ 2).
+
+The fourth corner, at longitude 0°, collects no monic cubic. Near corners 1 and 2 the families do more than converge in
+direction. They run as parallel strands at fixed offsets, affine in (B, C):
+
+* across the windings: `5.924R · (C − 2B/3 + A/3)`;
+* down the windings: `R√2 · (B − A)`.
+
+I checked these at k = 200 to 1600. At corner 1, `k³ + k² + C` moves 5.92R across per unit of C. Each unit of B moves
+it 3.95R the other way and 1.41R down. Near the pole the families spread out like √k instead (their angle from the pole
+halves each time k grows fourfold), so the pole is a fan, not a comb.
+
+**The 3D pronic numbers** are the cubic products of consecutive numbers, and they are the cancellation strands:
+
+* `(k − 1)k(k + 1) = k³ − k` goes to the pole, with 0 primes for k ≤ 400.
+* `k²(k + 1) = k³ + k²` goes to corner 1, with one prime (2).
+* `k(k + 1)² = k³ + 2k² + k` goes to corner 2, with 0 primes.
+
+**Euler's quadratic makes no strand.** A quadratic is too slow for the cube clock. Successive values of `k² + k + 41`
+are 2k + 2 apart. On their layer, about k^⅔, that is roughly 2∛k windings, so they land at effectively random longitudes
+(green).
+
+![BB1](BB1-cube-yarn-ball.jpg)
+
+**Seen down a corner, the ball is a comb.** This view looks along the axis of corner 1 at layers 60 to 120, on the
+yarn's down pass. Each strand `k³ + k² + Bk + C` is seen end-on as one spot, and the spots form a lattice. Its columns
+are 5.92R apart, its rows R√2 apart, and each row is shifted ⅔ of a column from the last.
+
+* Strands with an integer root stay dark: `k²(k + 1)` and `k(k² + k + 1)`, ringed red.
+* The always-odd strands carry the primes: `k²(k + 1) ± 1`, ringed gold.
+* Spots further out are short arcs, because their offsets have not settled yet.
+
+The up pass crosses the same corner and makes a second, finer lattice, which is left out of this picture.
+
+![BB2](BB2-down-corner-1.jpg)
+
+**Euler's lines of the cube ball.** Seen from below, the cone at height −⅓ through the two corners shows the flat
+spiral's picture again. The 3D pronic strands run straight out along the corner rays. The richest cubics curl in from
+the centre and straighten into lines parallel to them, just as Euler's line straightens beside the pronic ray. Offsets
+are in columns of 5.92R, and the yield is the number of primes divided by `Σ 1/log f(k)`, the count for random numbers of
+the same size:
+
+| strand | corner | offset | primes, k ≤ 400 | yield | first values prime |
+|---|---|---|---|---|---|
+| `k²(k + 1) + 17` | 1 | +17⅓ | 165 | 5.80 | 11: 17, 19, 29, 53, 97, …, 1117 |
+| `k²(k + 1) − 13` | 1 | −12⅔ | 126 | 4.51 | |
+| `k(k + 1)² + 13` | 2 | +13 | 126 | 4.44 | 9: 13, 17, 31, 61, …, 661 |
+| `k(k + 1)² − 17` | 2 | −17 | 161 | 5.79 | |
+| `k² + k + 41` (Euler, for comparison) | none | | 270 | 6.47 | 40 |
+
+`k²(k + 1) + 17` is to corner 1 what Euler's `k(k + 1) + 41` is to the pronic ray: the richest strand, and the one
+with the longest run of primes. A wider scan found two further records. It covered every cubic without an integer root
+with A = 0, 1, 2, |B| ≤ 15, |C| ≤ 60, for k ≤ 400.
+
+* The best yield is at the pole: `k³ − 13k − 41` (6.19).
+* The longest run is `k³ − 13k + 41`: 41, 29, 23, 29, 53, 101, …, 2069 for k = 0 to 13, so 41 turns up again.
+
+![BB3](BB3-euler-lines-of-the-cube-ball.jpg)
+
+### BC. The comb at corner 1: cancellation lines and anti-cancellation spots
+
+The chart puts every strand `k³ + k² + Bk + C` with |B| ≤ 6 and |C| ≤ 24 at its offset, 637 strands in all: across at
+`u = C − (2B − 1)/3` columns, down at `v = B − 1` rows. The rows are drawn farther apart than in the ball, for legibility.
+The strands fall into three kinds:
+
+* **Cancellation lines.** A strand with an integer root `k = −r` factors as `(k + r)·(quadratic)`, so it is composite
+  for every k beyond the first few. Its coefficients satisfy `C = r³ − r² + rB`, which is a straight line through the
+  chart for each r (red). 69 of the 637 strands lie on these lines. Where two lines cross, the cubic has two integer
+  roots and splits into three linear factors.
+* **Parity.** `k³ + k²` is always even, so the strands with B and C both even are always even: 139 strands, drawn dark.
+* **Anti-cancellation.** Off the lines the yield over k ≤ 120 varies more than tenfold. The brightest strands are:
+  * `k²(k + 1) + 17` (6.03)
+  * `k²(k + 1) − 13` (4.95)
+  * `k³ + k² − 6k − 19` (4.41)
+  * `k³ + k² + 4k + 11` (4.11)
+  * `k³ + k² + 4k − 7` (4.10)
+
+![BC1](BC1-comb-at-corner-1.jpg)
+
+### BD. One shell: the multiples cross the windings
+
+One layer, k₀ = 30, holds the numbers 27 000 to 29 790. Near corner 1 its windings are the comb's rows. A winding holds
+about k₀ numbers, so the multiples of `m = k₀ + r` step about one winding at a time. Each step also drifts sideways by a
+fixed angle, about `(360°/k₀)(r − ⅔)`: −7.9° for 30, +3.9° for 31, +15.6° for 32. So the multiples of each m run in
+straight lines across the windings, one slope per m. These are the cancellation lines of a single shell. The steep ones
+drift all the way round the sphere and come back into the window as parallel runs.
+
+Where three lines cross sits a number with three divisors near k₀:
+
+* 27 621 = 27·1023 = 31·891 = 33·837
+* 27 776 = 28·992 = 31·896 = 32·868
+* 27 840 = 29·960 = 30·928 = 32·870
+* 28 050 = 30·935 = 33·850 = 34·825
+
+The 3D pronic number 27 900 = 30²·31 lies on two lines, and 27 917 = 30²·31 + 17 is prime.
+
+![BD1](BD1-shell-at-corner-1.jpg)
+
+### What the yarn balls give
+
+* **The flat discriminant law survives in 3D, in two forms.** In the Sacks ball it becomes a helix radius. In the cube
+  ball it becomes an affine comb of parallel strands at three corners of a tetrahedron.
+* **New as pictures.**
+  * Landau's `k² + 1` has a cancellation twin, `k² − 1`, on the same cylinder.
+  * The 3D pronic numbers mark three corners of a tetrahedron.
+  * Euler's line has cubic analogues that straighten beside the 3D pronic strands, the best being `k²(k + 1) + 17`.
+* **No faster prime-finding.** A strand's richness is set by its residues mod small primes, the same Hardy–Littlewood
+  count as in the plane, and every strand contains composites.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -1360,14 +1520,31 @@ torus knot with a flare at every prime, winds the spiral onto the umbilic torus 
 of `k² + k + 1` and `k² + k + 3` on whole stacks, and unwinds the twist for contrast. Their counts and status lines are
 on the caption board at the top of the screen, so they read at any camera angle.
 
+Five modules cover the intersecting geometries (sections AA–AE), narrated with the same voice.
+
+* *Two norm surfaces* (AA) draws the bowl and the saddle meeting along the squares, then lays each curve on as a slice,
+  with its discriminant and prime count on the caption board: Euler's line, `k² + k + 17` and Landau's `k² + 1` on the
+  bowl, the factoring half-integer slices and `k² + k − 1` on the saddle. It ends on the level sets of 13 and 65, with
+  four and eight factor points on the saddle and eight and sixteen square points on the bowl.
+* *Rings through lattices* (AB) lays the square and triangular lattices under the rings of 13, 17, 19 and 23 (one prime
+  for each class mod 12), then under 1105 and 1729. It then draws Euler's lattice one ring at a time: forty primes, then
+  `41²`.
+* *A twelve-dimensional torus* (AC) recolours the 144 shadows panel by panel while Euler's line, then the pronic
+  numbers, pass through them, with the count of cancellation crosses hit on the board. It closes up on the 36 shadows
+  of 2 to 13.
+* *The modular surface* (AD) brings in the points, then their names and j-invariants, then the geodesics. It zooms to
+  the fundamental domain for the closed geodesic of `k² + k − 1` and the cusp geodesic of `k(k + 1)`.
+* *The lattice race* (AE) draws the race mod 4 and its rebuild from the zeros of Dirichlet's β live, flaring at
+  26 861, 616 841 and 12 306 137. The race mod 12 follows, with its near miss at 48 231 785.
+
 ## Rendering
 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-`ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, and `a` to
-`e` are AA to AE. Sections AA–AE are drawn for full horizontal frames: run them with `ZETA_EXP_WIDE=1` (1920 × 1080; the
-copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
+`ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
+`e` are AA to AE, and `f` to `i` are BA to BD. Sections AA–AE and BA–BD are drawn for full horizontal frames: run them
+with `ZETA_EXP_WIDE=1` (1920 × 1080; the copies in this folder are 960 × 540). The frames are 1080 × 1920; the copies in this folder are
 scaled to 540 × 960. All numbers quoted above were recomputed in Python before the pictures were drawn
 (product-curve crossings by integer arithmetic, the Gram statistics with the Riemann–Siegel theta function,
 Voronoi's sum with 3 000 terms, the Möbius counts directly).

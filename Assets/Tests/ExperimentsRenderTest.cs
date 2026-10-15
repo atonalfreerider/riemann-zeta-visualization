@@ -50,7 +50,7 @@ public class ExperimentsRenderTest
         sacks.ExpNumberField(SacksSpiral.Count);
         BloomEffect bloom = cam.GetComponent<BloomEffect>();
         if (bloom != null) bloom.Intensity = 0.6f;
-        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE)
+        // ZETA_EXP_WIDE=1: full horizontal frames (1920 × 1080) for the sections drawn for landscape (AA–AE, BA–BD)
         bool wideFrames = Environment.GetEnvironmentVariable("ZETA_EXP_WIDE") == "1";
         director.Recorder.Width = wideFrames ? 1920 : 1080;
         director.Recorder.Height = wideFrames ? 1080 : 1920;
@@ -1031,6 +1031,60 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         sacks.ExpRaceChart(ra, 190f, 80f, 44f, true, true, new[] { 26861.0, 616841.0, 12306137.0 });
         yield return Shot("AE2-prime-race-mod-4", ral + back * 118f, ral, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        // ---------------------------------------------------------------------------------------------
+        // The Sacks spiral spooled in 3D: sections BA–BD (SacksYarn.cs), lowercase letters f–i, drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('f')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 sb = c + new Vector3(SacksSpiral.SacksBallOffset, 0f, 0f);
+        sacks.ExpSacksYarnBall(sb, 60, 1.45f, 24f, 76f);
+        yield return Shot("BA1-sacks-yarn-ball", sb + new Vector3(-55f, 62f, -180f), sb, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        sacks.ExpSacksHelices(sb, 50, 1.45f, 24f, new[] { 1, 2 }, 30f);
+        Vector3 hx = sb + new Vector3(45f, 0f, 0f);
+        yield return Shot("BA2-double-helices", hx + new Vector3(0f, 16f, -56f), hx, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('g')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cb = c + new Vector3(SacksSpiral.CubeBallOffset, 0f, 0f);
+        sacks.ExpCubeYarnBall(cb, 40, 1.45f, 64f);
+        yield return Shot("BB1-cube-yarn-ball", cb + new Vector3(-150f, 55f, -40f), cb + new Vector3(0f, -4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        Vector3 cc = c + new Vector3(SacksSpiral.CubeCornerOffset, 0f, 0f);
+        sacks.ExpCubeCorner(cc, 1.45f, 60, 120, 58f, 18f);
+        yield return ShotOrtho("BB2-down-corner-1", cc + SacksSpiral.CubeCorner1 * 230f, cc, SacksSpiral.CubeCorner1Up, 27f);
+        sacks.ClearExperiments();
+        Vector3 ce = c + new Vector3(SacksSpiral.CubeEulerOffset, 0f, 0f);
+        sacks.ExpCubeEulerLines(ce, .5f, 400, 90f);
+        Vector3 cel = ce + new Vector3(-45f, 0f, 0f);
+        yield return ShotOrtho("BB3-euler-lines-of-the-cube-ball", cel + Vector3.down * 500f, cel, Vector3.left, 125f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('h')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cm = c + new Vector3(SacksSpiral.CubeCombOffset, 0f, 0f);
+        sacks.ExpCubeComb(cm, 2f, 4f, 6, 24, 34f);
+        Vector3 cml = cm + new Vector3(2f, 2f, 0f);
+        yield return Shot("BC1-comb-at-corner-1", cml + back * 78f, cml, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('i')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 cs = c + new Vector3(SacksSpiral.CubeShellOffset, 0f, 0f);
+        sacks.ExpCubeShell(cs, 30, 1.45f, 34f, 36f);
+        Vector3 corner = cs + SacksSpiral.CubeCorner1 * (1.45f * Mathf.Pow(27000f + 2791f / 3f, 1f / 3f));
+        yield return Shot("BD1-shell-at-corner-1", corner + SacksSpiral.CubeCorner1 * 84f, corner, SacksSpiral.CubeCorner1Up, 55f);
         sacks.ClearExperiments();
         }
 
