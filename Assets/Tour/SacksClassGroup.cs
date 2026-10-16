@@ -16,7 +16,8 @@ using UnityEngine;
 ///   LD  the three families are three points of the modular surface (the CM points of −23), drawn on section KD's disk;
 ///       their j-values are the roots of the class polynomial, and p is on the principal family when x³ − x − 1 splits mod p
 ///   LE  every mixture Λ₁ + λΛ₂ of the two families has the same functional equation, so on Re s = ½ its zeros are the
-///       crossings of one curve, λ = −Λ₁/Λ₂(½ + it), with the height λ; all of them lie on the line only at λ = 2 and −1
+///       crossings of one curve, λ = −Λ₁/Λ₂(½ + it), with the height λ; up to t = 50 every zero is on the line only for
+///       λ in two small windows round the L-functions, 1.99 to 2 and −1.02 to −0.88
 /// </summary>
 public partial class SacksSpiral
 {
@@ -297,12 +298,13 @@ public partial class SacksSpiral
     /// <summary>
     /// Left: the curve λ = R(t) = −Λ₁/Λ₂(½ + it) for 0 &lt; t ≤ 50 (broken at the zeros of Λ₂), with the heights λ = 2 and −1
     /// (the class group's L-functions, gold) and λ = 0 (the first family alone, blue) and their crossings. Right, on the same
-    /// λ axis: how many zeros on the line the mixture Λ₁ + λΛ₂ has, for every λ from −3 to 4.
+    /// λ axis: how many zeros off the line the mixture Λ₁ + λΛ₂ has, for every λ from −3 to 4: none only in two small
+    /// windows (gold), round the two L-functions.
     /// </summary>
     public void ExpClassMixtures(Vector3 o, float labelSize)
     {
         Transform g = ExpGroup("LE mixtures").transform;
-        const float w = 190f, sy = 12f, lo = -3f, hi = 4f, x0 = -140f, bx = 72f, sx = 1.2f;
+        const float w = 190f, sy = 12f, lo = -3f, hi = 4f, x0 = -140f, bx = 72f, sx = 3.2f;
         Color axisCol = new(.7f, .74f, .88f), blue = FormColors[1];
         Vector3 P(double t, double lam) => o + new Vector3(x0 + (float)(t / 50d) * w, (float)lam * sy, 0f);
         double[] R = ClassGroupData.MixR;
@@ -368,33 +370,36 @@ public partial class SacksSpiral
         }
 
         ExpPointCloud(g, "crossings", dots, dc, ds, Factory.GlowIntensity);
-        // the count of zeros on the line for every λ, on the same axis
-        int[] n = ClassGroupData.MixOnLine;
+        // the zeros off the line for every λ (all of the mixture's zeros, counted by the argument principle, minus those on the
+        // line), on the same axis: none only in two small windows, round the two L-functions
+        int[] off = ClassGroupData.MixOffLine;
         Vector3 Q(double lam, double count) => o + new Vector3(bx + (float)count * sx, (float)lam * sy, 0f);
-        Vector3[] prof = new Vector3[n.Length];
-        List<(Vector3, Vector3)> fill = new();
-        for (int k = 0; k < n.Length; k++)
+        Vector3[] prof = new Vector3[off.Length];
+        List<(Vector3, Vector3)> fill = new(), gold = new();
+        for (int k = 0; k < off.Length; k++)
         {
             double lam = lo + .01d * k;
-            prof[k] = Q(lam, n[k]);
-            if (k % 2 == 0) fill.Add((Q(lam, 0), Q(lam, n[k])));
+            prof[k] = Q(lam, off[k]);
+            if (k % 2 == 0) fill.Add((Q(lam, 0), Q(lam, off[k])));
+            if (off[k] == 0) gold.Add((Q(lam - .006, 0) + Vector3.back * .2f, Q(lam + .006, 0) + Vector3.back * .2f));
         }
 
-        Segments(g, "count fill", fill, .1f, new Color(.45f, .5f, .7f) * .55f, Factory.NoGlow);
-        ExpLine(g, "count", .26f, new Color(.85f, .88f, 1f), Factory.SoftGlowIntensity, prof);
-        List<(Vector3, Vector3)> cax = new() { (Q(lo, 0), Q(hi, 0)), (Q(lo, 0), Q(lo, 45)) };
-        foreach (int c in new[] { 0, 20, 40 })
+        Segments(g, "off fill", fill, .1f, new Color(.45f, .5f, .7f) * .55f, Factory.NoGlow);
+        ExpLine(g, "off", .26f, new Color(.85f, .88f, 1f), Factory.SoftGlowIntensity, prof);
+        Segments(g, "none off", gold, .9f, PrimeGold, Factory.GlowIntensity);
+        List<(Vector3, Vector3)> cax = new() { (Q(lo, 0), Q(hi, 0)), (Q(lo, 0), Q(lo, 16)) };
+        foreach (int c in new[] { 0, 8, 16 })
         {
             cax.Add((Q(lo, c), Q(lo - .12, c)));
             ExpLabelWide(g, c.ToString(), Q(lo - .45, c), labelSize * .14f, axisCol);
         }
 
         Segments(g, "count axes", cax, .12f, new Color(.55f, .6f, .78f) * .7f, Factory.NoGlow);
-        ExpLabelWide(g, "zeros on the line", Q(lo - 1.05, 22), labelSize * .15f, axisCol);
+        ExpLabelWide(g, "zeros off the line", Q(lo - 1.05, 8), labelSize * .15f, axisCol);
         foreach (var (lam, col, name) in heights)
         {
             int k = (int)Math.Round((lam - lo) / .01d);
-            ExpLabelWide(g, $"{n[k]}:  {name}", Q(lam, n[k]) + new Vector3(2.4f, 0f, -.3f), labelSize * .15f, col, TextAlignmentOptions.Left);
+            ExpLabelWide(g, $"{off[k]} off:  {name}", Q(lam, 17), labelSize * .15f, col, TextAlignmentOptions.Left);
         }
     }
 }

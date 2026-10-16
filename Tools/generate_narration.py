@@ -13,7 +13,8 @@ Writes, per line id:
 
 The timing JSON is derived from the ElevenLabs character alignment returned by the
 /with-timestamps endpoint, so the caption highlight follows the actual speech.
-Existing files are skipped unless --force is given.
+Existing files are skipped unless --force is given. Every new clip is faded out where its speech ends
+(Tools/fade_narration.py): ElevenLabs often ends a clip with a cut-off piece of the next line's first sound.
 """
 import argparse
 import re
@@ -25,6 +26,9 @@ import time
 from pathlib import Path
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fade_narration import fade_clip  # noqa: E402  (the exponential fade-out at the end of each clip)
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "Assets/Resources/Narration/script.json"
@@ -188,7 +192,8 @@ def main():
         words = words_from_alignment(l["text"], alignment)
         duration = words[-1]["e"] if words else 0.0
         timing.write_text(json.dumps({"words": words, "duration": round(duration + 0.25, 3)}, indent=1), encoding="utf-8")
-        print(f"{duration:.1f}s")
+        # a clip often ends with a piece of the next line's first sound (the next line is passed as context): fade it out
+        print(f"{duration:.1f}s;", fade_clip(mp3).split(": ", 1)[1])
 
     print("done — open Unity so it imports the new clips, then play the tour.")
 

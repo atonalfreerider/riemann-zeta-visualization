@@ -1797,6 +1797,18 @@ public class ExperimentsRenderTest
         sacks.ShowRoutes(false);
         sacks.ShowBackdrop(false);
         Vector3 Lz(int i) => c + new Vector3(SacksSpiral.ClassGroupOffset + 600f * i, 0f, 0f);
+        Vector3 KSat(Vector3 pos, Vector3 look, Vector3 up, float x, float y)
+        {
+            Vector3 fw = (look - pos).normalized, u = (up - Vector3.Dot(up, fw) * fw).normalized;
+            return look + Vector3.Cross(u, fw) * x + u * y;
+        }
+
+        Vector3 KDown(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fw = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, fw) * fw).normalized;
+        }
+
         const float lzLabel = 220f;
         Vector3 la = Lz(0);
         sacks.ExpClassLattices(la, lzLabel);
@@ -1849,8 +1861,18 @@ public class ExperimentsRenderTest
             "Mix the two families, and count the zeros on the line|" +
             "each mixture Λ<sub>1</sub> + λΛ<sub>2</sub> obeys the same functional equation, so it is real on Re s = ½|" +
             "its zeros there are where the one curve λ = −Λ<sub>1</sub>/Λ<sub>2</sub>(½ + it) meets the height λ (left)|" +
-            "right:  how many it meets, for every λ:  all of them only at λ = 2 and λ = −1, the two mixtures with an Euler product", 56f);
+            "right:  its zeros off the line, all its zeros counted:  none only in two small windows, round the two L-functions", 56f);
         yield return Shot("LE1-every-mixture-of-the-two-families", le + new Vector3(5f, 6f, 0f) + back * 172f, le + new Vector3(5f, 6f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 lf = c + new Vector3(SacksSpiral.ClassFiveOffset, 0f, 0f);
+        Vector3 lf2 = lf + new Vector3(600f, 0f, 0f);
+        sacks.ExpClassLandscape(lf2 + new Vector3(0f, -10f, 0f), 124f, 0f, 280, lzLabel, false);
+        sacks.ExpCaption(lf2 + new Vector3(-154f, 86f, -.3f), Vector3.down * 6.4f,
+            "Five families:  the plane of their mixtures|" +
+            "−47 has class number 5:  three zeta functions, and every mixture Λ<sub>1</sub> + λ<sub>2</sub>Λ<sub>2</sub> + λ<sub>3</sub>Λ<sub>3</sub> has their functional equation|" +
+            "colour:  its zeros up to t = 50 off the critical line:  gold none, cyan 1–2, blue 3–5, violet 6–9, magenta 10–14, red 15 or more", 56f);
+        yield return Shot("LF1-the-plane-of-mixtures", lf2 + back * 175f, lf2, Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 
@@ -1878,6 +1900,15 @@ public class ExperimentsRenderTest
             "a clock of 30 with n at radius log n:  squaring doubles the radius and folds the hours, 1, 11, 19, 29 → 1 and 7, 13, 17, 23 → 19|" +
             "the zeros count every prime power p<sup>k</sup> as 1/k of a prime:  put the 443 squares back (right) and 1 and 19 are ahead 32% and 50% of the way", 56f);
         yield return Shot("MB1-why-the-squares-lose", mb + new Vector3(0f, 4f, 0f) + back * 175f, mb + new Vector3(0f, 4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 mc = c + new Vector3(SacksSpiral.FamilyRaceOffset, 0f, 0f);
+        sacks.ExpFamilyRace(mc, mzLabel);
+        sacks.ExpCaption(mc + new Vector3(-154f, 88f, -.3f), Vector3.down * 6.4f,
+            "The same fold decides the race between the families of −23|" +
+            "each prime acts on the three roots of x³ − x − 1 as one of S<sub>3</sub>'s six symmetries;  squaring sends every reflection to the identity|" +
+            "so the squares of half of all primes land on the principal family:  it runs three behind, like E8's spokes 1 and 19, and never leads up to 10<sup>7</sup>", 56f);
+        yield return Shot("MC1-the-race-between-the-families", mc + new Vector3(5f, 0f, 0f) + back * 175f, mc + new Vector3(5f, 0f, 0f), Vector3.up, 55f);
         sacks.ClearExperiments();
         }
 

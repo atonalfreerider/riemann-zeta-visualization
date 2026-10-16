@@ -3031,7 +3031,7 @@ centre, the cusp i∞ is on the right, and 0 is on the left.
 * **In E8 itself:** they are the zeros of E8's own zeta function, twice, and they sit off E8's critical line. Only a theta
   series with a cusp-form part, like the Leech lattice's, moves the zeros away from ζ's.
 
-## LA–LE. The class group as families: three families of curves for −23
+## LA–LF. The class group as families: three families of curves for −23, and five for −47
 
 This was the third "worth exploring" item below: draw all h families of curves for a discriminant of class number h.
 
@@ -3164,21 +3164,80 @@ So for real λ it is real on the critical line, and its zeros there are exactly 
 One curve thus holds the critical-line zeros of every mixture. The curve's poles are the zeros of the second family on
 the line.
 
-| λ | the mixture | zeros on the line (t ≤ 50) |
-|---|---|---|
-| 2 | ζ(s) L(s, χ₋₂₃) | 44, all of them |
-| −1 | L(η(z)η(23z), s) | 42, all of them |
-| 0 | the first family alone | 33 |
-| 1.8, 2.2 | | 35, 38 |
-| −1.2, −0.8 | | 36, 41 |
-| large, either sign | close to the second family alone | 28 |
+A mixture's zeros on the line are not all of its zeros. Each mixture's zeros up to t = 50 were also counted in full, by
+the argument principle on the right half of the box (the change in argument of Λ along Re s = 2.2 and back along
+t = 50, divided by π). The difference is the number of zeros off the line.
 
-Counted for every λ from −3 to 4 in steps of 0.01, the count reaches 44 only at λ = 1.99 and 2, and 42 only between
-−1.02 and −0.99. So the mixtures keep all their zeros on the line only at the two that the class group's characters pick
-out. Away from them, some of the curve's wiggles turn back before reaching the height λ: there two zeros have met on the
-line and left it as a pair.
+| λ | the mixture | on the line | off it (t ≤ 50) |
+|---|---|---|---|
+| 2 | ζ(s) L(s, χ₋₂₃) | 44 | none |
+| −1 | L(η(z)η(23z), s) | 42 | none |
+| 0 | the first family alone | 33 | 10 |
+| 1.95, 2.01 | | 42, 42 | 2, 2 |
+| −0.8, −1.05 | | 41, 40 | 2, 2 |
+| 10 | close to the second family alone | 28 | 4 |
+
+Counted for every λ from −3 to 4 in steps of 0.01, the mixtures with every zero on the line form two small windows round
+the class group's two L-functions: λ from 1.99 to 2, and λ from −1.02 to −0.88. A zero off the line stays off it as
+more height is counted, so these windows can only shrink.
+
+Away from them, some of the curve's wiggles turn back before reaching the height λ: there two zeros have met on the line
+and left it as a pair.
 
 ![LE1](LE1-every-mixture-of-the-two-families.jpg)
+
+### LF. Five families: the plane of mixtures
+
+This was item 4 of the list below. Discriminant −47 has class number 5. Its reduced forms are:
+
+* x² + xy + 12y², the principal class;
+* 2x² ± xy + 6y², the classes g and g⁻¹;
+* 3x² ± xy + 4y², the classes g² and g⁻² (2 lies on 2x² + xy + 6y², and 4 = 2² on 3x² + xy + 4y²).
+
+That gives three distinct zeta functions Λ₁, Λ₂, Λ₃, and a whole plane of mixtures Λ₁ + λ₂Λ₂ + λ₃Λ₃. The class group C₅
+picks three points of the plane: (2, 2), which is ζ(s) L(s, χ₋₄₇), and (2 cos 72°, 2 cos 144°) and
+(2 cos 144°, 2 cos 72°), two L-functions of weight-1 forms. [`Tools/class_five_data.py`](../../Tools/class_five_data.py)
+checks and writes [`ClassFiveData.cs`](../../Assets/Tour/ClassFiveData.cs):
+
+* **Chowla–Selberg** against direct lattice sums at s = 3, to 10⁻⁹, for all three forms.
+* **(Z₁ + 2Z₂ + 2Z₃)/2 = ζ(s) L(s, χ₋₄₇)** at s = 2.3 + 1.7i, to 10 digits.
+* **The other two have Euler products:** their coefficients are multiplicative for all coprime m, n with mn ≤ 400, to
+  2·10⁻¹⁵.
+* **A quintic decides a prime's family.** x⁵ − 2x⁴ + x³ + x² − x + 1, the smallest quintic with discriminant 47², has
+  five roots mod p when p lies on the principal family, none when p lies on another family, and one when (−47/p) = −1.
+  This was checked for every prime below 3 000:
+
+| p lies on | primes below 3 000 | the first ones |
+|---|---|---|
+| x² + xy + 12y² | 40 | 83, 191, 197, 269, 439, 487 |
+| 2x² ± xy + 6y² | 86 | 2, 7, 53, 59, 61, 89 |
+| 3x² ± xy + 4y² | 86 | 3, 17, 37, 71, 79, 101 |
+| neither | 217 | 5, 11, 13, 19, 23, 29 |
+
+**Every mixture counted.** For every mixture, the zeros on the line come from its sign changes along Re s = ½. All of its
+zeros come from the argument principle round the box, as in LE. In LF1 each point of the plane is coloured by the
+difference: its zeros up to t = 50 that lie off the critical line.
+
+| mixture | zeros up to t = 50 | on the line | off it |
+|---|---|---|---|
+| ζ(s) L(s, χ₋₄₇), at (2, 2) | 50 | 50 | none |
+| L₁, at (0.618, −1.618) | 47 | 47 | none |
+| L₂, at (−1.618, 0.618) | 48 | 48 | none |
+| x² + xy + 12y² alone, at (0, 0) | 49 | 41 | 8 |
+
+**What the map shows.**
+
+* **Gold islands.** Mixtures with no zero off the line appear only in small islands: round each of the three
+  L-functions, and one more island near (1.65, 1.2) with no L-function in it. That island lies on the straight line from
+  ζ(s) L(s, χ₋₄₇) to L₁, and its mixtures have no zero off the line below t = 50. On a grid of 961 mixtures with step 0.2,
+  6 have none.
+* **Low ground between the L-functions.** On the straight line from L₁ to L₂ (the mixtures of just those two
+  L-functions), 2.6 zeros on average are off the line. On the line from L₁ to ζ(s) L(s, χ₋₄₇) it is 3.2, and on the
+  third line it is 9.9. Inside the triangle the average is 7.2, and over the whole square 14.6. Bombieri and Hejhal
+  (1995) proved that such mixtures keep almost all their zeros on the line, assuming the Riemann hypothesis for each
+  L-function and a hypothesis on how their zeros are spaced.
+
+![LF1](LF1-the-plane-of-mixtures.jpg)
 
 **What this answers.**
 
@@ -3186,17 +3245,19 @@ line and left it as a pair.
 * **On the saddle and in the lattices:** there are h families. A prime sits on at most one of them, and a composite
   can sit on several.
 * **Euler's test:** it fails exactly when it reads only one family.
-* **The zeros:** each family's own zeta function keeps zeros off the critical line. Only the class group's combinations,
-  which are L-functions with Euler products, keep them all on it.
+* **The zeros:** each family's own zeta function keeps zeros off the critical line. Up to t = 50, the mixtures that keep
+  them all on it lie in small windows round the class group's combinations, the L-functions with Euler products (two
+  windows for −23, and for −47 three islands plus one more on a line between two of them).
 
-## MA–MB. The prime race on E8's eight spokes
+## MA–MC. The prime race on E8's eight spokes, and between the families of −23
 
 Every prime above 5 lies on one of the eight gold spokes of the clock of 30: the hours 1, 7, 11, 13, 17, 19, 23, 29,
 which are E8's exponents. Section AE raced the classes mod 12. Here all eight spokes race, up to 10⁷.
 
 [`Tools/race_data.py`](../../Tools/race_data.py) counts the primes with a sieve. It rebuilds the race from the zeros of
 the seven L-functions mod 30 that section JC computed, and writes [`RaceData.cs`](../../Assets/Tour/RaceData.cs).
-[`SacksSpokeRace.cs`](../../Assets/Tour/SacksSpokeRace.cs) draws the stills (key `&`).
+[`SacksSpokeRace.cs`](../../Assets/Tour/SacksSpokeRace.cs) and [`SacksFamilyRace.cs`](../../Assets/Tour/SacksFamilyRace.cs)
+draw the stills (key `&`).
 
 ### MA. Two spokes run behind
 
@@ -3268,6 +3329,49 @@ formula, and they fade as x grows. Spoke 1's is −2.0 in the first decade and �
 * **In JA–JF:** the zeros of the L-functions mod 30 sort the primes onto E8's spokes.
 * **Here:** the same zeros drive the race between the spokes, and the bias comes from the group of units. Its two
   squares, 1 and 19, are two of E8's eight exponents.
+
+### MC. The same fold in a race between the families of −23
+
+The list below suggested item 5: the three families of −23 should race with no bias from prime squares, because
+squaring permutes a class group of odd order. **That prediction was wrong.** The group that decides the race is not
+the class group C₃ but S₃: the Galois group of x³ − x − 1, whose splitting field is the Hilbert class field of Q(√−23).
+
+**A prime's family is how it acts on the three roots of x³ − x − 1:**
+
+* as the identity (three roots mod p): the principal family x² + xy + 6y², one prime in six;
+* as a rotation of the triangle of roots (no root): the second family 2x² ± xy + 3y², one in three;
+* as a reflection (one root): neither family, one in two.
+
+**Squaring folds S₃.** Every reflection squares to the identity, and the two rotations square to each other. So the
+squares of the inert primes, half of all primes, land on the principal family, together with the squares of its own
+primes. Four elements of S₃ square to the identity, exactly as four units mod 30 square to 1 (and four to 19). The
+explicit formula then gives the same bias as on E8's spokes. For a class C, with r(C) the number of group elements whose
+square lies in C, the mean is −(r(C)/|C| − 1): −3 for the principal family, 0 for the second, +1 for the inert primes.
+
+[`Tools/family_race_data.py`](../../Tools/family_race_data.py) sorts the primes up to 10⁷ by the coefficients of
+η(z)η(23z) (2, −1 or 0, from Euler's pentagonal series), races them, and writes
+[`FamilyRaceData.cs`](../../Assets/Tour/FamilyRaceData.cs). The race is E_C(x) = (log x/√x)·((6/|C|) π(x; C) − π*(x)).
+
+| class | primes up to 10⁷ | mean of E_C (predicted) | mean, 10⁶ to 10⁷ | ahead of its share | in the lead |
+|---|---|---|---|---|---|
+| the principal family | 110 567 | −4.73 (−3) | −3.73 | never | never |
+| the second family | 221 545 | +0.49 (0) | +0.09 | 65 % | 35 % |
+| the inert primes | 332 466 | +1.25 (+1) | +1.18 | 93 % | 65 % |
+
+* **The principal family never leads.** Between 10² and 10⁷ it is never even ahead of its share. Its overall mean is
+  below −3 because the squares' term is really −3(1 + 2/log x + …) and the low zeros of L(s, χ₋₂₃) and of
+  L(η(z)η(23z), s) pull the same way over this range.
+* **Where the squares land.** MC1 draws the fold on a logarithmic clock of S₃: one sector per class, sized by its share,
+  and an arc from each prime p ≤ √10⁷ to p². Of the 445 prime squares, 293 land in the identity's sector.
+* **The fair race.** Counting each prime power p<sup>k</sup> as 1/k in the class of the k-th power of its symmetry closes
+  most of the gap. The means become −1.06, +0.66 and −0.09, and the principal family is ahead of its share 27 % of the
+  way.
+
+![MC1](MC1-the-race-between-the-families.jpg)
+
+**What this adds.** Chebyshev's bias in a Galois group is classical: Rubinstein and Sarnak's framework, extended to
+Chebotarev's density theorem. What the fold adds is one picture for E8's wheel and for the families of −23. In both, the
+identity's class receives the squares of four elements and runs three behind.
 
 ## What the sections give, as algorithms
 
@@ -3368,8 +3472,8 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 5. *The floor of the modular fundamental domain is a cancellation curve.* The arc `|τ| = 1` is the geodesic of
    `k² − 1 = (k − 1)(k + 1)`, and Landau's point `i` and the point `ρ` of `k² + k + 1` stand on it (section AD).
 
-**Worth exploring.** All three of the items below are now sections: the first two are P and Q above, and the third is
-LA–LE. Two more that came out of them follow.
+**Worth exploring.** All five items below have now been drawn: the first two are P and Q above, the third is LA–LE,
+the fourth is LF, and the fifth is MC.
 
 1. **The circle problem lives on the half-twisted saddle.** The number of lattice points in a circle of radius `√x`
    wobbles around `πx`. Hardy's formula writes that wobble as `(x^¼/π) Σ r₂(n) n^(−3/4) cos(2π√(nx) − 3π/4)`, which
@@ -3392,7 +3496,8 @@ LA–LE. Two more that came out of them follow.
    sit exactly at the three L-functions of the class group.
 5. **A race between the families.** The squares 1 and 19 lose E8's race (MA–MB) because squaring folds (Z/30)* onto two
    classes. Squaring permutes a class group of odd order, so the three families of −23 should race with no bias from
-   prime squares. The race between them is set by the zeros of L(η(z)η(23z), s) alone.
+   prime squares. (Section MC found the opposite: the group that decides the race is S₃, where every reflection squares
+   to the identity, and the principal family runs three behind.)
 
 ## Explainer modules
 
@@ -3497,7 +3602,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Sections MA–MB use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

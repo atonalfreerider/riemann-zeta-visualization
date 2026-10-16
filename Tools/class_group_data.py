@@ -14,8 +14,8 @@ families of curves and three 2D lattices.
   0.55 < Re s < 2.2 (the edge sampled every 0.01, so zeros on the line cannot fool the count) and Newton. D = -20 is the
   control (its two combinations are zeta L(chi_-20) and L(chi_-4) L(chi_5): no zeros off the line).
 * Every mixture Z1 + lam Z2 satisfies the same functional equation, so on the line its zeros are the crossings of the
-  one curve R(t) = -Lambda1/Lambda2 with the height lam. Counted for lam from -3 to 4: all of them only at lam = 2 and
-  lam = -1, the two L-functions.
+  one curve R(t) = -Lambda1/Lambda2 with the height lam. With all of each mixture's zeros counted by the argument
+  principle, the mixtures with every zero up to t = 50 on the line form two small windows round the two L-functions.
 
 Run from the repository root:  python3 Tools/class_group_data.py [--cache DIR]   (about 30 minutes on 8 cores; with --cache the
 values on the line, the box and the grid are kept, so a rerun takes seconds).
@@ -137,7 +137,7 @@ def main():
     forms44, fp44, fa44 = euler_counts(-44, (1, 0, 11))
     print(f"Euler, D = -23: principal alone {fp23} composites below 20000, all {len(forms23)} forms {fa23};  D = -44: {fp44} -> {fa44}")
     path = os.path.join(cache, "class_zeros.json") if cache else None
-    lines = {}
+    lines, boxes = {}, {}
     if path and os.path.exists(path):
         Zs = json.load(open(path))
     else:
@@ -162,7 +162,7 @@ def main():
                     vb = pool.map(lam, [(D, forms, s) for s in box])
                     gv = pool.map(lam, [(D, forms, z) for z in grid])
                     if part: json.dump([[[[z.real, z.imag] for z in v] for v in vs] for vs in (vl, vb, gv)], open(part, "w"))
-                lines[D] = vl
+                lines[D], boxes[D] = vl, vb
                 for name, w in funcs.items():
                     comb = lambda v: sum(wi * vi for wi, vi in zip(w, v))
                     on = [comb(v) for v in vl]
@@ -192,14 +192,34 @@ def main():
     # every mixture Z1 + lam Z2 has the same functional equation, so on the line its completed function e + lam c is real,
     # and its zeros there are the crossings of the one curve lam = R(t) = -e/c with the height lam
     if -23 not in lines:
-        lines[-23] = [[complex(*z) for z in v] for v in json.load(open(os.path.join(cache, "edges23.json")))[0]]
+        lines[-23], boxes[-23] = ([[complex(*z) for z in v] for v in vs] for vs in json.load(open(os.path.join(cache, "edges23.json")))[:2])
     e = [v[0].real for v in lines[-23]]; c = [v[1].real for v in lines[-23]]
+    # the total number of zeros of each mixture with 0.3 < t <= 50, by the argument principle on the right half of the
+    # box (bottom edge, right edge at Re s = 2.2, top edge back to the line): N = (1/pi) * the change in argument
+    nb = len(boxes[-23])
+    k03, k50 = round((0.3 - 0.02) / 0.02), len(lines[-23]) - 1
+    path = [lines[-23][k03]] + boxes[-23][:170 + 500 + 170] + [lines[-23][k50]]
+    def total(lam):
+        vals = [a + lam * b for a, b in path]
+        return round(sum(math.atan2((q / p).imag, (q / p).real) for p, q in zip(vals, vals[1:])) / math.pi)
     R = [-a / b for a, b in zip(e, c)]
     lams = [round(-3 + 0.01 * k, 2) for k in range(701)]
     def on_line(lam):
         f = [a + lam * b for a, b in zip(e, c)]
         return sum(1 for i in range(len(f) - 1) if f[i] * f[i + 1] < 0)
     counts = [on_line(l) for l in lams]
+    off = [total(l) - n for l, n in zip(lams, counts)]
+    assert min(off) >= 0, min(off)
+    windows, k = [], 0
+    while k < len(lams):
+        if off[k] == 0:
+            j = k
+            while j + 1 < len(lams) and off[j + 1] == 0:
+                j += 1
+            windows.append((lams[k], lams[j]))
+            k = j
+        k += 1
+    print("mixtures with every zero up to t = 50 on the line: lam in", windows, "; off the line at lam = 0:", off[300])
     best = sorted(range(len(lams)), key=lambda k: -counts[k])[:6]
     print("zeros on the line of Z1 + lam Z2 (t <= 50): most at", [(lams[k], counts[k]) for k in best],
           "; at lam = 0:", counts[300], "; the L-functions:", counts[500], counts[200])
@@ -223,6 +243,8 @@ def main():
         f.write(arr("MixR", R, "D = −23: R(t) = −Λ₁/Λ₂ on Re s = ½ at t = 0.02, 0.04, … 50 (Λ₁, Λ₂ the completed zetas of the two families).", "{:.4g}"))
         f.write("    /// <summary>Zeros on Re s = ½ up to t = 50 of Λ₁ + λΛ₂ for λ = −3, −2.99, … 4.</summary>\n")
         f.write("    public static readonly int[] MixOnLine = { " + ", ".join(str(n) for n in counts) + " };\n")
+        f.write("    /// <summary>Zeros off Re s = ½ up to t = 50 of Λ₁ + λΛ₂ (all of its zeros, by the argument principle, minus those on the line).</summary>\n")
+        f.write("    public static readonly int[] MixOffLine = { " + ", ".join(str(n) for n in off) + " };\n")
         f.write("}\n")
     print("wrote", OUT, os.path.getsize(OUT), "bytes")
 

@@ -76,5 +76,9 @@
    "e": 4.04
   }
  ],
- "duration": 4.29
+ "duration": 4.29,
+ "faded": {
+  "from": 3.99,
+  "over": 0.06
+ }
 }
