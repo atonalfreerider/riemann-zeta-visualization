@@ -2537,6 +2537,163 @@ factors.
 ZETA_OUT=/tmp/lab Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest
 ```
 
+## IA–ID. Inside the Lie group: where the symmetry of the counting numbers comes from
+
+Two questions:
+
+1. Are the vortices of the zeta chain related to the prime-factor sequences on E8?
+2. Can the Lie groups themselves supply the foundations, given that ζ is built from the counting numbers?
+
+The answers are below. Every number was checked in Python (mpmath and exact rationals) before it was drawn.
+[`Tools/lie_guts_data.py`](../../Tools/lie_guts_data.py) writes the measured data into
+[`LieGutsData.cs`](../../Assets/Tour/LieGutsData.cs), and [`SacksLieGuts.cs`](../../Assets/Tour/SacksLieGuts.cs) draws the
+stills (1920 × 1080, `ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`).
+
+### IA. The vortices are counting numbers, and on E8's hours their charges are E8's Coxeter traces
+
+Sections E and I set up the anatomy of the chain Σ n⁻ˢ at s = ½ + it:
+
+* **Spokes.** Consecutive links align into a straight run where t/n is a multiple of 2π, at n = t/2πk.
+* **Vortices.** Vortex k curls between spokes k + 1 and k.
+* **Mirror law.** The eye of vortex k is the chain's own k-th vertex, mirrored.
+
+**Each spoke is one counting number on the other side of the functional equation.** Crossing spoke k, the chain moves
+by χ(s)·k^(s−1), the k-th term of the reflected series. At t = 600 the measured step across spokes 1 to 4 matches it to
+3, 6, 10 and 4 %.
+
+**The steps carry the prime factorisation of k.** k^(s−1) is completely multiplicative, so the step at spoke 2k is the
+step at k turned by t·log 2 and shrunk by √2. Spokes k, 2k, 4k, 8k, … step along one discrete logarithmic spiral, and the
+steps of any k are built from its prime factors exactly as the links n⁻ˢ are, turning the other way.
+
+**Restricted to E8's 8 exponent hours, the vortices carry E8's Coxeter element.** Take the chain over the n prime to 30
+only (the gold hours). Poisson summation over each residue class gives a spoke at n = 30t/2πk for every k, not only at
+multiples of 30. Its charge is the sum of e^(2πikh/30) over the 8 gold hours h. That sum is the Ramanujan sum c₃₀(k), and
+it equals tr(Cᵏ), the trace of the k-th power of E8's Coxeter element (checked exactly from the 8 × 8 matrix,
+k = 1 … 30).
+
+The charge depends only on gcd(k, 30):
+
+| gcd(k, 30) | 1 | 2 | 3 | 5 | 6 | 10 | 15 | 30 |
+|---|---|---|---|---|---|---|---|---|
+| tr(Cᵏ) | −1 | 1 | 2 | 4 | −2 | −4 | −8 | 8 |
+
+Measured at t = 5000 (the jump across spoke k, divided by the predicted unit
+Γ(1−s) e^(iπ(1−s)/2) (2πk/30)^(s−1)/30):
+
+| spoke k | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| measured (real part) | −0.99 | 1.04 | 1.94 | 1.05 | 4.19 | −2.24 | −1.00 | 1.11 | 1.86 | −3.75 | −1.12 | −1.87 |
+| tr(Cᵏ) | −1 | 1 | 2 | 1 | 4 | −2 | −1 | 1 | 2 | −4 | −1 | −2 |
+
+Beyond k ≈ 12 the spokes are only 30t/2πk(k+1) links apart, their neighbourhoods overlap, and the measurement drifts.
+Spoke 15 reads −9.5 against −8. A larger t pushes that limit out.
+
+So the trace of E8's Coxeter element is the 2-3-5 sieve in spectral form:
+
+1_{gcd(n,30)=1} = (1/30) Σ_k tr(Cᵏ) e^(2πikn/30).
+
+It decides the strength and sign of every vortex of the gold chain.
+
+**Only a few Lie groups do this.** The groups whose Coxeter element has a single cyclotomic polynomial as its
+characteristic polynomial (exponents = all units mod h) are A_{p−1}, B_{2^k} and C_{2^k}, G2, F4 and E8. Checked: A4,
+A6, B2, B4, G2, F4 and E8 have one; B3, D4, E6 and E7 do not. (D_n never can: its rank exceeds φ(h).) E8 is the one with h = 30 = 2·3·5, the product of the first three
+primes.
+
+![IA1](IA1-coxeter-traces-are-the-spoke-charges.jpg)
+
+### IB. The counting numbers are SU(2)'s dimensions, and E8 is made of SU(2)s
+
+**ζ is the representation zeta function of SU(2).** The counting numbers are exactly the dimensions of SU(2)'s
+irreducible representations (spin j gives 2j + 1), so ζ(s) = Σ (dim V)⁻ˢ over SU(2)'s irreducibles. The same sum over
+another group is Witten's zeta function. For SU(3) it is Σ (ab(a+b)/2)⁻² = 4π⁶/2835, checked to 11 digits.
+
+**Kostant: E8 contains a principal SU(2).** Under it, E8's 248 dimensions split into SU(2) pieces of dimension 2m + 1,
+one for each exponent m:
+
+248 = 3 + 15 + 23 + 27 + 35 + 39 + 47 + 59
+
+Checked: the multiplicities of the root heights (8 roots of height 1, then 7, 7, …, down to 1 of height 29) are exactly
+those of these eight SU(2) strings. E8's Coxeter element is conjugate to this SU(2)'s rotation by 1/30 of a turn, which
+is why its eigenvalues are e^(2πim/30). The gold hours of E8's wheel are the spins of E8's SU(2) pieces.
+
+**Macdonald's identity builds η²⁴⁸ from E8's roots.** It reads η(q)²⁴⁸ = Σ_{v∈E8} d(ρ + 30v) q^(15 v·v + v·ρ), with d
+Weyl's dimension formula. Checked exactly through q¹²: only v = 0 and the negative roots contribute, and the sum gives
+
+| q^K | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| coefficient | −248 | 30 380 | −2 450 240 | 146 325 270 | −6 899 079 264 | 267 413 986 840 |
+
+These are the coefficients of q^(248/24) ∏(1 − qⁿ)²⁴⁸, the counting function η raised to the dimension of E8. The first
+ones are signed dimensions of irreducible representations of E8 (248 is the adjoint; 30 380 and 2 450 240 are
+irreducibles too).
+
+![IB1](IB1-e8-as-su2-spins-and-macdonald.jpg)
+
+### IC. E8's symmetry is counted by ζ at negative integers
+
+The Weyl group of E8 has 2·8·12·14·18·20·24·30 = 696 729 600 elements. Those are E8's exponents + 1.
+
+**The mass formula.** By Smith–Minkowski–Siegel, E8 is the only even unimodular lattice in 8 dimensions, its
+automorphism group is W(E8), and its mass is a product of Bernoulli numbers. Checked exactly:
+
+1/696 729 600 = |B₄|/8 · |B₂|/4 · |B₄|/8 · |B₆|/12, so #W(E8) = 16 / |ζ(−1) ζ(−3)² ζ(−5)|.
+
+**In 16 dimensions.** The two even unimodular lattices are E8² and D16⁺, the two lattices of the heterotic string.
+Checked exactly:
+
+1/#Aut(E8²) + 1/#Aut(D16⁺) = 691 / 277 667 181 515 243 520 000
+
+The 691 is the numerator of ζ(−11) = 691/32760, and the prime of Ramanujan's congruence τ(n) ≡ σ₁₁(n) (mod 691),
+checked for n ≤ 1000.
+
+**From the literature (not re-derived here).** Harder's Gauss–Bonnet theorem makes the Euler characteristic of the
+arithmetic group E8(Z) a rational multiple of the product of ζ(−m) over E8's exponents m. Langlands' volume formula puts
+the product of ζ(m + 1) into the volume of E8(Z)\E8(R) (Gross's "motive of E8"). The exact values are in IC1:
+
+* ζ(−1) = −1/12 and ζ(−13) = −1/12;
+* ζ(−7) = 1/240;
+* ζ(−11) = 691/32760;
+* ζ(−17) = −43867/14364 and ζ(−19) = 174611/6600;
+* ζ(−23) = 236364091/65520 and ζ(−29) = −1723168255201/85932.
+
+![IC1](IC1-zeta-at-minus-the-exponents.jpg)
+
+### ID. From E8's theta series back to SU(2): Sato–Tate
+
+The chain from E8's theta series to Δ, all checked:
+
+* **The theta series:** θ_E8 = E₄.
+* **Δ:** (E₄³ − E₆²)/1728 = Ramanujan's Δ = Σ τ(n) qⁿ, coefficient by coefficient.
+* **Deligne's bound:** |τ(p)| ≤ 2p^(11/2) holds for all 2262 primes p ≤ 20 000, so τ(p) = 2p^(11/2) cos θ_p.
+
+**The angles are random SU(2) angles.** The Sato–Tate theorem for Δ (Barnet-Lamb, Geraghty, Harris, Taylor 2011) says
+θ_p is distributed as (2/π) sin²θ dθ, the conjugacy classes of SU(2) under Haar measure. Measured over the 2262 primes,
+the mean of (2cos θ_p)^(2k) for k = 1 … 5 is 0.985, 1.960, 4.872, 13.54, 40.29. The Catalan numbers 1, 2, 5, 14, 42 are
+the dimensions of the SU(2)-invariants of V^(⊗2k).
+
+**The law holds on each of E8's eight spokes separately** (ID2: 275 to 288 primes per hour, second moments 0.89 to 1.05).
+
+![ID1](ID1-sato-tate-from-e8s-theta.jpg)
+![ID2](ID2-sato-tate-on-every-spoke.jpg)
+
+### What the Lie group gives
+
+* **SU(2) is the symmetry behind the counting numbers.** Its dimensions are the counting numbers, so ζ is its
+  representation zeta function. Its Haar measure is the law of the primes' angles in Δ, and its invariants are the
+  Catalan numbers that law's moments converge to.
+* **E8 is made of eight SU(2)s,** of spins 1, 7, 11, 13, 17, 19, 23, 29: the gold hours. Its Coxeter element is the
+  sieve of 2, 3, 5 written as traces, and those traces are the charges of the vortices of the gold chain.
+* **E8's symmetry is counted by ζ at negative integers** (the mass formula), and its theta series leads through Δ to
+  Ramanujan's 691 and to the SU(2) law of Sato–Tate.
+* **The general form is the Langlands programme (context, not computed here).** Each automorphic representation of a
+  Lie group has an L-function whose factor at each prime p is the characteristic polynomial of a conjugacy class in the
+  dual group. ζ is the case of the trivial representation of GL(1). The Dirichlet L-functions mod 30 are the characters
+  of the Galois group of E8's Coxeter eigenvalues (HC). Δ is a GL(2) form whose classes fill SU(2).
+
+**What it does not give.** As in GE, none of this locates primes or factors numbers faster. The Lie groups explain why
+the multiplicative structure has the symmetries it has, and how its statistics are distributed. They do not shortcut
+reading it.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -2743,7 +2900,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

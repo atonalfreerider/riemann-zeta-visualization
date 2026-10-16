@@ -1588,6 +1588,58 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        // ---------------------------------------------------------------------------------------------
+        // Inside the Lie group: sections IA–ID (SacksLieGuts.cs, data from Tools/lie_guts_data.py), key '#',
+        // drawn for 1920 × 1080.
+        // ---------------------------------------------------------------------------------------------
+        if (Wanted('#')) {
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Lie(int i) => c + new Vector3(SacksSpiral.LieOffset + 400f * i, 0f, 0f);
+        const float lieLabel = 170f;
+
+        sacks.ExpCoxeterTraceCharges(Lie(0), lieLabel);
+        sacks.ExpCaption(Lie(0) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "E8's Coxeter element sets the vortices of the chain restricted to its exponent hours|" +
+            "the chain Σ n<sup>−s</sup> over n prime to 30 has a spoke at n = 30t/2πk for every k, and spoke k carries the charge tr C<sup>k</sup> = c<sub>30</sub>(k)", 52f);
+        yield return Shot("IA1-coxeter-traces-are-the-spoke-charges", Lie(0) + back * 140f, Lie(0), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpKostantMacdonald(Lie(1), lieLabel);
+        sacks.ExpCaption(Lie(1) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "E8 is made of SU(2)s:  248 = 3 + 15 + 23 + 27 + 35 + 39 + 47 + 59   (Kostant)|" +
+            "E8's 120 positive roots by height:  there are as many roots of height j as exponents ≥ j, so each row is one SU(2) of spin m", 52f);
+        sacks.ExpCaption(Lie(1) + new Vector3(-125f, -54f, -.3f), Vector3.down * 5.4f,
+            "Macdonald:  η(q)<sup>248</sup> = sum over v in E8 of  d(ρ + 30v) q<sup>15 v·v + v·ρ</sup>,  d = Weyl's dimension formula|" +
+            "up to q<sup>12</sup> only v = 0 and the negative roots count:  each coefficient is a signed dimension of an E8 representation", 46f);
+        yield return Shot("IB1-e8-as-su2-spins-and-macdonald", Lie(1) + back * 140f, Lie(1), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpZetaAtExponents(Lie(2), lieLabel);
+        sacks.ExpCaption(Lie(2) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "E8's symmetry is counted by ζ at negative integers|" +
+            "the Weyl group of E8 has 2·8·12·14·18·20·24·30 = 696 729 600 elements = 16 / (ζ(−1) ζ(−3)² ζ(−5)), up to sign  (the mass formula)", 52f);
+        sacks.ExpCaption(Lie(2) + new Vector3(-125f, -50f, -.3f), Vector3.down * 5f,
+            "16 dimensions:  1 / #Aut(E8²) + 1 / #Aut(D16<sup>+</sup>) = 691 / 277 667 181 515 243 520 000|" +
+            "ζ(−11) = 691/32760, and 691 is the prime of Ramanujan's congruence τ(n) ≡ σ<sub>11</sub>(n) mod 691|" +
+            "Harder's Gauss–Bonnet:  the Euler characteristic of E8(Z) is a rational multiple of the product of ζ(−m) over E8's exponents", 44f);
+        yield return Shot("IC1-zeta-at-minus-the-exponents", Lie(2) + back * 140f, Lie(2), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpSatoTate(Lie(3), lieLabel);
+        sacks.ExpCaption(Lie(3) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "From E8's theta series to SU(2):  the primes in Ramanujan's Δ follow the Sato–Tate law|" +
+            "θ<sub>E8</sub> = E<sub>4</sub>,  Δ = (E<sub>4</sub>³ − E<sub>6</sub>²)/1728 = Σ τ(n) q<sup>n</sup>,  τ(p) = 2 p<sup>11/2</sup> cos θ<sub>p</sub>:  θ<sub>p</sub> is distributed like the angle of a random SU(2) matrix", 52f);
+        yield return Shot("ID1-sato-tate-from-e8s-theta", Lie(3) + back * 140f, Lie(3), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpSatoTateSpokes(Lie(4), lieLabel);
+        sacks.ExpCaption(Lie(4) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "…and on every one of E8's eight spokes|the primes p ≡ h (mod 30), one histogram for each exponent h:  the same SU(2) law, whatever the spoke", 52f);
+        yield return Shot("ID2-sato-tate-on-every-spoke", Lie(4) + back * 140f, Lie(4), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
