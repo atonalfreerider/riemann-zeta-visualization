@@ -113,6 +113,22 @@ public class Factory : MonoBehaviour
         renderer.SetPropertyBlock(sharedBlock);
     }
 
+    static readonly int MuteId = Shader.PropertyToID("_Mute");
+
+    /// <summary>Grey a renderer out (0 = as drawn, 1 = a faint blue-grey), for isolating one part of a dense picture.</summary>
+    public static void SetMute(Renderer renderer, float mute)
+    {
+        renderer.GetPropertyBlock(sharedBlock);
+        sharedBlock.SetFloat(MuteId, mute);
+        renderer.SetPropertyBlock(sharedBlock);
+    }
+
+    public static float GetMute(Renderer renderer)
+    {
+        renderer.GetPropertyBlock(sharedBlock);
+        return sharedBlock.GetFloat(MuteId);
+    }
+
     public static float GetIntensity(Renderer renderer)
     {
         renderer.GetPropertyBlock(sharedBlock);

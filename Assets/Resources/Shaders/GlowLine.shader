@@ -11,6 +11,7 @@ Shader "Zeta/GlowLine"
     {
         [HDR] _Color ("Tint", Color) = (1, 1, 1, 1)
         _Intensity ("HDR Intensity", Float) = 1.0
+        _Mute ("Mute (grey, faint)", Float) = 0.0
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("Z Test", Float) = 4
     }
     SubShader
@@ -34,6 +35,7 @@ Shader "Zeta/GlowLine"
             UNITY_INSTANCING_BUFFER_START(Props)
                 UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
                 UNITY_DEFINE_INSTANCED_PROP(float, _Intensity)
+                UNITY_DEFINE_INSTANCED_PROP(float, _Mute)
             UNITY_INSTANCING_BUFFER_END(Props)
 
             struct appdata
@@ -68,6 +70,11 @@ Shader "Zeta/GlowLine"
                 UNITY_SETUP_INSTANCE_ID(i);
                 float4 c = i.color * UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
                 c.rgb *= UNITY_ACCESS_INSTANCED_PROP(Props, _Intensity);
+                // muted: a dim blue-grey of the same lightness, and fainter, so a highlighted part stands out against it
+                float m = UNITY_ACCESS_INSTANCED_PROP(Props, _Mute);
+                float l = dot(saturate(c.rgb), float3(0.3, 0.59, 0.11));
+                c.rgb = lerp(c.rgb, l * float3(0.30, 0.32, 0.40), m);
+                c.a *= lerp(1.0, 0.22, m);
                 return c;
             }
             ENDCG

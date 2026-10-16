@@ -101,8 +101,17 @@ public partial class SacksSpiral
     /// 10⁷). Squaring doubles the radius and sends 1, 11, 19, 29 to hour 1 and 7, 13, 17, 23 to hour 19: an arc from every
     /// prime p ≤ √10⁷ (dots on all eight spokes) to its square (dots on spokes 1 and 19 only, in the colour of p's spoke).
     /// </summary>
+    Vector3 foldOrigin;
+    float foldRim = 60f;
+
+    /// <summary>Where n sits on the logarithmic clock of the last square fold drawn (its hour, radius ∝ log n).</summary>
+    public Vector3 FoldPosition(double n) =>
+        foldOrigin + RaceDir((float)(((long)n) % 30)) * (foldRim * (float)(System.Math.Log(n) / 16.11809565095832)) + Vector3.back * .4f;
+
     public void ExpSquareFold(Vector3 o, float rim, float labelSize)
     {
+        foldOrigin = o;
+        foldRim = rim;
         Transform g = ExpGroup("MB fold").transform;
         const double logMax = 16.11809565095832; // ln 10⁷
         Color axisCol = new(.7f, .74f, .88f);

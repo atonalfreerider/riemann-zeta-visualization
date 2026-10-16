@@ -80,11 +80,24 @@ public partial class SacksSpiral
     /// adds the mirror crosses. The framing follows the chain smoothly.
     /// </summary>
     public void ExpChainLive(double t0, double t1, float seconds, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize,
-        bool quiet = false)
+        bool quiet = false, bool flat = false)
     {
         chainLiveQuiet = quiet;
+        chainLiveFlat = flat;
+        if (flat && liveAxis != null)
+        {
+            Destroy(liveAxis);
+            liveAxis = null;
+        }
         StartLive(ChainLive(t0, t1, seconds, center, halfWidth, halfHeight, rings, mirrors, labelSize));
     }
+
+    /// <summary>Vertex n of the live chain as last drawn (the sum of its first n links), for callouts.</summary>
+    public Vector3 LiveChainVertex(int n) =>
+        liveChain != null && n >= 0 && n < liveChain.positionCount ? liveChain.GetPosition(n) + Vector3.back * .1f : Center;
+
+    /// <summary>When set, the chain stays in its plane: no t axis, no climbing (the camera can hold a fixed shot).</summary>
+    bool chainLiveFlat;
 
     /// <summary>When set, the live chain leaves the caption board to the line's own heading instead of showing the dial.</summary>
     bool chainLiveQuiet;
@@ -93,7 +106,8 @@ public partial class SacksSpiral
     {
         EnsureLivePanel(center, halfWidth, halfHeight, labelSize);
         double lo = System.Math.Min(t0, t1), hi = System.Math.Max(t0, t1);
-        if (liveAxis == null || lo < liveAxisLo || hi > liveAxisHi) BuildLiveAxis(lo - 1.0, hi + 2.5, labelSize);
+        if (chainLiveFlat) liveAxisLo = lo;
+        else if (liveAxis == null || lo < liveAxisLo || hi > liveAxisHi) BuildLiveAxis(lo - 1.0, hi + 2.5, labelSize);
         float time = 0f;
         while (true)
         {
@@ -216,7 +230,7 @@ public partial class SacksSpiral
     void DrawLivePanel(double t, Vector3 baseCenter, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize, float dt)
     {
         ExpLiveT = t;
-        ExpPanelHeight = (float)(t - liveAxisLo) * LiveRise;
+        ExpPanelHeight = chainLiveFlat ? 0f : (float)(t - liveAxisLo) * LiveRise;
         Vector3 center = baseCenter + Vector3.back * ExpPanelHeight;
         int N = (int)(t / System.Math.PI) + 12;
         Complex[] S = ChainSums(t, N);

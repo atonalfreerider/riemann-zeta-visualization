@@ -21,6 +21,10 @@ public partial class TourDirector : MonoBehaviour
     /// <summary>Storyboard: snap the camera per line, compress each line to a few seconds and save two PNGs per line.</summary>
     public bool Storyboard;
     public float StoryboardSecondsPerLine = 3f;
+    /// <summary>Storyboard frames per line: 0 for the two default ones (at 45 % and at the end), else this many, evenly spaced.</summary>
+    public int StoryboardFrames;
+    /// <summary>Storyboard lines last as long as their narration (or its estimate), so cues fire as in the video.</summary>
+    bool StoryboardRealTime => Storyboard && StoryboardSecondsPerLine <= 0f;
     public string StoryboardDirectory = "";
     /// <summary>Where full recordings go (empty = Recordings/&lt;timestamp&gt; next to the project).</summary>
     public string RecordDirectory = "";
@@ -328,7 +332,7 @@ public partial class TourDirector : MonoBehaviour
     IEnumerator Delayed(float seconds, string action)
     {
         int serial = lineSerial;
-        yield return new WaitForSeconds(Storyboard ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
+        yield return new WaitForSeconds(Storyboard && !StoryboardRealTime ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
         // only if the tour is still on the line that scheduled it (skipping ahead cancels it)
         if (Running && serial == lineSerial) ApplyActions(new[] { action });
     }
@@ -661,7 +665,7 @@ public partial class TourDirector : MonoBehaviour
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);
-        currentLineSeconds = Storyboard ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
+        currentLineSeconds = Storyboard && !StoryboardRealTime ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
         ApplyActions(line.actions);
         if (PlayingExperiment && CurrentLineIndex == 0) Rig.Snap(); // an experiment opens framed on its subject, not flying in
         if (timing == null)
@@ -733,21 +737,31 @@ public partial class TourDirector : MonoBehaviour
 
     IEnumerator StoryboardLine(TourLine line, LineTiming timing, float realDuration)
     {
-        // compress the real line duration into StoryboardSecondsPerLine, keeping the same amount of animation
-        float seconds = Mathf.Max(0.5f, StoryboardSecondsPerLine);
+        // compress the real line duration into StoryboardSecondsPerLine, keeping the same amount of animation (or, in real
+        // time, play the line at its own length with the camera flying as in the video)
+        float seconds = StoryboardRealTime ? realDuration : Mathf.Max(0.5f, StoryboardSecondsPerLine);
         Main.SpeedMultiplier = realDuration / seconds;
-        Rig.Snap();
-        yield return null;
-        Rig.Snap();
+        if (!StoryboardRealTime)
+        {
+            Rig.Snap();
+            yield return null;
+            Rig.Snap();
+        }
 
         int index = storyboardIndex++;
         float start = Time.time;
         bool first = false;
+        int shot = 0;
         while (Time.time - start < seconds)
         {
             float elapsed = Time.time - start;
             Captions.SetTime(elapsed / seconds * timing.duration);
-            if (!first && elapsed >= seconds * 0.45f)
+            if (StoryboardFrames > 1)
+            {
+                if (shot < StoryboardFrames - 1 && elapsed >= seconds * (shot + 1) / StoryboardFrames)
+                    Recorder.Snapshot($"{index:D2}_{line.id}_{++shot}.png");
+            }
+            else if (!first && elapsed >= seconds * 0.45f)
             {
                 first = true;
                 Recorder.Snapshot($"{index:D2}_{line.id}_a.png");
@@ -756,7 +770,7 @@ public partial class TourDirector : MonoBehaviour
             yield return null;
         }
 
-        Recorder.Snapshot($"{index:D2}_{line.id}_b.png");
+        Recorder.Snapshot(StoryboardFrames > 1 ? $"{index:D2}_{line.id}_{StoryboardFrames}.png" : $"{index:D2}_{line.id}_b.png");
         yield return null;
         yield return null;
     }

@@ -441,7 +441,9 @@ public class CameraRig : MonoBehaviour
         {
             if (name.StartsWith("orbit:"))
             {
-                cue = OrbitCue(name.Substring(6));
+                var (at, settle) = OrbitCueAt(name.Substring(6));
+                orbitCues[name] = (at, settle);
+                cue = () => at(Time.time - cueStartTime);
                 cues[name] = cue;
             }
             else
@@ -472,7 +474,16 @@ public class CameraRig : MonoBehaviour
     /// frames a W × H box (world units, across × up the screen) at the camera's current aspect, so one shot works in 16:9 and
     /// 9:16; raise=F moves the subject up the screen by F of the frame's height (to clear the captions).
     /// </summary>
+    // the orbit cues as functions of the cue's age, and the age at which each has finished moving (hold + span)
+    readonly Dictionary<string, (Func<float, CueState> at, float settle)> orbitCues = new();
+
     Func<CueState> OrbitCue(string spec)
+    {
+        var (at, _) = OrbitCueAt(spec);
+        return () => at(Time.time - cueStartTime);
+    }
+
+    (Func<float, CueState> at, float settle) OrbitCueAt(string spec)
     {
         Dictionary<string, string> p = new();
         foreach (string part in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
@@ -524,7 +535,8 @@ public class CameraRig : MonoBehaviour
             fit1 = ab.Length > 1 ? Box(ab[1]) : fit0;
         }
 
-        return () =>
+        float settleAge = hold + span;
+        return ((float age) =>
         {
             SacksSpiral s = annotations.Sacks;
             Vector3 c = s.Center;
@@ -535,22 +547,47 @@ public class CameraRig : MonoBehaviour
                 "live" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + Vector3.back * s.ExpLiveHeight,
                 "panellive" => c + new Vector3(SacksSpiral.ExpPanelOffset, 0f, 0f) + Vector3.back * s.ExpPanelHeight,
                 "towerfocus" => c + new Vector3(SacksSpiral.ExpTowerOffset, 0f, 0f) + s.ExpTowerFocus + Vector3.back * Mathf.Max(1f, s.ExpTowerHeight),
+                "pathplane" => s.PathFocus,
                 _ => c
             };
-            float age = Time.time - cueStartTime;
             float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((age - hold) / span));
             Vector3 look = basePoint + Vector3.Lerp(at0, at1, u) + Vector3.back * (hFrac * Mathf.Max(1f, s.ExpTowerHeight));
             float d = Mathf.Lerp(d0, d1, u);
             float tanV = Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
-            if (fit0.x > 0f)
-            {
-                Vector2 box = Vector2.Lerp(fit0, fit1, u);
-                d = Mathf.Max(box.x * .5f / (tanV * Aspect), box.y * .5f / tanV) * 1.06f;
-            }
-
             float el = Mathf.Clamp(Mathf.Lerp(e0, e1, u), -80f, 89.5f) * Mathf.Deg2Rad;
             float a = (az0 + spin * age) * Mathf.Deg2Rad;
             Vector3 hdir = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
+            Vector2 f0 = fit0, f1 = fit1;
+            if (on.StartsWith("nwbox"))
+            {
+                // follow a number-line lane's bounds as it winds up: frame the box as the camera sees it, blended from the
+                // cue's own shot (fit, at) towards it by `follow`
+                Bounds b = s.NwBounds(on.EndsWith("d") ? "d" : "p");
+                Vector3 upV = (Vector3.back * Mathf.Cos(el) - hdir * Mathf.Sin(el)).normalized;
+                Vector3 fwd = -(hdir * Mathf.Cos(el) + Vector3.back * Mathf.Sin(el));
+                Vector3 rightV = Vector3.Cross(upV, fwd).normalized;
+                float w = 0f, hgt = 0f;
+                for (int i = 0; i < 8; i++)
+                {
+                    Vector3 corner = new(i % 2 == 0 ? b.min.x : b.max.x, (i / 2) % 2 == 0 ? b.min.y : b.max.y, i / 4 == 0 ? b.min.z : b.max.z);
+                    Vector3 rel = corner - b.center;
+                    w = Mathf.Max(w, 2f * Mathf.Abs(Vector3.Dot(rel, rightV)));
+                    hgt = Mathf.Max(hgt, 2f * Mathf.Abs(Vector3.Dot(rel, upV)));
+                }
+
+                float follow = Num(p.TryGetValue("follow", out string fo) ? fo : "", 1f);
+                look = Vector3.Lerp(look, b.center, follow);
+                Vector2 own = Vector2.Lerp(fit0, fit1, u);
+                Vector2 boxed = new(Mathf.Max(w * 1.12f, 30f), Mathf.Max(hgt * 1.25f, 17f));
+                f0 = f1 = own.x > 0f ? Vector2.Lerp(own, boxed, follow) : boxed;
+            }
+
+            if (f0.x > 0f)
+            {
+                Vector2 box = Vector2.Lerp(f0, f1, u);
+                d = Mathf.Max(box.x * .5f / (tanV * Aspect), box.y * .5f / tanV) * 1.06f;
+            }
+
             Vector3 position = look + (hdir * Mathf.Cos(el) + Vector3.back * Mathf.Sin(el)) * d;
             // "up the screen" is the saddle's normal tipped back by the elevation, so a shot can pass overhead smoothly
             Vector3 upDir = (Vector3.back * Mathf.Cos(el) - hdir * Mathf.Sin(el)).normalized;
@@ -562,7 +599,26 @@ public class CameraRig : MonoBehaviour
             }
 
             return new CueState { Position = position, LookAt = look, Up = upDir, Fov = fov };
-        };
+        }, settleAge);
+    }
+
+    /// <summary>Where the active cue wants the camera now (the camera itself may still be flying there).</summary>
+    public bool TargetPose(out Vector3 position, out Quaternion rotation, out float fov, bool settled = false)
+    {
+        position = cam != null ? cam.transform.position : Vector3.zero;
+        rotation = cam != null ? cam.transform.rotation : Quaternion.identity;
+        fov = cam != null ? cam.fieldOfView : 55f;
+        if (activeCue == null || VRMode.Enabled) return false;
+        // settled: where an orbit cue comes to rest (the end of its move), else where it is now
+        CueState target = settled && orbitCues.TryGetValue(activeCueName, out var oc)
+            ? oc.at(Mathf.Max(Time.time - cueStartTime, oc.settle))
+            : activeCue();
+        Vector3 forward = target.LookAt - target.Position;
+        if (forward.sqrMagnitude < 1e-6f) return false;
+        position = target.Position;
+        rotation = Quaternion.LookRotation(forward, target.Up);
+        fov = target.Fov;
+        return true;
     }
 
     /// <summary>Jump straight to the active cue's current target (no smoothing).</summary>

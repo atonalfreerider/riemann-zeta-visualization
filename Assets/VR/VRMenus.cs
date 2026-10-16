@@ -148,15 +148,23 @@ public partial class VRApp
     // 28 places: every module fits (7 across, 4 down, above the line that names the one playing)
     const int LabColumns = 7, LabRows = 4;
 
+    /// <summary>The long-form horizontal segments (xs1 …, xz1 …) are videos for the desktop, not modules for the dock.</summary>
+    static bool LongForm(string id) => id.Length == 3 && id[0] == 'x' && (id[1] == 's' || id[1] == 'z') && char.IsDigit(id[2]);
+
     void BuildLabPage(RectTransform p)
     {
         TourChapter[] modules = tour.ExperimentChapters;
-        if (modules.Length > LabColumns * LabRows) Debug.LogWarning($"VR: {modules.Length} experiment modules, room for {LabColumns * LabRows} on the page");
-        for (int i = 0; i < modules.Length && i < LabColumns * LabRows; i++)
+        int shown = 0;
+        foreach (TourChapter m in modules) if (!LongForm(m.id)) shown++;
+        if (shown > LabColumns * LabRows) Debug.LogWarning($"VR: {shown} experiment modules, room for {LabColumns * LabRows} on the page");
+        int slot = 0;
+        for (int i = 0; i < modules.Length && slot < LabColumns * LabRows; i++)
         {
+            if (LongForm(modules[i].id)) continue;
             int index = i;
             (string label, VRIcons.Id icon) = LabInfo.TryGetValue(modules[i].id, out var info) ? info : (modules[i].title, VRIcons.Id.Flask);
-            int col = i % LabColumns, row = i / LabColumns;
+            int col = slot % LabColumns, row = slot / LabColumns;
+            slot++;
             Dock.AddButton(8 + col * 83, 2 + row * 66, 79, 62, label, icon,
                 () => PlayExperiment(index), true, () => tour.Running && tour.PlayingExperiment && tour.CurrentChapterIndex == index, 15f, p);
         }

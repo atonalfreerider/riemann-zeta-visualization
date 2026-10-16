@@ -3609,6 +3609,58 @@ says what was found, why it matters, and which part is classical and which is ne
 Its scenes are the landscape stills of those sections, so it is drawn for a horizontal frame and records with
 `--shapes horizontal`. Its script, with the reasons for each choice, is in [`xtop5-script.md`](xtop5-script.md).
 
+**The long-form segments.** *Five discoveries* and *The zeros inside E8's stack* are also told at length, as ten
+horizontal segments (`xs1` … `xs5`, `xz1` … `xz5`; scripts in [`long-form-script.md`](long-form-script.md)), narrated
+as the work of the author and Claude, an AI math research assistant. Each is one continuous sequence: a picture is
+built step by step and then turned into the next one (a parameter of the scene is eased, `exp:tw`), rather than
+cleared and replaced; the charts a segment compares are drawn side by side and the camera glides between them while
+the one being discussed is lit and the others greyed out (`exp:mute`, the GlowLine shader's `_Mute`). The number being
+discussed is isolated: its column, its prime factors (each piece labelled log p), its level and its hand are lit on the
+greyed-out picture (`exp:fwhl`, `exp:e8hl`), and callouts name it and its structure (12 = 2²·3 with its six divisors
+ringed one by one; 49 = 7² on hour 19; 6 = 2·3 dark among the lamps). Every cue lands on the word that names it.
+
+* **From the number line to the saddle** ([`SacksNumberWorld.cs`](../../Assets/Tour/SacksNumberWorld.cs)). The
+  numbers are laid on a straight line, and each master wave is first drawn over that line, as it would be in a book:
+  the zeros' wave −Σ cos(γ log x) (one zero, then ten, … ten thousand), and Voronoi's divisor wave (one wave, then four
+  thousand). The line then winds up into the Sacks spiral (one turn per unit of √x, every number keeping its distance
+  along the line), carrying its wave, and the plane bends into the saddle.
+* **The path of partial sums** ([`SacksPathWorld.cs`](../../Assets/Tour/SacksPathWorld.cs)), what the earlier modules
+  called the zeta chain: arrow n is 1/√n long and points t·log n from arrow 1, so it turns t·log(n/(n − 1)) from arrow
+  n − 1; at t = 1 the turns are 40°, 23°, 17°, 13°, 10°, … Each arrow is laid with its length, its turn (gold arc) and
+  its direction (blue arc) marked. The path is drawn at a fixed scale (the camera never re-fits it), the
+  Euler–Maclaurin tail closes it at ζ(½ + it), and the plane then climbs a t axis while ζ(½ + it) leaves its curve and
+  the vortices' eyes leave a tower.
+* **The coil, assembled** ([`SacksFunnelWorld.cs`](../../Assets/Tour/SacksFunnelWorld.cs)). The path at a zero is laid
+  on the floor of E8's factor funnel; each arrow n rises to the top of n's column, at height log n, with its tail on the
+  axis and its direction kept. The arrows become the hands of a clock turning γ per unit of height, and the coil runs
+  through their tips. Because log 6 = log 2 + log 3, the hand of 6 is the hand of 2 plus the hand of 3: the coil reads
+  the prime factors. Easing γ to another zero turns every hand by Δγ·log n.
+
+*The saddle and Voronoi's wave, made explicit.* The home view's master wave is −Σ cos(γ log x) over the zeros of ζ: it
+spikes at the primes and prime powers, and its waves tick on log x, so a single zero's wave drifts from turn to turn of
+the spiral in curved arms. Voronoi's formula gives the divisor count the same kind of master wave. Differentiated, and
+multiplied by √x so that every spike stands at its full height,
+
+    W(x) = −√2 x^¼ Σ_m w_m d(m) m^(−¼) sin(4π√(mx) − π/4),    w_m = exp(−4(m/M)²),
+
+it spikes at every whole number, as tall as its count of divisors: with M = 4 000 waves the spike at n is about
+1.1 √M d(n) (correlation 0.997 with d(n) for n < 150). Its waves tick on √x, the spiral's own clock, so each one stands still on the spiral:
+the m-th has 2√m crests per turn, and the first, two per turn, has its crests beside the squares (64) and the pronic
+numbers (72). That first wave is the saddle turned over: the tour's saddle falls away along the same two rays.
+[`SacksNumberWaves.cs`](../../Assets/Tour/SacksNumberWaves.cs) draws both master waves as the home view draws its own,
+as a curtain from the spiral, and a single wave as a ribbon painted on the spiral (bright where the wave is up).
+
+*The chain and its tail.* On the critical line the series Σ n^(−s) does not converge, so the chain cannot be summed to
+the end. The segments draw its first links and then the tail, ZetaMath's Euler–Maclaurin correction
+N^(1−s)/(s − 1) + …, which stands in for all the links beyond (the narration's "all the links beyond, added at once");
+the chain with its tail ends exactly at ζ(½ + it).
+
+*240 roots and infinitely many counting numbers.* E8's 240 roots are not where the counting numbers go. They fix E8's
+Coxeter element, a turn by 1/30, and so a clock of 30 hours: every n takes the hour n mod 30, and the hours repeat
+(7, 37, 67, 97 share one), with no end. And E8 is an infinite lattice: the 240 roots are its first shell, at distance √2.
+Shell n, at distance √(2n), holds 240 σ₃(n) points (240, 2 160, 6 720, 17 520, …; 82 560 for 7 and 60 480 for 6), one
+shell for every counting number, and together the shells give E8's zeta function 240 ζ(s) ζ(s − 3).
+
 **Narration fades.** ElevenLabs is given each line's neighbours as context, and a clip often ends with a cut-off piece of
 the next line's first sound. [`Tools/fade_narration.py`](../../Tools/fade_narration.py) finds where each clip's speech
 ends and fades it out exponentially there (−60 dB over 0.1 s). A word's own last consonant, released after a short

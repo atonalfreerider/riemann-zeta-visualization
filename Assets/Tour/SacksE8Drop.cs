@@ -69,6 +69,43 @@ public partial class SacksSpiral
     }
 
     /// <summary>The position of hour k on the wheel (clockwise from the top), at radius r.</summary>
+    float e8SpiralFrom = 15f, e8SpiralTo = 33f;
+    int e8SpiralN = 600;
+
+    /// <summary>Where n sits on the wheel's spiral of numbers (hour n mod 30, radius growing with n).</summary>
+    public Vector3 E8SpiralPosition(long n) =>
+        E8Hour((int)(n % 30), e8SpiralFrom + (e8SpiralTo - e8SpiralFrom) * (n - 1) / (float)e8SpiralN) + Vector3.back * .3f;
+
+    /// <summary>
+    /// Light numbers on the wheel's spiral (the rest muted with exp:mute:E8 spiral): a bright dot at each, its hour's spoke
+    /// drawn bright from the centre out, and its name (group "E8 lit"; exp:e8unhl clears it).
+    /// </summary>
+    public void ExpE8Light(long[] ns, bool spoke)
+    {
+        Transform g = (ExpRoot().Find("E8 lit") ?? ExpGroup("E8 lit").transform);
+        foreach (long n in ns)
+        {
+            Vector3 at = E8SpiralPosition(n) + Vector3.back * .3f;
+            bool prime = ExpPrime(n);
+            Color col = prime ? PrimeGold : n % 2 == 0 || n % 3 == 0 || n % 5 == 0 ? new Color(1f, .45f, .4f) : new Color(.75f, .85f, 1f);
+            ExpDot(g, $"lit {n}", at, e8WheelDot * 1.7f, col, AttentionIntensity);
+            Flare(at, e8WheelDot * 4f, 1.2f, 2);
+            if (spoke)
+            {
+                int h = (int)(n % 30);
+                LineRenderer l = ExpLine(g, $"spoke {h}", e8WheelDot * .3f, Color.white, AttentionIntensity,
+                    new[] { E8Hour(h, e8SpiralFrom * .92f) + Vector3.back * .25f, E8Hour(h, e8SpiralTo * 1.02f) + Vector3.back * .25f });
+                StartCoroutine(SettleRoutine(l, col * .9f, 1f));
+            }
+        }
+    }
+
+    public void ExpE8Unlight()
+    {
+        Transform g = ExpRoot().Find("E8 lit");
+        if (g != null) Destroy(g.gameObject);
+    }
+
     Vector3 E8Hour(int k, float r)
     {
         float a = (90f - 12f * k) * Mathf.Deg2Rad;
@@ -85,6 +122,7 @@ public partial class SacksSpiral
     public void ExpE8Wheel(Vector3 o, float scale, int nMax, float spiralFrom, float spiralTo, float dot, float labelSize, long[] impostors)
     {
         e8WheelCenter = o; e8WheelDot = dot; e8WheelLabel = labelSize;
+        e8SpiralFrom = spiralFrom; e8SpiralTo = spiralTo; e8SpiralN = nMax;
         ExpEnsureSieve(nMax + 2);
         List<double[]> roots = E8Roots();
         (double[] u1, double[] u2) = E8CoxeterPlane();
@@ -165,6 +203,10 @@ public partial class SacksSpiral
             }
 
             ExpPointCloud(loop.transform, "numbers", pts, cols, sizes, Factory.GlowIntensity);
+            // the path from number to number, so the winding shows (on into the next loop)
+            List<Vector3> path = new();
+            for (long n = l * 30 + 1; n <= System.Math.Min(nMax, l * 30 + 31); n++) path.Add(E8Hour((int)(n % 30), R(n)) + Vector3.back * .25f);
+            if (path.Count > 1) ExpLine(loop.transform, "path", dot * .1f, new Color(.55f, .6f, .8f) * .45f, Factory.NoGlow, path.ToArray());
             RevealNote note = loop.AddComponent<RevealNote>();
             note.Text = $"1 … {System.Math.Min(nMax, l * 30 + 30)} dropped on the wheel\n" + Small("gold: primes, all above 5 on a gold spoke");
         }

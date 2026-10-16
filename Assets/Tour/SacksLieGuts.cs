@@ -50,8 +50,26 @@ public partial class SacksSpiral
     /// and the same eight unit steps chained head to tail from the centre: they end on tr(C^k) = −8, −1, 4. Right: the charge of
     /// spoke k of the zeta chain restricted to n prime to 30 (measured at t = 5000), against tr(C^k) for k = 1 … 30.
     /// </summary>
+    // where the IA picture was drawn (for callouts at its bars and wheels)
+    Vector3 iaOrigin;
+
+    /// <summary>The top of the filled bar of spoke k (its charge measured at t = 5000) in the IA picture.</summary>
+    public Vector3 CoxeterBarTop(int k)
+    {
+        k = Mathf.Clamp(k, 1, 30);
+        return iaOrigin + new Vector3(16f + (k - .5f) * 3.6f, -6f + LieGutsData.SpokeChargeRe[k - 1] * 4.1f, -.4f);
+    }
+
+    /// <summary>The gold point where the eight unit steps of wheel k (15, 1 or 5) end: tr Cᵏ.</summary>
+    public Vector3 CoxeterWheelTrace(int k)
+    {
+        float x = k == 15 ? -86f : k == 1 ? -50f : -16f;
+        return iaOrigin + new Vector3(x + CoxeterTrace(k) * 3.25f, 6f, -.4f);
+    }
+
     public void ExpCoxeterTraceCharges(Vector3 o, float labelSize)
     {
+        iaOrigin = o;
         Transform g = ExpGroup("IA traces").transform;
         int[] ks = { 15, 1, 5 };
         float[] xs = { -86f, -50f, -16f };

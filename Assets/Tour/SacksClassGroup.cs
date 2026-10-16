@@ -402,4 +402,59 @@ public partial class SacksSpiral
             ExpLabelWide(g, $"{off[k]} off:  {name}", Q(lam, 17), labelSize * .15f, col, TextAlignmentOptions.Left);
         }
     }
+
+    /// <summary>
+    /// The sweep over LE's chart at o (as drawn by ExpClassMixtures): a gold height λ climbs from lam0 to lam1 in `seconds`,
+    /// its crossings with the curve light up (each a zero of that mixture on the line), a marker rides the count of zeros off
+    /// the line in the right panel, and a label reads λ and both counts.
+    /// </summary>
+    public void ExpMixtureSweepLive(Vector3 o, float lam0, float lam1, float seconds, float labelSize)
+    {
+        StartLive(MixtureSweep(o, lam0, lam1, seconds, labelSize));
+    }
+
+    System.Collections.IEnumerator MixtureSweep(Vector3 o, float lam0, float lam1, float seconds, float labelSize)
+    {
+        const float w = 190f, sy = 12f, lo = -3f, x0 = -140f, bx = 72f, sx = 3.2f;
+        Vector3 P(double t, double lam) => o + new Vector3(x0 + (float)(t / 50d) * w, (float)lam * sy, -.4f);
+        Vector3 Q(double lam, double count) => o + new Vector3(bx + (float)count * sx, (float)lam * sy, -.4f);
+        double[] R = ClassGroupData.MixR;
+        Transform g = LiveRoot();
+        LineRenderer height = ExpLine(g, "height", .3f, Color.white, AttentionIntensity, new[] { P(0, lam0), P(50, lam0) });
+        LineRenderer marker = ExpLine(g, "marker", .5f, Color.white, AttentionIntensity, new[] { Q(lam0, 0), Q(lam0, 1) });
+        TextBox readout = ExpLabelWide(g, "", o + new Vector3(x0 + 4f, 4.6f * sy, -.5f), labelSize * .19f, Color.white, TextAlignmentOptions.Left);
+        GameObject dotsHolder = null;
+        float time = 0f;
+        while (true)
+        {
+            if (height == null) yield break; // the stage was cleared under us
+            float u = Mathf.Clamp01(time / seconds);
+            double lam = lam0 + (lam1 - lam0) * Mathf.SmoothStep(0f, 1f, u);
+            height.SetPositions(new[] { P(0, lam), P(50, lam) });
+            int k = Mathf.Clamp((int)System.Math.Round((lam - lo) / .01), 0, ClassGroupData.MixOnLine.Length - 1);
+            int on = ClassGroupData.MixOnLine[k], off = ClassGroupData.MixOffLine[k];
+            marker.SetPositions(new[] { Q(lam, 0), Q(lam, off) });
+            readout.TextField.text = $"λ = {lam:0.00}:   <color=#FFD54A>{on} zeros on the line</color>,   {(off == 0 ? "<color=#FFD54A>none off it</color>" : $"{off} off it")}".Replace("-", "−");
+            // the crossings of the curve with the height: the zeros of this mixture on the line
+            if (dotsHolder != null) Destroy(dotsHolder);
+            dotsHolder = new GameObject("crossings");
+            dotsHolder.transform.SetParent(g, false);
+            List<Vector3> dots = new();
+            List<Color> dc = new();
+            List<float> ds = new();
+            for (int i = 1; i < R.Length; i++)
+            {
+                if (System.Math.Abs(R[i] - R[i - 1]) > 4d || (R[i] - lam) * (R[i - 1] - lam) > 0d) continue;
+                double f = (lam - R[i - 1]) / (R[i] - R[i - 1]);
+                dots.Add(P(.02 * i + .02 * f, lam) + Vector3.back * .2f);
+                dc.Add(off == 0 ? PrimeGold : Color.white);
+                ds.Add(1.2f);
+            }
+
+            ExpPointCloud(dotsHolder.transform, "dots", dots, dc, ds, AttentionIntensity);
+            if (u >= 1f) yield break;
+            time += Time.deltaTime;
+            yield return null;
+        }
+    }
 }
