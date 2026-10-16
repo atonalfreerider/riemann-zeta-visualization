@@ -95,6 +95,7 @@ public partial class TourDirector : MonoBehaviour
 
         script = TourScriptLoader.Load();
         experiments = TourScriptLoader.LoadExperiments();
+        SacksSpiral.WarmZeroModule(); // the zeros module's sums, on a worker thread, so it opens without a stall
         ModelLab.Create(this);
         if (!VRMode.Enabled)
         {

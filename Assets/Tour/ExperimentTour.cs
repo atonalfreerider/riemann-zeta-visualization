@@ -127,6 +127,7 @@ public partial class TourDirector
     /// exp:torusroll:SECONDS · exp:classes · exp:charlive:M:3|2|5:SECONDS[:slide][:rise][:BENDTO] · exp:fingerlive:CODE:SECONDS
     /// (CODE empty, primes, sq, euler, 17, k2p1, k2k1, pronic, u4u1) · exp:fingerall · exp:clocklive:SECONDS · exp:clock[:labels]
     /// exp:clockpulse:red|orange · exp:quadglow:Q:B:C
+    /// The zeros module: exp:zfunnel · exp:ztrees · exp:zpaths · exp:zspacing · exp:show:GROUP (all items of a hidden group at once)
     /// </summary>
     /// <summary>The moduli of the sieve machine's rings (exp:sievedial, exp:sieveboard).</summary>
     static readonly int[] SieveMods = { 3, 4, 5, 7, 8, 9, 11, 13, 16, 17, 19 };
@@ -466,6 +467,19 @@ public partial class TourDirector
                 break;
             }
             case "descent": sacks.ExpDescentRows(c + new Vector3(SacksSpiral.FactorFunnelOffset + 600f, 0f, 0f), 105f); break;
+            // the zeros module (xzeros): the funnel with its layers hidden, the eight trees, the paths, the spacings
+            case "zfunnel": sacks.ExpZeroModuleFunnel(c + new Vector3(SacksSpiral.ZeroModuleOffset, 0f, 0f), 150f); break;
+            case "ztrees":
+                sacks.ExpCharacterTrees(c + new Vector3(SacksSpiral.ZeroModuleOffset + 600f, 0f, 0f), 34f, 100, 15f, 3.4f, .55f, 150f, Vector3.up,
+                    new Vector3(.94f, -.342f, 0f), 2, 100f);
+                sacks.ExpHideItems("JC trees");
+                break;
+            case "zpaths":
+                sacks.ExpPathLampChart(c + new Vector3(SacksSpiral.ZeroModuleOffset + 1150f, 60f, 0f), new long[] { 360, 343, 397 }, 15.5f, 9f, 22f, .55f, 215f, true, 82f);
+                sacks.ExpHideItems("JE path lamps");
+                break;
+            case "zspacing": sacks.ExpZeroSpacing(c + new Vector3(SacksSpiral.ZeroModuleOffset + 1800f, 0f, 0f), 200f, true); break;
+            case "show": sacks.ExpShowItems(A(2)); break;
             case "say":
             {
                 string[] parts = string.Join(":", p, 2, p.Length - 2).Split('|');

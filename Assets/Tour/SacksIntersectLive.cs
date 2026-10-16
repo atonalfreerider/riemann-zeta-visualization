@@ -45,6 +45,15 @@ public partial class SacksSpiral
         foreach (Transform t in items) t.gameObject.SetActive(false);
     }
 
+    /// <summary>Show every item of a group at once (exp:show:GROUP), for groups hidden by exp:hide.</summary>
+    public void ExpShowItems(string groupName)
+    {
+        Transform g = FindExpGroup(groupName);
+        if (g == null) return;
+        Transform items = g.Find("reveal") ?? g;
+        foreach (Transform t in items) t.gameObject.SetActive(true);
+    }
+
     /// <summary>Show the items of a group one by one over <paramref name="seconds"/> (exp:reveal:GROUP:SECONDS).</summary>
     public void ExpRevealLive(string groupName, float seconds)
     {

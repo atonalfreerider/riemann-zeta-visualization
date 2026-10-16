@@ -133,9 +133,19 @@ public partial class VRApp
         ["xgoldbach"] = ("Pairs", VRIcons.Id.Pair),
         ["xsieve"] = ("Sieve", VRIcons.Id.Sieve),
         ["xtwist"] = ("Twist", VRIcons.Id.Twist),
+        ["xnorms"] = ("Norms", VRIcons.Id.Saddle),
+        ["xlattices"] = ("Rings", VRIcons.Id.Lattice),
+        ["xresidue"] = ("12-torus", VRIcons.Id.Torus),
+        ["xmodular"] = ("Modular", VRIcons.Id.Mirror),
+        ["xrace"] = ("Race", VRIcons.Id.Speed),
+        ["xe8"] = ("Drop on E8", VRIcons.Id.E8),
+        ["xebuild"] = ("E5 to E8", VRIcons.Id.E8),
+        ["xpaths"] = ("Paths", VRIcons.Id.Funnel),
+        ["xzeros"] = ("Zeros", VRIcons.Id.Zeros),
     };
 
-    const int LabColumns = 6, LabRows = 3;
+    // 28 places: every module fits (7 across, 4 down, above the line that names the one playing)
+    const int LabColumns = 7, LabRows = 4;
 
     void BuildLabPage(RectTransform p)
     {
@@ -146,8 +156,8 @@ public partial class VRApp
             int index = i;
             (string label, VRIcons.Id icon) = LabInfo.TryGetValue(modules[i].id, out var info) ? info : (modules[i].title, VRIcons.Id.Flask);
             int col = i % LabColumns, row = i / LabColumns;
-            Dock.AddButton(8 + col * 97, 2 + row * 88, 93, 84, label, icon,
-                () => PlayExperiment(index), true, () => tour.Running && tour.PlayingExperiment && tour.CurrentChapterIndex == index, 17f, p);
+            Dock.AddButton(8 + col * 83, 2 + row * 66, 79, 62, label, icon,
+                () => PlayExperiment(index), true, () => tour.Running && tour.PlayingExperiment && tour.CurrentChapterIndex == index, 15f, p);
         }
 
         labLabel = Dock.AddLabel(10, 272, 580, 26, "", 21f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);

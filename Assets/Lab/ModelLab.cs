@@ -105,6 +105,8 @@ public abstract class LabModel
 ///   Paths    the factor funnel of "The paths back": pick any n, watch it drop to 1, see the whole tree of first steps
 ///   E8       the 240 roots on their Coxeter planes: turn by the Coxeter element, reflect in a root, apply a Frobenius
 ///   Unified  E8's wheel under the funnel, ζ(½ + it) split into its 30 hour sums, the Sacks spiral as a second layout
+///   Zeros    where the zeros sit in the funnel: ζ's zeros as coils, their sum as a comb and rings, the eight L-functions of
+///            Q(ζ30) as fans to the primes on E8's spokes, the lamps on the prime-power columns
 /// Desktop: drag to orbit, wheel to zoom, right drag (or Shift + drag) to move, click a point to pick it; each model has
 /// keys, and a panel on the right lists its controls. VR: the model is placed in front of the user like a tour shot (pinch
 /// moves it), touching a point with a fingertip picks it, and the dock's Models page holds the controls and the readout.
@@ -151,6 +153,7 @@ public class ModelLab : MonoBehaviour
         lab.Models.Add(new PathsModel());
         lab.Models.Add(new E8Model());
         lab.Models.Add(new UnifiedModel());
+        lab.Models.Add(new ZerosModel());
         Instance = lab;
         if (!VRMode.Enabled) LabPanel.Create(lab);
         return lab;

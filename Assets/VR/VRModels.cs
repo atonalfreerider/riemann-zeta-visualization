@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// The dock's Models page: the model lab in VR. Three models (Paths, E8, Unified) and Leave across the top; the readout
+/// The dock's Models page: the model lab in VR. The models (Paths, E8, Unified, Zeros), Re-frame and Leave across the top; the readout
 /// (what the picked number or root says) and a number's column laid on its side; then the active model's controls, two rows
 /// of buttons and sliders. Touch a column top or a root with a fingertip to pick it; pinch to move the model as anywhere else.
 /// </summary>
@@ -26,18 +26,21 @@ public partial class VRApp
             return;
         }
 
+        // one button per model, then Re-frame and Leave, sharing the row
+        int slots = lab.Models.Count + 2;
+        float pitch = (DockWidth - 16f) / slots, bw = pitch - 6f;
         for (int i = 0; i < lab.Models.Count; i++)
         {
             LabModel m = lab.Models[i];
-            Dock.AddButton(8 + i * 118, 2, 112, 50, m.Short, m.Icon, () =>
+            Dock.AddButton(8 + i * pitch, 2, bw, 50, m.Short, m.Icon, () =>
             {
                 tour.LeaveExperiment();
                 lab.Enter(m.Id);
             }, true, () => lab.Active == m, 18f, p);
         }
 
-        Dock.AddButton(8 + 3 * 118, 2, 112, 50, "Re-frame", VRIcons.Id.Target, () => lab.ResetView(false), false, null, 18f, p);
-        Dock.AddButton(8 + 4 * 118, 2, 112, 50, "Leave", VRIcons.Id.Close, () => lab.Exit(), false, null, 18f, p);
+        Dock.AddButton(8 + lab.Models.Count * pitch, 2, bw, 50, "Re-frame", VRIcons.Id.Target, () => lab.ResetView(false), false, null, 18f, p);
+        Dock.AddButton(8 + (lab.Models.Count + 1) * pitch, 2, bw, 50, "Leave", VRIcons.Id.Close, () => lab.Exit(), false, null, 18f, p);
 
         labStatus = Dock.AddLabel(10, 56, 580, 70, "Touch a model to open it, then touch its points with a fingertip", 20f, VRStyle.Text, TextAlignmentOptions.TopLeft, FontStyles.Normal, p);
         labStatus.overflowMode = TextOverflowModes.Truncate;

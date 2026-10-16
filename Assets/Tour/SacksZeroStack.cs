@@ -22,196 +22,8 @@ using UnityEngine;
 public partial class SacksSpiral
 {
     public const float ZeroStackOffset = 66000f;
-    static readonly int[] ZsGold = { 1, 7, 11, 13, 17, 19, 23, 29 };
-
-    /// <summary>The Gaussian width in γ for the eight L-functions (their zeros are known to t = 1000 = 4σ).</summary>
-    public const double ZsSigmaL = 250d;
-
-    /// <summary>χ_k(n) for the primitive character k of LabMath.Characters (conductor 1, 3, 5 or 15), for any n.</summary>
-    static Cpx ZsChi(int k, long n)
-    {
-        var (a, b, q, _) = LabMath.Characters[k];
-        if (q == 1) return Cpx.One;
-        Cpx v = Cpx.One;
-        if (a == 1)
-        {
-            long r = n % 3;
-            if (r == 0) return Cpx.Zero;
-            if (r == 2) v = -v;
-        }
-
-        if (b > 0)
-        {
-            Cpx p5 = (n % 5) switch { 0 => Cpx.Zero, 1 => Cpx.One, 2 => new Cpx(0d, 1d), 4 => new Cpx(-1d, 0d), _ => new Cpx(0d, -1d) };
-            for (int i = 0; i < b; i++) v = v * p5;
-        }
-
-        return v;
-    }
-
-    static int ZsParity(int k)
-    {
-        var (a, b, q, _) = LabMath.Characters[k];
-        return q == 1 ? 0 : (a + b) % 2;
-    }
-
-    /// <summary>The smooth side of the explicit formula, ζ's pole and the trivial zeros, in the units of Σ χ(n) Λ(n)/√n δ(z − log n).</summary>
-    static double ZsSmooth(int k, double z)
-    {
-        double e2 = 1d - Math.Exp(-2d * z);
-        if (k == 0) return Math.Exp(z / 2d) - Math.Exp(-2.5d * z) / e2;
-        return ZsParity(k) == 0 ? -Math.Exp(-.5d * z) / e2 : -Math.Exp(-1.5d * z) / e2;
-    }
-
-    /// <summary>
-    /// The zeros of L(s, χ_k) summed at height z = log x with Gaussian weights e^(−γ²/2σ²):
-    ///   W(z) = e^(z/2) √(2π)/σ · (S_k(z) − Σ_ρ e^(−γ²/2σ²) e^(iγz)).
-    /// By the explicit formula W(z) = Σ_n χ(n) Λ(n) e^((z − log n)/2) e^(−σ²(z − log n)²/2): a tooth of height χ(n)·log p at the
-    /// height of each prime power n = p^j, nothing in between (checked against the primes in Tools/zero_stack_data.py).
-    /// </summary>
-    sealed class ZsSum
-    {
-        readonly double[] gam, w;
-        readonly double[] gamNeg, wNeg;
-        readonly int k;
-        readonly double sigma;
-
-        public ZsSum(int k, double sigma, double cut)
-        {
-            this.k = k;
-            this.sigma = sigma;
-            double[] pos = k == 0 ? ZeroStackData.Zeta : ZeroStackData.L[k];
-            (gam, w) = Weighted(pos, sigma, cut);
-            int c = k switch { 4 => 5, 5 => 4, 6 => 7, 7 => 6, _ => k };
-            if (c != k) (gamNeg, wNeg) = Weighted(c == 0 ? ZeroStackData.Zeta : ZeroStackData.L[c], sigma, cut);
-        }
-
-        static (double[], double[]) Weighted(double[] g, double sigma, double cut)
-        {
-            List<double> a = new(), b = new();
-            foreach (double x in g)
-            {
-                if (x > cut) break;
-                a.Add(x);
-                b.Add(Math.Exp(-.5d * (x / sigma) * (x / sigma)));
-            }
-
-            return (a.ToArray(), b.ToArray());
-        }
-
-        public double Sigma => sigma;
-
-        public Cpx At(double z)
-        {
-            double re = 0d, im = 0d;
-            for (int i = 0; i < gam.Length; i++)
-            {
-                double a = gam[i] * z;
-                re += w[i] * Math.Cos(a);
-                im += w[i] * Math.Sin(a);
-            }
-
-            if (gamNeg == null)
-            {
-                re *= 2d; // ±γ: the imaginary parts cancel
-                im = 0d;
-            }
-            else
-            {
-                for (int i = 0; i < gamNeg.Length; i++)
-                {
-                    double a = gamNeg[i] * z;
-                    re += wNeg[i] * Math.Cos(a);
-                    im -= wNeg[i] * Math.Sin(a);
-                }
-            }
-
-            double f = Math.Exp(z / 2d) * Math.Sqrt(2d * Math.PI) / sigma;
-            return new Cpx(f * (ZsSmooth(k, z) - re), -f * im);
-        }
-    }
-
-    static ZsSum[] zsL;
-    static ZsSum zsZeta;
-
-    static ZsSum[] ZsLSums() => zsL ??= BuildLSums();
-
-    static ZsSum[] BuildLSums()
-    {
-        ZsSum[] s = new ZsSum[8];
-        for (int k = 0; k < 8; k++) s[k] = new ZsSum(k, ZsSigmaL, 1000d);
-        return s;
-    }
-
-    /// <summary>ζ alone, with all 10 500 zeros (σ = a quarter of the last).</summary>
-    static ZsSum ZsZetaSum() => zsZeta ??= new ZsSum(0, ZeroStackData.Zeta[^1] / 4d, double.MaxValue);
-
-    /// <summary>
-    /// The eight sums turned back by χ(h) and averaged, (1/8) Σ_k conj χ_k(h) W_k(z), less the powers of 2, 3 and 5, whose
-    /// terms are known exactly (the field Q(ζ30) puts 2 at hour 17 mod 15, 3 and 5 are ramified; E8's wheel has no spoke for
-    /// them). What is left is Σ_{n ≡ h (30)} Λ(n) e^((z − log n)/2) e^(−σ²(z − log n)²/2).
-    /// </summary>
-    static double ZsSpoke(int h, double z)
-    {
-        ZsSum[] sums = ZsLSums();
-        Cpx[] w = new Cpx[8];
-        for (int k = 0; k < 8; k++) w[k] = sums[k].At(z);
-        return ZsSpokeFrom(h, z, w);
-    }
-
-    /// <summary>The same from the eight sums already evaluated at z.</summary>
-    static double ZsSpokeFrom(int h, double z, Cpx[] w)
-    {
-        double re = 0d;
-        for (int k = 0; k < 8; k++)
-        {
-            Cpx c = ZsChi(k, h);
-            re += c.Re * w[k].Re + c.Im * w[k].Im; // Re(conj(c)·w)
-        }
-
-        re /= 8d;
-        foreach (int p in new[] { 2, 3, 5 })
-        {
-            for (long m = p; m < 1000000; m *= p)
-            {
-                double share = p switch { 2 => (m - h) % 15 == 0 ? 1d : 0d, 3 => (m - h) % 5 == 0 ? .5d : 0d, _ => (m - h) % 3 == 0 ? .25d : 0d };
-                if (share == 0d) continue;
-                double u = z - Math.Log(m);
-                if (Math.Abs(u) * ZsSigmaL > 12d) continue;
-                re -= share * Math.Log(p) * Math.Exp(u / 2d - .5d * ZsSigmaL * ZsSigmaL * u * u);
-            }
-        }
-
-        return re;
-    }
-
-    /// <summary>Heights to sample: a coarse grid, and fine around each given spike (the teeth are 1/σ wide).</summary>
-    static List<double> ZsSamples(double z0, double z1, double coarse, IEnumerable<double> spikes, double sigma)
-    {
-        List<double> s = new();
-        for (double z = z0; z <= z1; z += coarse) s.Add(z);
-        foreach (double c in spikes)
-        {
-            if (c < z0 || c > z1) continue;
-            for (int j = -28; j <= 28; j++) s.Add(c + j * .22d / sigma);
-        }
-
-        s.Sort();
-        List<double> o = new();
-        foreach (double z in s) if (o.Count == 0 || z - o[^1] > 1e-9) o.Add(z);
-        return o;
-    }
-
-    static bool ZsPrimePower(long n, out long p, out int j)
-    {
-        p = 0; j = 0;
-        if (n < 2) return false;
-        List<long> f = Factorize(n);
-        p = f[0];
-        foreach (long q in f) if (q != p) return false;
-        j = f.Count;
-        return true;
-    }
+    static int[] ZsGold => ZeroSums.Gold;
+    const double ZsSigmaL = ZeroSums.SigmaL;
 
     static Vector3 ZsHourDir(int h)
     {
@@ -236,6 +48,218 @@ public partial class SacksSpiral
         if (!ramified) return;
         int[] ps = { 2, 3, 5 };
         for (int i = 0; i < 3; i++) ExpLabelWide(g, ps[i].ToString(), at + right * (step * (10f + i)), size * 1.1f, PrimeHue(ps[i]));
+    }
+
+    // ================================================================================================
+    // The module "The zeros inside E8's stack" (experiments.json, xzeros)
+    // ================================================================================================
+
+    public const float ZeroModuleOffset = 68000f;
+    const int ZmN = 400;
+    const float ZmS = 2.6f, ZmH = 6f;
+
+    /// <summary>The sums the module draws, worked out once on a worker thread (started with the experiments).</summary>
+    sealed class ZeroModuleCache
+    {
+        public readonly Dictionary<int, (double[] z, double[] w)> Teeth = new();
+        public readonly Dictionary<int, double> Peak = new();
+        public double[] FanZ;
+        public double[][] FanW = new double[8][];
+        public readonly Dictionary<int, double> FanTip = new();
+    }
+
+    static System.Threading.Tasks.Task<ZeroModuleCache> zeroModuleJob;
+
+    /// <summary>Start the module's sums in the background (cheap to call again).</summary>
+    public static void WarmZeroModule() => zeroModuleJob ??= System.Threading.Tasks.Task.Run(ComputeZeroModule);
+
+    static ZeroModuleCache ComputeZeroModule()
+    {
+        ZeroModuleCache c = new();
+        ZeroSums.Sum zeta = ZeroSums.ZetaAll;
+        double sig = zeta.Sigma;
+        for (int m = 2; m <= ZmN; m++)
+        {
+            if (!ZeroSums.PrimePower(m, out _, out _)) continue;
+            double zc = Math.Log(m);
+            List<double> z = new(), w = new();
+            for (int j = -26; j <= 26; j++)
+            {
+                double zz = zc + j * .23d / sig;
+                z.Add(zz);
+                w.Add(zeta.At(zz).Re);
+            }
+
+            c.Teeth[m] = (z.ToArray(), w.ToArray());
+            c.Peak[m] = zeta.At(zc).Re;
+        }
+
+        List<double> spikes = new();
+        for (int m = 7; m <= ZmN; m++)
+            if (m % 2 != 0 && m % 3 != 0 && m % 5 != 0 && ZeroSums.PrimePower(m, out _, out _))
+                spikes.Add(Math.Log(m));
+        List<double> zs = ZeroSums.Samples(1.0d, Math.Log(ZmN) + .02d, .004d, spikes, ZeroSums.SigmaL);
+        c.FanZ = zs.ToArray();
+        for (int h = 0; h < 8; h++) c.FanW[h] = new double[zs.Count];
+        ZeroSums.Sum[] sums = ZeroSums.LSums;
+        Cpx[] wk = new Cpx[8];
+        for (int i = 0; i < zs.Count; i++)
+        {
+            for (int k = 0; k < 8; k++) wk[k] = sums[k].At(zs[i]);
+            for (int h = 0; h < 8; h++) c.FanW[h][i] = ZeroSums.SpokeFrom(ZeroSums.Gold[h], zs[i], wk);
+        }
+
+        foreach (int hour in ZeroSums.Gold)
+            for (int m = hour; m <= ZmN; m += 30)
+                if (ZeroSums.PrimePower(m, out _, out _))
+                    c.FanTip[m] = ZeroSums.Spoke(hour, Math.Log(m));
+        return c;
+    }
+
+    /// <summary>
+    /// The funnel scene of the module: the factor funnel for n ≤ 400 and, each in its own reveal group (hidden until a line
+    /// shows it): "JM coils" (the first three zeros), "JM disc 7" and "JM disc 6" (where all 10 500 coils point at those
+    /// heights), "JM comb" (the funnel's profile and the axis, then one tooth per prime power from the bottom up), "JM comb
+    /// labels", "JM rings" (one per prime power) and "JM fans" (one per gold hour, with its tips and its number).
+    /// </summary>
+    public void ExpZeroModuleFunnel(Vector3 o, float labelSize)
+    {
+        WarmZeroModule();
+        ZeroModuleCache cache = zeroModuleJob.Result;
+        ExpFactorColumns(o, ZmN, ZmS, ZmH, .55f, 0f, new long[0], true, false, .6f);
+        Vector3 Up(double h) => Vector3.back * (ZmH * (float)h);
+        Vector3 side = Vector3.right;
+        float Reach(double z, double w) => (float)(ZmS * Math.Exp(z / 2d) * w / z);
+        Transform Item(Transform g, string name)
+        {
+            GameObject go = new(name);
+            go.transform.SetParent(g, false);
+            return go.transform;
+        }
+
+        // the coils
+        Transform coils = ExpGroup("JM coils").transform;
+        Color[] cc = { new(1f, .85f, .1f), new(.35f, .85f, 1f), new(1f, .45f, .8f) };
+        float zMax = Mathf.Log(ZmN);
+        for (int k = 0; k < 3; k++)
+        {
+            float r = ZmS * (3.4f - .9f * k), gm = (float)ZeroStackData.Zeta[k];
+            int steps = Mathf.CeilToInt(gm * zMax / (2f * Mathf.PI) * 48f);
+            Vector3[] pts = new Vector3[steps + 1];
+            for (int i = 0; i <= steps; i++)
+            {
+                float z = zMax * i / steps, a = gm * z;
+                pts[i] = o + new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f) + Up(z);
+            }
+
+            ExpLine(coils, $"coil {k + 1}", .34f - .06f * k, cc[k], Factory.GlowIntensity, pts);
+        }
+
+        // where all the coils point, at the heights of 7 and 6: rings of bars round the axis
+        foreach (int n in new[] { 7, 6 })
+        {
+            Transform g = ExpGroup($"JM disc {n}").transform;
+            double[] zs = ZeroStackData.Zeta;
+            const int bins = 48;
+            int[] hist = new int[bins];
+            double zn = Math.Log(n), mr = 0d, mi = 0d;
+            foreach (double gm in zs)
+            {
+                double a = gm * zn;
+                mr += Math.Cos(a);
+                mi += Math.Sin(a);
+                hist[(int)(a % (2d * Math.PI) / (2d * Math.PI) * bins) % bins]++;
+            }
+
+            mr /= zs.Length;
+            mi /= zs.Length;
+            Vector3 c = o + Up(zn);
+            float r0 = ZmS * 5.5f, unit = ZmS * 3.6f, mean = zs.Length / (float)bins;
+            Color col = n == 7 ? new Color(1f, .68f, .25f) : new Color(.75f, .78f, .9f);
+            List<(Vector3, Vector3)> ring = new(), bars = new();
+            for (int i = 0; i < 96; i += 2)
+            {
+                float a0 = i / 96f * Mathf.PI * 2f, a1 = (i + 1) / 96f * Mathf.PI * 2f;
+                ring.Add((c + new Vector3(Mathf.Cos(a0), Mathf.Sin(a0), 0f) * (r0 + unit), c + new Vector3(Mathf.Cos(a1), Mathf.Sin(a1), 0f) * (r0 + unit)));
+            }
+
+            for (int i = 0; i < bins; i++)
+            {
+                float a = (i + .5f) / bins * Mathf.PI * 2f;
+                Vector3 d = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
+                bars.Add((c + d * r0, c + d * (r0 + unit * hist[i] / mean)));
+            }
+
+            Segments(g, "even share", ring, .08f, Color.white * .5f, Factory.NoGlow);
+            Segments(g, "bars", bars, .42f, col, Factory.SoftGlowIntensity);
+            float gain = r0 * .9f / .12f;
+            Transform arrow = Item(g, "mean");
+            ExpLine(arrow, "mean line", .36f, Color.white, AttentionIntensity, new[] { c, c + new Vector3((float)mr, (float)mi, 0f) * gain });
+            ExpDot(arrow, "mean tip", c + new Vector3((float)mr, (float)mi, 0f) * gain, 1.1f, Color.white, AttentionIntensity);
+        }
+
+        // ζ's comb: the profile and the axis, then the teeth from the bottom up
+        Transform comb = ExpGroup("JM comb").transform;
+        Transform combLabels = ExpGroup("JM comb labels").transform;
+        Transform rings = ExpGroup("JM rings").transform;
+        Transform frame = Item(comb, "frame");
+        List<Vector3> profile = new();
+        for (double z = .42d; z <= Math.Log(ZmN) + .02d; z += .02d) profile.Add(o + side * (float)(ZmS * Math.Exp(z / 2d)) + Up(z));
+        ExpLine(frame, "funnel profile", .1f, new Color(.5f, .55f, .75f) * .7f, Factory.NoGlow, profile.ToArray());
+        ExpLine(frame, "axis", .12f, Color.white * .7f, Factory.SoftGlowIntensity, new[] { o + Up(.42d), o + Up(Math.Log(ZmN) + .02d) });
+        List<int> pp = new(cache.Teeth.Keys);
+        pp.Sort();
+        foreach (int m in pp)
+        {
+            var (z, w) = cache.Teeth[m];
+            Vector3[] pts = new Vector3[z.Length];
+            for (int i = 0; i < z.Length; i++) pts[i] = o + side * Reach(z[i], w[i]) + Up(z[i]);
+            ExpLine(comb, $"tooth {m}", .16f, Color.white, Factory.GlowIntensity, pts);
+            ZeroSums.PrimePower(m, out long p, out int j);
+            double zm = Math.Log(m), peak = cache.Peak[m];
+            float rr = Reach(zm, peak);
+            Vector3[] loop = new Vector3[97];
+            for (int i = 0; i < loop.Length; i++)
+            {
+                float a = i / 96f * Mathf.PI * 2f;
+                loop[i] = o + new Vector3(Mathf.Cos(a) * rr, Mathf.Sin(a) * rr, 0f) + Up(zm);
+            }
+
+            ExpLine(rings, $"ring {m}", j == 1 ? .09f : .06f, SegmentColor(p) * (j == 1 ? .8f : .5f), Factory.SoftGlowIntensity, loop);
+            if (j == 1 && (m <= 13 || m == 31 || m == 97 || m == 211 || m == 397))
+                ExpLabelWide(combLabels, m.ToString(), o + side * (rr + (m >= 31 ? 5f : 1.8f)) + Up(zm) + Vector3.back * (m == 13 ? 1.4f : m == 11 ? -1f : 0f),
+                    labelSize * .2f, SegmentColor(p), TextAlignmentOptions.Left);
+        }
+
+        // E8's fans: one per gold hour
+        Transform fans = ExpGroup("JM fans").transform;
+        for (int h = 0; h < 8; h++)
+        {
+            int hour = ZeroSums.Gold[h];
+            Transform fan = Item(fans, $"fan {hour}");
+            Vector3 u = ZsHourDir(hour);
+            Color col = ZsHourColor(hour);
+            Vector3[] pts = new Vector3[cache.FanZ.Length];
+            for (int i = 0; i < pts.Length; i++) pts[i] = o + u * Reach(cache.FanZ[i], cache.FanW[h][i]) + Up(cache.FanZ[i]);
+            ExpLine(fan, "comb", .17f, col, Factory.GlowIntensity, pts);
+            List<Vector3> tips = new();
+            List<Color> tc = new();
+            List<float> ts = new();
+            foreach (var kv in cache.FanTip)
+            {
+                if (kv.Key % 30 != hour) continue;
+                double z = Math.Log(kv.Key);
+                ZeroSums.PrimePower(kv.Key, out _, out int j);
+                tips.Add(o + u * Reach(z, kv.Value) + Up(z));
+                tc.Add(col);
+                ts.Add(j == 1 ? .8f : .55f);
+            }
+
+            ExpPointCloud(fan, "tips", tips, tc, ts, Factory.GlowIntensity);
+            ExpLabelWide(fan, hour.ToString(), o + u * (ZmS * Mathf.Sqrt(ZmN) * 1.13f) + Up(Math.Log(ZmN)), labelSize * .3f, col);
+        }
+
+        foreach (string name in new[] { "JM coils", "JM disc 7", "JM disc 6", "JM comb", "JM comb labels", "JM rings", "JM fans" }) ExpHideItems(name);
     }
 
     // ================================================================================================
@@ -362,14 +386,14 @@ public partial class SacksSpiral
         ExpEnsureSieve(nMax + 2);
         Vector3 Up(double h) => Vector3.back * (hScale * (float)h);
         side = new Vector3(side.x, side.y, 0f).normalized;
-        ZsSum zeta = ZsZetaSum();
+        ZeroSums.Sum zeta = ZeroSums.ZetaAll;
         List<double> spikes = new();
         List<long> pp = new();
         for (long m = 2; m <= nMax; m++)
-            if (ZsPrimePower(m, out _, out _)) { pp.Add(m); spikes.Add(Math.Log(m)); }
+            if (ZeroSums.PrimePower(m, out _, out _)) { pp.Add(m); spikes.Add(Math.Log(m)); }
 
         double zTop = Math.Log(nMax) + .02d;
-        List<double> zs = ZsSamples(.42d, zTop, .0025d, spikes, zeta.Sigma);
+        List<double> zs = ZeroSums.Samples(.42d, zTop, .0025d, spikes, zeta.Sigma);
         Vector3[] comb = new Vector3[zs.Count];
         for (int i = 0; i < zs.Count; i++)
         {
@@ -385,7 +409,7 @@ public partial class SacksSpiral
         List<Vector3> tips = new(); List<Color> tc = new(); List<float> ts = new();
         foreach (long m in pp)
         {
-            ZsPrimePower(m, out long p, out int j);
+            ZeroSums.PrimePower(m, out long p, out int j);
             double z = Math.Log(m), w = zeta.At(z).Re;
             float rr = (float)(s * Math.Sqrt(m) * w / z);
             Color col = SegmentColor(p);
@@ -414,23 +438,28 @@ public partial class SacksSpiral
     /// height up to log nMax, W_χ(z) → χ(n)·Λ(n), drawn as a curve about a vertical axis: Re to the right, Im away. Each tooth
     /// points along χ(p); tips coloured by the hour of n (2, 3, 5 in their own colours).
     /// </summary>
-    public void ExpCharacterTrees(Vector3 o, float dx, int nMax, float hScale, float tooth, float dot, float labelSize, Vector3 imDir, Vector3 rowDir)
+    public void ExpCharacterTrees(Vector3 o, float dx, int nMax, float hScale, float tooth, float dot, float labelSize, Vector3 imDir, Vector3 rowDir,
+        int rows = 1, float rowGap = 0f)
     {
         Transform g = ExpGroup("JC trees").transform;
         ExpEnsureSieve(nMax + 2);
         Vector3 Up(double h) => Vector3.back * (hScale * (float)h);
-        ZsSum[] sums = ZsLSums();
+        ZeroSums.Sum[] sums = ZeroSums.LSums;
         List<double> spikes = new();
         List<long> pp = new();
         for (long m = 2; m <= nMax; m++)
-            if (ZsPrimePower(m, out _, out _)) { pp.Add(m); spikes.Add(Math.Log(m)); }
+            if (ZeroSums.PrimePower(m, out _, out _)) { pp.Add(m); spikes.Add(Math.Log(m)); }
 
         double zTop = Math.Log(nMax) + .03d;
-        List<double> zs = ZsSamples(.42d, zTop, .003d, spikes, ZsSigmaL);
+        List<double> zs = ZeroSums.Samples(.42d, zTop, .003d, spikes, ZsSigmaL);
         string[] names = { "trivial:  ζ itself", "mod 3", "mod 5,  real", "mod 15,  real", "mod 5,  χ(7) = i", "mod 5,  χ(7) = −i", "mod 15,  χ(7) = i", "mod 15,  χ(7) = −i" };
+        int perRow = 8 / Mathf.Max(1, rows);
         for (int k = 0; k < 8; k++)
         {
-            Vector3 b = o + rowDir * (dx * (k - 3.5f));
+            int col = k % perRow, row = k / perRow;
+            Vector3 b = o + rowDir * (dx * (col - (perRow - 1) * .5f)) + Vector3.back * (rowGap * (rows - 1 - row));
+            Transform tg = new GameObject($"tree {k}").transform;
+            tg.SetParent(g, false);
             Vector3[] curve = new Vector3[zs.Count];
             for (int i = 0; i < zs.Count; i++)
             {
@@ -438,25 +467,25 @@ public partial class SacksSpiral
                 curve[i] = b + (Vector3.right * (float)w.Re + imDir * (float)w.Im) * tooth + Up(zs[i]);
             }
 
-            ExpLine(g, $"tree {k}", dot * .1f, Color.white * .55f, Factory.SoftGlowIntensity, curve);
-            ExpLine(g, $"axis {k}", dot * .08f, new Color(.6f, .64f, .8f) * .5f, Factory.NoGlow, new[] { b, b + Up(zTop) });
+            ExpLine(tg, $"tree {k}", dot * .1f, Color.white * .55f, Factory.SoftGlowIntensity, curve);
+            ExpLine(tg, $"axis {k}", dot * .08f, new Color(.6f, .64f, .8f) * .5f, Factory.NoGlow, new[] { b, b + Up(zTop) });
             List<(Vector3, Vector3)> cross = new()
             {
                 (b - Vector3.right * tooth * 2.2f, b + Vector3.right * tooth * 2.2f), (b - imDir * tooth * 2.2f, b + imDir * tooth * 2.2f),
             };
-            Segments(g, $"compass {k}", cross, dot * .07f, new Color(.6f, .64f, .8f) * .6f, Factory.NoGlow);
+            Segments(tg, $"compass {k}", cross, dot * .07f, new Color(.6f, .64f, .8f) * .6f, Factory.NoGlow);
             if (k == 0 || k == 4)
             {
-                ExpLabelWide(g, "1", b + Vector3.right * tooth * 2.8f, labelSize * .17f, new Color(.7f, .74f, .88f));
-                ExpLabelWide(g, "i", b + imDir * tooth * 2.8f, labelSize * .17f, new Color(.7f, .74f, .88f));
+                ExpLabelWide(tg, "1", b + Vector3.right * tooth * 2.8f, labelSize * .17f, new Color(.7f, .74f, .88f));
+                ExpLabelWide(tg, "i", b + imDir * tooth * 2.8f, labelSize * .17f, new Color(.7f, .74f, .88f));
             }
 
             List<Vector3> tips = new(); List<Color> tc = new(); List<float> ts = new();
             Dictionary<int, List<(Vector3, Vector3)>> teeth = new();
             foreach (long m in pp)
             {
-                ZsPrimePower(m, out long p, out int j);
-                if (ZsChi(k, m).Re == 0d && ZsChi(k, m).Im == 0d) continue;
+                ZeroSums.PrimePower(m, out long p, out int j);
+                if (ZeroSums.Chi(k, m).Re == 0d && ZeroSums.Chi(k, m).Im == 0d) continue;
                 Cpx w = sums[k].At(Math.Log(m));
                 Vector3 axisPt = b + Up(Math.Log(m)), tip = axisPt + (Vector3.right * (float)w.Re + imDir * (float)w.Im) * tooth;
                 tips.Add(tip);
@@ -467,10 +496,10 @@ public partial class SacksSpiral
                 teeth[key].Add((axisPt, tip));
             }
 
-            foreach (var kv in teeth) Segments(g, $"teeth {k} {kv.Key}", kv.Value, dot * .26f, kv.Key <= 5 ? PrimeHue(kv.Key) : ZsHourColor(kv.Key), Factory.SoftGlowIntensity);
+            foreach (var kv in teeth) Segments(tg, $"teeth {k} {kv.Key}", kv.Value, dot * .26f, kv.Key <= 5 ? PrimeHue(kv.Key) : ZsHourColor(kv.Key), Factory.SoftGlowIntensity);
 
-            ExpPointCloud(g, $"tips {k}", tips, tc, ts, Factory.GlowIntensity);
-            ExpLabelWide(g, names[k], b - Vector3.up * (dot * 2f) + Up(-.9d), labelSize * .2f, k == 0 ? Factory.Palette.Zero : new Color(.85f, .88f, .96f));
+            ExpPointCloud(tg, $"tips {k}", tips, tc, ts, Factory.GlowIntensity);
+            ExpLabelWide(tg, names[k], b - Vector3.up * (dot * 2f) + Up(-.9d), labelSize * .2f, k == 0 ? Factory.Palette.Zero : new Color(.85f, .88f, .96f));
         }
     }
 
@@ -493,9 +522,9 @@ public partial class SacksSpiral
         // the eight sums once, on heights shared by all the spokes (fine around every prime power prime to 30)
         List<double> spikes = new();
         for (long m = 7; m <= nMax; m++)
-            if (m % 2 != 0 && m % 3 != 0 && m % 5 != 0 && ZsPrimePower(m, out _, out _)) spikes.Add(Math.Log(m));
-        List<double> zs = ZsSamples(1.0d, zTop, .004d, spikes, ZsSigmaL);
-        ZsSum[] sums = ZsLSums();
+            if (m % 2 != 0 && m % 3 != 0 && m % 5 != 0 && ZeroSums.PrimePower(m, out _, out _)) spikes.Add(Math.Log(m));
+        List<double> zs = ZeroSums.Samples(1.0d, zTop, .004d, spikes, ZsSigmaL);
+        ZeroSums.Sum[] sums = ZeroSums.LSums;
         Cpx[][] w = new Cpx[zs.Count][];
         for (int i = 0; i < zs.Count; i++)
         {
@@ -510,7 +539,7 @@ public partial class SacksSpiral
             for (int i = 0; i < zs.Count; i++)
             {
                 double z = zs[i];
-                comb[i] = o + u * (float)(s * Math.Exp(z / 2d) * ZsSpokeFrom(h, z, w[i]) / z) + Up(z);
+                comb[i] = o + u * (float)(s * Math.Exp(z / 2d) * ZeroSums.SpokeFrom(h, z, w[i]) / z) + Up(z);
             }
 
             Color col = ZsHourColor(h);
@@ -518,9 +547,9 @@ public partial class SacksSpiral
             List<Vector3> tips = new(); List<Color> tc = new(); List<float> ts = new();
             for (long m = h; m <= nMax; m += 30)
             {
-                if (!ZsPrimePower(m, out _, out int j)) continue;
+                if (!ZeroSums.PrimePower(m, out _, out int j)) continue;
                 double z = Math.Log(m);
-                tips.Add(o + u * (float)(s * Math.Exp(z / 2d) * ZsSpoke(h, z) / z) + Up(z));
+                tips.Add(o + u * (float)(s * Math.Exp(z / 2d) * ZeroSums.Spoke(h, z) / z) + Up(z));
                 tc.Add(col); ts.Add(dot * (j == 1 ? .7f : .5f));
             }
 
@@ -540,17 +569,27 @@ public partial class SacksSpiral
     /// log p, as tall as the drop. Under each stop, the same sum at the stop itself: 0 unless the stop is a prime power.
     /// log n = Σ_{d | n} Λ(d).
     /// </summary>
-    public void ExpPathLampChart(Vector3 o, long[] ns, float xStep, float unit, float groupGap, float dot, float labelSize)
+    public void ExpPathLampChart(Vector3 o, long[] ns, float xStep, float unit, float groupGap, float dot, float labelSize, bool stacked = false, float rowGap = 0f)
     {
         Transform g = ExpGroup("JE path lamps").transform;
         ExpEnsureSieve(2000);
-        ZsSum zeta = ZsZetaSum();
+        ZeroSums.Sum zeta = ZeroSums.ZetaAll;
         double Lamp(long m) => m < 2 ? 0d : zeta.At(Math.Log(m)).Re;
         Color dim = new(.6f, .64f, .8f);
         float x = 0f;
-        List<(Vector3, Vector3)> guide = new();
-        foreach (long n0 in ns)
+        Vector3 o0 = o;
+        for (int r = 0; r < ns.Length; r++)
         {
+            long n0 = ns[r];
+            Transform pg = new GameObject($"path {n0}").transform;
+            pg.SetParent(g, false);
+            if (stacked)
+            {
+                o = o0 + Vector3.down * (rowGap * r);
+                x = 0f;
+            }
+
+            List<(Vector3, Vector3)> guide = new();
             List<long> stops = new() { n0 };
             for (long n = n0; n > 1;) { n /= Factorize(n)[0]; stops.Add(n); }
             float x0 = x;
@@ -559,12 +598,12 @@ public partial class SacksSpiral
                 long a = stops[i];
                 float xa = x0 + i * xStep, ya = unit * Mathf.Log(a);
                 Vector3 pa = o + new Vector3(xa, ya, 0f);
-                ExpDot(g, $"stop {n0}.{i}", pa + Vector3.back * .2f, dot * 1.3f, Color.white, Factory.GlowIntensity);
-                if (i == 0) ExpLabelWide(g, a.ToString(), pa + new Vector3(-1.2f, 3.2f, 0f), labelSize * .2f, Color.white, TextAlignmentOptions.Right);
-                else ExpLabelWide(g, a.ToString(), pa + new Vector3(-1.8f, -3.4f, 0f), labelSize * .2f, Color.white);
+                ExpDot(pg, $"stop {n0}.{i}", pa + Vector3.back * .2f, dot * 1.3f, Color.white, Factory.GlowIntensity);
+                if (i == 0) ExpLabelWide(pg, a.ToString(), pa + new Vector3(-1.2f, 3.2f, 0f), labelSize * .2f, Color.white, TextAlignmentOptions.Right);
+                else ExpLabelWide(pg, a.ToString(), pa + new Vector3(-1.8f, -3.4f, 0f), labelSize * .2f, Color.white);
                 double la = Lamp(a);
                 string lt = Math.Abs(la) < .0005d ? "0.000" : la.ToString("0.000");
-                ExpLabelWide(g, lt, o + new Vector3(xa, -7f, 0f), labelSize * .17f, Math.Abs(la) < .05d ? dim : (a <= 13 ? PrimeHue(a) : PrimeGold), TextAlignmentOptions.Center);
+                ExpLabelWide(pg, lt, o + new Vector3(xa, -7f, 0f), labelSize * .17f, Math.Abs(la) < .05d ? dim : (a <= 13 ? PrimeHue(a) : PrimeGold), TextAlignmentOptions.Center);
                 guide.Add((o + new Vector3(xa, -4.5f, 0f), o + new Vector3(xa, -1f, 0f)));
                 if (i + 1 == stops.Count) break;
                 long b = stops[i + 1], p = a / b;
@@ -574,21 +613,20 @@ public partial class SacksSpiral
                 for (int k = 0; k < j; k++) d *= p;
                 float xd = xa + xStep * .38f, yb = unit * Mathf.Log(b);
                 Color pc = SegmentColor(p);
-                ExpLine(g, $"tread {n0}.{i}", dot * .32f, Color.white * .85f, Factory.SoftGlowIntensity, new[] { pa, o + new Vector3(xd, ya, 0f) });
-                ExpLine(g, $"drop {n0}.{i}", dot * .5f, Color.white, Factory.GlowIntensity, new[] { o + new Vector3(xd, ya, 0f), o + new Vector3(xd, yb, 0f) });
-                ExpLine(g, $"after {n0}.{i}", dot * .32f, Color.white * .85f, Factory.SoftGlowIntensity, new[] { o + new Vector3(xd, yb, 0f), o + new Vector3(xa + xStep, yb, 0f) });
+                ExpLine(pg, $"tread {n0}.{i}", dot * .32f, Color.white * .85f, Factory.SoftGlowIntensity, new[] { pa, o + new Vector3(xd, ya, 0f) });
+                ExpLine(pg, $"drop {n0}.{i}", dot * .5f, Color.white, Factory.GlowIntensity, new[] { o + new Vector3(xd, ya, 0f), o + new Vector3(xd, yb, 0f) });
+                ExpLine(pg, $"after {n0}.{i}", dot * .32f, Color.white * .85f, Factory.SoftGlowIntensity, new[] { o + new Vector3(xd, yb, 0f), o + new Vector3(xa + xStep, yb, 0f) });
                 double ld = Lamp(d);
                 float xl = xa + xStep * .62f;
-                ExpLine(g, $"lamp {n0}.{i}", dot * 1.25f, pc, AttentionIntensity, new[] { o + new Vector3(xl, yb, -.05f), o + new Vector3(xl, yb + unit * (float)ld, -.05f) });
+                ExpLine(pg, $"lamp {n0}.{i}", dot * 1.25f, pc, AttentionIntensity, new[] { o + new Vector3(xl, yb, -.05f), o + new Vector3(xl, yb + unit * (float)ld, -.05f) });
                 string dl = j == 1 ? d.ToString() : $"{p}{LabMath.Superscript(j)}";
-                ExpLabelWide(g, $"÷{p}", o + new Vector3(xd - 1f, yb + 1.7f, 0f), labelSize * .18f, Color.white, TextAlignmentOptions.Right);
-                ExpLabelWide(g, $"{dl}:  {ld:0.000}", o + new Vector3(xl + 1.6f, yb + unit * (float)ld * .5f, 0f), labelSize * .17f, pc, TextAlignmentOptions.Left);
+                ExpLabelWide(pg, $"÷{p}", o + new Vector3(xd - 1f, yb + 1.7f, 0f), labelSize * .18f, Color.white, TextAlignmentOptions.Right);
+                ExpLabelWide(pg, $"{dl}:  {ld:0.000}", o + new Vector3(xl + 1.6f, yb + unit * (float)ld * .5f, 0f), labelSize * .17f, pc, TextAlignmentOptions.Left);
             }
 
             x = x0 + (stops.Count - 1) * xStep + groupGap;
+            Segments(pg, "guides", guide, .08f, dim * .5f, Factory.NoGlow);
         }
-
-        Segments(g, "guides", guide, .08f, dim * .5f, Factory.NoGlow);
     }
 
     // ================================================================================================
@@ -600,7 +638,7 @@ public partial class SacksSpiral
     /// correlation between zeros of two different L-functions of Q(ζ30) (flat: they ignore each other); nearest-neighbour
     /// spacings, ζ alone against the GUE (Wigner) curve and all eight merged against the Poisson curve e^(−s).
     /// </summary>
-    public void ExpZeroSpacing(Vector3 o, float labelSize)
+    public void ExpZeroSpacing(Vector3 o, float labelSize, bool stacked = false)
     {
         Transform g = ExpGroup("JF spacing").transform;
         const float w = 66f, hgt = 42f;
@@ -659,7 +697,7 @@ public partial class SacksSpiral
         Color zc = Factory.Palette.Zero, lc = new(.35f, .85f, 1f);
 
         // 1. within ζ
-        Vector3 c1 = o + new Vector3(-118f, -20f, 0f);
+        Vector3 c1 = stacked ? o + new Vector3(-w * .5f, 62f, 0f) : o + new Vector3(-118f, -20f, 0f);
         Bars(c1, ZeroStackData.PairZeta, 0f, 3f, 1.5f, zc * .8f, true, "pair zeta");
         Bars(c1, ZeroStackData.PairWithinL, 0f, 3f, 1.5f, lc, false, "pair L");
         Curve(c1, Gue, 0f, 3f, 1.5f, Color.white, "gue");
@@ -670,7 +708,7 @@ public partial class SacksSpiral
             c1 + new Vector3(0f, -17.5f, 0f), labelSize * .17f, text, TextAlignmentOptions.Left);
 
         // 2. across the eight
-        Vector3 c2 = o + new Vector3(-33f, -20f, 0f);
+        Vector3 c2 = stacked ? o + new Vector3(-w * .5f, -18f, 0f) : o + new Vector3(-33f, -20f, 0f);
         Bars(c2, ZeroStackData.PairAcross, -3f, 3f, 1.5f, new Color(.55f, .9f, .6f) * .85f, true, "across");
         Curve(c2, u => Gue(Mathf.Abs(u)), -3f, 3f, 1.5f, Color.white * .8f, "gue across", true);
         Axes(c2, -3f, 3f, "u  (from a zero of one L-function to a zero of another)", new[] { -3f, -2f, -1f, 0f, 1f, 2f, 3f }, new[] { "−3", "−2", "−1", "0", "1", "2", "3" });
@@ -679,7 +717,7 @@ public partial class SacksSpiral
             c2 + new Vector3(0f, -16.5f, 0f), labelSize * .17f, text, TextAlignmentOptions.Left);
 
         // 3. nearest neighbours
-        Vector3 c3 = o + new Vector3(52f, -20f, 0f);
+        Vector3 c3 = stacked ? o + new Vector3(-w * .5f, -98f, 0f) : o + new Vector3(52f, -20f, 0f);
         Bars(c3, ZeroStackData.SpacingMerged, 0f, 3f, 1.2f, new Color(.55f, .9f, .6f) * .8f, true, "merged");
         Bars(c3, ZeroStackData.SpacingZeta, 0f, 3f, 1.2f, zc, false, "spacing zeta");
         Curve(c3, s => 32f / (Mathf.PI * Mathf.PI) * s * s * Mathf.Exp(-4f * s * s / Mathf.PI), 0f, 3f, 1.2f, Color.white, "wigner");

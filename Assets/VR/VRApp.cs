@@ -118,7 +118,7 @@ public partial class VRApp : MonoBehaviour
 
         // launch options for testing from the command line (adb shell am start ... -e unity "-vrview waves -vrdark")
         //   -vrexperiment ID   play one experiment module;  -vrexperiment all   play every module, one after the other
-        //   -vrmodel ID        open a model of the lab (paths, e8, unified) on the Models page
+        //   -vrmodel ID        open a model of the lab (paths, e8, unified, zeros) on the Models page
         string[] args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {

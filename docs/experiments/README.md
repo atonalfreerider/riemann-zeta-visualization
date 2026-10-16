@@ -2353,15 +2353,16 @@ problem the same way, and a fast route from n to its factors would be a fast fac
 
 ![GE1](GE1-the-search.jpg)
 
-## HA–HC. The model lab: E8, the primes and ζ in one interactive model
+## HA–HD. The model lab: E8, the primes and ζ in one interactive model
 
 Video 24 (*The paths back*) is now a model you can walk around, in VR or on the desktop, together with E8 itself and a
 unified model that puts E8's wheel, the factor funnel, the Sacks spiral and ζ(½ + it) into one scene
-([`Assets/Lab`](../../Assets/Lab)). It has three models:
+([`Assets/Lab`](../../Assets/Lab)). It has four models:
 
 * **Paths:** pick any n ≤ 720 and watch its path back.
 * **E8:** turn the 240 roots, reflect them, and apply a Frobenius.
 * **Unified:** E8's wheel, the factor funnel, the Sacks layout and ζ(½ + it) in one scene.
+* **Zeros:** the zeros of sections JA–JF inside the funnel: coils, the comb and its rings, E8's eight fans, the lamps.
 
 **The arithmetic is checked twice.** Every identity below was first checked in Python (mpmath), then again inside Unity
 by `ModelLabTest`. The test also drives every control and writes the pictures in this section.
@@ -2514,6 +2515,36 @@ factors.
 ![HC5](HC5-sacks-layout-and-euler.jpg)
 ![HC6](HC6-zeta-plane-character-mod-3-zero-1.jpg)
 
+### HD. The zeros in the stack, interactive
+
+Sections JA–JF as a model ([`ZerosModel.cs`](../../Assets/Lab/ZerosModel.cs)). The funnel holds n ≤ 600, and each layer
+is a control:
+
+* **Coils (C):** the first three zeros of ζ as helices up the axis.
+* **Phases (P):** at the picked column's height, 48 bars show where all of ζ's zeros point, and an arrow shows their mean.
+  The readout compares the mean with Landau's prediction.
+* **Comb (Z) and Rings (R):** the sum of ζ's zeros at every height, and each tooth spun into a ring.
+* **E8 fans (F) and Spoke (S):** the eight L-functions of Q(ζ₃₀), turned back by χ(h), as one fan per gold hour.
+  **Spoke** shows one hour at a time.
+* **Lamps (L):** the sum at every column, lit as its top piece.
+* **Zeros (T):** 10 500, 1 000, 100 or 30 of ζ's zeros. With fewer zeros the teeth blur together, and the composites
+  light up too.
+
+**Picking a column** plays its path back, as in Paths. The readout gives the sum of the zeros there, the coils' mean
+against Landau's prediction, and whether its spoke's fan reaches it.
+
+**The sums run on worker threads.** The math is shared with the stills ([`ZeroSums.cs`](../../Assets/Lab/ZeroSums.cs)).
+
+**`ModelLabTest` checks the values against log p:**
+
+* the comb gives log 7 at 7, log 2 at 8, and 0 at 6 and at 360;
+* the fans reach 7, 49 = 7² (at log 7) and 397;
+* 77 gets no tooth.
+
+![HD1](HD1-zeros-coils-comb-phases.jpg)
+![HD3](HD3-zeros-e8-fans.jpg)
+![HD6](HD6-zeros-only-100-zeros.jpg)
+
 ### Using the models
 
 **Desktop.** Open MODELS in the side menu.
@@ -2529,7 +2560,7 @@ factors.
 * **Picking:** touch a column top or a root with a fingertip. The tops are 1–2 cm apart at the default scale, so spread
   two pinching hands to enlarge the model first.
 * **Moving:** pinch moves the model as everywhere else.
-* **From the command line:** `-vrmodel paths|e8|unified` opens a model.
+* **From the command line:** `-vrmodel paths|e8|unified|zeros` opens a model.
 
 `ModelLabTest` runs the checks:
 
@@ -3095,6 +3126,20 @@ side. During each walk, a strip above the captions shows the number's column lai
 * one piece per prime factor, lit as its drop is taken;
 * the values at the cuts (360, 180, 90, 45, 15, 5, 1);
 * the exponent under each run of equal pieces (2³, 3², 5).
+
+*The zeros inside E8's stack* (sections JA–JF) is scripted. It is not narrated yet: it plays with captions, timed from
+the length of its text. Its script, with what is on screen in each shot, is in
+[`xzeros-script.md`](xzeros-script.md). The module runs as follows:
+
+* it draws the first zero's coil up the funnel's axis, then the next two;
+* it puts a ring of 10 500 bars round the axis at the heights of 7 and 6, where the mean leans to −1 at 7 and cancels at
+  6;
+* it grows ζ's comb tooth by tooth and spins it into rings;
+* it grows the eight character trees;
+* it lays E8's eight fans down one hour at a time as they are named;
+* it ends on the paths chart and the spacing charts.
+
+Its heavy sums are worked out on a worker thread while the app starts.
 
 *Dropping onto E8* (section EF) is narrated with the same voice. It builds E8's 240 roots ring by ring in the Coxeter plane
 and walks the Coxeter element once round the 30 hours, lighting the eight hours coprime to 30 as they are named. Then it

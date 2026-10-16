@@ -2213,6 +2213,178 @@
           "pause": 1.2
         }
       ]
+    },
+    {
+      "id": "xzeros",
+      "title": "The zeros inside E8's stack",
+      "subtitle": "where zeta's zeros live, and how E8 sorts the primes",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off",
+        "exp:zfunnel",
+        "exp:ztrees",
+        "exp:zpaths",
+        "exp:zspacing"
+      ],
+      "lines": [
+        {
+          "id": "xzeros_01",
+          "text": "Here is E eight's factor funnel again. Every number up to four hundred stands at its hour on the wheel, with a column as tall as its logarithm. So where, in this stack, are the zeros of zeta?",
+          "camera": "orbit:on=centre;at=68000,0,-16;fit=124,140;el=26;az=-100;spin=2;raise=.05;span=12",
+          "actions": [
+            "exp:hide:GB factor columns",
+            "exp:say:where are ζ's zeros in the stack?|every n at its hour, its column as tall as log n",
+            "exp:reveal:GB factor columns:line",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_02",
+          "text": "Not at any point. At a zero, one half plus i gamma, every number n is turned by gamma times log n: its height in the funnel, times gamma. So a zero is a coil wound up the axis. The first zero, fourteen point one three, turns once every point four four of height.",
+          "camera": "orbit:on=centre;at=68000,0,-18;fit=62,92;el=12;az=-96;spin=3;span=10",
+          "actions": [
+            "exp:say:a zero is a coil up the axis|n turns by γ·log n — its height times γ",
+            "exp:reveal:JM coils:1.5,"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_03",
+          "text": "The second and third zeros, twenty-one point zero two and twenty-five point zero one, are tighter coils. And every drop of a path back, dividing by a prime p, lowers the height by log p and turns every coil by gamma times log p.",
+          "camera": "orbit:on=centre;at=68000,0,-18;fit=62,92;el=16;az=-66;spin=3;span=10",
+          "actions": [
+            "exp:say:the first three zeros|γ = 14.13, 21.02 and 25.01",
+            "exp:reveal:JM coils:0,1.6,3.4"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_04",
+          "text": "Now take all ten thousand five hundred zeros and look at one height: where seven sits. Their coils lean towards minus one. On average, by minus point one one five, which is exactly what Landau's formula predicts for a prime.",
+          "camera": "orbit:on=centre;at=68000,0,-12;fit=74,74;el=40;az=-100;spin=2;span=10",
+          "actions": [
+            "exp:show:JM coils",
+            "exp:say:at the height of 7, a prime|10 500 coils lean to −1: mean −0.115, Landau −0.115",
+            "exp:reveal:JM disc 7:0.6,1.6,4.2,7.5"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_05",
+          "text": "At the height of six, two times three, the coils point every way, and their mean is zero. The zeros lean only at prime powers.",
+          "camera": "orbit:on=centre;at=68000,0,-11;fit=74,74;el=40;az=-80;spin=2;span=10",
+          "actions": [
+            "exp:hide:JM disc 7",
+            "exp:say:at the height of 6 = 2·3|the coils cancel: mean 0.000",
+            "exp:reveal:JM disc 6:0.5,1.4,3,5"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_06",
+          "text": "So add up all the coils at every height, together with zeta's pole, and draw the sum out to the side. What is left is a comb: a tooth of exactly log p at every prime power, reaching the top of that prime's column, and nothing at the composites.",
+          "camera": "orbit:on=centre;at=68026,0,-18;fit=112,96;el=8;az=-90;spin=.5;span=12",
+          "actions": [
+            "exp:hide:JM coils",
+            "exp:hide:JM disc 6",
+            "exp:say:added up, the coils light every prime power|a tooth of log p, reaching the top of p's column",
+            "exp:show:JM comb labels",
+            "exp:reveal:JM comb:line"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_07",
+          "text": "But the comb is the same in every direction. Spin it round the axis, and each tooth becomes a ring through its prime's column. Zeta's zeros know how high a prime sits, but not its hour on the wheel.",
+          "camera": "orbit:on=centre;at=68000,0,-20;fit=124,118;el=8>30;az=-90;spin=2;span=12",
+          "actions": [
+            "exp:show:JM comb",
+            "exp:say:spun round the axis: a ring per prime power|ζ's zeros fix the height, not the hour",
+            "exp:reveal:JM rings:line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xzeros_08",
+          "text": "E eight knows more. Its Coxeter element makes E eight a lattice over the thirtieth roots of unity, and their field has eight L-functions, one for each character of E eight's exponent group. Zeta is the first.",
+          "camera": "orbit:on=centre;at=68600,0,-84;fit=150,206;el=18;az=-110;spin=.5;span=12",
+          "actions": [
+            "exp:say:E8's field has eight L-functions|one per character of (Z/30)*, E8's exponents — ζ is the first",
+            "exp:reveal:JC trees:2,",
+            "exp:snap"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_09",
+          "text": "The zeros of each one light the same prime powers, but turned by the character: back and forth for the real ones, and all four ways for the others. Every tooth of one colour, one hour, points the same way.",
+          "camera": "orbit:on=centre;at=68600,0,-84;fit=150,206;el=18;az=-110;spin=.5;span=12",
+          "actions": [
+            "exp:say:each turns the primes by χ(p)|±1 for the real characters, ±1 and ±i for the rest",
+            "exp:reveal:JC trees:0,1.4,2.8,4.2,5.6,7,8.4,9.8"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "xzeros_10",
+          "text": "Now turn each set of zeros back by its character at hour h, and add all eight. Only the primes on spoke h survive. Spoke one. Seven. Eleven. Thirteen. Seventeen. Nineteen. Twenty-three. Twenty-nine.",
+          "camera": "orbit:on=centre;at=68000,0,-16;fit=130,130;el=46;az=-90;spin=3;span=12",
+          "actions": [
+            "exp:hide:JM comb",
+            "exp:hide:JM comb labels",
+            "exp:hide:JM rings",
+            "exp:say:turned back by χ(h) and added|only the primes on spoke h survive",
+            "exp:reveal:JM fans:7.4,8.3,9.1,10,11,11.9,12.9,13.9",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xzeros_11",
+          "text": "Seven thousand four hundred zeros, none higher than a thousand, sort every prime up to four hundred onto its spoke. Zeta's zeros give the height. The other seven give the hour.",
+          "camera": "orbit:on=centre;at=68000,0,-16;fit=130,130;el=46>62;az=-90;spin=5;span=12",
+          "actions": [
+            "exp:show:JM fans",
+            "exp:say:7 420 zeros up to t = 1000|ζ's give the height, the other seven the hour"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xzeros_12",
+          "text": "And the paths back walk through these lamps. Three sixty drops log two three times, log three twice, and log five once. Each drop is exactly the sum of the zeros at a prime power dividing it: two cubed, two squared, two, three squared, three and five. At the stops in between, the zeros cancel.",
+          "camera": "orbit:on=centre;at=69204,2,0;fit=150,420;el=89.5;az=-90;spin=0;raise=.065;span=12",
+          "actions": [
+            "exp:say:every drop is a lamp the zeros light|log n = Σ Λ(d) over the prime powers d dividing n",
+            "exp:reveal:JE path lamps:0.5,13,16.5",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xzeros_13",
+          "text": "Among themselves, the zeros of each L-function repel, like the eigenvalues of a random unitary matrix. Zeros of different L-functions ignore each other. E eight's field holds eight independent spectra.",
+          "camera": "orbit:on=centre;at=69818,-3,0;fit=150,424;el=89.5;az=-90;spin=0;raise=.065;span=12",
+          "actions": [
+            "exp:say:within one L-function: repulsion|between the eight: none — eight independent spectra",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xzeros_14",
+          "text": "So the zeros are not points in the stack. They are frequencies of its height. Added up, they rebuild the prime powers. Turned by E eight's characters, they put each prime on its spoke. They reconstruct the primes, but they do not predict them.",
+          "camera": "orbit:on=centre;at=68000,0,-16;fit=124,140;el=30;az=-60;spin=4;raise=.05;span=12",
+          "actions": [
+            "exp:show:JM coils",
+            "exp:show:JM fans",
+            "exp:show:JM comb",
+            "exp:say:the zeros are frequencies of the height|they rebuild the primes — they do not predict them",
+            "exp:snap"
+          ],
+          "pause": 1.6
+        }
+      ]
     }
   ]
 }

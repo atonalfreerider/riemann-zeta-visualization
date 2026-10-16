@@ -43,7 +43,7 @@ every module one after the other).
 | Open the menu from anywhere | Turn your **left palm toward your face**: a small 2×3 pad floats over it (Menu, Pause, Skip, Follow, Room, Dark). |
 | Go back to the story's view | **Follow** (pin icon) in the footer or on the palm menu. |
 | See the room / go dark | **Room** and **Dark** in the footer or on the palm menu. In blackout a faint floor ring and your hand outlines appear. |
-| Explore a model | **Models** tab: **Paths** (the factor funnel of *The paths back*), **E8** (the 240 roots) and **Unified** (E8's wheel, the funnel, ζ and the Sacks spiral). **Touch a column top or a root with your index fingertip** to pick it; the page shows what it says, and its controls are the two rows below. **Re-frame** brings the model back in front of you, **Leave** goes back to the standing view. |
+| Explore a model | **Models** tab: **Paths** (the factor funnel of *The paths back*), **E8** (the 240 roots), **Unified** (E8's wheel, the funnel, ζ and the Sacks spiral) and **Zeros** (the zeros of ζ and of E8's field inside the funnel). **Touch a column top or a root with your index fingertip** to pick it; the page shows what it says, and its controls are the two rows below. **Re-frame** brings the model back in front of you, **Leave** goes back to the standing view. |
 | Look at one visualization | **Views** tab: Chain, Zeros, Strip, Waves, Staircase, Primes, Saddle, Machine. Below them, **Show or hide** toggles for the layers, a row for the curves on the Sacks spiral (Squares n = k², k(k+1), Euler's k² + k + 41 and Sacks's product curves k² + k + p), and a slider for how fast the dial turns. |
 | Zoom, turn, tilt, raise, bring closer | **Space** tab. These keep working while the story moves on. |
 | Reset | **Space ▸ Reset** (the story's view) or **Re-centre** (use where you stand and look now). |
@@ -55,10 +55,18 @@ The menu follows you if you walk or turn away from it for a moment, and it never
 
 ![The Experiments tab (desktop simulation)](vr/experiments-tab.jpg)
 
-The **Experiments** tab holds the 16 thought experiments on the saddle (`Assets/Resources/Narration/experiments.json`, the same
-modules as the desktop side menu): cancellation curves, level contours, the bend as a probe, mirrors, the two counting problems,
-the primes of Euler's ring, mirror lines, the discriminant comb, the pinches, the 12 × 12 torus, the Legendre symbol, base-12
-fingerprints, the 144 clock, mirrors for prime pairs, the sieve machine and the twisted tori. Each plays alone with its
+The **Experiments** tab holds all 25 modules, 7 across and 4 down (`Assets/Resources/Narration/experiments.json`, the same
+modules as the desktop side menu):
+
+* the thought experiments on the saddle: cancellation curves, level contours, the bend as a probe, mirrors, the two
+  counting problems, the primes of Euler's ring, mirror lines, the discriminant comb, the pinches;
+* the 144 modules: the 12 × 12 torus, the Legendre symbol, base-12 fingerprints, the 144 clock;
+* the twisted shapes: mirrors for prime pairs, the sieve machine, the twisted tori;
+* the intersecting geometries: two norm surfaces, rings through lattices, the twelve-dimensional torus, the modular
+  surface, the lattice race;
+* E8: dropping onto E8, E5 to E8, the paths back, and the zeros inside E8's stack.
+
+Each plays alone with its
 narration and camera moves (there are no captions in VR); every shot places the model in front of you like a tour chapter, so
 **Follow**, pinch and the Space tab work the same way.
 
@@ -69,7 +77,7 @@ Checked in the desktop simulation: every line of every module runs without an er
 ### Models
 
 The **Models** tab opens the model lab ([`Assets/Lab`](../Assets/Lab)). These are interactive versions of what the
-experiment videos show, and they stand in front of you like a tour shot. There are three models:
+experiment videos show, and they stand in front of you like a tour shot. There are four models:
 
 * **Paths.** Touch a column's top to watch its path back, with the factorization laid out as a strip on the page.
   * n ± 1 and n ± 30 step to a neighbour or along the spoke.
@@ -85,6 +93,13 @@ experiment videos show, and they stand in front of you like a tour shot. There a
   * The 30 hour sums are chained at the level t, and at every zero they close in 8 groups (**By gcd**).
   * **Character** weights E8's 8 exponent hours by a Dirichlet character mod 30, so the trail becomes L(s, χ).
   * **View** cycles whole → ζ plane (seen from above, following t) → funnel.
+* **Zeros.** The zeros of ζ inside the funnel (experiments README, sections JA–JF and HD).
+  * **Coils** shows the first zeros as helices up the axis.
+  * **Phases** shows where all 10 500 point at the picked column's height.
+  * **Comb** and **Rings** show their sum, a tooth of log p at every prime power.
+  * **E8 fans** shows the eight L-functions of E8's field putting each prime on its spoke, and **Spoke** picks one hour.
+  * **Lamps** lights each column's top piece by the sum there.
+  * **Zeros** lowers the number of zeros used, to show the teeth blur.
 
 ![The Models tab with the factor funnel (desktop simulation)](vr/models-page.jpg)
 
@@ -93,7 +108,7 @@ the column tops are 1–2 cm apart, so spread two pinching hands to enlarge the 
 Pinch-to-move, two-handed scaling, **Follow** and the Space tab work as for the tour.
 
 Only the desktop simulation has been tried. `ModelLabTest.VRModelsPage` picks a column with a scripted fingertip and
-renders the page, but no person has used the Models page on a headset yet. `-vrmodel paths|e8|unified` opens a model
+renders the page, but no person has used the Models page on a headset yet. `-vrmodel paths|e8|unified|zeros` opens a model
 from the command line (`adb shell am start … -e unity "-vrmodel e8"`).
 
 ### Comfort

@@ -254,6 +254,44 @@ public class ModelLabTest
         Click(unified, "View");
         Click(unified, "View");
 
+        // zeros: the sums run on worker threads; wait for them, then check them against log p
+        lab.Enter("zeros");
+        ZerosModel zeros = (ZerosModel)lab.Find("zeros");
+        yield return Until(() => zeros.Ready, 180f);
+        Assert.IsTrue(zeros.Ready, "the zero sums did not finish");
+        Assert.AreEqual(Mathf.Log(7f), (float)zeros.LampAt(7), .01f, "ζ's zeros give log 7 at the column of 7");
+        Assert.AreEqual(Mathf.Log(2f), (float)zeros.LampAt(8), .01f, "and log 2 at 8 = 2³");
+        Assert.AreEqual(0f, (float)zeros.LampAt(6), .02f, "and nothing at 6");
+        Assert.AreEqual(0f, (float)zeros.LampAt(360), .02f, "or at 360");
+        Assert.AreEqual(Mathf.Log(7f), (float)zeros.FanAt(7), .03f, "spoke 7's fan reaches 7");
+        Assert.AreEqual(Mathf.Log(7f), (float)zeros.FanAt(49), .03f, "spoke 19's fan reaches 49 = 7² at log 7");
+        Assert.AreEqual(Mathf.Log(397f), (float)zeros.FanAt(397), .03f, "and spoke 7's reaches 397");
+        Assert.IsTrue(double.IsNaN(zeros.FanAt(77)), "77 is not a prime power: no tooth");
+        zeros.Pick(7);
+        yield return Seconds(.5f);
+        StringAssert.Contains("Landau", lab.Status);
+        yield return Shot("HD1-zeros-coils-comb-phases");
+        zeros.SetLayers(false, true, true, false, false, false);
+        yield return Shot("HD2-zeros-comb-and-rings");
+        zeros.SetLayers(false, false, false, true, false, false);
+        lab.SetView(new LabView { Focus = zeros.Funnel.Origin + zeros.Funnel.Up(3.4f), Distance = 165f, Yaw = -90f, Pitch = 50f, Fov = 50f }, true);
+        yield return Shot("HD3-zeros-e8-fans");
+        zeros.SetSpoke(1);
+        StringAssert.Contains("spoke 7", lab.Status.ToLowerInvariant());
+        yield return Shot("HD4-zeros-fan-of-spoke-7");
+        zeros.SetSpoke(-1);
+        zeros.SetLayers(false, false, false, false, true, false);
+        zeros.Pick(360);
+        lab.ResetView(true);
+        yield return Seconds(2.5f);
+        yield return Shot("HD5-zeros-lamps-and-the-path-of-360");
+        zeros.SetZeroLevel(2);
+        yield return Until(() => zeros.Ready, 60f);
+        zeros.SetLayers(false, true, false, false, true, false);
+        StringAssert.Contains("100 zeros", lab.Status);
+        yield return Shot("HD6-zeros-only-100-zeros");
+        zeros.SetZeroLevel(0);
+
         lab.Exit();
         Assert.IsNull(lab.Active);
         yield return Seconds(.5f);
@@ -344,6 +382,13 @@ public class ModelLabTest
         head.SetLook(0f, 24f);
         yield return Seconds(.6f);
         yield return Shot("VR4-unified-and-page");
+        lab.Enter("zeros");
+        ZerosModel zeros = (ZerosModel)lab.Find("zeros");
+        yield return Until(() => zeros.Ready, 180f);
+        zeros.SetLayers(true, true, false, true, false, true);
+        zeros.Pick(7);
+        yield return Seconds(1f);
+        yield return Shot("VR5-zeros-and-page");
         lab.Exit();
         yield return Seconds(.5f);
         VRMode.RequestSimulation = false;
