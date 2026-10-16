@@ -291,7 +291,7 @@ public partial class SacksSpiral
     /// zero. Gold: the imaginary axis, along which the Mellin transform of θ_E8 gives E8's zeta function; the half-turn
     /// w ↦ −w is τ ↦ −1/τ, the functional equation s ↔ 4 − s.
     /// </summary>
-    public void ExpE8Hyperbolic(Vector3 o, float radius, float labelSize)
+    public void ExpE8Hyperbolic(Vector3 o, float radius, float labelSize, float dim = 1f, bool rhoLabel = true)
     {
         Transform g = ExpGroup("KD hyperbolic").transform;
         const double step = .0062d;
@@ -308,12 +308,14 @@ public partial class SacksSpiral
                 float hue = (float)((Math.Atan2(e4.Im, e4.Re) / (2d * Math.PI) + 1d) % 1d);
                 float val = (float)(.12d + .88d * Math.Tanh(inv * .9d));
                 float band = (float)(.82d + .18d * Math.Cos(2d * Math.PI * Math.Log(Math.Max(inv, 1e-9)) * 1.5d));
-                cols.Add(Color.HSVToRGB(hue, .62f, val * band));
+                cols.Add(Color.HSVToRGB(hue, .62f, val * band * dim));
                 pts.Add(o + new Vector3((float)x, (float)y, 0f) * radius);
                 sizes.Add(radius * (float)step * 1.05f);
             }
 
-        ExpPointCloud(g, "theta", pts, cols, sizes, Factory.NoGlow);
+        // the glow material is transparent and sorted by distance: the disk must draw before the labels and markers laid on
+        // it, or those whose centres lie farther from the camera than the disk's centre disappear under it
+        ExpPointCloud(g, "theta", pts, cols, sizes, Factory.NoGlow).sortingOrder = -10;
         // the boundary, the imaginary axis (the real diameter), the zeros at the images of ρ
         Vector3[] rim = new Vector3[181];
         for (int i = 0; i < rim.Length; i++)
@@ -353,6 +355,7 @@ public partial class SacksSpiral
         ExpLabelWide(g, "i∞", o + new Vector3(radius + 4f, 0f, 0f), labelSize * .2f, new Color(.8f, .84f, .95f), TextAlignmentOptions.Left);
         ExpLabelWide(g, "0", o + new Vector3(-radius - 4f, 0f, 0f), labelSize * .2f, new Color(.8f, .84f, .95f), TextAlignmentOptions.Right);
         Cpx wr = (rho - new Cpx(0d, 1d)) / (rho + new Cpx(0d, 1d));
-        ExpLabelWide(g, "ρ:  θ<sub>E8</sub>(ρ) = 0", o + new Vector3((float)wr.Re, (float)wr.Im, 0f) * radius + new Vector3(-2f, 5f, -.4f), labelSize * .17f, Color.white, TextAlignmentOptions.Right);
+        if (rhoLabel)
+            ExpLabelWide(g, "ρ:  θ<sub>E8</sub>(ρ) = 0", o + new Vector3((float)wr.Re, (float)wr.Im, 0f) * radius + new Vector3(-2f, 5f, -.4f), labelSize * .17f, Color.white, TextAlignmentOptions.Right);
     }
 }

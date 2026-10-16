@@ -3031,6 +3031,244 @@ centre, the cusp i∞ is on the right, and 0 is on the left.
 * **In E8 itself:** they are the zeros of E8's own zeta function, twice, and they sit off E8's critical line. Only a theta
   series with a cusp-form part, like the Leech lattice's, moves the zeros away from ζ's.
 
+## LA–LE. The class group as families: three families of curves for −23
+
+This was the third "worth exploring" item below: draw all h families of curves for a discriminant of class number h.
+
+Discriminant −23 has class number 3. Its reduced forms are:
+
+* x² + xy + 6y², the principal form;
+* 2x² + xy + 3y² and 2x² − xy + 3y², a form and its mirror image.
+
+These are three families of mirror lines, three lattices and three points of the modular surface.
+[`Tools/class_group_data.py`](../../Tools/class_group_data.py) checks everything below and writes
+[`ClassGroupData.cs`](../../Assets/Tour/ClassGroupData.cs). [`SacksClassGroup.cs`](../../Assets/Tour/SacksClassGroup.cs)
+draws the stills (key `+`).
+
+### LA. Three families, three lattices
+
+Each form is a lattice, with |v|² = f(x, y). LA1 draws the rings of norm 59, 13 and 6 = 2·3 through all three:
+
+| norm | on x² + xy + 6y² | on 2x² ± xy + 3y² | representations |
+|---|---|---|---|
+| 59, a prime | 4 points | none | one |
+| 13, a prime | none | 2 + 2 points | one |
+| 6 = 2·3 | 4 points | 2 + 2 points | two |
+
+A representation is a pair ±(x, y). x² + xy + 6y² has one more symmetry, (x, y) → (x + y, −y), so each of its
+representations shows as 4 points.
+
+* **A prime lies on one family.**
+* **A composite lies on several.**
+* **Euler's test reads only the principal family.** So it sees 6 once and calls it prime.
+
+![LA1](LA1-three-families-three-lattices.jpg)
+
+### LB. Euler's test needs every family
+
+Euler's test for x² + xy + 6y² asks: does n have exactly one representation? Below 20 000, among the numbers prime to 23:
+
+* **with the principal form alone,** 2 174 composites pass;
+* **counting the representations by all three forms,** none pass.
+
+The same holds for x² + 11y² (D = −44, also class number 3). There, the 1 047 failures that surprise 1 below records go
+to 0.
+
+The rule behind it: Euler's test works with one form exactly when each genus holds a single class, which happens for
+his 65 idoneal numbers. −23 has one genus and three classes.
+
+![LB1](LB1-eulers-test-needs-every-family.jpg)
+
+**Which family a prime lies on is decided by a cubic.** For each prime p ≠ 23:
+
+| p lies on | x³ − x − 1 mod p has | coefficient a_p of η(z)η(23z) | primes below 3 000 |
+|---|---|---|---|
+| x² + xy + 6y² | three roots | 2 | 67: 59, 101, 167, 173, 211, … |
+| 2x² ± xy + 3y² | no root | −1 | 145: 2, 3, 13, 29, 31, … |
+| neither ((−23/p) = −1) | one root | 0 | 217: 5, 7, 11, 17, 19, … |
+
+* **Checked:** all 429 primes below 3 000. η(z)η(23z) = q ∏ (1 − qⁿ)(1 − q²³ⁿ).
+* **Why a cubic:** the splitting field of x³ − x − 1 is the Hilbert class field of Q(√−23), and its Galois group over
+  Q(√−23) is the class group. The shares tend to 1/6, 1/3 and 1/2 (Chebotarev).
+
+### LC. Where each family keeps its zeros
+
+Each family has its own zeta function Z_f(s) = Σ f(x, y)<sup>−s</sup>, over (x, y) ≠ (0, 0).
+
+* **Computed by the Chowla–Selberg formula.** It matches direct lattice sums at s = 3 to 10⁻⁹.
+* **Completed:** Λ_f(s) = (√23/2π)<sup>s</sup> Γ(s) Z_f(s) = Λ_f(1 − s).
+* **The class group's characters combine the families into L-functions,** checked at s = 2.3 + 1.7i:
+  * (Z₁ + 2Z₂)/2 = ζ(s) L(s, χ₋₂₃), to 10 digits;
+  * (Z₁ − Z₂)/2 = L(η(z)η(23z), s), to 7 digits with 2 000 terms.
+
+**How the zeros were found (t ≤ 50).**
+
+* **On the line:** from the sign changes of the real function Λ along Re s = ½.
+* **Right of the line:** counted by the argument principle on the box 0.55 < Re s < 2.2. Its left edge is sampled every
+  0.01, so zeros on the line cannot fool the count. Newton then finds each one from the minima of |Λ| on a grid.
+
+| function | zeros on Re s = ½ | zeros right of it (each with a mirror at 1 − s̄) |
+|---|---|---|
+| Z for x² + xy + 6y² | 33 | 5: 0.953 + 16.290i, 0.798 + 29.552i, 0.664 + 33.650i, 0.810 + 43.859i, 0.782 + 46.961i |
+| Z for 2x² ± xy + 3y² | 28 | 2: **1.007 + 22.569i**, 0.820 + 39.065i |
+| ζ(s) L(s, χ₋₂₃) | 44 | none |
+| L(η(z)η(23z), s) | 42 | none |
+
+**The families' zeta functions break the Riemann hypothesis.** 10 of the 43 zeros of the first family's zeta function sit
+off the line, and 4 of the 32 of the second's. Davenport and Heilbronn proved that such functions must have zeros off the
+line.
+
+One zero of 2x² ± xy + 3y² is even at Re s = 1.007. That is right of Re s = 1, where the series converges absolutely, and
+no function with an Euler product can vanish there.
+
+The second family has fewer zeros because its series starts at n = 2, with the two vectors of norm 2. That costs it
+(T/π)·log 2 ≈ 11 zeros below T = 50.
+
+**The class group's L-functions keep every zero on the line.**
+
+The control is D = −20 (class number 2: x² + 5y² and 2x² + 2xy + 3y²). There the two combinations are ζ(s) L(s, χ₋₂₀)
+and L(s, χ₋₄) L(s, χ₅). They keep all 43 and 41 of their zeros on the line, while the two families' own zeta functions
+have 5 and 4 pairs off it (one at Re s = 2.08).
+
+![LC1](LC1-where-each-family-keeps-its-zeros.jpg)
+
+### LD. Three points of the modular surface
+
+A form's root τ = (−b + i√23)/2a is a point of the upper half plane. The three reduced forms give the three points of
+discriminant −23 in the fundamental domain. LD1 marks them, and all their images, on section KD's disk.
+
+| form | τ | j(τ) |
+|---|---|---|
+| x² + xy + 6y² | (−1 + i√23)/2 | −3 493 225.70 |
+| 2x² + xy + 3y² | (−1 + i√23)/4 | 737.85 + 1 764.02 i |
+| 2x² − xy + 3y² | (1 + i√23)/4 | 737.85 − 1 764.02 i |
+
+* **The class polynomial.** The three values of j are the roots of x³ + 3 491 750 x² − 5 151 296 875 x +
+  12 771 880 859 375 (mpmath, 40 digits; the coefficients come out as integers).
+* **The same field as x³ − x − 1.** The real root, j of x² + xy + 6y², generates the cubic field of discriminant −23,
+  and so does a root of x³ − x − 1 (its discriminant is −23). That is why the cubic in LB's table decides which family
+  a prime lies on.
+
+So the class number is a count of points on the modular surface, and the j-values of those points build the field
+whose primes the families sort.
+
+![LD1](LD1-three-points-of-the-modular-surface.jpg)
+
+### LE. Every mixture of the two families
+
+Any mixture Λ₁ + λΛ₂ of the two families' completed zeta functions has the same functional equation, Λ(s) = Λ(1 − s).
+So for real λ it is real on the critical line, and its zeros there are exactly the t where
+
+**the curve λ = −Λ₁/Λ₂(½ + it) meets the height λ.**
+
+One curve thus holds the critical-line zeros of every mixture. The curve's poles are the zeros of the second family on
+the line.
+
+| λ | the mixture | zeros on the line (t ≤ 50) |
+|---|---|---|
+| 2 | ζ(s) L(s, χ₋₂₃) | 44, all of them |
+| −1 | L(η(z)η(23z), s) | 42, all of them |
+| 0 | the first family alone | 33 |
+| 1.8, 2.2 | | 35, 38 |
+| −1.2, −0.8 | | 36, 41 |
+| large, either sign | close to the second family alone | 28 |
+
+Counted for every λ from −3 to 4 in steps of 0.01, the count reaches 44 only at λ = 1.99 and 2, and 42 only between
+−1.02 and −0.99. So the mixtures keep all their zeros on the line only at the two that the class group's characters pick
+out. Away from them, some of the curve's wiggles turn back before reaching the height λ: there two zeros have met on the
+line and left it as a pair.
+
+![LE1](LE1-every-mixture-of-the-two-families.jpg)
+
+**What this answers.**
+
+* **The question:** the "worth exploring" item asked to draw all h families of curves.
+* **On the saddle and in the lattices:** there are h families. A prime sits on at most one of them, and a composite
+  can sit on several.
+* **Euler's test:** it fails exactly when it reads only one family.
+* **The zeros:** each family's own zeta function keeps zeros off the critical line. Only the class group's combinations,
+  which are L-functions with Euler products, keep them all on it.
+
+## MA–MB. The prime race on E8's eight spokes
+
+Every prime above 5 lies on one of the eight gold spokes of the clock of 30: the hours 1, 7, 11, 13, 17, 19, 23, 29,
+which are E8's exponents. Section AE raced the classes mod 12. Here all eight spokes race, up to 10⁷.
+
+[`Tools/race_data.py`](../../Tools/race_data.py) counts the primes with a sieve. It rebuilds the race from the zeros of
+the seven L-functions mod 30 that section JC computed, and writes [`RaceData.cs`](../../Assets/Tour/RaceData.cs).
+[`SacksSpokeRace.cs`](../../Assets/Tour/SacksSpokeRace.cs) draws the stills (key `&`).
+
+### MA. Two spokes run behind
+
+The race is E_h(x) = (log x/√x)·(8 π(x; 30, h) − π*(x)), where π* counts the primes on all eight spokes. It is above 0
+when spoke h holds more than its eighth of the primes up to x. "Of the way" below means the share of log x between 10²
+and 10⁷.
+
+| spoke | 1 | 7 | 11 | 13 | 17 | 19 | 23 | 29 |
+|---|---|---|---|---|---|---|---|---|
+| primes up to 10⁷ | 83 003 | 83 104 | 83 101 | 83 077 | 83 107 | 83 010 | 83 152 | 83 022 |
+| mean of E_h | −3.48 | 1.57 | 1.39 | 1.24 | 1.01 | −3.29 | 0.93 | 0.62 |
+| ahead of its share | 0.3 % | 84 % | 83 % | 80 % | 74 % | 1.4 % | 73 % | 62 % |
+| predicted from the zeros | 1.4 % | 76 % | 76 % | 77 % | 76 % | 1.3 % | 75 % | 77 % |
+| in the lead | never | 36 % | 14 % | 14 % | 14 % | never | 12 % | 10 % |
+
+**The explicit formula predicts the bias.** It gives
+
+E_h(x) ≈ −(c(h) − 1) − Σ<sub>χ ≠ 1</sub> χ̄(h) Σ<sub>γ</sub> x<sup>iγ</sup>/(½ + iγ),
+
+where c(h) is the number of square roots of h mod 30 and γ runs over the zeros of L(s, χ). The units mod 30 form
+C₂ × C₄. Its only squares are 1 and 19, and each has four square roots. So c = 4 on spokes 1 and 19 and 0 on the other
+six, and the means are −3 and +1.
+
+The measured means are a little larger in size: −3.4 on the squares and +1.1 on the rest, on average. Section AE already
+met the reason: the squares' term is really −(c − 1)(1 + 2/log x + …).
+
+**The zeros rebuild the race.** The lower panel of MA1 uses the 6 771 zeros of the seven L-functions below height 1000.
+Spoke by spoke, it correlates with the count at 0.92 to 0.99.
+
+**How often the squares get ahead.** Rubinstein and Sarnak's model treats the zeros' phases as independent random
+angles. With these zeros, 3 000 draws predict that spokes 1 and 19 are ahead of their share 1.4 % and 1.3 % of the way.
+Between 10² and 10⁷ they were ahead 0.3 % and 1.4 % of the way, and never in the lead.
+
+![MA1](MA1-the-race-counted-and-rebuilt.jpg)
+
+### MB. Why: every prime's square lands on spoke 1 or 19
+
+**The zeros count prime powers.** Riemann's explicit formula does not count primes. It counts each prime power p<sup>k</sup>
+as 1/k of a prime:
+
+Π(x) = π(x) + ½ π(√x) + ⅓ π(∛x) + …
+
+Raced this way, the spokes are even, and the zeros alone set the race.
+
+**Squaring folds the spokes onto two.** The k = 2 term is the prime squares, and squaring sends every spoke to 1 or 19:
+
+* 1, 11, 19, 29 → 1
+* 7, 13, 17, 23 → 19
+
+There are 443 primes from 7 to 3 137, and their squares are the prime squares up to 10⁷. Of these, 218 land on spoke 1,
+225 on spoke 19 and none on the other six. A count of primes alone leaves out half a prime for each of them.
+
+The other powers do not matter here:
+
+* cubes and fifth powers permute the spokes, because 3 and 5 are prime to 8;
+* fourth powers all land on spoke 1, but there are only π(x<sup>1/4</sup>) of them.
+
+**MB1 draws this on a logarithmic clock of 30.** Each n sits in the direction of its hour, at radius log n. Squaring
+doubles the radius and folds the hours, and an arc runs from each prime p to p².
+
+**Put the squares back and the race is fair** (right panel). The eight means become −0.79 to +0.60, and spokes 1 and 19
+are ahead of their share 32 % and 50 % of the way. The offsets that remain are lower-order terms of the explicit
+formula, and they fade as x grows. Spoke 1's is −2.0 in the first decade and −0.1 in the last.
+
+![MB1](MB1-why-the-squares-lose.jpg)
+
+**What this adds to JA–JF.**
+
+* **In JA–JF:** the zeros of the L-functions mod 30 sort the primes onto E8's spokes.
+* **Here:** the same zeros drive the race between the spokes, and the bias comes from the group of units. Its two
+  squares, 1 and 19, are two of E8's eight exponents.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -3130,7 +3368,8 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 5. *The floor of the modular fundamental domain is a cancellation curve.* The arc `|τ| = 1` is the geodesic of
    `k² − 1 = (k − 1)(k + 1)`, and Landau's point `i` and the point `ρ` of `k² + k + 1` stand on it (section AD).
 
-**Worth exploring.** The first two are now sections P and Q above.
+**Worth exploring.** All three of the items below are now sections: the first two are P and Q above, and the third is
+LA–LE. Two more that came out of them follow.
 
 1. **The circle problem lives on the half-twisted saddle.** The number of lattice points in a circle of radius `√x`
    wobbles around `πx`. Hardy's formula writes that wobble as `(x^¼/π) Σ r₂(n) n^(−3/4) cos(2π√(nx) − 3π/4)`, which
@@ -3147,6 +3386,13 @@ Hardy–Littlewood constants are all one statement about quadratic curves and th
 3. **The class group as families of curves.** For a discriminant with class number `h` there are `h` reduced forms,
    and so `h` families of mirror lines. Drawing all of them would show why Euler's one-pair test works only when each
    genus holds one class, and the class number would appear as a count of curve families on the saddle.
+4. **Five families and a landscape of mixtures.** D = −47 has class number 5: the principal form and two pairs of mirror
+   images, so three distinct zeta functions and a two-parameter family of mixtures. Section LE's single curve becomes a
+   surface, and the count of zeros on the critical line becomes a landscape over the plane of mixtures. Its peaks should
+   sit exactly at the three L-functions of the class group.
+5. **A race between the families.** The squares 1 and 19 lose E8's race (MA–MB) because squaring folds (Z/30)* onto two
+   classes. Squaring permutes a class group of odd order, so the three families of −23 should race with no bias from
+   prime squares. The race between them is set by the zeros of L(η(z)η(23z), s) alone.
 
 ## Explainer modules
 
@@ -3251,7 +3497,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Sections MA–MB use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

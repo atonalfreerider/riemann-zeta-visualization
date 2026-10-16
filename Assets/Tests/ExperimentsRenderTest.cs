@@ -1792,6 +1792,95 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('+')) {
+        // LA–LD. The class group as families: discriminant −23, three families of curves, three lattices, three points
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Lz(int i) => c + new Vector3(SacksSpiral.ClassGroupOffset + 600f * i, 0f, 0f);
+        const float lzLabel = 220f;
+        Vector3 la = Lz(0);
+        sacks.ExpClassLattices(la, lzLabel);
+        sacks.ExpCaption(la + new Vector3(-152f, 86f, -.3f), Vector3.down * 6.4f,
+            "Discriminant −23 has three families of curves, so three lattices|" +
+            "x² + xy + 6y² (the principal form) and 2x² ± xy + 3y² (a form and its mirror image):  the class number of −23 is 3|" +
+            "Euler's test reads one family:  one representation by x² + xy + 6y² should mean a prime, and 6 = 2·3 has one", 56f);
+        yield return Shot("LA1-three-families-three-lattices", la + new Vector3(0f, 4f, 0f) + back * 172f, la + new Vector3(0f, 4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 lb = Lz(1);
+        sacks.ExpClassEuler(lb, lzLabel);
+        sacks.ExpCaption(lb + new Vector3(-152f, 76f, -.3f), Vector3.down * 6.4f,
+            "Euler's test needs every family|" +
+            "top:  one representation by x² + xy + 6y² alone (red:  composites);  bottom:  one representation counting all three families|" +
+            "only for Euler's 65 idoneal numbers does each genus hold a single family, and only there does one form suffice", 56f);
+        yield return Shot("LB1-eulers-test-needs-every-family", lb + new Vector3(0f, -8f, 0f) + back * 172f, lb + new Vector3(0f, -8f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 lc = Lz(2);
+        sacks.ExpClassZeros(lc, lzLabel);
+        sacks.ExpCaption(lc + new Vector3(-150f, 85f, -.3f), Vector3.down * 6.4f,
+            "Families keep zeros off the line;  the class group's L-functions keep them on it|" +
+            "each family's own zeta function Σ f(x, y)<sup>−s</sup> has zeros off Re s = ½ (Davenport–Heilbronn):  red, with their mirrors|" +
+            "the class group's characters combine them:  (Z<sub>1</sub> + 2Z<sub>2</sub>)/2 = ζ(s) L(s, χ<sub>−23</sub>),  (Z<sub>1</sub> − Z<sub>2</sub>)/2 = L(η(z)η(23z), s):  all on the line", 56f);
+        yield return Shot("LC1-where-each-family-keeps-its-zeros", lc + new Vector3(0f, 4f, 0f) + back * 168f, lc + new Vector3(0f, 4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 ld = Lz(3);
+        sacks.ExpClassHeegner(ld + new Vector3(-50f, -9f, 0f), 54f, 170f);
+        sacks.ExpCaption(ld + new Vector3(-125f, 66f, -.3f), Vector3.down * 5.4f,
+            "The three families are three points of the modular surface|" +
+            "each form's root τ = (−b + i√23)/2a and all its images on section KD's disk (θ<sub>E8</sub> dimmed;  white:  its zeros)", 52f);
+        sacks.ExpCaption(ld + new Vector3(14f, 40f, -.3f), Vector3.down * 5.6f,
+            "<color=#FFCC52>x² + xy + 6y²</color>|τ = (−1 + i√23)/2,  j(τ) = −3 493 225.70", 44f);
+        sacks.ExpCaption(ld + new Vector3(14f, 27f, -.3f), Vector3.down * 5.6f,
+            "<color=#59D9FF>2x² + xy + 3y²</color>|τ = (−1 + i√23)/4,  j(τ) = 737.85 + 1 764.02 i", 44f);
+        sacks.ExpCaption(ld + new Vector3(14f, 14f, -.3f), Vector3.down * 5.6f,
+            "<color=#FF73CC>2x² − xy + 3y²</color>|τ = (1 + i√23)/4,  j(τ) = 737.85 − 1 764.02 i", 44f);
+        sacks.ExpCaption(ld + new Vector3(14f, -3f, -.3f), Vector3.down * 5.6f,
+            "the three j are the roots of|x³ + 3 491 750 x² − 5 151 296 875 x + 12 771 880 859 375|" +
+            "and a prime p lies on the gold family exactly when|x³ − x − 1 has three roots mod p:  59, 101, 167, 173, 211, …|" +
+            "on the blue and pink one when it has none:  2, 3, 13, 29, …|and on neither when it has one:  5, 7, 11, 17, …", 44f);
+        yield return Shot("LD1-three-points-of-the-modular-surface", ld + back * 140f, ld, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 le = Lz(4);
+        sacks.ExpClassMixtures(le, lzLabel);
+        sacks.ExpCaption(le + new Vector3(-150f, 88f, -.3f), Vector3.down * 6.4f,
+            "Mix the two families, and count the zeros on the line|" +
+            "each mixture Λ<sub>1</sub> + λΛ<sub>2</sub> obeys the same functional equation, so it is real on Re s = ½|" +
+            "its zeros there are where the one curve λ = −Λ<sub>1</sub>/Λ<sub>2</sub>(½ + it) meets the height λ (left)|" +
+            "right:  how many it meets, for every λ:  all of them only at λ = 2 and λ = −1, the two mixtures with an Euler product", 56f);
+        yield return Shot("LE1-every-mixture-of-the-two-families", le + new Vector3(5f, 6f, 0f) + back * 172f, le + new Vector3(5f, 6f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
+        if (Wanted('&')) {
+        // MA–MB. The prime race on E8's eight spokes: Chebyshev's bias on the squares 1 and 19, rebuilt from the zeros, and why
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Mz(int i) => c + new Vector3(SacksSpiral.SpokeRaceOffset + 600f * i, 0f, 0f);
+        const float mzLabel = 220f;
+        Vector3 ma = Mz(0);
+        sacks.ExpSpokeRace(ma, mzLabel);
+        sacks.ExpCaption(ma + new Vector3(-158f, 96f, -.3f), Vector3.down * 6.4f,
+            "The prime race on E8's eight spokes|" +
+            "E<sub>h</sub>(x) = (log x/√x)·(8 π(x; 30, h) − π*(x)):  above 0 when spoke h holds more than its eighth of the primes up to x|" +
+            "the squares 1 and 19 run behind:  ahead of their share 0.3% and 1.4% of the way, where the zeros predict 1.4% and 1.3%|" +
+            "dashed:  the means the explicit formula predicts, −3 for the two squares and +1 for the other six;  the panels correlate 0.92 to 0.99", 56f);
+        yield return Shot("MA1-the-race-counted-and-rebuilt", ma + new Vector3(0f, 10f, 0f) + back * 180f, ma + new Vector3(0f, 10f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 mb = Mz(1);
+        sacks.ExpSquareFold(mb + new Vector3(-70f, -8f, 0f), 60f, mzLabel);
+        sacks.ExpFairRace(mb + new Vector3(82f, -12f, 0f), 130f, 3.6f, mzLabel);
+        sacks.ExpCaption(mb + new Vector3(-154f, 88f, -.3f), Vector3.down * 6.4f,
+            "Why the squares lose:  every prime's square lands on spoke 1 or 19|" +
+            "a clock of 30 with n at radius log n:  squaring doubles the radius and folds the hours, 1, 11, 19, 29 → 1 and 7, 13, 17, 23 → 19|" +
+            "the zeros count every prime power p<sup>k</sup> as 1/k of a prime:  put the 443 squares back (right) and 1 and 19 are ahead 32% and 50% of the way", 56f);
+        yield return Shot("MB1-why-the-squares-lose", mb + new Vector3(0f, 4f, 0f) + back * 175f, mb + new Vector3(0f, 4f, 0f), Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
