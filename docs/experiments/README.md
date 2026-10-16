@@ -2935,6 +2935,102 @@ eigen-directions.
   * No new geometry of the zeros appears beyond two known facts: the duality with the prime powers and the random-matrix
     statistics. What E8 adds is which L-functions to use and how to combine them (its eight characters).
 
+## KA–KD. E8's own zeta function: lattice zetas and where they keep their zeros
+
+**Every lattice has a zeta function.** It is Z_L(s) = Σ<sub>v ≠ 0</sub> (v·v/2)<sup>−s</sup> = Σ<sub>n</sub> r(n) n<sup>−s</sup>,
+where r(n) counts the vectors of norm 2n. Riemann's own argument works for it: the theta series θ_L(τ) = Σ q<sup>v·v/2</sup>
+turns under τ → −1/τ, and so the completed function Λ_L(s) = (2π)<sup>−s</sup> Γ(s) Z_L(s) is symmetric about the line
+Re s = d/4. That line is the lattice's own critical line (d is the dimension).
+
+So "where are ζ's zeros in E8?" has a literal answer: they are the zeros of E8's own zeta function.
+[`Tools/lattice_zeta_data.py`](../../Tools/lattice_zeta_data.py) checks everything below against direct counts of lattice
+points and writes [`LatticeZetaData.cs`](../../Assets/Tour/LatticeZetaData.cs).
+[`SacksLatticeZeta.cs`](../../Assets/Tour/SacksLatticeZeta.cs) draws the stills (key `%`).
+
+### KA. E8's shells are its zeta function
+
+E8 has 240 vectors of norm 2, 2 160 of norm 4, 6 720 of norm 6 and 17 520 of norm 8. These were counted directly, and in
+general there are 240·σ₃(n) of norm 2n. Since Σ σ₃(n) n<sup>−s</sup> = ζ(s) ζ(s − 3):
+
+**Z_E8(s) = 240 ζ(s) ζ(s − 3)**
+
+At s = 6 the shells up to n = 3 000 give 293.4970057, against 240 ζ(6) ζ(3) = 293.4970201. The difference is the part of
+the sum beyond n = 3 000. So E8's zeta function vanishes exactly at Riemann's zeros ρ, and again at ρ + 3.
+
+In KA1 each shell is seen from E8's Coxeter plane. Every shell is a union of Coxeter orbits of 30 points, so each shows as
+concentric 30-gons.
+
+![KA1](KA1-e8s-shells-make-its-zeta-function.jpg)
+
+### KB. Off its own critical line
+
+**The functional equation.** Λ_E8(s) = Λ_E8(4 − s) holds to 10⁻²⁰, so E8's critical line is Re s = 2.
+
+**Nothing vanishes on that line.** On it, Λ_E8(2 + it) is real and negative for every t checked (0.5 to 60), because
+ζ(2 + it) and ζ(−1 + it) are never 0. So all of E8's zeros lie off its own critical line: on Re s = ½ and on Re s = 7/2,
+one mirror image of the other.
+
+**The landscape.** KB1 is the landscape log of the size of Λ_E8(s)/Λ_E8(2 + it). It is 0 along the gold line, the same on
+both sides of it, and has craters only at ζ's zeros, ½ and 7/2.
+
+![KB1](KB1-the-landscape-of-e8s-zeta.jpg)
+
+### KC. Five lattices
+
+| lattice | d | its zeta function | critical line | where its zeros are (t ≤ 50) |
+|---|---|---|---|---|
+| Z² | 2 | 4 ζ(s) L(s, χ₋₄) | Re s = ½ | all on it: ζ's and L(s, χ₋₄)'s |
+| A2 (hexagonal) | 2 | 6 ζ(s) L(s, χ₋₃) | Re s = ½ | all on it |
+| D4 | 4 | 24 (1 − 2<sup>1−s</sup>) ζ(s) ζ(s − 1) | Re s = 1 | 1 − 2<sup>1−s</sup>'s zeros (t = 2πk/log 2) on it; ζ's on Re s = ½ and 3/2 |
+| E8 | 8 | 240 ζ(s) ζ(s − 3) | Re s = 2 | none on it: ζ's on Re s = ½ and 7/2 |
+| Leech | 24 | (65520/691)(ζ(s) ζ(s − 11) − L(Δ, s)) | Re s = 6 | none on it; 10 zeros, not ζ's |
+
+**How each row was checked.**
+
+* **Z², A2, D4:** the shell counts against direct counts of lattice points for n ≤ 12.
+* **D4:** it is not unimodular, so its completed function is symmetric only after a factor 2<sup>s/2</sup>, which adds no
+  zeros.
+* **Z²:** the zeros of L(s, χ₋₄) were computed from the sign changes of its Hardy function: 25 up to t = 60, starting
+  6.0209, 10.2438, 12.9881.
+
+**The Leech lattice's zeta.**
+
+* **The shells:** r(n) = (65520/691)(σ₁₁(n) − τ(n)) gives 0, 196 560, 16 773 120, 398 034 000, 4 629 381 120. Its theta
+  series has a cusp-form part (Ramanujan's Δ), so its zeta function is not a product of copies of ζ.
+* **No zeros on its critical line.** Its functional equation holds to 10⁻²¹. On Re s = 6 it never changes sign up to
+  t = 50: there the Δ part is 10⁻⁷ to 10⁻⁵ of the Eisenstein part ζ(s)ζ(s − 11).
+* **Its zeros sit near Re s ≈ 0 and their mirrors near Re s ≈ 12.** The argument principle counts exactly 5 in
+  −4 ≤ Re s ≤ 6, 0.3 ≤ t ≤ 50, and Newton finds all five:
+
+  −0.384 + 23.330i,  0.598 + 31.715i,  −0.350 + 38.415i,  0.412 + 42.406i,  0.759 + 48.769i
+
+  The first is at t = 23.3, while ζ's first zero is at 14.13.
+* **These needed 45 digits.** At 25 digits the series for L(Δ, s) loses everything above t ≈ 50: it showed false sign
+  changes on the line, and an argument-principle count of 18. At 40 digits the error is 4·10⁻¹¹.
+
+![KC1](KC1-five-lattices-and-their-zeros.jpg)
+
+### KD. E8's theta function on the hyperbolic plane
+
+θ_E8(τ) = E₄(τ) = 1 + 240 Σ σ₃(n) qⁿ lives on the upper half plane, shown here as the Poincaré disk. τ = i is at the
+centre, the cusp i∞ is on the right, and 0 is on the left.
+
+* **How it is drawn.** Each point is moved into the fundamental domain, using E₄(γτ) = (cτ + d)⁴ E₄(τ), and summed there.
+  The colour is the argument of θ_E8. The light is y²·(size of θ_E8), which is the same at every image of τ.
+* **One zero.** θ_E8's only zero is at ρ = e<sup>2πi/3</sup> (the valence formula: weight 4 gives 4/12 = 1/3, the weight
+  of ρ). Its images are the white dots.
+* **The imaginary axis (gold):** along it, ∫₀^∞ (θ_E8(iy) − 1) y<sup>s−1</sup> dy = (2π)<sup>−s</sup> Γ(s) · 240 ζ(s) ζ(s − 3).
+* **The functional equation is a half-turn.** The half-turn of the disk is τ → −1/τ. Since θ_E8(−1/τ) = τ⁴ θ_E8(τ), it is
+  the functional equation s ↔ 4 − s.
+
+![KD1](KD1-e8s-theta-on-the-hyperbolic-plane.jpg)
+
+**What this adds to JA–JF.**
+
+* **In the funnel (JA–JF):** ζ's zeros live as frequencies.
+* **In E8 itself:** they are the zeros of E8's own zeta function, twice, and they sit off E8's critical line. Only a theta
+  series with a cusp-form part, like the Leech lattice's, moves the zeros away from ζ's.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -3155,7 +3251,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

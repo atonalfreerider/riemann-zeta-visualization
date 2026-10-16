@@ -1735,6 +1735,63 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('%')) {
+        // KA–KD. E8's own zeta function: lattice zeta functions, where they keep their zeros, θ_E8 on the hyperbolic plane
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Kz(int i) => c + new Vector3(SacksSpiral.LatticeZetaOffset + 600f * i, 0f, 0f);
+        const float kzLabel = 170f;
+        Vector3 KSat(Vector3 pos, Vector3 look, Vector3 up, float x, float y)
+        {
+            Vector3 fw = (look - pos).normalized, u = (up - Vector3.Dot(up, fw) * fw).normalized;
+            return look + Vector3.Cross(u, fw) * x + u * y;
+        }
+
+        Vector3 KDown(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fw = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, fw) * fw).normalized;
+        }
+
+        sacks.ExpE8Shells(Kz(0), kzLabel);
+        sacks.ExpCaption(Kz(0) + new Vector3(-125f, 64f, -.3f), Vector3.down * 5.4f,
+            "E8 has its own zeta function, and it is made of ζ|" +
+            "count E8's vectors by norm:  240 of norm 2, 2 160 of norm 4, 6 720 of norm 6 …,  240·σ<sub>3</sub>(n) of norm 2n|" +
+            "so the sum of (v·v/2)<sup>−s</sup> over E8 is 240 ζ(s) ζ(s − 3):  the zeros of ζ are the zeros of E8's zeta function, twice", 52f);
+        yield return Shot("KA1-e8s-shells-make-its-zeta-function", Kz(0) + back * 140f, Kz(0), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 kb = Kz(1);
+        sacks.ExpE8Landscape(kb, kzLabel);
+        Vector3 kbL = kb + new Vector3(2f, 4f, 2f), kbPos = kbL + new Vector3(-60f, -112f, -82f);
+        sacks.ExpCaption(KSat(kbPos, kbL, back, -136f, 70f), KDown(kbPos, kbL, back) * 5f,
+            "E8's zeta function keeps every zero off its own critical line|" +
+            "height:  the log of the size of Λ<sub>E8</sub>(s) / Λ<sub>E8</sub>(2 + it),  Λ<sub>E8</sub>(s) = (2π)<sup>−s</sup> Γ(s) · 240 ζ(s) ζ(s − 3) = Λ<sub>E8</sub>(4 − s):  a mirror image across Re s = 2 (gold)|" +
+            "the craters are ζ's zeros, on Re s = ½ and again on Re s = 7/2;  on Re s = 2 the function is real, negative and never 0", 48f);
+        yield return Shot("KB1-the-landscape-of-e8s-zeta", kbPos, kbL, back, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpLatticeZeros(Kz(2), kzLabel);
+        sacks.ExpCaption(Kz(2) + new Vector3(-136f, 74f, -.3f), Vector3.down * 5.2f,
+            "Five lattices, five zeta functions:  where each keeps its zeros|" +
+            "each strip is the s-plane up to t = 50, with the lattice's critical line Re s = d/4 in gold (d its dimension)|" +
+            "gold dots:  zeros of ζ;  blue:  of an L-function;  green:  of D4's factor 1 − 2<sup>1−s</sup>;  white:  the Leech lattice's own", 50f);
+        yield return Shot("KC1-five-lattices-and-their-zeros", Kz(2) + back * 150f, Kz(2), Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 kd = Kz(3);
+        sacks.ExpE8Hyperbolic(kd + new Vector3(-50f, -9f, 0f), 54f, kzLabel);
+        sacks.ExpCaption(kd + new Vector3(-125f, 66f, -.3f), Vector3.down * 5.4f,
+            "E8's theta function on the hyperbolic plane|" +
+            "θ<sub>E8</sub>(τ) = 1 + 240 Σ σ<sub>3</sub>(n) q<sup>n</sup> on the Poincaré disk:  colour its argument, light y² times its size, the same at every image of τ", 52f);
+        sacks.ExpCaption(kd + new Vector3(14f, 34f, -.3f), Vector3.down * 6.4f,
+            "its only zero:  ρ = e<sup>2πi/3</sup>|(white:  the images of ρ)|" +
+            "gold:  the imaginary axis τ = iy,  along which|∫ (θ<sub>E8</sub>(iy) − 1) y<sup>s−1</sup> dy = (2π)<sup>−s</sup> Γ(s) · 240 ζ(s) ζ(s − 3)|" +
+            "the half-turn w → −w is τ → −1/τ:|θ<sub>E8</sub>(−1/τ) = τ<sup>4</sup> θ<sub>E8</sub>(τ),  so Λ<sub>E8</sub>(s) = Λ<sub>E8</sub>(4 − s)", 40f);
+        yield return Shot("KD1-e8s-theta-on-the-hyperbolic-plane", kd + back * 140f, kd, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
