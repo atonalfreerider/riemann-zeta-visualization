@@ -79,10 +79,15 @@ public partial class SacksSpiral
     /// chain every frame (eased in and out). <paramref name="rings"/> rings every detected eye, <paramref name="mirrors"/>
     /// adds the mirror crosses. The framing follows the chain smoothly.
     /// </summary>
-    public void ExpChainLive(double t0, double t1, float seconds, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize)
+    public void ExpChainLive(double t0, double t1, float seconds, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize,
+        bool quiet = false)
     {
+        chainLiveQuiet = quiet;
         StartLive(ChainLive(t0, t1, seconds, center, halfWidth, halfHeight, rings, mirrors, labelSize));
     }
+
+    /// <summary>When set, the live chain leaves the caption board to the line's own heading instead of showing the dial.</summary>
+    bool chainLiveQuiet;
 
     IEnumerator ChainLive(double t0, double t1, float seconds, Vector3 center, float halfWidth, float halfHeight, bool rings, bool mirrors, float labelSize)
     {
@@ -262,7 +267,8 @@ public partial class SacksSpiral
         bool atZero = gap < 0.004;
         // the dial on the screen's board: where t is, and the zero it is at or between
         string gold = ColorUtility.ToHtmlStringRGB(Factory.Palette.Zero);
-        Board($"t = {t:0.000}\n<size=58%>" + (atZero
+        if (!chainLiveQuiet)
+            Board($"t = {t:0.000}\n<size=58%>" + (atZero
             ? $"<color=#{gold}>zero #{near + 1}:  ζ(½ + it) = 0, the gold centre is on the axis</color>"
             : $"between zeros #{System.Math.Max(1, j)} and #{j + 1}:  the gold centre ζ(½ + it) is off the axis") + "</size>");
         liveZeta.transform.localScale = Vector3.one * (atZero ? .8f : .45f);

@@ -3574,9 +3574,8 @@ side. During each walk, a strip above the captions shows the number's column lai
 * the values at the cuts (360, 180, 90, 45, 15, 5, 1);
 * the exponent under each run of equal pieces (2³, 3², 5).
 
-*The zeros inside E8's stack* (sections JA–JF) is scripted. It is not narrated yet: it plays with captions, timed from
-the length of its text. Its script, with what is on screen in each shot, is in
-[`xzeros-script.md`](xzeros-script.md). The module runs as follows:
+*The zeros inside E8's stack* (sections JA–JF) is narrated with the same voice. Its script, with what is on screen in
+each shot, is in [`xzeros-script.md`](xzeros-script.md). The module runs as follows:
 
 * it draws the first zero's coil up the funnel's axis, then the next two;
 * it puts a ring of 10 500 bars round the axis at the heights of 7 and 6, where the mean leans to −1 at 7 and cancels at
@@ -3596,6 +3595,25 @@ the composites that land there too.
 The second half stacks the spheres of norm 2n as a tower, with the floor count of each on the caption board. The primes
 sit on the floor 240(1 + n³), and 4 and 6 rise above it by their divisors' cubes. It shows the counts as one cube of
 points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's extra points.
+
+*Five discoveries* (`xtop5`) presents the five findings of this search that matter most. For each one the narration
+says what was found, why it matters, and which part is classical and which is new:
+
+1. the saddle is the first wave of Voronoi's divisor formula (C, P);
+2. E8's Coxeter traces are the charges of the zeta chain's vortices (IA);
+3. where ζ's zeros live in E8, and E8's own zeta function with its empty critical line (JA–JD, KA–KB);
+4. what keeps zeros on the critical line: of all the mixtures of the families' zeta functions, only those round the
+   Euler products keep every zero there (LC–LF);
+5. Chebyshev's bias as a fold, the same on E8's wheel and in S₃ (MA–MC).
+
+Its scenes are the landscape stills of those sections, so it is drawn for a horizontal frame and records with
+`--shapes horizontal`. Its script, with the reasons for each choice, is in [`xtop5-script.md`](xtop5-script.md).
+
+**Narration fades.** ElevenLabs is given each line's neighbours as context, and a clip often ends with a cut-off piece of
+the next line's first sound. [`Tools/fade_narration.py`](../../Tools/fade_narration.py) finds where each clip's speech
+ends and fades it out exponentially there (−60 dB over 0.1 s). A word's own last consonant, released after a short
+closure, is left alone. Of the 240 clips recorded before, 29 had a cut-off sound. `generate_narration.py` now fades
+every clip it writes.
 
 ## Rendering
 

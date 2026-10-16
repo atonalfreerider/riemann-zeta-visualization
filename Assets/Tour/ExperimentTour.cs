@@ -226,7 +226,7 @@ public partial class TourDirector
                 }
 
                 float seconds = A(4).ToLowerInvariant() == "line" ? currentLineSeconds * .92f : F(4, 6f);
-                sacks.ExpChainLive(Dial(A(2)), Dial(A(3)), seconds, panel, 9.5f, 15f, Has("rings"), Has("mirrors"), 6f);
+                sacks.ExpChainLive(Dial(A(2)), Dial(A(3)), seconds, panel, 9.5f, 15f, Has("rings"), Has("mirrors"), 6f, Has("quiet"));
                 break;
             }
             case "towergrow":
@@ -480,6 +480,18 @@ public partial class TourDirector
                 break;
             case "zspacing": sacks.ExpZeroSpacing(c + new Vector3(SacksSpiral.ZeroModuleOffset + 1800f, 0f, 0f), 200f, true); break;
             case "show": sacks.ExpShowItems(A(2)); break;
+            // the five discoveries (xtop5): the stills of sections IA, KB, LC, LE, LF, MA, MB and MC, where their renders put them
+            case "t5charges": sacks.ExpCoxeterTraceCharges(c + new Vector3(SacksSpiral.LieOffset, 0f, 0f), 170f); break;
+            case "t5e8land": sacks.ExpE8Landscape(c + new Vector3(SacksSpiral.LatticeZetaOffset + 600f, 0f, 0f), 170f); break;
+            case "t5families": sacks.ExpClassZeros(c + new Vector3(SacksSpiral.ClassGroupOffset + 1200f, 0f, 0f), 220f); break;
+            case "t5mix": sacks.ExpClassMixtures(c + new Vector3(SacksSpiral.ClassGroupOffset + 2400f, 0f, 0f), 220f); break;
+            case "t5plane": sacks.ExpClassLandscape(c + new Vector3(SacksSpiral.ClassFiveOffset + 600f, -10f, 0f), 124f, 0f, 280, 220f, false); break;
+            case "t5race": sacks.ExpSpokeRace(c + new Vector3(SacksSpiral.SpokeRaceOffset, 0f, 0f), 220f); break;
+            case "t5fold":
+                sacks.ExpSquareFold(c + new Vector3(SacksSpiral.SpokeRaceOffset + 600f - 70f, -8f, 0f), 60f, 220f);
+                sacks.ExpFairRace(c + new Vector3(SacksSpiral.SpokeRaceOffset + 600f + 82f, -12f, 0f), 130f, 3.6f, 220f);
+                break;
+            case "t5family": sacks.ExpFamilyRace(c + new Vector3(SacksSpiral.FamilyRaceOffset, 0f, 0f), 220f); break;
             case "say":
             {
                 string[] parts = string.Join(":", p, 2, p.Length - 2).Split('|');

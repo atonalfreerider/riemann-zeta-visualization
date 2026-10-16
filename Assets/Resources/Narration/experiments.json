@@ -2335,7 +2335,7 @@
             "exp:hide:JM comb labels",
             "exp:hide:JM rings",
             "exp:say:turned back by χ(h) and added|only the primes on spoke h survive",
-            "exp:reveal:JM fans:7.4,8.3,9.1,10,11,11.9,12.9,13.9",
+            "exp:reveal:JM fans:7.6,8.3,9.1,9.8,11,12,13.1,14.2",
             "exp:snap"
           ],
           "pause": 0.8
@@ -2356,7 +2356,7 @@
           "camera": "orbit:on=centre;at=69204,2,0;fit=150,420;el=89.5;az=-90;spin=0;raise=.065;span=12",
           "actions": [
             "exp:say:every drop is a lamp the zeros light|log n = Σ Λ(d) over the prime powers d dividing n",
-            "exp:reveal:JE path lamps:0.5,13,16.5",
+            "exp:reveal:JE path lamps:0.5,14.3,16.6",
             "exp:snap"
           ],
           "pause": 0.8
@@ -2380,6 +2380,244 @@
             "exp:show:JM fans",
             "exp:show:JM comb",
             "exp:say:the zeros are frequencies of the height|they rebuild the primes — they do not predict them",
+            "exp:snap"
+          ],
+          "pause": 1.6
+        }
+      ]
+    },
+    {
+      "id": "xtop5",
+      "title": "Five discoveries",
+      "subtitle": "what this search found, and why it matters",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off",
+        "exp:vortexprep"
+      ],
+      "lines": [
+        {
+          "id": "xtop5_01",
+          "text": "This search began with a spiral of numbers and one question: what geometry hides in the primes? Five findings stood out. For each one, here is what we found, why it matters, and what is new.",
+          "camera": "orbit:on=centre;d=215>195;el=72>58;az=-90;spin=2.5;span=11",
+          "actions": [
+            "exp:backdrop:on",
+            "exp:curves:12",
+            "exp:say:five discoveries|what this search found, and why it matters"
+          ],
+          "pause": 1.0
+        },
+        {
+          "id": "xtop5_02",
+          "text": "One. The saddle under the spiral is a wave. We bent the Sacks spiral over a saddle to make its curves stand out. The saddle rises and falls twice on every turn, the same rhythm as the first wave of Voronoi's formula for counting divisors.",
+          "camera": "orbit:on=centre;at=0,0,-2;fit=78,52>72,48;el=22>14;az=-90;spin=5;raise=.06;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:backdrop:off",
+            "exp:surfacewire:30",
+            "exp:surfacefield:400",
+            "exp:lattice:divisor:1:first",
+            "exp:say:1.  the saddle is a wave|the first wave of Voronoi's divisor formula:  two crests per turn",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_03",
+          "text": "Count points in circles instead of under hyperbolas, and the waves rise once per turn. They need the saddle twisted half a turn for every turn of the spiral. Two counting problems, two surfaces under one spiral.",
+          "camera": "orbit:on=centre;at=0,0,-2;fit=84,62>78,58;el=16>24;az=-90;spin=6;raise=.06;span=14",
+          "actions": [
+            "exp:clear",
+            "exp:twistlive:0:2:line:ribbon",
+            "exp:say:circles:  one crest per turn|Hardy's waves ride the saddle twisted half a turn per turn",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_04",
+          "text": "Why it matters: the curves on the Sacks spiral are products, and these waves are how the count of products wobbles. Voronoi and Hardy found the formulas a century ago. What is new is seeing them as the surfaces beneath the spiral.",
+          "camera": "orbit:on=centre;at=3200,0,0;fit=64,62;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:latticechart:divisor:3000:exact:series:first",
+            "exp:say:why it matters|the surface that shows the products is the products' own wave",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_05",
+          "text": "Two. Add one over n to the s, arrow by arrow, at a zero of zeta. The chain curls into vortices, one for every counting number, each the reflection of the chain's own start.",
+          "camera": "orbit:on=panellive;d=34>30;el=62>50;az=-90;spin=4;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:chainlive:318:326:line:quiet",
+            "exp:say:2.  the vortices of the zeta chain|one vortex for every counting number",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_06",
+          "text": "Keep only the numbers on E eight's eight gold hours, and each vortex carries a charge. Measured at height five thousand, the charges are the traces of E eight's Coxeter element: minus one, one, two, four, and so on, set only by the common factor with thirty.",
+          "camera": "orbit:on=centre;at=62000,-5,0;fit=230,150;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5charges",
+            "exp:say:the charges are E8's Coxeter traces|tr C<sup>k</sup> = −1, 1, 2, 4, −2, −4, −8, 8, set by gcd(k, 30)",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_07",
+          "text": "Why it matters: E eight's Coxeter trace is the sieve of two, three and five, written as a spectrum. So a Lie group sets the strength of every vortex. The identity behind it is Ramanujan's; what is new is watching E eight decide the vortices of zeta's chain.",
+          "camera": "orbit:on=centre;at=62000,-5,0;fit=230,150>190,125;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:say:why it matters|a Lie group sets the strength of each vortex"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_08",
+          "text": "Three. Where are zeta's zeros inside E eight? Not at points. Each zero is a coil wound up the factor funnel, and together the coils light every prime power. Zeta's zeros fix a prime's height; the zeros of seven more L-functions of E eight's field fix its spoke.",
+          "camera": "orbit:on=centre;at=68000,0,-16;fit=150,175;el=46;az=-90;spin=3;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:zfunnel",
+            "exp:show:JM coils",
+            "exp:hide:JM comb",
+            "exp:hide:JM comb labels",
+            "exp:hide:JM rings",
+            "exp:reveal:JM fans:14,14.5,15,15.5,16,16.5,17,17.5",
+            "exp:say:3.  where the zeros live in E8|coils up the funnel;  eight L-functions put each prime on its spoke",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_09",
+          "text": "E eight also has its own zeta function. Count its vectors by length, and you get two hundred and forty times zeta of s, times zeta of s minus three. Its critical line is real part two, and no zero sits on it: they lie on one half and on seven halves, mirror images.",
+          "camera": "orbit:on=centre;at=72602,4,2;fit=185,130;el=33;az=-118;spin=2;raise=.1;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:t5e8land",
+            "exp:say:E8's own zeta function|240 ζ(s) ζ(s − 3):  no zero on its own critical line, Re s = 2",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_10",
+          "text": "Why it matters: Riemann's zeros are E eight's own zeros, twice, and not one of them lies on E eight's own critical line. The formula is classical, Hecke's. The empty critical line is the picture this search adds.",
+          "camera": "orbit:on=centre;at=72602,4,2;fit=185,130>165,115;el=33>40;az=-112;spin=2;raise=.1;span=12",
+          "actions": [
+            "exp:say:why it matters|ζ's zeros are E8's own zeros, twice, all off its line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_11",
+          "text": "Four: what the Riemann hypothesis depends on. Discriminant minus twenty-three has three families of curves, each with its own zeta function and Riemann's symmetry. Yet they have zeros off the critical line, one even at real part one point zero zero seven, where no Euler product can vanish.",
+          "camera": "orbit:on=centre;at=77200,0,0;fit=255,205;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5families",
+            "exp:say:4.  what keeps zeros on the line|each family's own zeta function has zeros off it",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_12",
+          "text": "Mix the families. Every mixture shares the functional equation, and one curve holds all their zeros on the line at once. Counted in full, up to height fifty, only two small windows of mixtures keep every zero on the line, both around the class group's L-functions.",
+          "camera": "orbit:on=centre;at=78410,2,0;fit=320,165;el=89.5;az=-90;spin=0;raise=.04;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5mix",
+            "exp:say:every mixture at once|no zero off the line only round the two L-functions",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_13",
+          "text": "With five families, for minus forty-seven, the mixtures fill a plane. Colour each one by its zeros off the line, and gold appears only in small islands: around the three L-functions, and one more island with no L-function in it.",
+          "camera": "orbit:on=centre;at=88600,-10,0;fit=230,215;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5plane",
+            "exp:say:five families:  a plane of mixtures|gold:  no zero off the line up to t = 50",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_14",
+          "text": "Why it matters: symmetry alone does not put zeros on the line. Davenport and Heilbronn proved that in 1936. The functions that keep them there, as far as anyone has checked, are the ones with Euler products. What is new is seeing every mixture at once.",
+          "camera": "orbit:on=centre;at=88600,-10,0;fit=230,215>190,175;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:say:why it matters|symmetry alone does not keep zeros on the line"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_15",
+          "text": "Five: the prime race. Race the primes on E eight's eight spokes up to ten million. Spokes one and nineteen run three behind, ahead of their share only zero point three and one point four percent of the time, and six thousand seven hundred and seventy-one zeros rebuild every curve.",
+          "camera": "orbit:on=centre;at=80000,-5,0;fit=310,225;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5race",
+            "exp:say:5.  the prime race on E8's spokes|spokes 1 and 19 run three behind",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_16",
+          "text": "The reason is a fold. The zeros count prime powers, and squaring folds the eight spokes onto one and nineteen, so every prime square lands there. Put the squares back, and the race is fair.",
+          "camera": "orbit:on=centre;at=80608,-4,0;fit=320,210;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5fold",
+            "exp:say:the reason:  a fold|squaring sends every spoke to 1 or 19",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_17",
+          "text": "The same fold decides another race: the families of minus twenty-three. Each prime acts on the roots of x cubed minus x minus one as a symmetry of a triangle. Every reflection squares to the identity, so the principal family runs three behind and never leads, up to ten million.",
+          "camera": "orbit:on=centre;at=84003,-4,0;fit=330,205;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:clear",
+            "exp:t5family",
+            "exp:say:the same fold in S<sub>3</sub>|every reflection squares to the identity",
+            "exp:snap"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_18",
+          "text": "Why it matters: Chebyshev saw the bias in 1853, and Rubinstein and Sarnak explained it with the zeros. What is new is one picture for both races: when four elements square to the identity, the identity's class falls three behind.",
+          "camera": "orbit:on=centre;at=83908,0,0;fit=175,180;el=89.5;az=-90;spin=0;raise=.02;span=10",
+          "actions": [
+            "exp:hide:MC race",
+            "exp:hide:MC fair",
+            "exp:say:why it matters|one fold for both races"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xtop5_19",
+          "text": "None of this finds primes faster than a sieve, and none of it proves the Riemann hypothesis. What the search found is geometry: a surface, a Lie group, a plane of mixtures and a fold, where classical facts that looked separate turn out to be one picture.",
+          "camera": "orbit:on=centre;d=230>200;el=70>56;az=-90;spin=2.5;span=12",
+          "actions": [
+            "exp:clear",
+            "exp:backdrop:on",
+            "exp:curves:12",
+            "exp:say:five discoveries|a surface, a Lie group, a plane of mixtures and a fold",
             "exp:snap"
           ],
           "pause": 1.6

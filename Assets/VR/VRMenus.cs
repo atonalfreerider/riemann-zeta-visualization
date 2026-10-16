@@ -142,6 +142,7 @@ public partial class VRApp
         ["xebuild"] = ("E5 to E8", VRIcons.Id.E8),
         ["xpaths"] = ("Paths", VRIcons.Id.Funnel),
         ["xzeros"] = ("Zeros", VRIcons.Id.Zeros),
+        ["xtop5"] = ("Top five", VRIcons.Id.Flask),
     };
 
     // 28 places: every module fits (7 across, 4 down, above the line that names the one playing)

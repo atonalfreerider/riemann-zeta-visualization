@@ -2,8 +2,8 @@
 
 Module `xzeros` (the 25th in the Experiments menu, desktop and VR). The lines below are the narration as recorded in
 [`experiments.json`](../../Assets/Resources/Narration/experiments.json); the module plays them with captions and its
-camera and reveal cues, and it can be narrated with the tour's voice and recorded like the others
-(`Tools/generate_narration.py --script experiments`, then `Tools/render_chapters.py --script experiments --shapes vertical`).
+camera and reveal cues, narrated with the tour's voice (JohnV4), and records as a vertical video
+(`Tools/render_chapters.py --script experiments --chapters xzeros --shapes vertical`).
 Sections JA–JF of the [experiments README](README.md) hold the numbers behind every line.
 
 **Title card:** The zeros inside E8's stack — *where zeta's zeros live, and how E8 sorts the primes*
