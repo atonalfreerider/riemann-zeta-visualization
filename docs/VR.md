@@ -43,6 +43,7 @@ every module one after the other).
 | Open the menu from anywhere | Turn your **left palm toward your face**: a small 2×3 pad floats over it (Menu, Pause, Skip, Follow, Room, Dark). |
 | Go back to the story's view | **Follow** (pin icon) in the footer or on the palm menu. |
 | See the room / go dark | **Room** and **Dark** in the footer or on the palm menu. In blackout a faint floor ring and your hand outlines appear. |
+| Explore a model | **Models** tab: **Paths** (the factor funnel of *The paths back*), **E8** (the 240 roots) and **Unified** (E8's wheel, the funnel, ζ and the Sacks spiral). **Touch a column top or a root with your index fingertip** to pick it; the page shows what it says, and its controls are the two rows below. **Re-frame** brings the model back in front of you, **Leave** goes back to the standing view. |
 | Look at one visualization | **Views** tab: Chain, Zeros, Strip, Waves, Staircase, Primes, Saddle, Machine. Below them, **Show or hide** toggles for the layers, a row for the curves on the Sacks spiral (Squares n = k², k(k+1), Euler's k² + k + 41 and Sacks's product curves k² + k + p), and a slider for how fast the dial turns. |
 | Zoom, turn, tilt, raise, bring closer | **Space** tab. These keep working while the story moves on. |
 | Reset | **Space ▸ Reset** (the story's view) or **Re-centre** (use where you stand and look now). |
@@ -64,6 +65,36 @@ narration and camera moves (there are no captions in VR); every shot places the 
 Checked in the desktop simulation: every line of every module runs without an error in the headset's eye shape
 (`VRExperimentsTest`). Frame times of the experiment modules have not been measured on a headset yet:
 `python Tools/quest.py run --experiment all --seconds 1700` plays them all and prints a `[VRPERF]` line per narration line.
+
+### Models
+
+The **Models** tab opens the model lab ([`Assets/Lab`](../Assets/Lab)). These are interactive versions of what the
+experiment videos show, and they stand in front of you like a tour shot. There are three models:
+
+* **Paths.** Touch a column's top to watch its path back, with the factorization laid out as a strip on the page.
+  * n ± 1 and n ± 30 step to a neighbour or along the spoke.
+  * **Tree** shows every number's first step, or only the drops by 2, 3, 5, 7, 11 or 13.
+  * **Powers** draws the spirals of p^k, and **Sacks spiral** morphs the layout.
+* **E8.** Touch a root to pick it: its 56, 126 and 56 neighbours are coloured by their angle to it.
+  * **c step** and **Spin** turn the roots by the Coxeter element.
+  * **Frobenius 7, 11, 13** carry the picture to the next Coxeter plane.
+  * **Reflect** mirrors all 240 roots in the picked root.
+  * **Edges** and **Norm 4** add the Gosset polytope and the next lattice shell.
+* **Unified.** E8's roots under the funnel, and ζ(½ + it) rising beside it.
+  * The **t** slider, **Prev/Next zero** and **Play t** move along ζ.
+  * The 30 hour sums are chained at the level t, and at every zero they close in 8 groups (**By gcd**).
+  * **Character** weights E8's 8 exponent hours by a Dirichlet character mod 30, so the trail becomes L(s, χ).
+  * **View** cycles whole → ζ plane (seen from above, following t) → funnel.
+
+![The Models tab with the factor funnel (desktop simulation)](vr/models-page.jpg)
+
+Picking needs the fingertip within about a centimetre of the point, and pushing in picks it once. At the default scale
+the column tops are 1–2 cm apart, so spread two pinching hands to enlarge the model before picking in a dense spot.
+Pinch-to-move, two-handed scaling, **Follow** and the Space tab work as for the tour.
+
+Only the desktop simulation has been tried. `ModelLabTest.VRModelsPage` picks a column with a scripted fingertip and
+renders the page, but no person has used the Models page on a headset yet. `-vrmodel paths|e8|unified` opens a model
+from the command line (`adb shell am start … -e unity "-vrmodel e8"`).
 
 ### Comfort
 

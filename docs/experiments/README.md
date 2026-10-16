@@ -2353,6 +2353,190 @@ problem the same way, and a fast route from n to its factors would be a fast fac
 
 ![GE1](GE1-the-search.jpg)
 
+## HA–HC. The model lab: E8, the primes and ζ in one interactive model
+
+Video 24 (*The paths back*) is now a model you can walk around, in VR or on the desktop, together with E8 itself and a
+unified model that puts E8's wheel, the factor funnel, the Sacks spiral and ζ(½ + it) into one scene
+([`Assets/Lab`](../../Assets/Lab)). It has three models:
+
+* **Paths:** pick any n ≤ 720 and watch its path back.
+* **E8:** turn the 240 roots, reflect them, and apply a Frobenius.
+* **Unified:** E8's wheel, the factor funnel, the Sacks layout and ζ(½ + it) in one scene.
+
+**The arithmetic is checked twice.** Every identity below was first checked in Python (mpmath), then again inside Unity
+by `ModelLabTest`. The test also drives every control and writes the pictures in this section.
+
+**The headset was not used.** VR was tested only in the desktop simulation: a scripted fingertip picks a column and the
+Models page is rendered in the headset's eye shape.
+
+### HA. The paths back, interactive
+
+The funnel of GB for n ≤ 720.
+
+* **Picking:** pick a column (click it, or touch its top in VR) and its path back plays, one drop per prime factor.
+* **Strip:** under the model, the number's column is laid on its side: the pieces, the values at the cuts, and the
+  exponent under each run.
+* **Readout:** it gives n's hour on E8's wheel and the E8 lattice shell of norm 2n. That shell has 240·σ₃(n) vectors,
+  and a prime p has the fewest any number can have, 240·(1 + p³).
+
+What the model shows:
+
+* **The tree of first steps (HA2).** Each n is joined to n/p, with p its smallest prime. All the paths back together form one
+  tree rooted at 1.
+* **Drops by 7 seen from above (HA3).** A drop by a prime p ≥ 7 moves the column from hour h to hour h·p⁻¹ mod 30. That
+  is the same permutation of the spokes for every prime in p's class mod 30. For p ≡ 7 the inverse is 13 (7·13 = 91 ≡ 1),
+  and on E8's exponent hours the arcs run in two 4-cycles: 1 → 13 → 19 → 7 → 1 and 11 → 23 → 29 → 17 → 11.
+* **Prime-power spirals (HA4).** The hours of p, p², p³, … repeat with the order of p mod 30, so each run of equal
+  factors climbs the funnel as a discrete spiral that rises log p per step:
+
+  | p | period | hours |
+  |---|---|---|
+  | 2 | 4 | 2, 4, 8, 16 |
+  | 3 | 4 | 3, 9, 27, 21 |
+  | 5 | 2 | 5, 25 |
+  | 7 | 4 | 7, 19, 13, 1 |
+  | 11 | 2 | 11, 1 |
+  | 13 | 4 | 13, 19, 7, 1 |
+
+  An exponent is the number of steps taken along one of these spirals.
+
+![HA1](HA1-paths-360.jpg)
+![HA2](HA2-tree-of-first-steps.jpg)
+![HA3](HA3-drops-by-7-from-above.jpg)
+![HA4](HA4-prime-power-spirals.jpg)
+
+### HB. E8: the Coxeter element, the Galois action, reflections
+
+The 240 roots, exact (integer coordinates).
+
+**The Coxeter element.** c = s₁s₂…s₈ (Bourbaki's simple roots) has order 30. It splits the roots into 8 orbits of 30.
+Its characteristic polynomial is exactly Φ₃₀(x) = x⁸ + x⁷ − x⁵ − x⁴ − x³ + x + 1.
+
+**Four planes, one set of radii.** On the eigenplanes of the exponents m = 1, 7, 11, 13 (paired with 29, 23, 19, 17),
+c turns by 12m°. The four planes are orthogonal to 10⁻¹⁵, and in every one of them the 8 orbits lie on rings with
+the same eight radii: 0.2382, 0.3855, 0.4739, 0.5729, 0.7043, 0.7667, 0.9270, 1.1396.
+
+**The rings are permuted, not changed.** Each orbit's ring, numbered from the inside, in the four planes:
+
+| orbit | m = 1 | m = 7 | m = 11 | m = 13 |
+|---|---|---|---|---|
+| a | 0 | 5 | 4 | 6 |
+| b | 1 | 2 | 7 | 3 |
+| c | 2 | 7 | 3 | 1 |
+| d | 3 | 1 | 2 | 7 |
+| e | 4 | 6 | 0 | 5 |
+| f | 5 | 4 | 6 | 0 |
+| g | 6 | 0 | 5 | 4 |
+| h | 7 | 3 | 1 | 2 |
+
+**The Frobenius of a prime acts on these planes.** The Galois symmetry ζ₃₀ ↦ ζ₃₀^p of a prime p carries plane m to
+plane ±pm:
+
+| p mod 30 | planes | rings |
+|---|---|---|
+| ±1 | all fixed | all fixed |
+| ±7 | cycled 1 → 7 → 11 → 13 | (0 5 4 6)(1 2 7 3) |
+| ±11 | swapped in pairs | (0 4)(5 6)(1 7)(2 3) |
+| ±13 | cycled the other way | the inverse of the ±7 cycles |
+
+The 8 rings are two Galois families of four. The model colours them warm and cool.
+
+**The model's picture (the lantern).** Each root sits at its projection onto one plane, raised by its radius in the next
+plane of the cycle. So the 8 orbits stand as 8 horizontal rings, and c turns the lantern one notch.
+
+**Reflections and the other shells.**
+
+* Reflecting in a root fixes the 126 roots orthogonal to it (an E7), swaps the 56 at 60° with the 56 at 120°, and swaps α
+  with −α.
+* The 2160 lattice vectors of norm 4 (240·σ₃(2)) can be shown as a second, larger lantern.
+* The 6720 edges between roots at 60° draw the Gosset polytope 4₂₁ (HB5).
+
+![HB1](HB1-e8-lantern.jpg)
+![HB2](HB2-after-frobenius-7.jpg)
+![HB3](HB3-neighbours-of-a-root.jpg)
+![HB4](HB4-reflected.jpg)
+![HB5](HB5-edges.jpg)
+
+### HC. One model for E8, the primes, the Sacks spiral and ζ
+
+The unified model stands the funnel on a plate of E8's roots and puts a ζ tower beside it.
+
+* **The plate:** E8's roots in the Coxeter plane, turned so the 30 root directions fall on the 30 hours.
+* **The tower:** ζ(½ + it) as a trail rising with t, with the zeros marked.
+* **The level t:** at the height t sit the 30 hour sums, chained head to tail.
+
+What it puts together, all checked:
+
+1. **+1 and ×p both act on E8's wheel.** E8's Coxeter element turns its plane by one hour (12°), as n → n + 1 turns the
+   wheel. The Frobenius of a prime p (ζ ↦ ζ^p on the Coxeter eigenvalues e^(2πim/30)) acts on the hours as n → p·n.
+   The additive structure of the integers is the Coxeter element; the multiplicative structure is Galois.
+2. **ζ splits into 30 hour sums, and at every zero they cancel in 8 separate groups (HC1–HC4).** Write
+   ζ(s) = Σ_h S_h(s), with S_h(s) = Σ n⁻ˢ over n ≡ h (mod 30), which equals 30⁻ˢ ζ(s, h/30).
+   * Grouped by d = gcd(h, 30), each group sums to d⁻ˢ ∏_{p | 30/d} (1 − p⁻ˢ) ζ(s).
+   * So at every zero of ζ, each of the 8 groups sums to zero on its own. The arrows on hours 15 and 30 vanish by
+     themselves (S₃₀ = 30⁻ˢ ζ(s)).
+   * Checked to 30 digits at the first three zeros: the group sums are about 10⁻³⁰ while the arrows are 0.3 to 1.0. At
+     t = 17, which is not a zero, the groups stay open.
+   * In the model, the chain ordered by group returns to the axis eight times at a zero.
+3. **E8's 8 exponent hours carry the 8 Dirichlet characters mod 30, and through them the zeta function of E8's own
+   number field (HC6).**
+   * The group of E8's exponents is (Z/30)* = ⟨7⟩ × ⟨11⟩. Its 8 characters χ are named by χ(7) ∈ {1, i, −1, −i} and
+     χ(11) = ±1.
+   * Turning each gold arrow by χ(h) gives Σ χ(h) S_h = L(s, χ). This was checked to 10⁻²⁵ for all 8 characters.
+   * So the 8 gold arrows close up again at every zero of each L(s, χ). The first zeros are 8.0397 (mod 3), 6.6485
+     (mod 5, real), 3.0570 (mod 15, real), 6.1836 and 4.1329 (mod 5, complex), and 2.7346 and 4.4067 (mod 15, complex).
+   * The model has 26 to 43 zeros of each up to t = 66.
+   * Up to the Euler factors at 2, 3 and 5 (which do not vanish on the critical line), the product of the 8 L-functions
+     is the Dedekind zeta function of Q(ζ₁₅) = Q(ζ₃₀), the field generated by E8's Coxeter eigenvalues.
+4. **The path back is a spiral in the plane of ζ.** n ↦ n⁻ˢ turns multiplication into spiral similarities. Each drop by
+   p turns n⁻ˢ by t·log p and stretches it by √p, so the path of 360 is a discrete spiral from 360⁻ˢ out to 1. Its
+   steps are the primes, and its runs are the exponents.
+5. **E8's lattice zeta is two copies of ζ.** Σ′ |v|⁻²ˢ over E8 = Σ 240 σ₃(n) (2n)⁻ˢ = 240·2⁻ˢ ζ(s) ζ(s − 3). Summing
+   the shells numerically matches this to 15 digits at s = 8. The zeros of ζ are zeros of E8's lattice zeta, and each
+   shell count 240·σ₃(n) is multiplicative along the path back.
+6. **E8 leads to Euler's 41 on the Sacks spiral (HC5).** The theta series of E8 is E₄, and j = E₄³/Δ =
+   −640320³ exactly at (1 + √−163)/2 (checked to 25 digits). That is the class-number-one fact that makes k² + k + 41
+   prime for k = 0 … 39. On the Sacks layout of the funnel those primes lie on one curve, Sacks's angle 2π(√n − k).
+
+What this does not give: a new way to test or factor. Every piece is classical algebra:
+
+* cyclotomic fields and Frobenius;
+* Dirichlet characters and Hurwitz sums;
+* Eisenstein series and the j-function.
+
+The model shows how these pieces fit around one wheel of 30 hours. As in GE, reading a number's path still needs its
+factors.
+
+![HC1](HC1-unified-whole-at-the-first-zero.jpg)
+![HC2](HC2-zeta-plane-at-the-first-zero.jpg)
+![HC3](HC3-zeta-plane-t17.jpg)
+![HC4](HC4-zeta-plane-zero-2-hour-order.jpg)
+![HC5](HC5-sacks-layout-and-euler.jpg)
+![HC6](HC6-zeta-plane-character-mod-3-zero-1.jpg)
+
+### Using the models
+
+**Desktop.** Open MODELS in the side menu.
+
+* **Moving around:** drag to orbit, use the wheel to zoom, right-drag (or Shift + drag) to move, and click a point to
+  pick it.
+* **The panel:** it lists each model's controls with their keys.
+* **Unified's View control** cycles whole → ζ plane → funnel. The ζ-plane view looks straight down at the level t and
+  follows it.
+
+**VR.** Use the dock's Models tab (see [VR.md](../VR.md)).
+
+* **Picking:** touch a column top or a root with a fingertip. The tops are 1–2 cm apart at the default scale, so spread
+  two pinching hands to enlarge the model first.
+* **Moving:** pinch moves the model as everywhere else.
+* **From the command line:** `-vrmodel paths|e8|unified` opens a model.
+
+`ModelLabTest` runs the checks:
+
+```bash
+ZETA_OUT=/tmp/lab Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest
+```
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -2558,6 +2742,8 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
+
+The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

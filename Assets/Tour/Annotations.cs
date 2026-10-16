@@ -1015,6 +1015,7 @@ public class Annotations : MonoBehaviour
 
     // ---- the first twenty turns stacked end to end: what they add up to --------------------------------------
     GameObject angleStackRoot;
+    Coroutine angleStackRoutine;
     public Vector3 AngleStackCentre { get; private set; }
 
     /// <summary>
@@ -1024,15 +1025,19 @@ public class Annotations : MonoBehaviour
     /// </summary>
     public void StackAngles(float seconds)
     {
+        // a line skipped quickly can start this again while the last drawing is still going: stop it before its segments go
+        if (angleStackRoutine != null) StopCoroutine(angleStackRoutine);
         if (angleStackRoot != null) Destroy(angleStackRoot);
         SetJointAngles(false);
         angleStackRoot = new GameObject("AngleStack");
         angleStackRoot.transform.SetParent(transform, false);
-        StartCoroutine(StackAnglesRoutine(seconds));
+        angleStackRoutine = StartCoroutine(StackAnglesRoutine(seconds));
     }
 
     public void HideAngleStack()
     {
+        if (angleStackRoutine != null) StopCoroutine(angleStackRoutine);
+        angleStackRoutine = null;
         if (angleStackRoot != null) Destroy(angleStackRoot);
         angleStackRoot = null;
     }
@@ -1053,6 +1058,7 @@ public class Annotations : MonoBehaviour
             int n = i + 2;
             float turn = (float)(t * System.Math.Log((double)n / (n - 1)));
             Color col = Color.HSVToRGB(Mathf.Repeat(.78f - i * .045f, 1f), .55f, 1f);
+            if (angleStackRoot == null) yield break;
             LineRenderer seg = Factory.NewLine("turn " + n, .035f, col, Factory.GlowIntensity);
             seg.transform.SetParent(angleStackRoot.transform, false);
             int segs = Mathf.Clamp(Mathf.CeilToInt(turn / (2f * Mathf.PI) * 64f), 6, 256);
@@ -1069,18 +1075,21 @@ public class Annotations : MonoBehaviour
             while (e < per)
             {
                 e += Time.deltaTime;
+                if (seg == null) yield break; // the stack was cleared (another call, or the stage) while it drew
                 int shown = Mathf.Clamp(Mathf.CeilToInt(e / per * segs) + 1, 2, segs + 1);
                 seg.positionCount = shown;
                 for (int k = 0; k < shown; k++) seg.SetPosition(k, pts[k]);
                 yield return null;
             }
 
+            if (seg == null) yield break;
             seg.positionCount = pts.Length;
             seg.SetPositions(pts);
             cumulative += turn;
         }
 
         double total = t * System.Math.Log(AngleCount + 1);
+        if (angleStackRoot == null) yield break;
         TextBox sum = Label(angleStackRoot.transform, $"the first {AngleCount} turns, end to end\n<color=#C8A0FF>t</color> · log 21 = {total:0.0} radians = {total / (2 * System.Math.PI):0.0} full turns",
             c + (tall ? new Vector3(0, 0, -1.25f) : new Vector3(0, 0, -1.15f)), .8f, new Color(1f, .75f, .97f), TextAlignmentOptions.Center);
         sum.gameObject.AddComponent<Billboard>();

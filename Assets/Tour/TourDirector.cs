@@ -95,6 +95,7 @@ public partial class TourDirector : MonoBehaviour
 
         script = TourScriptLoader.Load();
         experiments = TourScriptLoader.LoadExperiments();
+        ModelLab.Create(this);
         if (!VRMode.Enabled)
         {
             SideMenu.Create(this);
@@ -182,6 +183,7 @@ public partial class TourDirector : MonoBehaviour
     public void StartTour()
     {
         if (Running) return;
+        if (ModelLab.Instance != null) ModelLab.Instance.Close();
         Running = true;
         skipRequested = false;
         replayRequested = false;
@@ -257,6 +259,7 @@ public partial class TourDirector : MonoBehaviour
     /// <summary>Start (or restart) the narrated tour at a chapter, from a clean stage.</summary>
     public void GoToChapter(string chapterId, bool continueOn = true)
     {
+        if (ModelLab.Instance != null) ModelLab.Instance.Close();
         bool experiment = PlayingExperiment; // a jump between modules stays among the modules
         if (Running)
         {

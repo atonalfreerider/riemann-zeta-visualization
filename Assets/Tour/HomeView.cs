@@ -54,6 +54,7 @@ public class HomeView : MonoBehaviour
 
     public void Enter()
     {
+        if (ModelLab.Instance != null) ModelLab.Instance.Close();
         SacksSpiral sacks = director.Annotations.Sacks;
         // coming from the tour's last line the animation is already running: carry on with the camera where it is
         bool continuing = sacks.Growing && sacks.Mode == SacksSpiral.GrowthMode.FullWave && sacks.GrowthTMax >= SacksSpiral.HomeTMax;

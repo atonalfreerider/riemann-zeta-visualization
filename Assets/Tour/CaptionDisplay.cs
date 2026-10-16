@@ -638,12 +638,12 @@ public class CaptionDisplay : MonoBehaviour
         if (legend != null) legend.gameObject.SetActive(false);
     }
 
-    // ---- strip (just above the captions: a length cut into coloured pieces, lit one at a time) ----
+    // ---- strip (just above the captions: a length cut into coloured pieces, lit one at a time; see StripView) ----
     RectTransform strip;
-    readonly List<Image> stripPieces = new();
-    readonly List<Color> stripColors = new();
-    readonly List<TextMeshProUGUI> stripInner = new(), stripMarks = new();
-    readonly List<(GameObject go, int last)> stripGroups = new();
+    StripView stripView;
+
+    /// <summary>Put the strip at the bottom edge instead of above the captions (the model lab shows no captions).</summary>
+    public bool StripAtBottom;
 
     /// <summary>
     /// A bar cut into pieces as wide as <paramref name="weights"/>, in their colours with a label inside each; the values at
@@ -654,6 +654,22 @@ public class CaptionDisplay : MonoBehaviour
     public void ShowStrip(float[] weights, Color[] colors, string[] inner, string[] marks, (int first, int last, string label, Color color)[] groups)
     {
         if (VRMode.Enabled || weights == null || weights.Length == 0) return;
+        EnsureStrip();
+        stripView.Show(weights, colors, inner, marks, groups, Landscape ? 1380f : 900f);
+        strip.gameObject.SetActive(true);
+    }
+
+    /// <summary>The strip of a number: its column laid on its side (the same as the stair modules show).</summary>
+    public void ShowStrip(int n)
+    {
+        if (VRMode.Enabled || n < 2) return;
+        EnsureStrip();
+        stripView.Show(n, Landscape ? 1380f : 900f);
+        strip.gameObject.SetActive(true);
+    }
+
+    void EnsureStrip()
+    {
         if (strip == null)
         {
             GameObject go = new("Strip");
@@ -662,97 +678,25 @@ public class CaptionDisplay : MonoBehaviour
             Image bg = go.AddComponent<Image>();
             bg.color = new Color(0.02f, 0.02f, 0.05f, 0.62f);
             bg.raycastTarget = false;
+            stripView = new StripView(strip, 1f, (parent, text, size) =>
+            {
+                TextMeshProUGUI t = MakeText(parent, "strip text", size, FontStyles.Bold, TextAlignmentOptions.Center);
+                t.text = text;
+                return t;
+            });
         }
 
-        foreach (Transform c in strip) Destroy(c.gameObject);
-        stripPieces.Clear();
-        stripColors.Clear();
-        stripInner.Clear();
-        stripMarks.Clear();
-        stripGroups.Clear();
-        float barWidth = Landscape ? 1380f : 900f, total = 0f;
-        foreach (float w in weights) total += w;
+        float barWidth = Landscape ? 1380f : 900f;
         strip.anchorMin = strip.anchorMax = new Vector2(0.5f, 0f);
         strip.pivot = new Vector2(0.5f, 0f);
-        strip.anchoredPosition = new Vector2(0f, Landscape ? 272f : 574f);
+        strip.anchoredPosition = new Vector2(0f, StripAtBottom ? 18f : Landscape ? 272f : 574f);
         strip.sizeDelta = new Vector2(barWidth + 100f, 236f);
-        float X(float sum) => -barWidth * .5f + barWidth * sum / total;
-        RectTransform Box(Transform parent, string name, float x0, float x1, float y, float h)
-        {
-            GameObject go = new(name);
-            go.transform.SetParent(parent, false);
-            RectTransform r = go.AddComponent<RectTransform>();
-            r.anchorMin = r.anchorMax = new Vector2(.5f, .5f);
-            r.pivot = new Vector2(.5f, .5f);
-            r.anchoredPosition = new Vector2((x0 + x1) * .5f, y);
-            r.sizeDelta = new Vector2(Mathf.Max(1f, x1 - x0), h);
-            return r;
-        }
-
-        TextMeshProUGUI Label(Transform parent, string name, string text, float x, float y, float size, Color color)
-        {
-            TextMeshProUGUI t = MakeText(parent, name, size, FontStyles.Bold, TextAlignmentOptions.Center);
-            t.textWrappingMode = TextWrappingModes.NoWrap;
-            RectTransform r = t.rectTransform;
-            r.anchorMin = r.anchorMax = new Vector2(.5f, .5f);
-            r.sizeDelta = new Vector2(260f, size * 1.5f);
-            r.anchoredPosition = new Vector2(x, y);
-            t.text = text;
-            t.color = color;
-            return t;
-        }
-
-        const float barY = 8f, barH = 46f, gap = 3f;
-        float acc = 0f;
-        for (int i = 0; i < weights.Length; i++)
-        {
-            float a = X(acc), b = X(acc + weights[i]);
-            Image piece = Box(strip, $"piece {i}", a + gap, b - gap, barY, barH).gameObject.AddComponent<Image>();
-            piece.raycastTarget = false;
-            stripPieces.Add(piece);
-            stripColors.Add(colors[i]);
-            stripInner.Add(Label(strip, $"inner {i}", inner != null && i < inner.Length ? inner[i] : "", (a + b) * .5f, barY, 32f, Color.black));
-            acc += weights[i];
-        }
-
-        acc = 0f;
-        for (int i = 0; i < marks.Length; i++)
-        {
-            stripMarks.Add(Label(strip, $"mark {i}", marks[i], X(acc), barY + 60f, 36f, Factory.Palette.Caption));
-            if (i < weights.Length) acc += weights[i];
-        }
-
-        if (groups != null)
-            foreach (var (first, last, label, color) in groups)
-            {
-                float a = 0f, b = 0f;
-                for (int i = 0; i <= last; i++) { if (i < first) a += weights[i]; b += weights[i]; }
-                RectTransform br = Box(strip, $"bracket {first}", X(a) + gap, X(b) - gap, barY - 38f, 6f);
-                Image line = br.gameObject.AddComponent<Image>();
-                line.color = color;
-                line.raycastTarget = false;
-                Label(br, $"group {first}", label, 0f, -34f, 46f, color);
-                stripGroups.Add((br.gameObject, last));
-            }
-
-        strip.gameObject.SetActive(true);
-        StripLight(0);
     }
 
     /// <summary>Light the first <paramref name="lit"/> pieces of the strip; show the marks up to the last lit cut and the brackets of the finished runs.</summary>
     public void StripLight(int lit)
     {
-        if (strip == null) return;
-        for (int i = 0; i < stripPieces.Count; i++)
-        {
-            Color c = stripColors[i];
-            bool on = i < lit;
-            stripPieces[i].color = on ? c : new Color(c.r * .5f, c.g * .5f, c.b * .5f, .5f);
-            stripInner[i].color = on ? new Color(.04f, .04f, .07f) : new Color(.85f, .86f, .9f, .6f);
-        }
-
-        for (int i = 0; i < stripMarks.Count; i++) stripMarks[i].gameObject.SetActive(i <= lit);
-        foreach (var (go, last) in stripGroups) go.SetActive(lit > last);
+        if (stripView != null) stripView.Light(lit);
     }
 
     public void HideStrip()

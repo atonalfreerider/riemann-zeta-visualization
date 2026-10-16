@@ -17,7 +17,9 @@ public static class VRIcons
         Chain, Tail, Zeros, Trail, Waves, Stairs, Strip, Sacks, Saddle, Equations, Grid, Dial, Zeno, Stage, Machine, Key,
         Speed, Check,
         // the experiments tab
-        Flask, Curves, Contours, Probe, Mirror, Lattice, Ideals, Chords, Comb, Pinch, Torus, Legendre, Fingerprint, Clock, Pair, Sieve, Twist
+        Flask, Curves, Contours, Probe, Mirror, Lattice, Ideals, Chords, Comb, Pinch, Torus, Legendre, Fingerprint, Clock, Pair, Sieve, Twist,
+        // the models tab
+        Funnel, E8, Unify
     }
 
     const int Size = 96;
@@ -508,6 +510,42 @@ public static class VRIcons
 
                 c.Fill(Shape.Segment(V(0, -.18f), V(0, -.55f), .08f));
                 break;
+            case Id.Funnel: // columns rising toward the rim, and a path stepping down them
+            {
+                float[] xs = { -.72f, -.36f, 0f, .36f, .72f };
+                float[] hs = { -.25f, .05f, .3f, .52f, .72f };
+                for (int i = 0; i < xs.Length; i++) c.Fill(Shape.Segment(V(xs[i], -.85f), V(xs[i], hs[i]), .1f));
+                for (int i = xs.Length - 1; i > 0; i--)
+                {
+                    c.Fill(Shape.Segment(V(xs[i] + .02f, hs[i] + .14f), V(xs[i] + .02f, hs[i - 1] + .14f), .08f));
+                    c.Fill(Shape.Segment(V(xs[i] + .02f, hs[i - 1] + .14f), V(xs[i - 1], hs[i - 1] + .14f), .08f));
+                }
+
+                break;
+            }
+            case Id.E8: // two rings of a 30-fold star, as E8's roots look from its Coxeter plane
+                for (int i = 0; i < 15; i++)
+                {
+                    c.Fill(Shape.Circle(Dir(i * 24f) * .82f, .085f));
+                    c.Fill(Shape.Circle(Dir(i * 24f + 12f) * .5f, .075f));
+                }
+
+                c.Fill(Shape.Ring(V(0, 0), .2f, .07f));
+                break;
+            case Id.Unify: // a spiral through spokes
+            {
+                for (int i = 0; i < 6; i++) c.Fill(Shape.Segment(V(0, 0), Dir(i * 60f + 15f) * .9f, .05f));
+                Vector2 prev = V(0, 0);
+                for (int i = 1; i <= 40; i++)
+                {
+                    float r = .85f * i / 40f, a = i / 40f * 4.4f * Mathf.PI;
+                    Vector2 q = V(Mathf.Cos(a) * r, Mathf.Sin(a) * r);
+                    c.Fill(Shape.Segment(prev, q, .1f));
+                    prev = q;
+                }
+
+                break;
+            }
             case Id.Clock:
                 c.Fill(Shape.Ring(V(0, 0), .8f, .12f));
                 for (int i = 0; i < 12; i++)

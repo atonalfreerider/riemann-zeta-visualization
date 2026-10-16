@@ -207,6 +207,23 @@ public class SideMenu : MonoBehaviour
 
         Label(content, "Scripted in Narration/experiments.json; captions only, no narration recorded. Findings in docs/experiments.", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 50).textWrappingMode = TextWrappingModes.Normal;
 
+        if (ModelLab.Instance != null)
+        {
+            Header(content, "MODELS   interactive, also in VR");
+            RectTransform modelRow = Row(content);
+            foreach (LabModel m in ModelLab.Instance.Models)
+            {
+                string id = m.Id;
+                Button(modelRow, m.Short, () =>
+                {
+                    ModelLab.Instance.Enter(id);
+                    open = false;
+                }, 1f, TextAlignmentOptions.Left, Icon(m.Icon));
+            }
+
+            Label(content, "Paths: the factor funnel of \"The paths back\".  E8: the roots, the Coxeter element, reflections, Frobenius.  Unified: E8's wheel, ζ split into its 30 hour sums, the Sacks spiral.", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 74).textWrappingMode = TextWrappingModes.Normal;
+        }
+
         Header(content, "RECORD");
         RectTransform recordRow = Row(content);
         Button(recordRow, "Record whole tour", () => { director.RecordTour("", true, director.Portrait); open = false; }, 2f, TextAlignmentOptions.Left, VRIcons.Circle(), RecordColor);

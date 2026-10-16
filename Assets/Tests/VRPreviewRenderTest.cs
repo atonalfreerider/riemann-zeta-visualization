@@ -63,8 +63,8 @@ public class VRPreviewRenderTest
         yield return Shot("01-home-dock");
         Debug.Log($"VR rig scale {rig.Scale:0.0}, passthrough {rig.Passthrough}");
 
-        // the pages of the dock: experiments, views, space, settings
-        for (int p = 1; p <= 4; p++)
+        // the pages of the dock: experiments, views, models, space, settings
+        for (int p = 1; p <= 5; p++)
         {
             app.ShowPage(p);
             for (int i = 0; i < 12; i++) yield return null;
@@ -73,8 +73,18 @@ public class VRPreviewRenderTest
 
         app.ShowPage(0);
 
-        // hover and press: the right index finger over the "4 Dial" chapter button
-        VRButton dial = FindButton(app, "4  Dial");
+        // hover and press: the right index finger over the Dial chapter's button ("5  Dial" since the tour's v12 split)
+        VRButton dial = null;
+        int dialIndex = -1;
+        foreach (VRControl c in app.Dock.Controls)
+        {
+            if (c is VRButton b && b.Label != null && b.Label.EndsWith("  Dial"))
+            {
+                dial = b;
+                dialIndex = int.Parse(b.Label.Split(' ')[0]) - 1;
+            }
+        }
+
         Assert.IsNotNull(dial, "no chapter button for the dial");
         Vector3 centre = rig.Offset.InverseTransformPoint(dial.Rt.TransformPoint(dial.Rt.rect.center));
         Vector3 inFront = -app.Dock.transform.forward; // the dock faces the user; its back points away
@@ -90,7 +100,7 @@ public class VRPreviewRenderTest
         yield return Shot("06-press-dial");
         for (int i = 0; i < 4; i++) yield return null;
         Assert.IsTrue(app.Tour.Running, "pressing the chapter button should start the tour");
-        Assert.AreEqual(3, app.Tour.CurrentChapterIndex, "the dial chapter is chapter 4");
+        Assert.AreEqual(dialIndex, app.Tour.CurrentChapterIndex, "pressing the Dial button starts the Dial chapter");
         app.Hands.ScriptedRightTip = centre + inFrontLocal * 0.2f; // retract
         for (int i = 0; i < 10; i++) yield return null;
 

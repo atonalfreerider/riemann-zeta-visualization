@@ -54,9 +54,9 @@ public partial class VRApp
     {
         Dock = VRPanel.Create("Dock", new Vector2(DockWidth, DockHeight), Rig.Ui);
 
-        string[] tabNames = { "Tour", "Experiments", "Views", "Space", "Settings" };
-        VRIcons.Id[] tabIcons = { VRIcons.Id.List, VRIcons.Id.Flask, VRIcons.Id.Cube, VRIcons.Id.Move, VRIcons.Id.Gear };
-        float[] tabWidths = { 78f, 140f, 88f, 88f, 104f };
+        string[] tabNames = { "Tour", "Experiments", "Views", "Models", "Space", "Settings" };
+        VRIcons.Id[] tabIcons = { VRIcons.Id.List, VRIcons.Id.Flask, VRIcons.Id.Cube, VRIcons.Id.E8, VRIcons.Id.Move, VRIcons.Id.Gear };
+        float[] tabWidths = { 68f, 120f, 76f, 84f, 72f, 88f };
         float tabX = 8f;
         for (int i = 0; i < tabNames.Length; i++)
         {
@@ -66,14 +66,15 @@ public partial class VRApp
             tabX += tabWidths[i] + 4f;
         }
 
-        Dock.AddButton(530, 8, 62, 54, "", VRIcons.Id.Close, () => Dock.SetOpen(false));
+        Dock.AddButton(540, 8, 52, 54, "", VRIcons.Id.Close, () => Dock.SetOpen(false));
 
         for (int i = 0; i < tabNames.Length; i++) pages.Add(Dock.AddPage(tabNames[i], 0, PageTop, DockWidth, PageHeight));
         BuildTourPage(pages[0]);
         BuildLabPage(pages[1]);
         BuildViewsPage(pages[2]);
-        BuildSpacePage(pages[3]);
-        BuildSettingsPage(pages[4]);
+        BuildModelsPage(pages[3]);
+        BuildSpacePage(pages[4]);
+        BuildSettingsPage(pages[5]);
         ShowPage(0);
         BuildFooter();
     }
@@ -104,6 +105,7 @@ public partial class VRApp
 
     void PlayChapter(int index)
     {
+        CloseLab();
         tour.LeaveExperiment(); // the chapter numbers are the tour's, not the experiment modules'
         Guide.ResetOffsets();
         Guide.SetFollow(true, true);
@@ -154,6 +156,7 @@ public partial class VRApp
     /// <summary>Play one experiment module (they play alone; Next goes on to the one after).</summary>
     public void PlayExperiment(int index)
     {
+        CloseLab();
         Guide.ResetOffsets();
         Guide.SetFollow(true, true);
         tour.PlayExperiment(index);
@@ -162,6 +165,7 @@ public partial class VRApp
     /// <summary>For the command line: one module by id, or all of them one after the other.</summary>
     public void PlayExperiment(string id, bool chain)
     {
+        CloseLab();
         Guide.ResetOffsets();
         Guide.SetFollow(true, true);
         tour.PlayExperiment(id, chain);
@@ -251,6 +255,7 @@ public partial class VRApp
     /// <summary>Leave the narrated tour and show one visualization on its own, framed for the user, running.</summary>
     public void ApplyView(string id)
     {
+        CloseLab();
         if (tour.Running) tour.StopTour();
         tour.RestoreFreeRoam();
         main.Speed = 1.8d;
