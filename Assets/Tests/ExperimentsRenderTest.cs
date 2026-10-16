@@ -1641,6 +1641,100 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('@')) {
+        // JA–JF. The zeros inside E8's stack: where the zeros of ζ (and of the other seven L-functions of Q(ζ30)) sit in the
+        // factor funnel of "The paths back"
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 Zs(int i) => c + new Vector3(SacksSpiral.ZeroStackOffset + 600f * i, 0f, 0f);
+        const float zsLabel = 170f;
+        Vector3 Right(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fw = (look - pos).normalized, u = (up - Vector3.Dot(up, fw) * fw).normalized;
+            return Vector3.Cross(u, fw);
+        }
+
+        // screen-anchored positions: x right and y up from the target, in world units at the target's distance
+        Vector3 Sat(Vector3 pos, Vector3 look, Vector3 up, float x, float y)
+        {
+            Vector3 fw = (look - pos).normalized, u = (up - Vector3.Dot(up, fw) * fw).normalized;
+            return look + Vector3.Cross(u, fw) * x + u * y;
+        }
+
+        Vector3 Sdown(Vector3 pos, Vector3 look, Vector3 up)
+        {
+            Vector3 fw = (look - pos).normalized;
+            return -(up - Vector3.Dot(up, fw) * fw).normalized;
+        }
+
+        Vector3 ja = Zs(0);
+        sacks.ExpZeroCoils(ja, 120, 2.6f, 10f, .5f, zsLabel);
+        Vector3 jaL = ja + new Vector3(24f, 0f, -30f), jaPos = jaL + new Vector3(0f, -118f, -38f);
+        sacks.ExpPhaseWheel(Sat(jaPos, jaL, back, 76f, 12f), Right(jaPos, jaL, back), -Sdown(jaPos, jaL, back), 7, 12.5f, zsLabel * .8f, "at the height of 7, a prime");
+        sacks.ExpPhaseWheel(Sat(jaPos, jaL, back, 76f, -38f), Right(jaPos, jaL, back), -Sdown(jaPos, jaL, back), 6, 12.5f, zsLabel * .8f, "at the height of 6 = 2·3");
+        sacks.ExpCaption(Sat(jaPos, jaL, back, -111f, 61f), Sdown(jaPos, jaL, back) * 4.3f,
+            "Where a zero sits in the stack:  it is a coil up the axis|" +
+            "the funnel's height is log n, and at s = ½ + iγ the term n<sup>−s</sup> turns by γ·log n:  the height times γ|" +
+            "gold, blue, pink:  the first three zeros of ζ, γ = 14.13, 21.02, 25.01, a turn every 2π/γ of height (here 1 … 120)|" +
+            "right:  where all 10 500 coils point at one height.  At a prime's height they lean to −1 (Landau), at 6 they cancel", 41f);
+        yield return Shot("JA1-a-zero-is-a-coil-up-the-stack", jaPos, jaL, back, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 jb = Zs(1);
+        Vector3 jbL = jb + new Vector3(14f, 0f, -22f), jbPos = jbL + new Vector3(0f, -118f, -34f);
+        sacks.ExpZetaComb(jb, 400, 2.6f, 7f, .5f, zsLabel, Right(jbPos, jbL, back));
+        sacks.ExpCaption(Sat(jbPos, jbL, back, -111f, 61f), Sdown(jbPos, jbL, back) * 4.3f,
+            "Added up, the 10 500 coils light every prime power and nothing else|" +
+            "white:  the sum over ζ's zeros (with its pole) at every height, drawn out to the right:  a tooth of log p at each p<sup>j</sup>|" +
+            "scaled so a tooth of log p reaches the funnel:  the top of p's column  (p<sup>j</sup> reaches 1/j of the way)|" +
+            "spun round the axis, each tooth is a ring at that height:  the zeros fix the height, not the hour", 41f);
+        yield return Shot("JB1-zetas-zeros-light-every-prime-power", jbPos, jbL, back, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 jc = Zs(2);
+        Vector3 jcL = jc + new Vector3(0f, 0f, -30f), jcPos = jcL + new Vector3(-58f, -168f, -62f);
+        Vector3 jcRow = Right(jcPos, jcL, back);
+        sacks.ExpCharacterTrees(jc, 32f, 100, 15f, 3.4f, .55f, zsLabel, Vector3.up, new Vector3(jcRow.x, jcRow.y, 0f).normalized);
+        sacks.ExpHourKey(Sat(jcPos, jcL, back, -10f, -84f), jcRow, zsLabel * .2f, true);
+        sacks.ExpCaption(Sat(jcPos, jcL, back, -146f, 78f), Sdown(jcPos, jcL, back) * 5.4f,
+            "E8's field has eight L-functions, and the zeros of each light the primes turned to χ(p)|" +
+            "E8's Coxeter element makes E8 a lattice over Z[ζ<sub>30</sub>];  the field Q(ζ<sub>30</sub>) has one L-function for each character of (Z/30)*|" +
+            "each tree:  the zeros of one L-function (t ≤ 1000) summed at every height up to log 100, real part right, imaginary away|" +
+            "every tooth is χ(p)·log p:  tips coloured by the hour of n mod 30, one direction per hour", 52f);
+        yield return Shot("JC1-each-l-function-turns-the-primes", jcPos, jcL, back, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 jd = Zs(3);
+        sacks.ExpSpokeCombs(jd, 400, 2.6f, 7f, .5f, zsLabel);
+        Vector3 jdL = jd + new Vector3(16f, 8f, -20f), jdPos = jdL + new Vector3(0f, -110f, -104f);
+        sacks.ExpCaption(Sat(jdPos, jdL, back, -134f, 72f), Sdown(jdPos, jdL, back) * 5.2f,
+            "Turned back by χ(h) and added, the eight sets of zeros keep only the primes on spoke h|" +
+            "for each gold hour h:  (1/8) Σ<sub>χ</sub> χ(h)* · (the zeros of L(s, χ)),  drawn in the half-plane of spoke h|" +
+            "every tooth reaches the top of a prime's column on its spoke;  the composites on the spoke get none|" +
+            "7 420 zeros up to t = 1000 sort every prime ≤ 400 onto its hour:  the height and the hour", 50f);
+        yield return Shot("JD1-the-zeros-sort-the-primes-onto-e8s-spokes", jdPos, jdL, back, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 je = Zs(4);
+        sacks.ExpPathLampChart(je + new Vector3(-100f, -38f, 0f), new long[] { 360, 343, 397 }, 15.5f, 9f, 22f, .55f, zsLabel);
+        sacks.ExpCaption(je + new Vector3(-128f, 64f, -.3f), Vector3.down * 5.4f,
+            "Every drop of a path back is a lamp the zeros light|" +
+            "white:  the paths back from 360, 343 and 397, one drop of log p per prime factor (height = log of the number)|" +
+            "coloured, beside each drop:  the sum of ζ's 10 500 zeros at the prime power p<sup>j</sup> the drop removes — it is log p|" +
+            "under each stop:  the same sum at the stop itself, 0 unless the stop is a prime power.   log n = Σ Λ(d) over the prime powers d dividing n", 52f);
+        yield return Shot("JE1-every-drop-is-a-lamp", je + back * 140f, je, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 jf = Zs(5);
+        sacks.ExpZeroSpacing(jf, zsLabel);
+        sacks.ExpCaption(jf + new Vector3(-128f, 64f, -.3f), Vector3.down * 5.4f,
+            "The zeros among themselves:  random unitary matrices, one for each character|" +
+            "within one L-function the zeros repel like the eigenvalues of a random unitary matrix (Montgomery, Dyson, Odlyzko)|" +
+            "zeros of two different L-functions of E8's field do not see each other:  the field's zeta is eight independent spectra", 52f);
+        yield return Shot("JF1-the-zeros-among-themselves", jf + back * 140f, jf, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();

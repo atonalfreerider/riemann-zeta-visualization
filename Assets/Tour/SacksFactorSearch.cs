@@ -140,7 +140,7 @@ public partial class SacksSpiral
     /// z = log n is drawn as rings at 10, 100, 1000; the gold spokes on the floor. Then, for each n in <paramref name="stairs"/>,
     /// the descent: down the top segment (÷ smallest prime p), across at that height to the top of n/p's column, and so on to 1.
     /// </summary>
-    public void ExpFactorColumns(Vector3 o, int nMax, float s, float hScale, float dot, float labelSize, long[] stairs, bool columns, bool labelStairs)
+    public void ExpFactorColumns(Vector3 o, int nMax, float s, float hScale, float dot, float labelSize, long[] stairs, bool columns, bool labelStairs, float dim = 1f)
     {
         Transform g = ExpGroup("GB factor columns").transform;
         ExpEnsureSieve(nMax + 2);
@@ -166,10 +166,10 @@ public partial class SacksSpiral
                 }
 
                 bool prime = f.Count == 1;
-                tops.Add(b + Up(h)); topCols.Add(prime ? PrimeGold : new Color(.8f, .82f, .92f)); topSizes.Add(prime ? dot * .9f : dot * .55f);
+                tops.Add(b + Up(h)); topCols.Add((prime ? PrimeGold : new Color(.8f, .82f, .92f)) * dim); topSizes.Add(prime ? dot * .9f : dot * .55f);
             }
 
-            foreach (var kv in byPrime) Segments(g, $"segments {kv.Key}", kv.Value, dot * .32f, SegmentColor(kv.Key) * .85f, Factory.SoftGlowIntensity);
+            foreach (var kv in byPrime) Segments(g, $"segments {kv.Key}", kv.Value, dot * .32f, SegmentColor(kv.Key) * (.85f * dim), Factory.SoftGlowIntensity);
             ExpPointCloud(g, "column tops", tops, topCols, topSizes, Factory.GlowIntensity);
         }
 

@@ -2700,6 +2700,210 @@ the dimensions of the SU(2)-invariants of V^(⊗2k).
 the multiplicative structure has the symmetries it has, and how its statistics are distributed. They do not shortcut
 reading it.
 
+## JA–JF. The zeros inside E8's stack: where the zeros of ζ sit in the factor funnel
+
+The question: where do the zeros of ζ appear in the E8 logarithmic prime-factor stack of "The paths back" (n at hour
+n mod 30 and radius s·√n, its column rising to log n in one piece of log p per prime factor), and do the paths back
+cross them? The answers below were computed and checked in Python first:
+[`Tools/zero_stack_data.py`](../../Tools/zero_stack_data.py) finds the zeros, runs the checks, and writes
+[`ZeroStackData.cs`](../../Assets/Tour/ZeroStackData.cs). [`SacksZeroStack.cs`](../../Assets/Tour/SacksZeroStack.cs)
+draws the stills (1920 × 1080, `ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`).
+
+**The zeros used.**
+
+* **ζ:** the first 10 500 zeros, from mpmath's `zetazero`. It uses Gram blocks and Rosser's rule, so none are skipped.
+  The last is at t = 10 303.
+* **The other seven L-functions of E8's field (JC):** every zero 0 < t ≤ 1000, 6 771 in all.
+  * They are the sign changes of the real Hardy function Z<sub>χ</sub>(t) = ε<sup>−1/2</sup> e<sup>iθ(t)</sup> L(½ + it, χ).
+  * Im Z<sub>χ</sub> stays below 10⁻¹¹, which confirms the root numbers ε.
+  * The zero count follows θ(t)/π without drift, so no pair was skipped.
+  * The first 26 to 43 zeros of each match the model lab's earlier table to its rounding.
+
+### JA. A zero is a coil up the axis
+
+**A zero is not a point of the stack; it is a frequency along its height.** The funnel's height is z = log n. At
+s = ½ + iγ the term n<sup>−s</sup> = n<sup>−1/2</sup>·e<sup>−iγ log n</sup> points at the angle γ·z: the height times γ. So
+each zero is a coil (a helix) up the funnel's axis, one turn every 2π/γ of log n:
+
+| zero | γ | one turn every (log n) | n grows per turn by |
+|---|---|---|---|
+| 1st | 14.13 | 0.445 | ×1.56 |
+| 2nd | 21.02 | 0.299 | ×1.35 |
+| 3rd | 25.01 | 0.251 | ×1.29 |
+
+**A path back turns the coils.** A drop ÷p lowers the height by log p and turns every coil by γ·log p. This is the
+Euler factor p<sup>−s</sup> written in the stack's coordinates.
+
+**At the height of a prime power, the coils lean toward −1; everywhere else they cancel.** Landau (1911):
+
+Σ<sub>0 < γ ≤ T</sub> x<sup>iγ</sup> = −(T/2π)·Λ(x)/√x + O(log T)
+
+Λ is von Mangoldt's function: log p at x = p<sup>j</sup>, 0 otherwise. Measured with all 10 500 zeros:
+
+* **At the height of 7:** the mean of 7<sup>iγ</sup> is −0.115. Landau predicts −0.115.
+* **At the height of 6:** the mean is +0.000, and Landau predicts 0.
+
+![JA1](JA1-a-zero-is-a-coil-up-the-stack.jpg)
+
+### JB. Added up, the coils light every prime power and nothing else
+
+The explicit formula, with a Gaussian weight e<sup>−γ²/2σ²</sup> on the zeros:
+
+Σ<sub>n</sub> Λ(n)/√n · G(log n − z) = e<sup>z/2</sup> − e<sup>−5z/2</sup>/(1 − e<sup>−2z</sup>) − Σ<sub>ρ</sub> e<sup>−γ²/2σ²</sup> e<sup>iγz</sup>
+
+* G is a Gaussian of width 1/σ.
+* The first two terms are ζ's pole and its trivial zeros.
+* Multiplied by e<sup>z/2</sup>√(2π)/σ, the sum has a tooth of exactly log p at the height of each prime power p<sup>j</sup>.
+
+**Checked.**
+
+* **ζ alone (10 500 zeros, σ = 2576), n ≤ 720:** the sum is log p at every prime power, to within 0.001. At every
+  other n it is 0, to within 0.011.
+* **The same formula for all eight characters of JC:** it matches direct prime sums to 0.008, where the teeth reach 73.
+
+**In the funnel.** The sum is drawn out to one side, scaled so that a tooth of log p reaches the funnel.
+
+* The tips trace the funnel's own profile, at the height of every prime.
+* A tooth at p<sup>j</sup> reaches 1/j of the way: one piece of the j pieces of its column.
+* Spun round the axis, each tooth is a ring at its height. The ring passes through the top of that number's column and
+  through no other column top.
+
+So ζ's zeros fix how high every prime power sits, but they are the same in every direction: they cannot tell its hour.
+
+![JB1](JB1-zetas-zeros-light-every-prime-power.jpg)
+
+### JC. E8's field: eight L-functions, each turning the primes by its character
+
+**E8 is a lattice over Z[ζ₃₀].** The characteristic polynomial of E8's Coxeter element C is the cyclotomic polynomial
+Φ₃₀: its eigenvalues are the eight primitive 30th roots of unity. So Z[C] ≅ Z[ζ₃₀], and E8 is a module of rank 1 over
+the cyclotomic integers Z[ζ₃₀]. Q(ζ₃₀) = Q(ζ₁₅) has class number 1, so E8 ≅ Z[ζ₃₀] as a module.
+
+**The Galois group is E8's exponent group.** The Galois group of Q(ζ₃₀), ζ ↦ ζ<sup>a</sup> for a in (Z/30)*, is E8's
+exponent group: the gold hours under multiplication. It permutes C's eight eigen-directions as multiplying by a prime
+permutes the hours (the model lab's Frobenius buttons).
+
+**The field's zeta function splits over the eight characters of (Z/30)*.**
+
+ζ<sub>Q(ζ30)</sub>(s) = ζ(s) · L(s, χ<sub>3</sub>) · L(s, χ<sub>5</sub>) · L(s, χ<sub>15</sub>) · L(s, ψ)·L(s, ψ̄) · L(s, ψ′)·L(s, ψ̄′)
+
+* χ<sub>3</sub>, χ<sub>5</sub> and χ<sub>15</sub> are the real characters of conductor 3, 5 and 15.
+* ψ and ψ′ are the quartic characters, of conductor 5 and 15.
+
+So "the zeros inside E8" are ζ's zeros together with the zeros of seven Dirichlet L-functions. Up to t = 1000 there are:
+
+| L-function | ζ | mod 3 | mod 5, real | mod 15, real | mod 5, χ(7) = i | mod 5, χ(7) = −i | mod 15, χ(7) = i | mod 15, χ(7) = −i |
+|---|---|---|---|---|---|---|---|---|
+| zeros, 0 < t ≤ 1000 | 649 | 823 | 904 | 1079 | 904 | 904 | 1079 | 1078 |
+
+**Each L-function's zeros light the same prime powers, turned by its character.** The explicit formula for L(s, χ)
+gives teeth of χ(p)·log p: ±1 for the real characters, and ±1 or ±i for the quartic ones. Measured: the sum over each
+L-function's zeros at the height of 7 is χ(7)·log 7 for all eight characters:
+
+1.946, 1.946, −1.946, −1.946, 1.946i, −1.946i, 1.946i, −1.946i
+
+In JC1 each tree is one L-function. Teeth of the same colour (the same hour mod 30) always point the same way.
+
+**The field files 2 under hour 17.** Its conductor is 15, so 2 is unramified, and its Frobenius is 2 mod 15. Among E8's
+hours that is 17: χ(2) = χ(17) for every character. 3 and 5 divide the conductor.
+
+![JC1](JC1-each-l-function-turns-the-primes.jpg)
+
+### JD. Turned back and added, the zeros sort the primes onto E8's spokes
+
+**The sorting rule.** The characters are orthogonal: (1/8) Σ<sub>χ</sub> χ(h)* χ(n) is 1 when n ≡ h (mod 15) and 0
+otherwise. So, for each gold hour h,
+
+(1/8) Σ<sub>χ</sub> χ(h)* · [the zeros of L(s, χ), summed]
+
+lights only the prime powers on spoke h.
+
+**Checked, with zeros only up to t = 1000 (σ = 250).** For n ≤ 720:
+
+* every prime power on a gold spoke reads log p, to within 0.023;
+* every composite on the spoke reads 0.000.
+
+**Three primes are removed exactly.** Their terms are known in closed form, and E8's wheel has no spoke for them:
+
+* **2:** its powers go to hours 17, 19, 23, 1, by their class mod 15.
+* **3:** it lands at half strength on hours 13 and 23.
+* **5:** it lands at a quarter strength on hours 11, 17, 23, 29.
+
+**In the funnel.** Each spoke's sum is drawn in the vertical half-plane of that spoke, scaled as in JB. It becomes a fan
+of rays from the axis, each ending at the top of a prime's column on that spoke: eight fans, one per gold hour. ζ's zeros
+fix the height of a prime; the other seven L-functions' zeros fix its hour.
+
+**ζ alone cannot do this.** On its own it gives every spoke the same sum: each prime at 1/8 strength on all eight spokes.
+
+**Resolution.**
+
+* **One L-function alone:** to separate neighbours near n it needs zeros up to about t = 14·n (σ ≈ 3.5·n, with the
+  zeros used to 4σ). ζ's 10 500 zeros reach t = 10 303, which resolves every column up to 720. With zeros only to
+  t = 1000, ζ's teeth blur together above n ≈ 70.
+* **On a spoke:** neighbours are 30 apart, so t ≈ n/2 suffices. The zeros of the eight L-functions up to t = 1000 sort
+  every prime up to 720.
+
+![JD1](JD1-the-zeros-sort-the-primes-onto-e8s-spokes.jpg)
+
+### JE. Every drop of a path back is a lamp the zeros light
+
+**The identity.** log n = Σ<sub>d | n</sub> Λ(d). The pieces of n's column are the prime powers dividing n, each worth
+log p.
+
+**Each drop removes one prime power.** The path back drops one piece at a time, dividing by the smallest prime p. The
+drop taken while p<sup>j</sup> divides the number removes p<sup>j</sup> from its divisors. The zeros' sum at p<sup>j</sup>
+is log p, as tall as the drop. The stops in between are where the zeros cancel, unless the stop is itself a prime power.
+
+| path | drops remove | zeros' sum there | stops | zeros' sum at the stops |
+|---|---|---|---|---|
+| 360 = 2³·3²·5 | 2³, 2², 2, 3², 3, 5 | 0.693, 0.693, 0.693, 1.099, 1.099, 1.609 | 360, 180, 90, 45, 15, 5, 1 | 0, 0, 0, 0, 0, 1.609, 0 |
+| 343 = 7³ | 7³, 7², 7 | 1.946, 1.946, 1.946 | 343, 49, 7, 1 | 1.946, 1.946, 1.946, 0 |
+| 397, prime | 397 | 5.984 | 397, 1 | 5.984, 0 |
+
+**So the paths do cross the zeros, at every step.** Each drop is a place where the coils of all the zeros line up. Each
+stop between drops, unless it is a prime power, is a place where they cancel.
+
+![JE1](JE1-every-drop-is-a-lamp.jpg)
+
+### JF. The zeros among themselves
+
+**Within one L-function, the zeros repel like the eigenvalues of a random unitary matrix.** This is the GUE law of
+Montgomery and Dyson, which Odlyzko checked numerically.
+
+* **ζ's zeros 1000 … 10 500, unfolded:** their pair correlation follows 1 − (sin πu/πu)². The first bins, in steps of
+  0.1, read 0.01, 0.04, 0.13, 0.28, 0.45, 0.64, 0.80, against GUE 0.01, 0.07, 0.19, 0.34, 0.51, 0.67, 0.81.
+* **Gaps under ¼ of the mean:** 0.98% (GUE 1.17%, Poisson 22%).
+* **The other seven L-functions, at t ≤ 1000:** the same hole, with the extra wiggles of low height.
+
+**Between different L-functions of E8's field, the zeros do not repel.** The correlation between a zero of one and a
+zero of another is flat, 0.96 to 1.03, with no hole. Merged, the 7 420 zeros of ζ<sub>Q(ζ30)</sub> up to t = 1000 have
+no hole at zero: 18% of their gaps are under ¼.
+
+**Read with the Lie groups of IA–ID.** Each L-function's zeros look like the spectrum of a random unitary matrix. The
+field's zeros look like eight independent such spectra, one per character: the same splitting as E8's eight
+eigen-directions.
+
+![JF1](JF1-the-zeros-among-themselves.jpg)
+
+### What this answers
+
+* **The zeros are not points in the stack.** They are frequencies of its height axis: coils, turning γ·log n at the
+  height of n.
+* **Summed, ζ's zeros rebuild the stack's pieces:** a tooth of log p at every prime power, nothing at composites. This
+  is the explicit formula, checked here to 10⁻³.
+* **ζ's zeros fix a prime's height but not its hour.** The hour comes from the zeros of the other seven L-functions of
+  E8's Coxeter field Q(ζ₃₀), through the characters of E8's exponent group (Z/30)*. Together the eight sets of zeros put
+  every prime at its height and on its spoke.
+* **The paths back walk through the lamps.** Every drop is a prime power where the zeros line up. Every composite stop
+  is a number where they cancel.
+* **Limits.**
+  * This reconstructs the primes from the zeros; it does not predict them. Resolving primes near n takes ζ's zeros up
+    to t ≈ 14·n (about 10 000 zeros for n ≤ 720), or zeros up to t ≈ n/2 for each of the eight L-functions on E8's
+    spokes. That is far more work than a sieve.
+  * Plotting the zeros on Re s = ½ uses that every zero computed here lies on the line, which the sign-change counts
+    confirm. That is not a proof of RH.
+  * No new geometry of the zeros appears beyond two known facts: the duality with the prime powers and the random-matrix
+    statistics. What E8 adds is which L-functions to use and how to combine them (its eight characters).
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -2906,7 +3110,7 @@ points per divisor, for 6, 7 and 35, and recovers 35 = 5 × 7 from the sphere's 
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
