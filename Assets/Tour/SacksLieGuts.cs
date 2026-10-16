@@ -10,7 +10,7 @@ using UnityEngine;
 ///       the zeta chain restricted to E8's exponent hours (measured at t = 5000), which are those traces
 ///   IB  E8 as SU(2) spins (Kostant: 248 = 3 + 15 + … + 59 from the root heights) and Macdonald's η²⁴⁸ from the same roots
 ///   IC  ζ at minus E8's exponents, and the Weyl group counted by ζ at negative integers (the mass formula)
-///   ID  Sato–Tate: the angles of Δ = (θ_E8³ − E6²)/1728 at the primes are SU(2)'s Haar measure, on every one of E8's spokes
+///   ID  Sato–Tate: the angles of Δ = (θ_E8³ − θ_Leech)/720 at the primes are SU(2)'s Haar measure, on every one of E8's spokes
 /// </summary>
 public partial class SacksSpiral
 {
@@ -140,7 +140,7 @@ public partial class SacksSpiral
 
     /// <summary>
     /// E8's 120 positive roots by height: row j has as many roots as exponents ≥ j, so column i has height m_i, the spin of
-    /// one SU(2) piece of E8 (dimension 2m_i + 1). Beside the top rows: the coefficients of η(q)²⁴⁸ = q^(248/24) ∏(1 − qⁿ)²⁴⁸,
+    /// one SU(2) piece of E8 (dimension 2m_i + 1). Beside the top rows: the coefficients of ∏(1 − qⁿ)²⁴⁸ = q^(−31/3) η(q)²⁴⁸,
     /// which Macdonald's identity gives as d(ρ − 30β) summed over the roots β of height 30 − K (d = Weyl's dimension formula).
     /// </summary>
     public void ExpKostantMacdonald(Vector3 o, float labelSize)
@@ -187,7 +187,7 @@ public partial class SacksSpiral
             "−6 125 150 439 153 200", "134 310 078 987 466 356", "−2 634 774 572 077 659 648", "46 596 338 416 013 280 790"
         };
         Vector3 t0 = o + new Vector3(-118f, -18f, 0f);
-        ExpLabelWide(g, "coefficients of η(q)<sup>248</sup> = q<sup>248/24</sup> ∏ (1 − q<sup>n</sup>)<sup>248</sup>, read off E8's roots:", t0, labelSize * .21f, new Color(.8f, .84f, .95f), TextAlignmentOptions.Left);
+        ExpLabelWide(g, "coefficients of ∏ (1 − q<sup>n</sup>)<sup>248</sup> = q<sup>−31/3</sup> η(q)<sup>248</sup>, read off E8's roots:", t0, labelSize * .21f, new Color(.8f, .84f, .95f), TextAlignmentOptions.Left);
         for (int K = 1; K <= 12; K++)
         {
             int col = (K - 1) / 6, row = (K - 1) % 6;

@@ -2616,16 +2616,19 @@ Checked: the multiplicities of the root heights (8 roots of height 1, then 7, 7,
 those of these eight SU(2) strings. E8's Coxeter element is conjugate to this SU(2)'s rotation by 1/30 of a turn, which
 is why its eigenvalues are e^(2πim/30). The gold hours of E8's wheel are the spins of E8's SU(2) pieces.
 
-**Macdonald's identity builds η²⁴⁸ from E8's roots.** It reads η(q)²⁴⁸ = Σ_{v∈E8} d(ρ + 30v) q^(15 v·v + v·ρ), with d
-Weyl's dimension formula. Checked exactly through q¹²: only v = 0 and the negative roots contribute, and the sum gives
+**Macdonald's identity builds η²⁴⁸ from E8's roots.** It reads ∏(1 − qⁿ)²⁴⁸ = Σ_{v∈E8} d(ρ + 30v) q^(15 v·v + v·ρ), with
+d Weyl's dimension formula. The left side is η(q)²⁴⁸ with its q^(248/24) taken off (248/24 = |ρ|²/60 = 31/3). Below q¹⁴
+only v = 0 and v = −β for the 120 positive roots β contribute: β adds d(ρ − 30β) to the power q^(30 − height β). The 2160
+vectors of norm 4 first enter at q¹⁴. Checked exactly, term by term, through q¹³:
 
 | q^K | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
 | coefficient | −248 | 30 380 | −2 450 240 | 146 325 270 | −6 899 079 264 | 267 413 986 840 |
 
-These are the coefficients of q^(248/24) ∏(1 − qⁿ)²⁴⁸, the counting function η raised to the dimension of E8. The first
-ones are signed dimensions of irreducible representations of E8 (248 is the adjoint; 30 380 and 2 450 240 are
-irreducibles too).
+Heights 29 down to 24 hold one root each, so each of these six coefficients is a single signed dimension of an irreducible
+representation of E8 (248 is the adjoint; 30 380, 2 450 240, 146 325 270, … are irreducibles too). From q⁷ on, two,
+three, then four roots share a height and their terms add: q⁷ = −5 006 235 840 320 − 3 754 721 200 320
+= −8 760 957 040 640.
 
 ![IB1](IB1-e8-as-su2-spins-and-macdonald.jpg)
 
@@ -2663,7 +2666,10 @@ the product of ζ(m + 1) into the volume of E8(Z)\E8(R) (Gross's "motive of E8")
 The chain from E8's theta series to Δ, all checked:
 
 * **The theta series:** θ_E8 = E₄.
-* **Δ:** (E₄³ − E₆²)/1728 = Ramanujan's Δ = Σ τ(n) qⁿ, coefficient by coefficient.
+* **Δ from lattices alone:** Δ = (θ_E8³ − θ_Leech)/720 = Σ τ(n) qⁿ (section EC checked the Leech shells). So τ(n) is
+  the number of vectors of norm 2n in E8⊕E8⊕E8 minus the number in the Leech lattice, divided by 720:
+  τ(2) = (179 280 − 196 560)/720 = −24 and τ(3) = (16 954 560 − 16 773 120)/720 = 252.
+* **The same Δ from E₆:** (E₄³ − E₆²)/1728, coefficient by coefficient.
 * **Deligne's bound:** |τ(p)| ≤ 2p^(11/2) holds for all 2262 primes p ≤ 20 000, so τ(p) = 2p^(11/2) cos θ_p.
 
 **The angles are random SU(2) angles.** The Sato–Tate theorem for Δ (Barnet-Lamb, Geraghty, Harris, Taylor 2011) says
