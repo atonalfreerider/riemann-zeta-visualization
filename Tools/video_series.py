@@ -21,6 +21,7 @@ SCRIPT = ROOT / "Assets/Resources/Narration/experiments.json"
 TIMING = ROOT / "Assets/Resources/Narration/Timing"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from video_series_spec import SERIES  # noqa: E402
+from caption_markup import auto_markup, spoken_of, display_of  # noqa: E402
 
 def norm(w):
     return re.sub(r"[^a-z0-9]", "", w.lower())
@@ -136,9 +137,12 @@ def build():
         az_end = -90.0
         for i, ln in enumerate(ch["lines"], 1):
             lid = f"{ch['id']}_{i:02d}"
+            # the line as written may mark {display|spoken} stretches; numbers said in words are marked automatically
+            markup = auto_markup(ln["text"])
+            text = spoken_of(markup)
             acts = []
             for a in ln.get("actions", []):
-                r, _ = resolve(lid, ln["text"], placeholders(lid, ln["text"], a))
+                r, _ = resolve(lid, text, placeholders(lid, text, a))
                 acts.append(r)
             pause = ln.get("pause", 0.8)
             cam = ln["camera"]
@@ -146,14 +150,19 @@ def build():
                 # az_to: turn at the steady rate that reaches that azimuth as the line ends
                 cam = dict(cam)
                 az0 = float(az_end if cam.get("az") == "+" else cam.get("az", -90))
-                secs = line_seconds(lid, ln["text"], pause)
+                secs = line_seconds(lid, text, pause)
                 if "az_to" in cam:
                     cam["spin"] = round((float(cam.pop("az_to")) - az0) / max(1.0, secs), 3)
                 cue = camera(cam, az_end)
                 az_end = az0 + float(cam.get("spin", 3)) * secs
             else:
                 cue = camera(cam, az_end)
-            lines.append({"id": lid, "text": ln["text"], "camera": cue, "actions": acts, "pause": pause})
+            if isinstance(cue, str) and "{" in cue:
+                cue = placeholders(lid, text, cue)
+            entry = {"id": lid, "text": text, "camera": cue, "actions": acts, "pause": pause}
+            if markup != text:
+                entry["caption"] = markup
+            lines.append(entry)
         chapters.append({"id": ch["id"], "title": ch["title"], "subtitle": ch["subtitle"], "setup": ch.get("setup", []), "lines": lines})
     return chapters
 
@@ -192,7 +201,7 @@ def write_doc(chapters):
                 act = a.split(":", 2)[2] if a.startswith("delay:") else a
                 if act.startswith("exp:call"):
                     calls.append(act.split(":", 4)[4] if act.count(":") >= 4 else act)
-            out.append(f"{i}. {ln['text']}")
+            out.append(f"{i}. {display_of(ln.get('caption', ln['text']))}")
             if b:
                 out.append(f"   *Board:* {b}")
             if calls:
@@ -216,7 +225,7 @@ def main():
             for i, ln in enumerate(ch["lines"], 1):
                 lid = f"{ch['id']}_{i:02d}"
                 has = (TIMING / f"{lid}.json").exists()
-                if has and timing_for(lid, ln["text"]) is not None:
+                if has and timing_for(lid, spoken_of(ln["text"])) is not None:
                     continue
                 print(f"{lid}: {'changed' if has else 'not narrated'}")
                 if args.delete and has:

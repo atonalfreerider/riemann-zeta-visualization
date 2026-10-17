@@ -19,11 +19,14 @@ using UnityEngine;
 ///   pw.curve    0 … 1: the trail of ζ(½ + it) since pw.t0
 ///   pw.eyes     0 … 1: rings at the vortex eyes (DetectVortices); pw.trails 1: each eye leaves a trail up the axis
 ///   pw.gold     0 … 1: the links of n off E8's eight gold hours (gcd(n, 30) > 1) shrink away
+///   pw.logh     0: the plane climbs t·PwRise; 1: it climbs PwLogH·log₁₀(1 + t), so t = 1 … 5000 fits on the screen
+///   pw.ground   0 … 1: the ground, the complex plane at t = 0 (a grid with its axes), where the t axis stands; the t
+///               axis carries ticks at t = 10, 100, 1000 (log) or every 100 (linear)
 /// </summary>
 public partial class SacksSpiral
 {
     public const float PathWorldOffset = 104000f;
-    const float PwRise = 1.1f, PwScale = 12f;
+    const float PwRise = 1.1f, PwScale = 12f, PwLogH = 16f;
 
     class PwScene
     {
@@ -45,6 +48,8 @@ public partial class SacksSpiral
         public string Sig = "";
         public float AxisTop = -1f;
         public int BoardLink = -1;
+        public Transform Ground, Ticks;
+        public string TickSig = "";
     }
 
     PwScene pw;
@@ -55,7 +60,7 @@ public partial class SacksSpiral
     /// <summary>The middle of the path's plane where it is now (the camera's "pathplane" target).</summary>
     public Vector3 PathFocus => PathOrigin + Vector3.back * PathHeight(Tw("pw.t", 1f));
 
-    float PathHeight(double t) => (float)(t * PwRise) * Tw("pw.rise", 0f);
+    float PathHeight(double t) => Mathf.Lerp((float)(t * PwRise), PwLogH * (float)Math.Log10(1.0 + Math.Max(0.0, t)), Tw("pw.logh", 0f)) * Tw("pw.rise", 0f);
 
     Vector3 PwP(Complex z, double t) => PathOrigin + new Vector3((float)z.Re, (float)z.Im, 0f) * PwScale + Vector3.back * PathHeight(t);
 
@@ -119,6 +124,24 @@ public partial class SacksSpiral
         pw.ZetaTag = ExpLabelWide(pw.Root, "", PathOrigin, 10f, Factory.Palette.Zero, TextAlignmentOptions.Left);
         foreach (TextBox t in new[] { pw.Readout, pw.Desc, pw.LenTag, pw.TurnTag, pw.DirTag, pw.ZetaTag }) Outline(t.TextField);
         for (int k = 0; k < 8; k++) pw.TrailPts[k] = new List<Vector3>();
+        // the ground: the complex plane at t = 0, a faint grid with its axes, under the climbing plane
+        pw.Ground = new GameObject("ground").transform;
+        pw.Ground.SetParent(pw.Root, false);
+        List<(Vector3, Vector3)> grid = new();
+        for (float gx = -1.5f; gx <= 2.51f; gx += .5f) grid.Add((PathOrigin + new Vector3(gx, -2f, 0f) * PwScale, PathOrigin + new Vector3(gx, 1.5f, 0f) * PwScale));
+        for (float gy = -2f; gy <= 1.51f; gy += .5f) grid.Add((PathOrigin + new Vector3(-1.5f, gy, 0f) * PwScale, PathOrigin + new Vector3(2.5f, gy, 0f) * PwScale));
+        Segments(pw.Ground, "grid", grid, .08f, new Color(.4f, .45f, .62f) * .6f, Factory.NoGlow);
+        Segments(pw.Ground, "axes", new List<(Vector3, Vector3)>
+        {
+            (PathOrigin + new Vector3(-1.5f, 0f, 0f) * PwScale, PathOrigin + new Vector3(2.5f, 0f, 0f) * PwScale),
+            (PathOrigin + new Vector3(0f, -2f, 0f) * PwScale, PathOrigin + new Vector3(0f, 1.5f, 0f) * PwScale),
+        }, .16f, new Color(.6f, .65f, .85f) * .8f, Factory.NoGlow);
+        ExpDot(pw.Ground, "origin", PathOrigin + Vector3.back * .1f, .9f, Color.white, Factory.SoftGlowIntensity);
+        TextBox ground = ExpLabelWide(pw.Ground, "the ground:  t = 0", PathOrigin + new Vector3(2.6f, -.15f, -.1f) * PwScale, 22f, new Color(.72f, .76f, .9f), TextAlignmentOptions.Left);
+        Outline(ground.TextField);
+        pw.Ground.gameObject.SetActive(false);
+        pw.Ticks = new GameObject("t ticks").transform;
+        pw.Ticks.SetParent(pw.Root, false);
         StartCoroutine(PathWorldLoop(pw));
     }
 
@@ -160,7 +183,7 @@ public partial class SacksSpiral
         s.Readout.gameObject.SetActive(false);
         Hud(0, readout > .01f ? $"t = {t:0.00}" : "", new Color(1f, 1f, 1f, readout));
 
-        string sig = $"{t:F5}|{shown:F3}|{tail:F3}|{marks:F3}|{rise:F3}|{curveVis:F3}|{eyes:F3}|{trails:F3}|{gold:F3}|{axisVis:F3}|{Tw("pw.mirrors", 0f):F3}|{Tw("pw.alleyes", 0f):F3}";
+        string sig = $"{t:F5}|{shown:F3}|{tail:F3}|{marks:F3}|{rise:F3}|{curveVis:F3}|{eyes:F3}|{trails:F3}|{gold:F3}|{axisVis:F3}|{Tw("pw.mirrors", 0f):F3}|{Tw("pw.alleyes", 0f):F3}|{Tw("pw.logh", 0f):F3}|{Tw("pw.ground", 0f):F3}";
         if (sig == s.Sig) return;
         s.Sig = sig;
         float height = PathHeight(t);
@@ -241,12 +264,41 @@ public partial class SacksSpiral
             s.Axis.startColor = s.Axis.endColor = new Color(.6f, .64f, .85f, axisVis);
         }
 
+        float groundVis = Tw("pw.ground", 0f);
+        s.Ground.gameObject.SetActive(groundVis > .01f);
+        if (groundVis > .01f)
+            foreach (Renderer r in s.Ground.GetComponentsInChildren<Renderer>(true))
+                if (r.GetComponent<TMP_Text>() == null) Factory.SetColor(r, new Color(1f, 1f, 1f, groundVis));
+        PwTicks(s, t, axisOn ? axisVis : 0f);
+
         // the critical-line curve: ζ(½ + iτ) for τ from pw.t0 to t, in the climbing plane's frame
         PwCurve(s, t, curveVis);
         PwEyes(s, t, eyes, trails);
     }
 
     Complex[] pwBuffer2;
+
+    /// <summary>Ticks on the t axis up to the plane's height: t = 1, 10, 100, 1000 when the climb is logarithmic, else every 100.</summary>
+    void PwTicks(PwScene s, double t, float vis)
+    {
+        float logh = Tw("pw.logh", 0f), rise = Tw("pw.rise", 0f);
+        string sig = vis <= .01f ? "off" : $"{logh:F2}|{rise:F2}|{(int)Math.Floor(Math.Log10(Math.Max(1.0, t)))}|{(int)(t / 100)}";
+        if (sig == s.TickSig) return;
+        s.TickSig = sig;
+        foreach (Transform old in s.Ticks) Destroy(old.gameObject);
+        if (vis <= .01f) return;
+        List<double> marks = new();
+        if (logh > .5f) { for (double m = 1; m <= Math.Max(1, t) * 1.0001; m *= 10) marks.Add(m); }
+        else for (double m = 100; m <= t + 1e-6; m += 100) marks.Add(m);
+        Color c = new(.72f, .76f, .9f, vis);
+        foreach (double m in marks)
+        {
+            Vector3 at = PathOrigin + Vector3.back * PathHeight(m);
+            ExpLine(s.Ticks, $"tick {m}", .2f, c, Factory.NoGlow, new[] { at + Vector3.left * 1.6f, at + Vector3.right * 1.6f });
+            TextBox l = ExpLabelWide(s.Ticks, $"t = {m:0}", at + Vector3.left * 2f, 22f, c, TextAlignmentOptions.Right);
+            Outline(l.TextField);
+        }
+    }
 
     /// <summary>The marks on link n: its length, the dashed run of link n − 1, the gold turn arc and the blue direction arc.</summary>
     void PwMarks(PwScene s, double t, int n, float marks, float frac)

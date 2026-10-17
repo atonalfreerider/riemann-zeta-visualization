@@ -93,12 +93,19 @@ public partial class SacksSpiral
             Color col = prime ? PrimeGold : n % 2 == 0 || n % 3 == 0 || n % 5 == 0 ? new Color(1f, .45f, .4f) : new Color(.75f, .85f, 1f);
             ExpDot(g, $"lit {n}", at, e8WheelDot * 1.7f, col, AttentionIntensity);
             Flare(at, e8WheelDot * 4f, 1.2f, 2);
-            if (spoke)
+            if (spoke && g.Find($"arm {n % 30}") == null)
             {
+                // the clock arm of n's hour: from the centre out past the spiral, bright, with the hour named at its end
                 int h = (int)(n % 30);
-                LineRenderer l = ExpLine(g, $"spoke {h}", e8WheelDot * .3f, Color.white, AttentionIntensity,
-                    new[] { E8Hour(h, e8SpiralFrom * .92f) + Vector3.back * .25f, E8Hour(h, e8SpiralTo * 1.02f) + Vector3.back * .25f });
-                StartCoroutine(SettleRoutine(l, col * .9f, 1f));
+                Color armCol = GoldHour(h) ? PrimeGold : new Color(1f, .5f, .45f);
+                LineRenderer l = ExpLine(g, $"arm {h}", e8WheelDot * .9f, Color.white, AttentionIntensity * 1.2f,
+                    new[] { E8Hour(h, 0f) + Vector3.back * .5f, E8Hour(h, e8SpiralTo * 1.05f) + Vector3.back * .5f });
+                OnTop(l, 19);
+                StartCoroutine(SettleRoutine(l, armCol, 1f));
+                TextBox tag = ExpLabelWide(g, $"hour {h}", E8Hour(h, e8SpiralTo * 1.05f + Mathf.Max(3f, e8WheelLabel * .09f)) + Vector3.back * .6f,
+                    Mathf.Max(14f, e8WheelLabel * .3f), armCol);
+                Outline(tag.TextField);
+                Flare(E8Hour(h, e8SpiralTo * .6f) + Vector3.back * .6f, e8WheelDot * 6f, 1.2f, 2);
             }
         }
     }

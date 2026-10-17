@@ -95,6 +95,8 @@ PRONOUNCE = [
     (re.compile(r"\b([Cc])osine"), r"\1o-sign"),  # "co-sign"
     (re.compile(r"\bVoronoi"), "Voronoy"),          # Georgy Voronoi: "vo-ro-NOY"
     (re.compile(r"\b([Pp])ronic"), r"\1ro-nick"),  # "PRO-nick"
+    (re.compile(r"\bFermat"), "Fair-mah"),         # Pierre de Fermat: "fair-MAH", the t silent
+    (re.compile(r"\bi t\b"), "eye tee"),           # ζ(½ + it): the letters, never the word "it"
 ]
 
 

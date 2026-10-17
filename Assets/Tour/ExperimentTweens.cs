@@ -21,9 +21,17 @@ public partial class SacksSpiral
     readonly Dictionary<string, Tween> tweens = new();
 
     /// <summary>The current value of parameter <paramref name="key"/> (its default if it was never set).</summary>
+    // each parameter's default as its scene reads it, so a first tween starts from there (not from its own target)
+    readonly Dictionary<string, float> twDefaults = new();
+
     public float Tw(string key, float dflt = 0f)
     {
-        if (!tweens.TryGetValue(key, out Tween t)) return dflt;
+        if (!tweens.TryGetValue(key, out Tween t))
+        {
+            twDefaults[key] = dflt;
+            return dflt;
+        }
+
         if (t.Duration <= 0f) return t.To;
         float u = Mathf.Clamp01((Time.time - t.Start) / t.Duration);
         switch (t.Ease)
@@ -42,7 +50,7 @@ public partial class SacksSpiral
     /// <summary>Ease parameter <paramref name="key"/> from where it is now to <paramref name="to"/> in <paramref name="seconds"/>.</summary>
     public void TwTo(string key, float to, float seconds, int ease = 1)
     {
-        float from = Tw(key, to);
+        float from = tweens.ContainsKey(key) ? Tw(key, to) : twDefaults.TryGetValue(key, out float d) ? d : to;
         tweens[key] = new Tween { From = from, To = to, Start = Time.time, Duration = Mathf.Max(0f, seconds), Ease = ease };
     }
 

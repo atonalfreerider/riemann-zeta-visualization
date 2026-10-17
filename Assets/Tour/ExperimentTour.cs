@@ -73,6 +73,8 @@ public partial class TourDirector
     {
         if (!PlayingExperiment) return;
         PlayingExperiment = false;
+        SacksSpiral.LabelBoost = 1f;
+        SacksSpiral.CalloutScale = 1f;
         if (mainScript != null) script = mainScript;
         if (sweepRoutine != null)
         {
@@ -100,6 +102,31 @@ public partial class TourDirector
         // the corner readouts belong to the scene that wrote them
         SacksSpiral.Hud(0, "", Color.white);
         SacksSpiral.Hud(1, "", Color.white);
+    }
+
+    /// <summary>
+    /// The home view as a teaser inside a module: the Sacks spiral on its saddle with the master wave of every zero, and
+    /// ζ's trail growing out of the saddle's centre to t = tMax in the given time (exp:home:TMAX:SECONDS).
+    /// </summary>
+    void ExpHomeTeaser(float tMax, float seconds)
+    {
+        SacksSpiral sacks = Annotations.Sacks;
+        Main.CancelAnimations();
+        Main.Pause();
+        Main.SetPrimeCurveVisible(false);
+        Main.SetCosineVisible(false);
+        Main.SetEquationsVisible(false);
+        Main.SetZetaCurveVisible(false);
+        Main.SetGridVisible(false);
+        Main.SetZeroMarkersVisible(false);
+        Main.Limit.SetSpiralVisible(false);
+        Main.Limit.SetTailVisible(false);
+        Annotations.CancelAnimations();
+        Annotations.HideAll();
+        sacks.ShowFull();
+        sacks.ShowRoutes(false);
+        sacks.FullWaveAmplitude = 5f;
+        sacks.StartGrowth(SacksSpiral.GrowthMode.FullWave, tMax, seconds, false);
     }
 
     static float[] Heights(string list)
@@ -552,6 +579,7 @@ public partial class TourDirector
             case "callblock":
             case "callhand":
             case "calltooth":
+            case "calllat":
             case "callpath":
             case "callpathzeta":
             case "callnw":
@@ -584,6 +612,7 @@ public partial class TourDirector
                     "callpath" => sacks.PathVertex((int)num),
                     "callhand" => sacks.FwHandTip((long)num),
                     "calltooth" => sacks.FwToothTip((long)num),
+                    "calllat" => sacks.LatticePoint(Mathf.RoundToInt(ParseVector(A(2)).x), Mathf.RoundToInt(ParseVector(A(2)).y), Mathf.RoundToInt(ParseVector(A(2)).z)),
                     "callblock" => sacks.TraceBlockAt((int)num),
                     "callpathzeta" => sacks.PathZeta(),
                     "callclock" => sacks.ClockPosition((int)num),
@@ -609,6 +638,31 @@ public partial class TourDirector
             case "numbers": sacks.ExpSpiralNumbers(I(2, 150)); break;
             // the number line that winds into the Sacks spiral (SacksNumberWorld.cs); its parameters are eased with exp:tw
             case "nwinit": sacks.ExpNumberWorld(); break;
+            // discovery four, step by step (SacksClassWaves.cs): exp:lacounts:X,Y,Z · exp:lwaves:X,Y,Z · exp:lratio:SECONDS ·
+            // exp:t5terrain:X,Y,Z[:CELLS] (lf.build, lf.h, lf.slice eased with exp:tw)
+            case "lacounts": sacks.ExpClassCountTable(c + ParseVector(A(2)), 220f); break;
+            // discovery five, step by step (SacksS3Count.cs): exp:hoursquares:SECONDS · exp:powerwalk:P:MAXPOW:SECONDS ·
+            // exp:modp:P:X,Y,Z:RADIUS · exp:modptest:P:SECONDS · exp:s3anim:NAME:SECONDS (NAME identity|rotation|reflection|square)
+            case "hoursquares": sacks.ExpHourSquares(Seconds(A(2), 6f), 220f); break;
+            // exp:e8links:MAXN:GAP — the divisor links beside E8's tower · exp:eyelimits:SECONDS — why the eyes thin out at 1.71
+            case "e8links": sacks.ExpE8Links(I(2, 7), F(3, 16f), 220f); break;
+            case "eyelimits": sacks.ExpEyeLimits(Seconds(A(2), 8f), 220f); break;
+            case "powerwalk": sacks.ExpPowerWalk(I(2, 7), I(3, 4), Seconds(A(4), 6f), 220f); break;
+            case "modp": sacks.ExpRootsModP(c + ParseVector(A(3)), I(2, 5), F(4, 20f), 220f); break;
+            case "modptest": sacks.ExpRootsTest(I(2, 5), Seconds(A(3), 4f), 220f); break;
+            case "s3anim": sacks.ExpS3Animate("S3 " + A(2).ToLowerInvariant(), Seconds(A(3), 3f)); break;
+            case "lwaves": sacks.ExpClassWaves(c + ParseVector(A(2)), 220f); break;
+            case "lratio": sacks.ExpClassRatioLive(Seconds(A(2), 10f), 220f); break;
+            case "t5terrain": sacks.ExpClassTerrain(c + ParseVector(A(2)), 124f, I(3, 280), 220f); break;
+            // the teaser: exp:home:TMAX:SECONDS
+            case "home": ExpHomeTeaser(F(2, 300f), Seconds(A(3), 15f)); break;
+            // the terms entering the master waves (SacksNumberTerms.cs): exp:nwrows:p|d:COUNT:GAP:AMP:LABEL[:FIRST] ·
+            // exp:nwenter:K:SECONDS · exp:nwrowsclear · exp:nwangle:on|off[:LABEL] · exp:nwradius:N:LABEL:TEXT
+            case "nwrows": sacks.ExpNwRows(A(2).ToLowerInvariant(), I(3, 3), F(4, 10f), F(5, 3.5f), F(6, 4f), I(7, 1)); break;
+            case "nwenter": sacks.ExpNwEnter(I(2, 1), Seconds(A(3), 3f)); break;
+            case "nwrowsclear": sacks.ExpNwRowsClear(); break;
+            case "nwangle": sacks.ExpNwAngle(A(2).ToLowerInvariant() != "off", F(3, 4f)); break;
+            case "nwradius": sacks.ExpNwRadius(F(2, 100f), string.Join(":", p, 4, Mathf.Max(0, p.Length - 4)), F(3, 4f)); break;
             case "nwflare":
             {
                 string[] nk = A(2).Split('@');

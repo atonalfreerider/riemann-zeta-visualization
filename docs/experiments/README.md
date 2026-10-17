@@ -3660,6 +3660,66 @@ one; 49 = 7² on hour 19; 6 = 2·3 dark among the lamps). Every cue lands on the
   place, the triangle to the fold of S₃, and the race between the families takes the prime race's place and evens out
   in turn (`exp:familymorph`). E8's wheel becomes the first floor of its tower of shells (`exp:e8tower:…:attach`).
 
+*Round four (October 2026).* The segments now open with a teaser (`exp:home:TMAX:SECONDS`: the home view's saddle,
+master wave and ζ's trail rising from the centre) and build every formula on screen:
+
+* **The terms entering** ([`SacksNumberTerms.cs`](../../Assets/Tour/SacksNumberTerms.cs)). Over the number line, rows
+  stand ready for the first terms (`exp:nwrows:p|d:COUNT:GAP:AMP:LABEL[:FIRST]`). For ζ a little critical line stands
+  at the left with the zeros ½ + iγ at their heights; `exp:nwenter:K:SECONDS` flies zero K's dot into its row's formula
+  −cos(γ log x), draws the row, and drops it into the line's sum. For Voronoi each row shows m, its divisors and its
+  wave d(m) m^(−¼) sin(4π√(mx) − π/4) at its true size against the first.
+* **The square root is the critical line's ½.** The spiral's radius √n = n^½ and ζ's critical line Re s = ½ are the same
+  exponent: on the line each zero's wave swells like n^½ while each term of ζ shrinks like n^(−½) (`exp:nwradius`).
+* **Why Voronoi's first wave is turned 22.5° from the saddle.** His formula's phase −π/4 turns every crest by a
+  sixteenth of a turn on the spiral (θ = 2π√n): the derivative of his first term is −sin(4π√x − π/4) ∝ cos(2θ + π/4),
+  crests at θ = −22.5° and 157.5°. Measured directly, the divisor-count excess over n ≤ 2 000 000 projected on cos 2θ,
+  sin 2θ peaks at θ = −22.4°. The saddle's valleys sit on the squares' and pronic rays (θ = 0°, 180°), where the primes
+  are scarcest (the prime excess's troughs, measured the same way, are at −3.3° and 176.7°), so the saddle stays as it is
+  and the narration explains the turn (`exp:nwangle` draws the crest rays and the 22.5° arcs).
+* **The ground and the depth.** The path of partial sums climbs a logarithmic t axis (`pw.logh`: t = 1 … 5000 in one
+  shot) above a ground grid at t = 0 (`pw.ground`), seen from 62° instead of overhead; the t axis carries ticks at
+  1, 10, 100, 1000.
+* **Real numbers, not symbols.** The blocks of the gold path are the arrows of actual counting numbers (1577 … 1603), each
+  labelled with its number and hour, and the run's period is derived on screen: 30 numbers on, an arrow has turned by
+  about 30t/n, which is 15 whole turns at n ≈ 1590. Their prime factors play no part (23 881 = 11 · 13 · 167 is simply
+  hour 1).
+* **Clock arms.** Whenever an hour is named it is drawn: the arm of n's hour on the funnel's floor (`exp:fwhl`), on E8's
+  wheel (`exp:e8hl:…:spoke`), and the hours the lifted blocks point at.
+* **The coil, honestly.** A lifted arrow keeps its true length 1/√n, so stacked the arrows make a horn; stretching each
+  by √n — n's distance from the centre on the Sacks spiral — makes every one exactly one unit (n^(−½) · n^½ = 1), which
+  is why the coil has a constant radius (`fw.stretch`; the coil's radius is now the floor path's own scale). The coil is
+  drawn one gradient line per turn, and the hand of 6 shows the turns of 2 and 3 as fractional arcs chained on the floor
+  with every other hand faded (`fw.dim`). The comb's spin leaves a faint copy every 15° so the sweep shows.
+* **Discovery four, step by step** ([`SacksClassWaves.cs`](../../Assets/Tour/SacksClassWaves.cs)). The lattice points of
+  2, 3 and 6 = 2·3 are counted on both families (`exp:calllat`): the first family has 0, 0 and 4 points, so its counts
+  cannot be built from the primes, while (first − second)/2 gives −1, −1 and +1 = (−1)(−1): that is an Euler product.
+  The chart's curve is derived on screen from the two families' real waves on the critical line (`exp:lwaves`,
+  ClassWaveData from Tools/class_wave_data.py): a cursor sweeps t and plots −Λ₁/Λ₂, which breaks into hyperbola-like
+  branches at the second wave's zeros (`exp:lratio`). −47's plane of mixtures is built row by row as a terrain
+  (`exp:t5terrain`, `lf.build`), raised by each mixture's zeros off the line (`lf.h`) and sliced (`lf.slice`): every
+  slice is a sweep like −23's.
+* **Discovery five with counts** ([`SacksS3Count.cs`](../../Assets/Tour/SacksS3Count.cs)). Every gold hour squared lands
+  on hour 1 or 19 (`exp:hoursquares`); the powers of 7 walk round the clock (7, 49, 343, 2401 on hours 7, 19, 13, 1;
+  `exp:powerwalk`); x³ − x − 1 is tested on p dots for p = 5 (one root, x = 2), 2 (none) and 59 (4, 13, 42)
+  (`exp:modp`, `exp:modptest`); and the roots of each S₃ panel move as their permutation says (`exp:s3anim`).
+* **The faint circle of the eyes** ([`SacksEyeLimits.cs`](../../Assets/Tour/SacksEyeLimits.cs)). At a zero, vortex 2's
+  eye is as far from the centre as |1 + 2^(−s)|: one plus an arrow 1/√2 long, so it stays between 1 − 1/√2 = 0.29 and
+  1 + 1/√2 = 1.71 and lingers at both extremes. Over the first 10 000 zeros the density of eyes drops 2.7-fold across
+  r = 1.71 (vortices 2 … 5 counted) and peaks near 0.3 (`exp:eyelimits`).
+* **E8's shells, linked** ([`SacksE8Links.cs`](../../Assets/Tour/SacksE8Links.cs)). Every floor of the tower gets its
+  cubes (one d³ per divisor), and arcs beside the tower carry each shell's cube to the shells of its multiples
+  (`exp:e8links`): a prime's shell holds the fewest points, 240(1 + p³), and every extra cube is a divisor.
+* **Captions.** Lines are written as they are said; [`Tools/caption_markup.py`](../../Tools/caption_markup.py) marks
+  numbers and formulas said in words as `{display|spoken}` (`nineteen oh four` → 1904, `fourteen point one three` →
+  14.13, `seven squared` → 7², `E eight` → E8), the chapters carry the marked text as `caption`, and
+  `TourScriptLoader.DisplayTiming` lights each caption word while its spoken words are said.
+* **Pronunciation.** [`Tools/check_pronunciation.py`](../../Tools/check_pronunciation.py) transcribes every clip with
+  ElevenLabs speech-to-text and lists the words heard differently from the script (numbers compared as numbers). It
+  caught "i t" read as the word "it" and "sum" heard as "thumb"; Fermat is now respelled "Fair-mah" and "k-th" is
+  written to be said "kay-th".
+* **Both shapes.** The segments record 16:9 and 9:16; in the tall frame their scene labels are made 1.45 × larger and the
+  callouts keep their proportion (`SacksSpiral.LabelBoost`, `CalloutScale`).
+
 *Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
 of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
 height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate

@@ -2630,67 +2630,112 @@
       "subtitle": "discovery 1 of 5:  two master waves on the Sacks spiral",
       "setup": [
         "exp:stage",
-        "exp:backdrop:off",
-        "exp:nwinit",
-        "exp:tw:nw.vis:1:0",
-        "exp:tw:nw.labels:1:0",
-        "exp:tw:nw.dot:2:0",
-        "exp:tw:nw.label:14:0",
-        "exp:tw:nw.h:22:0",
-        "exp:tw:nw.terms.p:1:0",
-        "exp:tw:nw.terms.d:1:0",
-        "exp:tw:nw.mix:0:0",
-        "exp:tw:nw.stand:0:0",
-        "exp:tw:nw.wave:0:0",
-        "exp:tw:nw.count:0:0"
+        "exp:backdrop:off"
       ],
       "lines": [
         {
           "id": "xs1_01",
-          "text": "Claude, an AI math research assistant, and I went looking for the geometry hidden in the counting numbers. We begin with the plainest picture of them, the number line: one dot for each number, the primes in gold. Two, three, five, seven, eleven, thirteen.",
-          "camera": "orbit:on=centre;at=100073.4,3,0;fit=170,96;el=89.5;az=-90;spin=0;raise=0",
+          "text": "Claude, an AI math research assistant, and I set out to find the geometry hidden in the counting numbers. This is where it leads: the Sacks spiral on its saddle, carrying the master wave of zeta's zeros, which spikes at every prime, and the curve of zeta rising out of the saddle's centre, touching its axis at every zero. Here is how it is built.",
+          "camera": "home_orbit",
           "actions": [
-            "exp:say:the number line|one dot for each counting number;  the primes in gold",
-            "delay:0.80:exp:tw:nw.count:32:10.37:linear",
-            "delay:12.85:exp:nwflare:2",
-            "delay:13.20:exp:nwflare:3",
-            "delay:13.57:exp:nwflare:5",
-            "delay:14.00:exp:nwflare:7",
-            "delay:14.40:exp:nwflare:11",
-            "delay:14.79:exp:nwflare:13",
+            "exp:home:240:line",
+            "exp:say:where this leads|ζ's master wave on the Sacks spiral  ·  ζ's curve rising from the saddle's centre",
             "exp:snap"
           ],
           "pause": 0.8
         },
         {
           "id": "xs1_02",
-          "text": "Over this line the zeros of zeta draw a wave. The first zero, at height fourteen point one three, adds a single cosine. Its crests tick on the logarithm of n: at seven point four, eleven point five, eighteen and twenty-eight, each about one and a half times the last.",
-          "camera": "orbit:on=centre;at=100073.4,3,0;fit=170,96;el=89.5;az=-90;spin=0;raise=0",
+          "text": "We begin with the plainest picture: the counting numbers on a line, one dot for each. A prime can be divided only by one and itself. Two, three, five and seven are prime, and so are eleven and thirteen, in gold. Four is two times two, six is two times three, nine is three times three: those are not.",
+          "camera": "orbit:on=centre;at=100036.9,2,0;fit=100,56;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
-            "delay:1.66:exp:tw:nw.wave:1:2.5",
-            "delay:1.66:exp:tw:nw.counter:1:1",
-            "exp:say:one zero, one wave|−cos(14.13 · log n):  its crests tick on log n",
-            "delay:9.93:exp:callnw:7.39:0,0:7.4",
-            "delay:10.97:exp:callnw:11.53:0,0:11.5",
-            "delay:12.01:exp:callnw:17.98:0,0:18.0",
-            "delay:12.48:exp:callnw:28.05:0,0:28.1"
+            "exp:stage",
+            "exp:backdrop:off",
+            "exp:nwinit",
+            "exp:tw:nw.vis:1:0",
+            "exp:tw:nw.labels:1:0",
+            "exp:tw:nw.dot:2:0",
+            "exp:tw:nw.label:14:0",
+            "exp:tw:nw.h:5:0",
+            "exp:tw:nw.terms.p:0:0",
+            "exp:tw:nw.terms.d:1:0",
+            "exp:tw:nw.mix:0:0",
+            "exp:tw:nw.stand:0:0",
+            "exp:tw:nw.wave:1:0",
+            "exp:tw:nw.count:0:0",
+            "exp:tw:nw.counter:0:0",
+            "exp:snap",
+            "exp:say:the counting numbers|a prime can be divided only by 1 and itself",
+            "delay:0.07:exp:tw:nw.count:16:4.82:linear",
+            "delay:7.70:exp:nwflare:2",
+            "delay:7.70:exp:callnw:2:-0.3,1,0.12,ffd973:2",
+            "delay:8.08:exp:nwflare:3",
+            "delay:8.08:exp:callnw:3:0,1,0.12,ffd973:3",
+            "delay:8.53:exp:nwflare:5",
+            "delay:8.53:exp:callnw:5:0,1,0.12,ffd973:5",
+            "delay:8.97:exp:nwflare:7",
+            "delay:8.97:exp:callnw:7:0,1,0.12,ffd973:7",
+            "delay:10.89:exp:nwflare:11",
+            "delay:10.89:exp:callnw:11:0,1,0.12,ffd973:11",
+            "delay:11.37:exp:nwflare:13",
+            "delay:11.37:exp:callnw:13:0.3,1,0.12,ffd973:13",
+            "delay:13.12:exp:callnw:4:-0.3,-1,0.12,ff6b5a:4 = 2·2",
+            "delay:14.43:exp:callnw:6:0,-1,0.12,ff6b5a:6 = 2·3",
+            "delay:15.77:exp:callnw:9:0.3,-1,0.12,ff6b5a:9 = 3·3"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "We begin with the plainest picture: the counting numbers on a line, one dot for each. A prime can be divided only by one and itself. {2, 3, 5 and 7|Two, three, five and seven} are prime, and so are {11|eleven} and {13|thirteen}, in gold. {4 = 2 · 2,|Four is two times two,} {6 = 2 · 3,|six is two times three,} {9 = 3 · 3:|nine is three times three:} those are not."
         },
         {
           "id": "xs1_03",
+          "text": "Over this line the zeros of zeta draw a wave. The zeros lie on the critical line, real part one half, and the first is at height fourteen point one three. That height becomes the frequency of a cosine: minus cos of fourteen point one three times log x. Its crests tick on the logarithm: at seven point four, eleven point five, eighteen and twenty-eight, each about one and a half times the last.",
+          "camera": "orbit:on=centre;at=100020.0,10.5,0>100043.0,19.0,0;fit=120.4,67.7>194.7,109.5;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "actions": [
+            "exp:uncall",
+            "exp:tw:nw.count:32:3",
+            "delay:0.86:exp:nwrows:p:3:13:3.5:30",
+            "exp:say:each zero, one wave|the zero ½ + 14.13i:  its height is the frequency of −cos(14.13 · log x)",
+            "delay:7.81:exp:nwenter:1:12.74",
+            "delay:13.96:exp:tw:nw.counter:1:1",
+            "delay:20.55:exp:callnw:7.39:0,0:7.4",
+            "delay:21.79:exp:callnw:11.53:0,0:11.5",
+            "delay:23.07:exp:callnw:17.98:0,0:18.0",
+            "delay:23.84:exp:callnw:28.05:0,0:28.1"
+          ],
+          "pause": 0.8,
+          "caption": "Over this line the zeros of zeta draw a wave. The zeros lie on the critical line, real part one half, and the first is at height {14.13|fourteen point one three}. That height becomes the frequency of a cosine: {−cos(14.13 · log x)|minus cos of fourteen point one three times log x}. Its crests tick on the logarithm: at {7.4|seven point four}, {11.5|eleven point five}, {18|eighteen} and {28|twenty-eight}, each about one and a half times the last."
+        },
+        {
+          "id": "xs1_04",
+          "text": "The second zero, at twenty-one point zero two, adds its own cosine, and the third, at twenty-five point zero one, another. Each zero's height is the frequency of one wave, and the waves add up.",
+          "camera": "orbit:on=centre;at=100043.0,19.0,0;fit=194.7,109.5;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "delay:0.07:exp:nwenter:2:4.60",
+            "delay:4.67:exp:nwenter:3:6.19",
+            "exp:say:three zeros, three waves|−cos(14.13 · log x) − cos(21.02 · log x) − cos(25.01 · log x)"
+          ],
+          "pause": 0.8,
+          "caption": "The second zero, at {21.02|twenty-one point zero two}, adds its own cosine, and the third, at {25.01|twenty-five point zero one}, another. Each zero's height is the frequency of one wave, and the waves add up."
+        },
+        {
+          "id": "xs1_05",
           "text": "Add the waves of more zeros: ten, a hundred, a thousand, ten thousand. They agree at the primes and cancel between them, and the sum sharpens into spikes, one at every prime and at every power of a prime.",
           "camera": "orbit:on=centre;at=100100.7,3,0;fit=220,124;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
             "exp:uncall",
+            "exp:mute:NW rows:1.2:1.9",
+            "exp:tw:nw.h:22:1.5",
             "exp:tw:nw.count:45:3",
             "exp:tw:nw.terms.p:10000:5.48:geo",
-            "exp:say:adding zeros|they agree at the primes and cancel between them"
+            "delay:6.98:exp:nwrowsclear",
+            "exp:say:adding zeros|−Σ cos(γ · log x) over the zeros ½ + iγ:  they agree at the primes"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Add the waves of more zeros: {10|ten}, {100|a hundred}, {1,000|a thousand}, {10,000|ten thousand}. They agree at the primes and cancel between them, and the sum sharpens into spikes, one at every prime and at every power of a prime."
         },
         {
-          "id": "xs1_04",
+          "id": "xs1_06",
           "text": "Seven is a prime, and it has a spike. Eight is two cubed, a power of two, and it has one too; so does nine, three squared. But ten, two times five, has no spike, and neither does twelve, two squared times three.",
           "camera": "orbit:on=centre;at=100043.8,3,0;fit=64,36;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
@@ -2702,10 +2747,11 @@
             "delay:11.02:exp:callnw:12:0.6,-1,0.17,ff6b5a:12 = 2²·3:  no spike",
             "exp:say:spikes at the primes and prime powers|and nowhere else"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{7|Seven} is a prime, and it has a spike. {8 = 2³|Eight is two cubed}, a power of {2|two}, and it has one too; so does {9 = 3².|nine, three squared.} But {10 = 2 · 5|ten, two times five,} has no spike, and neither does {12 = 2² · 3.|twelve, two squared times three.}"
         },
         {
-          "id": "xs1_05",
+          "id": "xs1_07",
           "text": "This is the cosine wave of the home view, drawn the way a mathematician would draw it, along the number line. It is the explicit formula of Riemann and von Mangoldt: added up, the zeros spike exactly at the prime powers.",
           "camera": "orbit:on=centre;at=100342.2,0,0;fit=720,405;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
@@ -2717,7 +2763,7 @@
           "pause": 0.8
         },
         {
-          "id": "xs1_06",
+          "id": "xs1_08",
           "text": "Now curl the number line up, one full turn for each step of the square root. Watch the graph curl with it: each number keeps its place along the line, and one, four, nine, sixteen, twenty-five, the squares, come to rest on a single ray. This is the Sacks spiral.",
           "camera": "orbit:on=nwboxp;at=0,0,0;el=89.5;az=-90;spin=0;raise=0.035;span=6",
           "actions": [
@@ -2732,14 +2778,29 @@
             "delay:14.89:exp:callnw:25:0,0,0.12,66c4ff:25 = 5²",
             "exp:say:curling the line|one turn for each step of √n:  the Sacks spiral"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now curl the number line up, one full turn for each step of the square root. Watch the graph curl with it: each number keeps its place along the line, and {1|one}, {4|four}, {9|nine}, {16|sixteen}, {25|twenty-five}, the squares, come to rest on a single ray. This is the Sacks spiral."
         },
         {
-          "id": "xs1_07",
+          "id": "xs1_09",
+          "text": "The square root is n to the power one half: the same one half as zeta's critical line. On that line every zero's wave swells like the square root of n, the radius of this very spiral, while every term of zeta shrinks like one over it. The spiral and the critical line are mirror images through the power one half, which is why they reflect the same distribution of primes.",
+          "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "delay:0.37:exp:nwradius:100:24:radius √100 = 10",
+            "delay:3.26:exp:say:one half, twice|the spiral's radius √n = n<sup>½</sup>   ·   ζ's critical line:  Re s = ½",
+            "delay:7.87:exp:say:one half, twice|each zero's wave swells like n<sup>½</sup>   ·   each term of ζ shrinks like n<sup>−½</sup>"
+          ],
+          "pause": 0.8,
+          "caption": "The square root is {n<sup>½</sup>:|n to the power one half:} the same {½|one half} as zeta's critical line. On that line every zero's wave swells like the square root of n, the radius of this very spiral, while every term of zeta shrinks like one over it. The spiral and the critical line are mirror images through the power {½,|one half,} which is why they reflect the same distribution of primes."
+        },
+        {
+          "id": "xs1_10",
           "text": "Now stand the graph up out of the plane. On the spiral it becomes the curtain of the home view: a spike on every prime and every prime power; ninety-seven, a prime, and sixty-four, two to the sixth.",
           "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6;el=89.5>40;az=-90;spin=0;raise=0.035;span=7",
           "actions": [
             "exp:uncall",
+            "exp:nwradius:0:24:",
             "exp:tw:nw.rays:0:1.5",
             "delay:0.06:exp:tw:nw.stand:1:3.74",
             "delay:0.06:exp:tw:nw.h:6:3.74",
@@ -2747,10 +2808,11 @@
             "delay:9.20:exp:callnw:64:0,0:64 = 2<sup>6</sup>",
             "exp:say:the master wave on the Sacks spiral|the home view's curtain"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now stand the graph up out of the plane. On the spiral it becomes the curtain of the home view: a spike on every prime and every prime power; {97|ninety-seven}, a prime, and {64 = 2<sup>6</sup>.|sixty-four, two to the sixth.}"
         },
         {
-          "id": "xs1_08",
+          "id": "xs1_11",
           "text": "One zero's wave on its own looks very different here. Take the hundredth zero alone. Its crests still tick on the logarithm, but the spiral turns on the square root, so they drift from turn to turn and wind into arms.",
           "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6;el=40>86;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
@@ -2761,10 +2823,11 @@
             "delay:3.94:exp:tw:nw.ribbon:1:1.5",
             "exp:say:one zero's wave on the spiral|the 100th zero:  −cos(236.5 · log n)"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "One zero's wave on its own looks very different here. Take the {100th|hundredth} zero alone. Its crests still tick on the logarithm, but the spiral turns on the square root, so they drift from turn to turn and wind into arms."
         },
         {
-          "id": "xs1_09",
+          "id": "xs1_12",
           "text": "Go back to the first zero's wave, and uncurl the spiral into the number line again: the very first graph comes back.",
           "camera": "orbit:on=nwboxp;at=0,0,0;el=89.5;az=-90;spin=0;raise=0.035;span=6",
           "actions": [
@@ -2781,32 +2844,53 @@
           "pause": 0.8
         },
         {
-          "id": "xs1_10",
-          "text": "Now count divisors instead of primes. Voronoi found in nineteen oh four that the count of divisors has waves of its own. His first wave ticks on the square root of n, so its crests spread apart only slowly: eight point six, eleven point eight, fifteen point five.",
+          "id": "xs1_13",
+          "text": "Now count divisors instead of primes. Voronoi found in nineteen oh four that the count of divisors has waves of its own. His first wave is a sine of four pi times the square root of x, so it ticks on the square root, and its crests spread apart only slowly: eight point six, eleven point eight, fifteen point five.",
           "camera": "orbit:on=centre;at=100068.8,3,0;fit=170,96;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
-            "delay:0.12:exp:tw:nw.mix:1:8.20",
-            "delay:14.33:exp:callnw:8.63:0,0:8.6",
-            "delay:15.31:exp:callnw:11.82:0,0:11.8",
-            "delay:16.33:exp:callnw:15.5:0,0:15.5",
-            "exp:say:Voronoi's first wave|sin(4π√n − π/4):  it ticks on √n"
+            "delay:0.08:exp:tw:nw.mix:1:7.90",
+            "delay:16.56:exp:callnw:8.63:0,0:8.6",
+            "delay:17.52:exp:callnw:11.82:0,0:11.8",
+            "delay:18.37:exp:callnw:15.5:0,0:15.5",
+            "exp:say:Voronoi's first wave|sin(4π√x − π/4):  it ticks on √x"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now count divisors instead of primes. Voronoi found in {1904|nineteen oh four} that the count of divisors has waves of its own. His first wave is a sine of {4π√x|four pi times the square root of x}, so it ticks on the square root, and its crests spread apart only slowly: {8.6|eight point six}, {11.8|eleven point eight}, {15.5|fifteen point five}."
         },
         {
-          "id": "xs1_11",
+          "id": "xs1_14",
+          "text": "His wave number m ticks on the square root of m times x, and its strength is m's own count of divisors. Two has two divisors, one and two; three has two; four has three, one, two and four. Each enters his formula as one more wave.",
+          "camera": "orbit:on=centre;at=100043.0,21.5,0;fit=194.7,109.5;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "exp:tw:nw.h:5:1.2",
+            "exp:nwrows:d:4:13:3:30:2",
+            "exp:say:Voronoi's waves|the wave of m:  d(m) · m<sup>−¼</sup> · sin(4π√(mx) − π/4),  d(m) its divisors",
+            "delay:7.64:exp:nwenter:2:2.07",
+            "delay:9.71:exp:nwenter:3:1.07",
+            "delay:10.78:exp:nwenter:4:7.53"
+          ],
+          "pause": 0.8,
+          "caption": "His wave number m ticks on {√(mx),|the square root of m times x,} and its strength is m's own count of divisors. {2|Two} has two divisors, {1 and 2;|one and two;} {3|three} has two; {4|four} has three, {1, 2 and 4.|one, two and four.} Each enters his formula as one more wave."
+        },
+        {
+          "id": "xs1_15",
           "text": "Add more of his waves, ten, a hundred, four thousand, and they too sharpen into spikes. But now there is a spike at every whole number, and each one stands as tall as its number's count of divisors.",
           "camera": "orbit:on=centre;at=100091.6,3,0;fit=200,112;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
             "exp:uncall",
+            "exp:mute:NW rows:1.2:1.9",
+            "exp:tw:nw.h:22:1.5",
             "exp:tw:nw.count:45:3",
             "exp:tw:nw.terms.d:4000:11.62:geo",
+            "delay:6.89:exp:nwrowsclear",
             "exp:say:Voronoi's divisor wave|a spike at every n, as tall as its count of divisors"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Add more of his waves, {10|ten}, {100|a hundred}, {4,000|four thousand}, and they too sharpen into spikes. But now there is a spike at every whole number, and each one stands as tall as its number's count of divisors."
         },
         {
-          "id": "xs1_12",
+          "id": "xs1_16",
           "text": "Seven, a prime, has two divisors, one and seven, so its spike is short. Twelve has six: one, two, three, four, six and twelve. Sixteen, two to the fourth, has five.",
           "camera": "orbit:on=centre;at=100052.9,3,0;fit=64,36;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
@@ -2818,10 +2902,11 @@
             "delay:9.38:exp:callnw:16:0,0:16 = 2<sup>4</sup>:  5 divisors",
             "exp:say:the spikes count divisors|7:  2   ·   12:  6   ·   16:  5"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{7,|Seven,} a prime, has two divisors, {1 and 7,|one and seven,} so its spike is short. {12|Twelve} has six: {1|one}, {2|two}, {3|three}, {4|four}, {6|six} and {12|twelve}. {16 = 2<sup>4</sup>|Sixteen, two to the fourth,} has five."
         },
         {
-          "id": "xs1_13",
+          "id": "xs1_17",
           "text": "The count comes from the prime factors: add one to each exponent, and multiply. Twelve is two squared times three, so three times two, six. Thirty is two times three times five, two times two times two, eight. And thirty-six, two squared times three squared, has three times three, nine.",
           "camera": "orbit:on=centre;at=100109.9,3,0;fit=170,96;el=89.5;az=-90;spin=0;raise=0",
           "actions": [
@@ -2832,45 +2917,49 @@
             "delay:7.87:exp:callnw:30:-0.2,1:30 = 2·3·5:  2·2·2 = 8",
             "delay:11.99:exp:callnw:36:0.5,1:36 = 2²·3²:  3·3 = 9"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "The count comes from the prime factors: add one to each exponent, and multiply. {12 = 2² · 3,|Twelve is two squared times three,} so {3 · 2 = 6.|three times two, six.} {30 = 2 · 3 · 5,|Thirty is two times three times five,} {2 · 2 · 2 = 8.|two times two times two, eight.} And {36 = 2² · 3²|thirty-six, two squared times three squared,} has {3 · 3 = 9.|three times three, nine.}"
         },
         {
-          "id": "xs1_14",
+          "id": "xs1_18",
           "text": "Take his sum back down to its first wave, and curl the line up into the spiral once more.",
           "camera": "orbit:on=nwboxp;at=0,0,0;el=89.5;az=-90;spin=0;raise=0.035;span=6",
           "actions": [
             "exp:uncall",
             "exp:tw:nw.count:150:1.5",
-            "exp:tw:nw.terms.d:1:2.37:geo",
-            "delay:2.37:exp:tw:nw.roll:0.004:0.8",
-            "delay:3.17:exp:tw:nw.roll:1:2.70:geo",
-            "delay:2.37:exp:tw:nw.h:1:2.70:geo",
-            "delay:2.37:exp:tw:nw.dot:0.5:2.70:geo",
-            "delay:2.37:exp:tw:nw.labels:0:2",
+            "exp:tw:nw.terms.d:1:2.13:geo",
+            "delay:2.13:exp:tw:nw.roll:0.004:0.8",
+            "delay:2.93:exp:tw:nw.roll:1:2.75:geo",
+            "delay:2.13:exp:tw:nw.h:1:2.75:geo",
+            "delay:2.13:exp:tw:nw.dot:0.5:2.75:geo",
+            "delay:2.13:exp:tw:nw.labels:0:2",
             "exp:say:curling Voronoi's first wave|the same Sacks spiral"
           ],
           "pause": 0.8
         },
         {
-          "id": "xs1_15",
-          "text": "On the spiral his first wave stands still: two crests on every turn, at the same two angles turn after turn, beside the ray of the squares, like sixty-four, and the ray of the pronic numbers, like seventy-two.",
+          "id": "xs1_19",
+          "text": "On the spiral his first wave stands still: two crests on every turn, at the same two angles turn after turn, twenty-two and a half degrees before the ray of the squares, just short of sixty-four, and before the ray of the pronic numbers, just short of seventy-two.",
           "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6;el=86;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:tw:nw.stand:1:1.5",
             "exp:tw:nw.ribbon:1:1.5",
-            "delay:8.39:exp:tw:nw.rays:1:1.5",
-            "delay:9.08:exp:callnw:64:0,0,0.12,ffffff:64 = 8²",
-            "delay:11.92:exp:callnw:72:0,0,0.12,ffffff:72 = 8·9",
-            "exp:say:Voronoi's first wave on the spiral|two crests per turn, on the same two rays"
+            "delay:4.49:exp:tw:nw.rays:1:1.5",
+            "delay:6.91:exp:nwangle:on:24",
+            "delay:10.18:exp:callnw:64:0,0,0.12,ffffff:64 = 8²",
+            "delay:14.07:exp:callnw:72:0,0,0.12,ffffff:72 = 8·9",
+            "exp:say:Voronoi's first wave on the spiral|two crests per turn, 22.5° before the squares and the pronic numbers"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "On the spiral his first wave stands still: two crests on every turn, at the same two angles turn after turn, {22.5°|twenty-two and a half degrees} before the ray of the squares, just short of {64|sixty-four}, and before the ray of the pronic numbers, just short of {72|seventy-two}."
         },
         {
-          "id": "xs1_16",
+          "id": "xs1_20",
           "text": "Turn it into a zero's wave on the same spiral, and its crests start to drift into arms, because the zeros tick on the logarithm. Turn it back: Voronoi's waves tick on the square root, the spiral's own clock, so each one stands still.",
           "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6;el=86;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:uncall",
+            "exp:nwangle:off",
             "exp:tw:nw.rays:0:1.5",
             "exp:tw:nw.first.p:100:0",
             "delay:0.00:exp:tw:nw.mix:0:3.67",
@@ -2880,21 +2969,27 @@
           "pause": 0.8
         },
         {
-          "id": "xs1_17",
-          "text": "Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, its valleys along those same two rays. The saddle has the shape of Voronoi's first wave, turned over.",
+          "id": "xs1_21",
+          "text": "Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, its valleys along the rays of the squares and the pronic numbers, where primes are scarcest. Voronoi's first wave has the same shape, turned over and turned by twenty-two and a half degrees: the minus pi over four in his formula moves every crest by a sixteenth of a turn.",
           "camera": "orbit:on=centre;at=100000,0,-3;fit=106,59.6>56,42;el=86>26;az=-90;spin=2;raise=0.04;span=8",
           "actions": [
-            "delay:0.00:exp:tw:nw.bend:1:8.71",
-            "delay:0.00:exp:tw:nw.h:0.4:8.71",
-            "exp:say:the saddle|down twice and up twice on every turn:  Voronoi's first wave, turned over"
+            "delay:0.00:exp:tw:nw.bend:1:7.60",
+            "delay:0.00:exp:tw:nw.h:0.4:7.60",
+            "delay:6.85:exp:tw:nw.rays:1:1.5",
+            "delay:12.34:exp:nwangle:on:0",
+            "exp:say:the saddle|down twice and up twice on every turn:  valleys on the squares and pronic numbers",
+            "delay:12.34:exp:say:the saddle and Voronoi's first wave|the same shape, turned over and turned 22.5°:  the phase −π/4 in his formula"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, its valleys along the rays of the squares and the pronic numbers, where primes are scarcest. Voronoi's first wave has the same shape, turned over and turned by {22.5°:|twenty-two and a half degrees:} the {−π/4|minus pi over four} in his formula moves every crest by a sixteenth of a turn."
         },
         {
-          "id": "xs1_18",
+          "id": "xs1_22",
           "text": "Now build both master waves on the saddle, on this one spiral. The zeros' waves light the primes; turn them into the whole numbers' own waves, and every number lights up by its count of divisors.",
-          "camera": "orbit:on=centre;at=100000,0,-3;fit=64,50;el=34;az=-60.87;spin=2;raise=0.075",
+          "camera": "orbit:on=centre;at=100000,0,-3;fit=64,50;el=34;az=-42.02;spin=2;raise=0.075",
           "actions": [
+            "exp:nwangle:off",
+            "exp:tw:nw.rays:0:1.5",
             "exp:tw:nw.ribbon:0:1.5",
             "exp:tw:nw.first.p:1:0",
             "delay:0.06:exp:tw:nw.mix:0:2",
@@ -2907,15 +3002,16 @@
           "pause": 0.8
         },
         {
-          "id": "xs1_19",
-          "text": "Voronoi's formula is from nineteen oh four, and the explicit formula for the primes from Riemann and von Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first wave, and both master waves ride the same spiral.",
-          "camera": "orbit:on=centre;at=100000,0,-3;fit=64,50>70,54;el=34>28;az=-35.37;spin=2;raise=0.075;span=14",
+          "id": "xs1_23",
+          "text": "Voronoi's formula is from nineteen oh four, and the explicit formula for the primes from Riemann and von Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first wave, turned a sixteenth of a turn, and both master waves ride the same spiral.",
+          "camera": "orbit:on=centre;at=100000,0,-3;fit=64,50>70,54;el=34>28;az=-16.51;spin=2;raise=0.075;span=14",
           "actions": [
-            "delay:2.54:exp:tw:nw.mix:0:3",
-            "delay:13.74:exp:tw:nw.mix:1:3",
-            "exp:say:what is new|the saddle is Voronoi's first wave;  both master waves ride one spiral"
+            "delay:2.31:exp:tw:nw.mix:0:3",
+            "delay:12.85:exp:tw:nw.mix:1:3",
+            "exp:say:what is new|the saddle is Voronoi's first wave, turned 22.5°;  both master waves ride one spiral"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Voronoi's formula is from {1904|nineteen oh four}, and the explicit formula for the primes from Riemann and von Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first wave, turned a sixteenth of a turn, and both master waves ride the same spiral."
         }
       ]
     },
@@ -2933,6 +3029,8 @@
         "exp:tw:pw.tail:0:0",
         "exp:tw:pw.marks:1:0",
         "exp:tw:pw.readout:1:0",
+        "exp:tw:pw.logh:1:0",
+        "exp:tw:pw.ground:0:0",
         "exp:e8wheel:40:150:11:12:104040,-9,0:6",
         "exp:hide:E8 spiral",
         "exp:hide:E8 impostors",
@@ -2942,7 +3040,7 @@
         {
           "id": "xs2_01",
           "text": "Discovery two. Claude and I drew zeta's series as a path of partial sums: one arrow for every counting number n, one over root n long, each turning from the last by t times the logarithm of n over n minus one.",
-          "camera": "orbit:on=pathplane;at=11,-7,0>12,-16,0;fit=44,26>70,42;el=89.5;az=-90;spin=0;raise=0.035;span=6;hold=8",
+          "camera": "orbit:on=pathplane;at=11,-7,0>12,-16,0;fit=44,26>70,42;el=80;az=-90;spin=0;raise=0.035;span=6;hold=8",
           "actions": [
             "exp:say:the path of partial sums|one arrow n<sup>−½ − it</sup> for every counting number, laid end to end",
             "delay:4.91:exp:tw:pw.n:1:1.2",
@@ -2952,89 +3050,112 @@
             "delay:12.63:exp:tw:pw.n:8:1.44:linear",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Discovery two. Claude and I drew zeta's series as a path of partial sums: one arrow for every counting number n, {1/√n|one over root n} long, each turning from the last by {t · log(n/(n − 1)).|t times the logarithm of n over n minus one.}"
         },
         {
           "id": "xs2_02",
-          "text": "Raise t, and the path winds up. At the first zero, t equal to fourteen point one three, its end lands on zero. Higher still, at the hundred and fifty-ninth zero, three hundred thirty-three point six, the path curls into vortices, with straight spokes between them.",
-          "camera": "orbit:on=pathplane;at=12,-16,0>5,-5,0;fit=70,42>56,32;el=89.5;az=-90;spin=0;raise=0.035;span=6",
+          "text": "Raise t, and the path climbs its axis, winding up as it goes; the grid below is the ground, where t is zero. At the first zero, t equal to fourteen point one three, the path's end lands on zero. Higher still, at the hundred and fifty-ninth zero, three hundred thirty-three point six, it curls into vortices, with straight spokes between them.",
+          "camera": "orbit:on=centre;at=104012,-12,0>104006,-8,-20;fit=70,42>161.8,91;el=80>62;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
             "exp:tw:pw.marks:0:0.8",
             "exp:tw:pw.n:1000000:1.5",
-            "delay:0.00:exp:tw:pw.t:14.134725:6.82:geo",
-            "delay:1.46:exp:tw:pw.tail:1:1.5",
-            "delay:7.29:exp:callpathzeta:0:0,0,0.12,ffd973:ζ = 0",
-            "delay:7.81:exp:uncall",
-            "delay:7.81:exp:tw:pw.t:333.645:6.14:geo",
-            "delay:13.96:exp:tw:pw.eyes:1:1.5",
-            "exp:say:winding up|the first zero, t = 14.13;  the 159th, t = 333.6"
+            "delay:0.00:exp:tw:pw.ground:1:1.5",
+            "delay:0.00:exp:tw:pw.rise:1:5.47",
+            "delay:0.00:exp:tw:pw.axis:1:1.5",
+            "delay:0.00:exp:tw:pw.t:14.134725:11.59:geo",
+            "delay:11.59:exp:tw:pw.tail:1:1.5",
+            "delay:12.16:exp:callpathzeta:0:0,0,0.12,ffd973:ζ = 0",
+            "delay:12.68:exp:uncall",
+            "delay:12.68:exp:tw:pw.t:333.645:5.16:geo",
+            "delay:17.83:exp:tw:pw.eyes:1:1.5",
+            "exp:say:climbing the t axis|the first zero, t = 14.13;  the 159th, t = 333.6;  the ground is t = 0"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Raise t, and the path climbs its axis, winding up as it goes; the grid below is the ground, where t is zero. At the first zero, {t =|t equal to} {14.13|fourteen point one three}, the path's end lands on zero. Higher still, at the {159th|hundred and fifty-ninth} zero, {333.6|three hundred thirty-three point six}, it curls into vortices, with straight spokes between them."
         },
         {
           "id": "xs2_03",
-          "text": "The spokes sit near n equal to t over two pi k: fifty-three, twenty-seven, eighteen. Crossing spoke k, the path moves by the k-th term of zeta's reflected series, so every vortex belongs to a counting number.",
-          "camera": "orbit:on=pathplane;at=5,-5,0;fit=56,32;el=89.5;az=-90;spin=0;raise=0.035",
+          "text": "The spokes sit near n equal to t over two pi k: fifty-three, twenty-seven, eighteen. Crossing spoke k, the path moves by the kay-th term of zeta's reflected series, so every vortex belongs to a counting number.",
+          "camera": "orbit:on=centre;at=104006,-8,-20;fit=161.8,91;el=62;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:say:spoke k at n ≈ t / 2πk|t = 333.6:  53,  27,  18, …",
-            "delay:3.47:exp:callpath:53:0,0:spoke 1:  n ≈ 53",
-            "delay:4.15:exp:callpath:27:0,0:spoke 2:  n ≈ 27",
-            "delay:4.81:exp:callpath:18:0,0:spoke 3:  n ≈ 18",
-            "delay:5.79:exp:say:each spoke is a counting number|crossing spoke k, the path moves by χ(s) k<sup>s−1</sup>"
+            "delay:3.84:exp:callpath:53:0,0:spoke 1:  n ≈ 53",
+            "delay:4.59:exp:callpath:27:0,0:spoke 2:  n ≈ 27",
+            "delay:5.48:exp:callpath:18:0,0:spoke 3:  n ≈ 18",
+            "delay:6.69:exp:say:each spoke is a counting number|crossing spoke k, the path moves by χ(s) k<sup>s−1</sup>"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "The spokes sit near {n ≈ t/2πk:|n equal to t over two pi k:} {53|fifty-three}, {27|twenty-seven}, {18|eighteen}. Crossing spoke k, the path moves by the {k-th|kay-th} term of zeta's reflected series, so every vortex belongs to a counting number."
         },
         {
           "id": "xs2_04",
-          "text": "Now bring in E eight's clock: its two hundred and forty roots turn by a thirtieth of a circle, and eight of the thirty hours are gold, the ones with no factor two, three or five. Keep only the arrows of numbers on those eight hours: the other arrows shrink away, and the path re-forms.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035",
+          "text": "Bring the plane back down to the ground, and beside it, E eight's clock: its two hundred and forty roots turn by a thirtieth of a circle, and eight of the thirty hours are gold, the ones with no factor two, three or five. Keep only the arrows of numbers on those eight hours: the other arrows shrink away, and the path re-forms.",
+          "camera": "orbit:on=centre;at=104006,-8,-20>104027.5,-8.5,0;fit=161.8,91>88.3,49.7;el=62>74;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
             "exp:uncall",
             "exp:tw:pw.eyes:0:1",
-            "delay:0.91:exp:reveal:E8 rings:10.79",
-            "delay:11.69:exp:e8walk:0.30",
-            "delay:9.74:exp:tw:pw.gold:1:4.86",
+            "delay:0.00:exp:tw:pw.rise:0:3.59",
+            "delay:0.00:exp:tw:pw.axis:0:1.5",
+            "delay:3.59:exp:tw:pw.ground:0:1.5",
+            "delay:3.59:exp:reveal:E8 rings:13.03",
+            "delay:16.62:exp:e8walk:0.30",
+            "delay:13.61:exp:tw:pw.gold:1:6.11",
             "exp:say:E8's clock and its eight gold hours|keep only the arrows of n with no factor 2, 3 or 5"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Bring the plane back down to the ground, and beside it, {E8's|E eight's} clock: its {240|two hundred and forty} roots turn by a thirtieth of a circle, and eight of the {30|thirty} hours are gold, the ones with no factor two, three or five. Keep only the arrows of numbers on those eight hours: the other arrows shrink away, and the path re-forms."
         },
         {
           "id": "xs2_05",
           "text": "Raise t to five thousand. The gold path stretches out: a tangle at the start, then long smooth runs, and at its end a coil of tiny loops.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035",
+          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=74;az=-90;spin=0;raise=0.035",
           "actions": [
-            "delay:0.00:exp:tw:pw.t:5000:1.94:geo",
+            "delay:0.00:exp:tw:pw.t:5000:2.04:geo",
             "exp:say:the gold path at t = 5000|only the n on E8's eight gold hours:  25 795 terms"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Raise t to {5,000|five thousand}. The gold path stretches out: a tangle at the start, then long smooth runs, and at its end a coil of tiny loops."
         },
         {
           "id": "xs2_06",
-          "text": "Look closely at the long run near n equal to fifteen ninety. It is made of blocks of eight arrows, one for each gold hour, and in every block all eight arrows point the same way.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0>104009.8,-12.7,0;fit=88.3,49.7>11.2,6.3;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "text": "Look closely at the long run near n equal to fifteen ninety. These are the arrows of actual counting numbers: fifteen seventy-seven, fifteen seventy-nine, fifteen eighty-three and on to sixteen oh three, the eight numbers here on E eight's gold hours, one for each hour. All eight arrows point the same way.",
+          "camera": "orbit:on=centre;at=104027.5,-8.5,0>104009.8,-12.7,0;fit=88.3,49.7>11.2,6.3;el=74;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
-            "delay:5.36:exp:tbblock:15",
-            "delay:5.36:exp:mute:PW path:1.5",
-            "exp:say:one run, close up|blocks of eight arrows:  1577, 1579, 1583, 1589, 1591, 1597, 1601, 1603"
+            "delay:0.00:exp:tbblock:15",
+            "delay:0.00:exp:mute:PW path:1.5",
+            "exp:say:one run, close up|the arrows of 1577, 1579, 1583, 1589, 1591, 1597, 1601, 1603:  one per gold hour"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Look closely at the long run near {n =|n equal to} {1590|fifteen ninety}. These are the arrows of actual counting numbers: {1577|fifteen seventy-seven}, {1579|fifteen seventy-nine}, {1583|fifteen eighty-three} and on to {1603|sixteen oh three}, the eight numbers here on {E8's|E eight's} gold hours, one for each hour. All eight arrows point the same way."
         },
         {
           "id": "xs2_07",
+          "text": "Why here? Thirty numbers on, each arrow has turned by about thirty t over n. Near n equal to thirty t over two pi times fifteen, about fifteen ninety, that is fifteen whole turns, so every thirty numbers the pattern repeats exactly: the run is block after block of the same eight arrows.",
+          "camera": "orbit:on=centre;at=104009.8,-12.7,0;fit=11.2,6.3;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:say:the turn over thirty numbers|t · log((n + 30)/n) ≈ 30t/n = 2π · 15  at  n ≈ 30t / 30π ≈ 1590"
+          ],
+          "pause": 0.8,
+          "caption": "Why here? {30|Thirty} numbers on, each arrow has turned by about {30t/n.|thirty t over n.} Near {n = 30t/(2π · 15),|n equal to thirty t over two pi times fifteen,} about {1590|fifteen ninety}, that is {15|fifteen} whole turns, so every {30|thirty} numbers the pattern repeats exactly: the run is block after block of the same eight arrows."
+        },
+        {
+          "id": "xs2_08",
           "text": "Lift one block onto E eight's clock. Seen from the block, each arrow points at fifteen times its own hour, and every gold hour times fifteen is hour fifteen: all eight line up, and the block adds to minus eight.",
-          "camera": "orbit:on=centre;at=104009.8,-12.7,0>104027.5,-8.5,0;fit=11.2,6.3>88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "camera": "orbit:on=centre;at=104009.8,-12.7,0>104027.5,-8.5,0;fit=11.2,6.3>88.3,49.7;el=74;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
             "delay:0.00:exp:mute:E8 rings:1.5",
             "delay:0.00:exp:tblift:15:2.29",
             "delay:0.00:exp:tbscale:8",
             "exp:say:the block on E8's clock|arrow n points at hour 15·n:  all eight at hour 15, the sum −8"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Lift one block onto {E8's|E eight's} clock. Seen from the block, each arrow points at {15|fifteen} times its own hour, and every gold hour times {15|fifteen} is hour {15|fifteen}: all eight line up, and the block adds to {−8|minus eight}."
         },
         {
-          "id": "xs2_08",
+          "id": "xs2_09",
           "text": "Near n equal to forty-seven seventy, each arrow points at five times its hour: four land on hour five and four on hour twenty-five, and the block adds to four.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035",
+          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=74;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:clearchild:TB chain",
             "delay:0.00:exp:tbblock:5",
@@ -3042,26 +3163,29 @@
             "delay:2.28:exp:tblift:5:4.14",
             "exp:say:near n = 4770:  k = 5|arrow n points at hour 5·n:  hours 5 and 25, the sum 4"
           ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs2_09",
-          "text": "And at the very end, near n equal to twenty-three thousand eight hundred and eighty, each arrow points at its own hour, and the eight nearly cancel: minus one. Every tiny loop of that coil is one such block.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035",
-          "actions": [
-            "exp:uncall",
-            "exp:clearchild:TB chain",
-            "delay:0.98:exp:tbblock:1",
-            "delay:0.98:exp:callblock:1:0,0:n ≈ 23 880",
-            "delay:4.30:exp:tblift:1:2.48",
-            "exp:say:near n = 23 880:  k = 1|arrow n points at its own hour:  the sum −1"
-          ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Near {n =|n equal to} {4770|forty-seven seventy}, each arrow points at five times its hour: four land on {hour 5|hour five} and four on {hour 25,|hour twenty-five,} and the block adds to four."
         },
         {
           "id": "xs2_10",
+          "text": "And at the very end, near n equal to twenty-three thousand eight hundred and eighty, each arrow points at its own hour, and the eight nearly cancel: minus one. Their prime factors play no part. Twenty-three thousand eight hundred and eighty-one is eleven times thirteen times a hundred and sixty-seven, but on the clock it is simply hour one.",
+          "camera": "orbit:on=centre;at=104027.5,-8.5,0;fit=88.3,49.7;el=74;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "exp:clearchild:TB chain",
+            "delay:1.35:exp:tbblock:1",
+            "delay:1.35:exp:callblock:1:0,0:n ≈ 23 880",
+            "delay:4.97:exp:tblift:1:2.39",
+            "exp:say:near n = 23 880:  k = 1|arrow n points at its own hour:  the sum −1",
+            "delay:9.57:exp:say:only the hour counts|23 881 = 11 · 13 · 167:  on the clock, hour 1"
+          ],
+          "pause": 0.8,
+          "caption": "And at the very end, near {n =|n equal to} {23,880|twenty-three thousand eight hundred and eighty}, each arrow points at its own hour, and the eight nearly cancel: {−1|minus one}. Their prime factors play no part. {23,881|Twenty-three thousand eight hundred and eighty-one} is {11|eleven} times {13|thirteen} times {167|a hundred and sixty-seven}, but on the clock it is simply hour {1|one}."
+        },
+        {
+          "id": "xs2_11",
           "text": "Let k run from one to thirty, and the chain of the eight gold hours dances on the clock. Each time k is a whole number it lands on a trace of E eight's Coxeter element: minus one, one, two, four, minus two, minus four, minus eight, eight.",
-          "camera": "orbit:on=centre;at=104027.5,-8.5,0>104065.0,-8.5,0;fit=88.3,49.7>88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035;span=3",
+          "camera": "orbit:on=centre;at=104027.5,-8.5,0>104065.0,-8.5,0;fit=88.3,49.7>88.3,49.7;el=74;az=-90;spin=0;raise=0.035;span=3",
           "actions": [
             "exp:uncall",
             "exp:clearchild:TB chain",
@@ -3070,38 +3194,42 @@
             "delay:0.00:exp:tbsweep:1:30:18.86",
             "exp:say:tr C<sup>k</sup>:  E8's Coxeter element|the chain of the eight gold hours, each turned k hours per hour"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Let k run from {1|one} to {30|thirty}, and the chain of the eight gold hours dances on the clock. Each time k is a whole number it lands on a trace of {E8's|E eight's} Coxeter element: {−1|minus one}, {1|one}, {2|two}, {4|four}, {−2|minus two}, {−4|minus four}, {−8|minus eight}, {8|eight}."
         },
         {
-          "id": "xs2_11",
+          "id": "xs2_12",
           "text": "Measured on the path itself at t equal to five thousand, the charges of the spokes match these traces, to within a quarter up to spoke twelve.",
-          "camera": "orbit:on=centre;at=104065.0,-8.5,0;fit=88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035",
+          "camera": "orbit:on=centre;at=104065.0,-8.5,0;fit=88.3,49.7;el=74;az=-90;spin=0;raise=0.035",
           "actions": [
             "delay:0.00:exp:tbbarsall:measured",
             "exp:say:measured on the gold path at t = 5000|white: the charge of spoke k;  colour: tr C<sup>k</sup>"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Measured on the path itself at {t =|t equal to} {5,000|five thousand}, the charges of the spokes match these traces, to within a quarter up to spoke {12|twelve}."
         },
         {
-          "id": "xs2_12",
+          "id": "xs2_13",
           "text": "Added up again, each turned by an hour, the thirty traces give back E eight's sieve: for seven they reach hour seven on the rim; for six they close up at the centre.",
-          "camera": "orbit:on=centre;at=104065.0,-8.5,0>104040.0,-8.5,0;fit=88.3,49.7>88.3,49.7;el=89.5;az=-90;spin=0;raise=0.035;span=3",
+          "camera": "orbit:on=centre;at=104065.0,-8.5,0>104040.0,-8.5,0;fit=88.3,49.7>88.3,49.7;el=74;az=-90;spin=0;raise=0.035;span=3",
           "actions": [
             "delay:5.39:exp:tbsieve:7:2.39",
             "delay:7.78:exp:tbsieve:6:3",
             "exp:say:the sieve as a spectrum|(1/30) Σ<sub>k</sub> tr C<sup>k</sup> e<sup>−2πikn/30</sup>:  1 on the gold hours, 0 off them"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Added up again, each turned by an hour, the {30|thirty} traces give back {E8's|E eight's} sieve: for seven they reach hour {7|seven} on the rim; for six they close up at the centre."
         },
         {
-          "id": "xs2_13",
+          "id": "xs2_14",
           "text": "Why it matters: a symmetry of eight dimensions sets the sign and the strength of every vortex of the gold path. The identity is Ramanujan's; what Claude and I add is seeing E eight's clock inside zeta's own path.",
-          "camera": "orbit:on=centre;at=104040.0,-8.5,0>104052.0,-8.5,0;fit=88.3,49.7>108.4,61.0;el=89.5;az=-90;spin=0;raise=0.035;span=10",
+          "camera": "orbit:on=centre;at=104040.0,-8.5,0>104052.0,-8.5,0;fit=88.3,49.7>108.4,61.0;el=74;az=-90;spin=0;raise=0.035;span=10",
           "actions": [
             "exp:unmute:E8 rings,PW path:2",
             "exp:say:what is new|Ramanujan's sum c<sub>30</sub>(k) = tr C<sup>k</sup>:  E8's clock inside the path of ζ"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Why it matters: a symmetry of eight dimensions sets the sign and the strength of every vortex of the gold path. The identity is Ramanujan's; what Claude and I add is seeing {E8's|E eight's} clock inside zeta's own path."
         }
       ]
     },
@@ -3117,6 +3245,8 @@
         "exp:tw:fw.gamma:14.134725:0",
         "exp:tw:fw.n:0:0",
         "exp:tw:fw.lift:0:0",
+        "exp:tw:fw.dim:0:0",
+        "exp:tw:fw.stretch:1:0",
         "exp:tw:fw.coil:0:0",
         "exp:tw:fw.tail:0:0",
         "exp:tw:fw.path:1:0",
@@ -3131,25 +3261,27 @@
             "exp:say:E8's factor funnel|n at its hour n mod 30, its column as tall as log n, cut at its prime factors",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Discovery three. Claude and I asked where zeta's zeros live in {E8's|E eight's} layout of the counting numbers. Here it is: every number up to {400|four hundred} at its hour on {E8's|E eight's} wheel of {30|thirty}, with a column as tall as its logarithm, cut at its prime factors."
         },
         {
           "id": "xs3_02",
-          "text": "That is too much at once, so grey it out and light one number at a time. Seven is a prime, at hour seven: one piece, log seven tall. Six is two times three, at hour six: a piece log three tall, and on top of it one log two tall.",
+          "text": "That is too much at once, so grey it out and light one number at a time. Seven is a prime: its arm points to hour seven on the floor, and its column is one piece, log seven tall. Six is two times three, at hour six: a piece log three tall, and on top of it one log two tall.",
           "camera": "orbit:on=centre;at=68000,0,-16>68004,0,-6;fit=124,140>36,28;el=26>22;az=-59.08;spin=1;raise=0.04;span=5",
           "actions": [
-            "delay:1.70:exp:mute:GB factor columns:1.2",
-            "delay:4.38:exp:fwhl:7:logs",
-            "delay:10.12:exp:fwunhl:7",
-            "delay:10.12:exp:fwhl:6:logs",
+            "delay:1.67:exp:mute:GB factor columns:1.2",
+            "delay:4.42:exp:fwhl:7:logs",
+            "delay:11.81:exp:fwunhl:7",
+            "delay:11.81:exp:fwhl:6:logs",
             "exp:say:one number at a time|7:  prime, one piece log 7   ·   6 = 2·3:  log 3 + log 2"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "That is too much at once, so grey it out and light one number at a time. Seven is a prime: its arm points to hour {7|seven} on the floor, and its column is one piece, {log 7|log seven} tall. {6 = 2 · 3,|Six is two times three,} at hour {6|six}: a piece {log 3|log three} tall, and on top of it one {log 2|log two} tall."
         },
         {
           "id": "xs3_03",
           "text": "Now bring in the path of partial sums from discovery two, at the first zero, t equal to fourteen point one three, and lay it on the funnel's floor, starting at the axis. Its arrows wind round and its tail brings it back to the axis.",
-          "camera": "orbit:on=centre;at=68004,0,-6>68006.8,0.2,0;fit=36,28>40,22.5;el=22>84;az=-40.29;spin=-3.621;raise=0.035;span=4",
+          "camera": "orbit:on=centre;at=68004,0,-6>68006.8,0.2,0;fit=36,28>40,22.5;el=22>84;az=-38.99;spin=-3.716;raise=0.035;span=4",
           "actions": [
             "exp:fwunhl",
             "exp:mute:GB factor columns:1.5:1.85",
@@ -3157,38 +3289,58 @@
             "delay:10.48:exp:tw:fw.tail:1:1.5",
             "exp:say:the path at the first zero, on the floor|t = 14.13:  its arrows n<sup>−½ − it</sup> close on the axis"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now bring in the path of partial sums from discovery two, at the first zero, {t =|t equal to} {14.13|fourteen point one three}, and lay it on the funnel's floor, starting at the axis. Its arrows wind round and its tail brings it back to the axis."
         },
         {
           "id": "xs3_04",
-          "text": "Lift each arrow to the height of its own number. Arrow n rises to log n, the top of n's column; its tail moves onto the axis, and it keeps its direction. Arrow one stays on the floor, arrow two rises to log two, arrow six to log six.",
-          "camera": "orbit:on=centre;at=68006.8,0.2,0>68002,0,-7;fit=40,22.5>44,40;el=84>22;az=-90.0;spin=1.5;raise=0.04;span=6",
+          "text": "Lift each arrow to the height of its own number. Arrow n rises to log n, the top of n's column; its tail moves onto the axis, and it keeps both its direction and its length, one over root n. Arrow one stays on the floor, arrow two rises to log two, arrow six to log six: stacked, the shrinking arrows narrow like a horn.",
+          "camera": "orbit:on=centre;at=68006.8,0.2,0>68002,0,-8;fit=40,22.5>56,40;el=84>22;az=-90.0;spin=1.5;raise=0.04;span=6",
           "actions": [
+            "exp:tw:fw.stretch:0:0",
             "exp:tw:fw.tail:0:1",
             "exp:tw:fw.axis:1:1",
-            "exp:tw:fw.path:0:15.65",
-            "delay:0.00:exp:tw:fw.lift:1:13.84",
-            "delay:12.88:exp:fwhl:2",
-            "delay:13.84:exp:fwhl:6",
-            "exp:say:lift arrow n to the height log n|its direction stays:  γ·log n"
+            "exp:tw:fw.path:0:22.06",
+            "delay:0.00:exp:tw:fw.lift:1:17.97",
+            "delay:16.09:exp:fwhl:2",
+            "delay:17.97:exp:fwhl:6",
+            "delay:21.13:exp:tw:fw.coil:0.5:0.93",
+            "exp:say:lift arrow n to the height log n|it keeps its direction γ·log n and its length 1/√n:  a horn"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Lift each arrow to the height of its own number. Arrow n rises to log n, the top of n's column; its tail moves onto the axis, and it keeps both its direction and its length, {1/√n|one over root n}. Arrow one stays on the floor, arrow two rises to {log 2|log two}, arrow six to {log 6|log six}: stacked, the shrinking arrows narrow like a horn."
         },
         {
           "id": "xs3_05",
-          "text": "Stacked, the arrows are the hands of a clock that turns by gamma for every unit of height, and a coil runs through their tips, one turn every point four four. That coil is the zero, wound up E eight's funnel.",
-          "camera": "orbit:on=centre;at=68000,0,-14;fit=66,74;el=22;az=-65.02;spin=-1.883;raise=0.04",
+          "text": "Now stretch each arrow by the square root of its number: the distance of n from the centre on the Sacks spiral, and on this funnel's floor. One over root n, times root n, is one. On the critical line the length and the radius cancel, every arrow becomes one unit long, and all that is left is its direction.",
+          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-12;fit=56,40>70,52;el=22;az=-55.41;spin=1.5;raise=0.04;span=6",
           "actions": [
             "exp:fwunhl",
-            "delay:4.85:exp:tw:fw.coil:1:7.41",
-            "exp:say:a zero is a coil|one turn every 2π/γ = 0.44 of height"
+            "delay:0.07:exp:tw:fw.stretch:1:11.13",
+            "delay:0.07:exp:fwhl:2",
+            "exp:say:stretch arrow n by √n|1/√n × √n = 1:  the critical line's ½ cancels the spiral's radius",
+            "delay:11.21:exp:say:every arrow one unit long|n<sup>−½</sup> · n<sup>½</sup> = 1:  only the direction γ·log n is left"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now stretch each arrow by the square root of its number: the distance of n from the centre on the Sacks spiral, and on this funnel's floor. {1/√n × √n = 1.|One over root n, times root n, is one.} On the critical line the length and the radius cancel, every arrow becomes one unit long, and all that is left is its direction."
         },
         {
           "id": "xs3_06",
+          "text": "Stacked, the arrows are the hands of a clock that turns by gamma for every unit of height, and a coil runs through their tips, one turn every point four four. That coil is the zero, wound up E eight's funnel.",
+          "camera": "orbit:on=centre;at=68000,0,-14;fit=76,74;el=22;az=-22.35;spin=-5.1;raise=0.04",
+          "actions": [
+            "exp:fwunhl",
+            "exp:tw:fw.coil:0:0",
+            "delay:4.85:exp:tw:fw.coil:1:7.41",
+            "exp:say:a zero is a coil|one turn every 2π/γ = 0.44 of height"
+          ],
+          "pause": 0.8,
+          "caption": "Stacked, the arrows are the hands of a clock that turns by {γ|gamma} for every unit of height, and a coil runs through their tips, one turn every {0.44|point four four}. That coil is the zero, wound up {E8's|E eight's} funnel."
+        },
+        {
+          "id": "xs3_07",
           "text": "And the coil reads the prime factors. Six is two times three, so log six is log two plus log three, and the hand at six has turned the turn of two plus the turn of three.",
-          "camera": "orbit:on=centre;at=68000,0,-14>68004,-1,-9.5;fit=66,74>64,36;el=22>64;az=-90;spin=0;raise=0.035;span=5",
+          "camera": "orbit:on=centre;at=68000,0,-14>68004,-1,-9.5;fit=76,74>72,40.5;el=22>64;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
             "exp:tw:fw.coil:0.32:2",
             "exp:tw:fw.dim:1:2",
@@ -3196,12 +3348,13 @@
             "delay:5.22:exp:fwangles:6",
             "exp:say:the hand of 6 = the hand of 2 + the hand of 3|γ·log 6 = γ·log 2 + γ·log 3:  1.56 + 2.47 = 4.03 turns"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "And the coil reads the prime factors. {6 = 2 · 3,|Six is two times three,} so {log 6 = log 2 + log 3,|log six is log two plus log three,} and the hand at six has turned the turn of two plus the turn of three."
         },
         {
-          "id": "xs3_07",
+          "id": "xs3_08",
           "text": "Every zero is such a coil. The next two, twenty-one point zero two and twenty-five point zero one, turn every hand further, the higher ones more: tighter coils.",
-          "camera": "orbit:on=centre;at=68004,-1,-9.5>68000,0,-14;fit=64,36>66,74;el=64>24;az=-90;spin=0;raise=0.04;span=5",
+          "camera": "orbit:on=centre;at=68004,-1,-9.5>68000,0,-14;fit=72,40.5>76,74;el=64>24;az=-90;spin=0;raise=0.04;span=5",
           "actions": [
             "exp:fwunhl",
             "exp:clearchild:FW angles",
@@ -3211,12 +3364,13 @@
             "delay:4.38:exp:tw:fw.gamma:25.010858:2",
             "exp:say:the next zeros|γ = 21.02,  25.01:  tighter coils"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Every zero is such a coil. {The next two:|The next two,} {21.02|twenty-one point zero two} and {25.01|twenty-five point zero one}, turn every hand further, the higher ones more: tighter coils."
         },
         {
-          "id": "xs3_08",
+          "id": "xs3_09",
           "text": "Now add the coils of all ten thousand five hundred zeros. A ring climbs the funnel's axis, and at each height the coils add up to a single hand. Where they agree, at a prime or a power of a prime, the hand shoots out to the top of that prime's column: seven, eight, nine. At six and ten they cancel, and the hand stays at the axis.",
-          "camera": "orbit:on=centre;at=68000,0,-14>68004,0,-10;fit=66,74>56,31.5;el=24>10;az=-90;spin=0;raise=0.035;span=4",
+          "camera": "orbit:on=centre;at=68000,0,-14>68004,0,-10;fit=76,74>56,31.5;el=24>10;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
             "exp:tw:fw.coil:0:1.5",
             "exp:tw:fw.hands:0:1.5",
@@ -3232,10 +3386,11 @@
             "delay:17.01:exp:calltooth:6:-1,-0.6,0.12,ff6b5a:6:  dark",
             "delay:17.75:exp:calltooth:10:-1,0.6,0.12,ff6b5a:10:  dark"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now add the coils of all {10,500|ten thousand five hundred} zeros. A ring climbs the funnel's axis, and at each height the coils add up to a single hand. Where they agree, at a prime or a power of a prime, the hand shoots out to the top of that prime's column: {7, 8, 9.|seven, eight, nine.} At {6|six} and {10|ten} they cancel, and the hand stays at the axis."
         },
         {
-          "id": "xs3_09",
+          "id": "xs3_10",
           "text": "Climbing on, the ring lights every prime power up to four hundred, and leaves every composite dark. The comb it draws is the master wave of discovery one, stood up along the logarithm.",
           "camera": "orbit:on=centre;at=68004,0,-10>68008,0,-19;fit=56,31.5>130,73;el=8;az=-90;spin=0;raise=0.035;span=6",
           "actions": [
@@ -3244,31 +3399,34 @@
             "delay:6.28:exp:tw:fw.scan:100:0",
             "exp:say:ζ's comb|a tooth at every prime power:  the master wave, along log n"
           ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs3_10",
-          "text": "Zeta's zeros fix a prime's height but not its hour. E eight's field has seven more L-functions; turned back by their characters, they split the comb into eight fans, one for each gold hour. Forty-nine, seven squared, lands on hour nineteen.",
-          "camera": "orbit:on=centre;at=68008,0,-19>68000,0,-16;fit=130,73>130,130;el=8>50;az=-90;spin=0;raise=0.04;span=8",
-          "actions": [
-            "delay:7.25:exp:tw:fw.scan:-1:0",
-            "delay:7.25:exp:hide:JM comb",
-            "delay:7.25:exp:hide:JM comb labels",
-            "delay:7.25:exp:tw:fw.fan:1:0.30",
-            "delay:10.41:exp:callfun:49:0,0:49 = 7²:  hour 19",
-            "exp:say:eight L-functions, eight spokes|ζ's zeros give the height, the other seven the hour"
-          ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Climbing on, the ring lights every prime power up to {400|four hundred}, and leaves every composite dark. The comb it draws is the master wave of discovery one, stood up along the logarithm."
         },
         {
           "id": "xs3_11",
+          "text": "Zeta's zeros fix a prime's height but not its hour. E eight's field has seven more L-functions; turned back by their characters, they split the comb into eight fans, one for each gold hour. Forty-nine, seven squared, lands on hour nineteen.",
+          "camera": "orbit:on=centre;at=68008,0,-19>68000,0,-16;fit=130,73>130,130;el=8>50;az=-90;spin=0;raise=0.04;span=8",
+          "actions": [
+            "delay:8.22:exp:tw:fw.scan:-1:0",
+            "delay:8.22:exp:hide:JM comb",
+            "delay:8.22:exp:hide:JM comb labels",
+            "delay:8.22:exp:tw:fw.fan:1:0.30",
+            "delay:11.48:exp:callfun:49:0,0:49 = 7²:  hour 19",
+            "exp:say:eight L-functions, eight spokes|ζ's zeros give the height, the other seven the hour"
+          ],
+          "pause": 0.8,
+          "caption": "Zeta's zeros fix a prime's height but not its hour. {E8's|E eight's} field has seven more L-functions; turned back by their characters, they split the comb into eight fans, one for each gold hour. {49 = 7² lands on hour 19.|Forty-nine, seven squared, lands on hour nineteen.}"
+        },
+        {
+          "id": "xs3_12",
           "text": "Why it matters: the zeros are not points in E eight's stack. They are frequencies of its height, and every coil reads the prime factors. The explicit formula is classical; what Claude and I add is where each zero sits in E eight's funnel.",
           "camera": "orbit:on=centre;at=68000,0,-16;fit=130,130>124,140;el=50>30;az=-90.0;spin=3;raise=0.04;span=12",
           "actions": [
             "exp:uncall",
             "exp:say:what is new|a zero is a coil up E8's funnel, turning with the logarithm of every number"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Why it matters: the zeros are not points in {E8's|E eight's} stack. They are frequencies of its height, and every coil reads the prime factors. The explicit formula is classical; what Claude and I add is where each zero sits in {E8's|E eight's} funnel."
         }
       ]
     },
@@ -3283,129 +3441,269 @@
         "exp:t5families:76000,-8,0",
         "exp:t5mix:76000,0,0",
         "exp:t5plane:76330,-6,0",
+        "exp:t5terrain:76330,-6,0",
+        "exp:tw:lf.build:0:0",
+        "exp:tw:lf.h:0:0",
+        "exp:tw:lf.slice:-10:0",
+        "exp:lacounts:76040,28,0",
+        "exp:lwaves:76000,0,0",
         "exp:hidechild:LA lattices:ring",
         "exp:hidechild:LA lattices:lit",
         "exp:hide:LC zeros",
         "exp:hide:LE mixtures",
-        "exp:twgroup:LF landscape:0,0,0:.02:0",
         "exp:hide:LF landscape"
       ],
       "lines": [
         {
           "id": "xs4_01",
-          "text": "Discovery four. Discriminant minus twenty-three has three families of quadratic forms, and each family is a lattice. A number lies on a family when the lattice has a point at that distance squared from the centre.",
+          "text": "Discovery four. Discriminant minus twenty-three has three families of quadratic forms, and each family is a lattice of points. A number lies on a family when some point of its lattice sits at that number's distance squared from the centre.",
           "camera": "orbit:on=centre;at=76000.0,-4.0,0;fit=353.1,198.6;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:say:three families, three lattices|x² + xy + 6y²  ·  2x² + xy + 3y²  ·  2x² − xy + 3y²",
-            "exp:snap"
+            "exp:snap",
+            "delay:7.71:exp:showchild:LA lattices:ring 0 6",
+            "delay:7.71:exp:showchild:LA lattices:lit 0 6",
+            "delay:11.89:exp:calllat:0,0,1:0,0,0.12,ff6b5a:(0, 1):  0 + 0 + 6 = 6"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Discovery four. Discriminant {−23|minus twenty-three} has three families of quadratic forms, and each family is a lattice of points. A number lies on a family when some point of its lattice sits at that number's distance squared from the centre."
         },
         {
           "id": "xs4_02",
           "text": "Fifty-nine, a prime, lies on the first family only. Thirteen, a prime, lies on the other two. But six, two times three, lies on all three: a composite shows up on more than one family.",
           "camera": "orbit:on=centre;at=76000.0,-4.0,0;fit=353.1,198.6;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
+            "exp:uncall",
             "delay:0.00:exp:showchild:LA lattices:ring 0 59",
-            "delay:0.00:exp:showchild:LA lattices:lit",
+            "delay:0.00:exp:showchild:LA lattices:lit 0 59",
             "delay:0.00:exp:callat:75934.3,0,-0.4:1,1,0.12,ffffff:59:  4 points",
             "delay:2.97:exp:showchild:LA lattices:ring 1 13",
+            "delay:2.97:exp:showchild:LA lattices:lit 1 13",
             "delay:2.97:exp:showchild:LA lattices:ring 2 13",
+            "delay:2.97:exp:showchild:LA lattices:lit 2 13",
             "delay:2.97:exp:callat:76015.1,0,-0.4:1,1,0.12,7dff8f:13",
-            "delay:5.98:exp:showchild:LA lattices:ring 0 6",
             "delay:5.98:exp:showchild:LA lattices:ring 1 6",
+            "delay:5.98:exp:showchild:LA lattices:lit 1 6",
             "delay:5.98:exp:showchild:LA lattices:ring 2 6",
+            "delay:5.98:exp:showchild:LA lattices:lit 2 6",
             "delay:5.98:exp:callat:76108.3,0,-0.4:1,-1,0.12,ff6b5a:6 = 2·3:  on all three"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{59|Fifty-nine}, a prime, lies on the first family only. {13|Thirteen}, a prime, lies on the other two. But {6 = 2·3|six, two times three,} lies on all three: a composite shows up on more than one family."
         },
         {
           "id": "xs4_03",
-          "text": "Each family has its own zeta function, counting its lattice points by distance, with Riemann's symmetry. The lattices move up to head their strips of zeros. Yet those zeros leave the critical line; one sits at real part one point zero zero seven, where no function with an Euler product can vanish.",
-          "camera": "orbit:on=centre;at=76000.0,-4.0,0>76000.0,5.0,0;fit=353.1,198.6>429.6,241.6;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "text": "Now count the points on each ring. On the second family, two has two points, and three has two points.",
+          "camera": "orbit:on=centre;at=76000.0,0.0,0;fit=76.5,43.0;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:uncall",
-            "delay:7.50:exp:hidechild:LA lattices:row",
-            "delay:7.50:exp:hidechild:LA lattices:name",
-            "delay:7.50:exp:hidechild:LA lattices:sub",
-            "delay:7.50:exp:twgroup:LA lattices/family 0:2,66,0:.3:1.73",
-            "delay:7.50:exp:twgroup:LA lattices/family 1:-45,66,0:.3:1.73",
-            "delay:7.50:exp:twgroup:LA lattices/family 2:-117,66,0:.3:1.73",
-            "delay:9.23:exp:show:LC zeros",
-            "delay:9.23:exp:hidechild:LC zeros:tick",
-            "delay:9.23:exp:hidechild:LC zeros:section",
-            "delay:9.23:exp:drawon:LC zeros/line:2",
-            "exp:say:each family's own zeta function|red: zeros off the critical line Re s = ½",
-            "delay:11.79:exp:callat:75916.6,-30.5,-0.4:-1,1,0.12,ff6b5a:0.953 + 16.29i",
-            "delay:14.84:exp:callat:75982.1,-18.6,-0.4:1,1,0.12,ff6b5a:1.007 + 22.57i"
+            "exp:hidechild:LA lattices:ring",
+            "exp:hidechild:LA lattices:lit",
+            "exp:hidechild:LA lattices:row",
+            "delay:2.60:exp:showchild:LA lattices:ring 1 2",
+            "delay:2.60:exp:showchild:LA lattices:lit 1 2",
+            "delay:2.60:exp:calllat:1,1,0:0,0,0.12,ff9e33:2:  (±1, 0)",
+            "delay:3.22:exp:showchild:LA lattices:ring 1 3",
+            "delay:3.22:exp:showchild:LA lattices:lit 1 3",
+            "delay:3.22:exp:calllat:1,0,1:0,0,0.12,c78cff:3:  (0, ±1)",
+            "exp:say:count the points on each ring|2x² + xy + 3y²:  2 has 2 points,  3 has 2 points"
           ],
           "pause": 0.8
         },
         {
           "id": "xs4_04",
-          "text": "The class group's characters mix the families into two L-functions with Euler products, and those two keep every zero on the line: forty-four and forty-two zeros, all gold.",
+          "text": "On the first family, two and three have no points at all. But six, two times three, has four.",
+          "camera": "orbit:on=centre;at=75902.0,0.0,0;fit=82.4,46.3;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "delay:0.19:exp:showchild:LA lattices:ring 0 2",
+            "delay:0.19:exp:showchild:LA lattices:ring 0 3",
+            "delay:2.44:exp:calllat:0,1,0:1,1,0.12,ffffff:2, 3:  no points",
+            "delay:3.75:exp:showchild:LA lattices:ring 0 6",
+            "delay:3.75:exp:showchild:LA lattices:lit 0 6",
+            "delay:6.06:exp:calllat:0,1,-1:0,0,0.12,ff6b5a:6:  4 points",
+            "exp:say:count the points on each ring|x² + xy + 6y²:  2 has none,  3 has none,  6 = 2·3 has 4"
+          ],
+          "pause": 0.8,
+          "caption": "On the first family, two and three have no points at all. But {6 = 2·3|six, two times three,} has four."
+        },
+        {
+          "id": "xs4_05",
+          "text": "So the first family's counts cannot be built from the prime factors: zero times zero is not four. But take the first family's count minus the second's, and halve it. Two gives minus one, three gives minus one, and six gives plus one, which is minus one times minus one. Building every count from its prime factors is exactly what an Euler product does: zeta's own product over the primes.",
+          "camera": "orbit:on=centre;at=76107.5,8.0,0;fit=176.5,99.3;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:uncall",
+            "exp:twgroup:LA lattices/family 2:0,0,0:.01:1",
+            "exp:showchild:LA counts:header",
+            "exp:showchild:LA counts:row 2",
+            "exp:showchild:LA counts:row 3",
+            "exp:showchild:LA counts:row 6",
+            "delay:4.11:exp:showchild:LA counts:check 0",
+            "delay:6.93:exp:pulse:LA counts:1.5",
+            "delay:13.61:exp:showchild:LA counts:check 1",
+            "exp:say:counts built from the prime factors|(first − second)/2:  6 → +1 = (−1) × (−1):  an Euler product"
+          ],
+          "pause": 0.8,
+          "caption": "So the first family's counts cannot be built from the prime factors: {0 × 0 ≠ 4.|zero times zero is not four.} But take the first family's count minus the second's, and halve it. {2 → −1,|Two gives minus one,} {3 → −1,|three gives minus one,} and {6 → +1 = (−1) × (−1).|six gives plus one, which is minus one times minus one.} Building every count from its prime factors is exactly what an Euler product does: zeta's own product over the primes."
+        },
+        {
+          "id": "xs4_06",
+          "text": "Each family has its own zeta function, counting its lattice points by distance, with Riemann's symmetry. The lattices move up to head their strips of zeros. Yet those zeros leave the critical line; one sits at real part one point zero zero seven, where no function with an Euler product can vanish.",
+          "camera": "orbit:on=centre;at=76000.0,-4.0,0>76000.0,5.0,0;fit=353.1,198.6>429.6,241.6;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "actions": [
+            "exp:uncall",
+            "exp:hide:LA counts",
+            "exp:twgroup:LA lattices/family 2:0,0,0:1:0",
+            "delay:5.52:exp:hidechild:LA lattices:name",
+            "delay:5.52:exp:hidechild:LA lattices:sub",
+            "delay:5.52:exp:twgroup:LA lattices/family 0:2,66,0:.3:1.35",
+            "delay:5.52:exp:twgroup:LA lattices/family 1:-45,66,0:.3:1.35",
+            "delay:5.52:exp:twgroup:LA lattices/family 2:-117,66,0:.3:1.35",
+            "delay:6.86:exp:show:LC zeros",
+            "delay:6.86:exp:hidechild:LC zeros:tick",
+            "delay:6.86:exp:hidechild:LC zeros:section",
+            "delay:6.86:exp:drawon:LC zeros/line:2",
+            "exp:say:each family's own zeta function|red: zeros off the critical line Re s = ½",
+            "delay:8.87:exp:callat:75916.6,-30.5,-0.4:-1,1,0.12,ff6b5a:0.953 + 16.29i",
+            "delay:11.42:exp:callat:75982.1,-18.6,-0.4:1,1,0.12,ff6b5a:1.007 + 22.57i"
+          ],
+          "pause": 0.8,
+          "caption": "Each family has its own zeta function, counting its lattice points by distance, with Riemann's symmetry. The lattices move up to head their strips of zeros. Yet those zeros leave the critical line; one sits at real part {1.007|one point zero zero seven}, where no function with an Euler product can vanish."
+        },
+        {
+          "id": "xs4_07",
+          "text": "The two combinations of the families with Euler products keep every zero on the line: forty-four and forty-two zeros, all gold.",
           "camera": "orbit:on=centre;at=76000.0,5.0,0;fit=429.6,241.6;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:uncall",
             "exp:say:the class group's L-functions|(Z<sub>1</sub> + 2Z<sub>2</sub>)/2 and (Z<sub>1</sub> − Z<sub>2</sub>)/2:  every zero on the line",
-            "delay:6.70:exp:callat:76032,-65.7,-0.4:-1,-1,0.12,ffd973:44 on the line",
-            "delay:7.64:exp:callat:76096,-65.7,-0.4:1,-1,0.12,ffd973:42 on the line"
+            "delay:4.63:exp:callat:76032,-65.7,-0.4:-1,-1,0.12,ffd973:44 on the line",
+            "delay:5.33:exp:callat:76096,-65.7,-0.4:1,-1,0.12,ffd973:42 on the line"
           ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs4_05",
-          "text": "Now mix the two families with any weight lambda. Fold the four strips down onto one chart: every zero on the line lands where a single curve crosses its height, lambda zero for the first family, two and minus one for the L-functions, and the second family's zeros become the curve's poles.",
-          "camera": "orbit:on=centre;at=76000.0,5.0,0>76000,4,0;fit=429.6,241.6>300,165;el=89.5;az=-90;spin=0;raise=0.05;span=4",
-          "actions": [
-            "exp:uncall",
-            "delay:3.19:exp:stripsmorph:76000,-8,0:76000,0,0:16.60",
-            "delay:3.19:exp:mute:LC zeros:2",
-            "delay:3.19:exp:mute:LA lattices:2",
-            "delay:7.66:exp:show:LE mixtures",
-            "delay:7.66:exp:drawon:LE mixtures/R:4",
-            "exp:say:every mixture at once|the zeros of Λ<sub>1</sub> + λΛ<sub>2</sub> on the line:  where the curve meets the height λ"
-          ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs4_06",
-          "text": "Sweep the height lambda through every mixture. Counted in full, up to height fifty, only two small windows of mixtures keep every zero on the line, and both surround the class group's L-functions.",
-          "camera": "orbit:on=centre;at=76000,4,0;fit=300,165;el=89.5;az=-90;spin=0;raise=0.05",
-          "actions": [
-            "delay:0.00:exp:mixsweep:-3:4:2.97:76000,0,0",
-            "exp:say:no zero off the line:  two small windows|λ from 1.99 to 2,  and from −1.02 to −0.88",
-            "delay:6.33:exp:callat:76072,24,-0.4:1,1,0.12,ffd973:λ = 2",
-            "delay:8.93:exp:callat:76072,-11.4,-0.4:1,-1,0.12,ffd973:λ = −1"
-          ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs4_07",
-          "text": "With five families, for minus forty-seven, the line of mixtures grows into a plane. Colour each by its zeros off the line, and gold appears only in small islands: round the three L-functions, and one more island with no L-function in it.",
-          "camera": "orbit:on=centre;at=76000,4,0>76170,-6,0;fit=300,165>480,270;el=89.5;az=-90;spin=0;raise=0.05;span=4",
-          "actions": [
-            "exp:uncall",
-            "delay:3.03:exp:show:LF landscape",
-            "delay:3.03:exp:twgroup:LF landscape:0,0,0:1:1.38",
-            "exp:say:five families:  a plane of mixtures|gold:  no zero off the line up to t = 50",
-            "delay:9.71:exp:callat:76371.3,35.3,-0.4:1,1,0.12,ffd973:ζ(s) L(s, χ<sub>−47</sub>)",
-            "delay:9.71:exp:callat:76342.8,-39.4,-0.4:1,-1,0.12,ffd973:L<sub>1</sub>",
-            "delay:9.71:exp:callat:76296.6,6.8,-0.4:-1,1,0.12,ffd973:L<sub>2</sub>",
-            "delay:11.68:exp:callat:76364.1,18.8,-0.4:1,-1,0.12,ffffff:no L-function here"
-          ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "The two combinations of the families with Euler products keep every zero on the line: {44|forty-four} and {42|forty-two} zeros, all gold."
         },
         {
           "id": "xs4_08",
-          "text": "Why it matters: symmetry alone does not keep zeros on the line. Davenport and Heilbronn proved that in nineteen thirty-six. As far as anyone has checked, the functions that keep them there have Euler products. What Claude and I add is seeing every mixture at once.",
-          "camera": "orbit:on=centre;at=76170,-6,0>76170,10,0;fit=480,270>500,290;el=89.5;az=-90;spin=0;raise=0.05;span=14",
+          "text": "Now the curves of the chart, built step by step. On the critical line each family's completed zeta function is a real wave: gold for the first family, blue for the second. Their zeros are where the waves cross the axis.",
+          "camera": "orbit:on=centre;at=75948.5,3.0,0;fit=288.4,162.2;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "exp:uncall",
-            "exp:unmute:LA lattices:3",
+            "exp:mute:LC zeros,LA lattices:1.2:1.95",
+            "delay:6.57:exp:showchild:LW waves:t axis",
+            "delay:6.57:exp:showchild:LW waves:first",
+            "delay:6.57:exp:drawon:LW waves/first:2",
+            "delay:7.67:exp:showchild:LW waves:name first",
+            "delay:9.07:exp:showchild:LW waves:second",
+            "delay:9.07:exp:drawon:LW waves/second:2",
+            "delay:9.07:exp:showchild:LW waves:name second",
+            "delay:10.81:exp:showchild:LW waves:zeros",
+            "delay:10.81:exp:showchild:LW waves:t label",
+            "delay:11.01:exp:hide:LC zeros",
+            "delay:11.01:exp:hide:LA lattices",
+            "exp:say:each family on the critical line|Λ(½ + it) is real:  gold x² + xy + 6y²,  blue 2x² ± xy + 3y²"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xs4_09",
+          "text": "Mix them: the first plus lambda times the second. That mixture is zero where the first equals minus lambda times the second, that is, where the ratio, minus the first over the second, equals lambda. Sweep along t and plot that ratio: wherever the blue wave crosses zero it divides by zero and shoots off to infinity, so the curve breaks into these branches.",
+          "camera": "orbit:on=centre;at=75948.5,3.0,0;fit=288.4,162.2;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "delay:11.90:exp:lratio:10.44",
+            "exp:say:Λ<sub>1</sub> + λΛ<sub>2</sub> = 0  ⟺  λ = −Λ<sub>1</sub>/Λ<sub>2</sub>|the ratio of the two waves, with a pole at every zero of the blue one"
+          ],
+          "pause": 0.8,
+          "caption": "Mix them: the first plus {λ|lambda} times the second. That mixture is zero where the first equals minus {λ|lambda} times the second, that is, where the ratio, minus the first over the second, equals {λ|lambda}. Sweep along t and plot that ratio: wherever the blue wave crosses zero it divides by zero and shoots off to infinity, so the curve breaks into these branches."
+        },
+        {
+          "id": "xs4_10",
+          "text": "A level line at height lambda crosses this curve exactly at that mixture's zeros on the line. At zero it meets the gold dots, the first family's own zeros. At two and at minus one it meets the two L-functions with Euler products, and every one of their zeros is there.",
+          "camera": "orbit:on=centre;at=75975.0,2.0,0;fit=294.2,165.5;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:show:LE mixtures",
+            "exp:hidechild:LE mixtures:R",
+            "exp:hidechild:LE mixtures:height",
+            "exp:hidechild:LE mixtures:crossings",
+            "exp:mute:LW waves:1.2:1.7",
+            "delay:6.00:exp:showchild:LE mixtures:height 0",
+            "delay:6.00:exp:showchild:LE mixtures:crossings 0",
+            "delay:9.65:exp:showchild:LE mixtures:height 2",
+            "delay:9.65:exp:showchild:LE mixtures:crossings 2",
+            "delay:9.65:exp:showchild:LE mixtures:height -1",
+            "delay:9.65:exp:showchild:LE mixtures:crossings -1",
+            "exp:say:a level line λ:  the zeros of Λ<sub>1</sub> + λΛ<sub>2</sub> on the line|λ = 0:  the first family  ·  λ = 2 and −1:  the L-functions"
+          ],
+          "pause": 0.8,
+          "caption": "A level line at height {λ|lambda} crosses this curve exactly at that mixture's zeros on the line. At zero it meets the gold dots, the first family's own zeros. {At λ = 2 and λ = −1|At two and at minus one} it meets the two L-functions with Euler products, and every one of their zeros is there."
+        },
+        {
+          "id": "xs4_11",
+          "text": "Sweep lambda through every mixture. Each mixture has a set number of zeros up to height fifty; where the level line crosses the curve fewer times, the rest have left the line. Only two small windows of mixtures keep every zero on it, and both surround the L-functions.",
+          "camera": "orbit:on=centre;at=75975.0,2.0,0;fit=294.2,165.5;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "delay:0.00:exp:mixsweep:-3:4:9.97:76000,0,0",
+            "exp:say:no zero off the line:  two small windows|λ from 1.99 to 2,  and from −1.02 to −0.88",
+            "delay:10.79:exp:callat:76072,24,-0.4:1,1,0.12,ffd973:λ = 2",
+            "delay:13.57:exp:callat:76072,-11.4,-0.4:1,-1,0.12,ffd973:λ = −1"
+          ],
+          "pause": 0.8,
+          "caption": "Sweep {λ|lambda} through every mixture. Each mixture has a set number of zeros up to height {50|fifty}; where the level line crosses the curve fewer times, the rest have left the line. Only two small windows of mixtures keep every zero on it, and both surround the L-functions."
+        },
+        {
+          "id": "xs4_12",
+          "text": "With five families, for minus forty-seven, there are two weights instead of one, and the mixtures fill a plane. Build it row by row: each row is a sweep like the one we just made, every cell coloured by how many zeros leave the line, gold where none do.",
+          "camera": "orbit:on=centre;at=75975.0,2.0,0>76330.0,-6.5,0;fit=294.2,165.5>403.1,226.7;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "actions": [
+            "exp:uncall",
+            "exp:hide:LW waves",
+            "exp:mute:LE mixtures:1.5:2",
+            "delay:0.13:exp:clearlive",
+            "delay:5.40:exp:tw:lf.build:1:6.62:linear",
+            "delay:5.40:exp:hide:LE mixtures",
+            "exp:say:five families:  a plane of mixtures|Λ<sub>1</sub> + λ<sub>2</sub>Λ<sub>2</sub> + λ<sub>3</sub>Λ<sub>3</sub>:  every row a sweep"
+          ],
+          "pause": 0.8,
+          "caption": "With five families, for {−47|minus forty-seven}, there are two weights instead of one, and the mixtures fill a plane. Build it row by row: each row is a sweep like the one we just made, every cell coloured by how many zeros leave the line, gold where none do."
+        },
+        {
+          "id": "xs4_13",
+          "text": "Now raise every mixture by its number of zeros off the line, and the plane becomes a landscape. The gold patches are its valleys, at sea level. Slice through it, and each slice is a sweep like minus twenty-three's: where it dips to the floor, a window.",
+          "camera": "orbit:on=centre;at=76330,-6,0>76330,-6,-12;fit=403.1,226.7>220,124;el=89.5>38;az=-90;spin=2;raise=0.035;span=5",
+          "actions": [
+            "delay:0.14:exp:tw:lf.h:1:5.06",
+            "delay:9.94:exp:tw:lf.slice:-3:0",
+            "delay:9.94:exp:tw:lf.slice:3:7.02:linear",
+            "exp:say:the landscape of mixtures|height:  the zeros off the line up to t = 50;  gold valleys:  none"
+          ],
+          "pause": 0.8,
+          "caption": "Now raise every mixture by its number of zeros off the line, and the plane becomes a landscape. The gold patches are its valleys, at sea level. Slice through it, and each slice is a sweep like {−23's:|minus twenty-three's:} where it dips to the floor, a window."
+        },
+        {
+          "id": "xs4_14",
+          "text": "Three valleys surround the class group's three L-functions, and their counts, like minus twenty-three's, are built from their prime factors: Euler products. One more valley has no L-function in it.",
+          "camera": "orbit:on=centre;at=76330,-6,-12;fit=220,124;el=38;az=-54.09;spin=2;raise=0.05",
+          "actions": [
+            "exp:tw:lf.slice:-10:0",
+            "delay:0.00:exp:callat:76371.3,35.3,-0.4:1,1,0.12,ffd973:ζ(s) L(s, χ<sub>−47</sub>)",
+            "delay:0.00:exp:callat:76342.8,-39.4,-0.4:1,-1,0.12,ffd973:L<sub>1</sub>",
+            "delay:0.00:exp:callat:76296.6,6.8,-0.4:-1,1,0.12,ffd973:L<sub>2</sub>",
+            "delay:9.43:exp:callat:76364.1,18.8,-0.4:1,-1,0.12,ffffff:no L-function here",
+            "exp:say:the valleys|round the three L-functions:  Euler products,  counts built from primes"
+          ],
+          "pause": 0.8,
+          "caption": "Three valleys surround the class group's three L-functions, and their counts, like {−23's,|minus twenty-three's,} are built from their prime factors: Euler products. One more valley has no L-function in it."
+        },
+        {
+          "id": "xs4_15",
+          "text": "Why it matters: symmetry alone does not keep zeros on the line. Davenport and Heilbronn proved that in nineteen thirty-six. As far as anyone has checked, the functions that keep them there are the ones whose counts are built from their prime factors: the Euler products. What Claude and I add is seeing every mixture at once.",
+          "camera": "orbit:on=centre;at=76330,-6,-12;fit=220,124;el=38;az=-27.1;spin=3;raise=0.05",
+          "actions": [
+            "exp:uncall",
             "exp:say:what is new|symmetry is not enough:  every mixture seen at once"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Why it matters: symmetry alone does not keep zeros on the line. Davenport and Heilbronn proved that in {1936|nineteen thirty-six}. As far as anyone has checked, the functions that keep them there are the ones whose counts are built from their prime factors: the Euler products. What Claude and I add is seeing every mixture at once."
         }
       ]
     },
@@ -3422,6 +3720,9 @@
         "exp:t5family:79914,9,0:80260,-8,0:60:280",
         "exp:twgroup:MC fold:0,0,0:.3:0",
         "exp:mute:MA rebuilt:0:1.9",
+        "exp:modp:2:80200,-4,0:10",
+        "exp:modp:5:80260,-4,0:24",
+        "exp:modp:59:80332,-4,0:28",
         "exp:hide:MB fair",
         "exp:hide:MB fold",
         "exp:hide:S3 identity",
@@ -3443,7 +3744,8 @@
             "delay:9.67:exp:callat:80112,43,-0.4:0.4,1,0.12,ffd973:the other six:  about +1",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Discovery five. Every prime above five lies on one of {E8's|E eight's} eight gold spokes. Race them up to {10 million|ten million}, and two of the spokes, {1|one} and {19|nineteen}, run behind nearly all the way."
         },
         {
           "id": "xs5_02",
@@ -3455,99 +3757,163 @@
             "delay:5.91:exp:unmute:MA rebuilt:1.2",
             "delay:5.91:exp:pulse:MA rebuilt:2.4"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "They are ahead of their share only {0.3|zero point three} and {1.4%|one point four percent} of the way, and never in the lead. Below, {6,771|six thousand seven hundred and seventy-one} zeros of {E8's|E eight's} L-functions rebuild every curve."
         },
         {
           "id": "xs5_03",
-          "text": "The reason is a fold. The zeros count prime powers, not only primes. Beside the race, E eight's clock of thirty, with an arc from every prime to its square: squaring folds every spoke onto one or nineteen.",
-          "camera": "orbit:on=centre;at=80000.0,1.0,0>80087.5,-7.0,0;fit=370.7,208.5>496.8,279.4;el=89.5;az=-90;spin=0;raise=0.035;span=4",
+          "text": "Why one and nineteen? Square any gold hour, and see where it lands on E eight's clock. One stays at one. Seven squared is forty-nine, hour nineteen. Eleven squared, a hundred and twenty-one, is hour one; thirteen squared, a hundred and sixty-nine, hour nineteen. All eight gold hours, squared, land on one or nineteen: the only two square hours on the clock.",
+          "camera": "orbit:on=centre;at=80000.0,1.0,0>80260.0,-8.0,0;fit=370.7,208.5>211.9,119.2;el=89.5;az=-90;spin=0;raise=0.035;span=3",
           "actions": [
-            "delay:0.08:exp:mute:MA rebuilt:1.5",
-            "delay:4.32:exp:show:MB fold",
-            "delay:4.32:exp:hidechild:MB fold:arcs",
-            "delay:7.25:exp:showchild:MB fold:arcs",
-            "delay:7.25:exp:drawon:MB fold/arcs:5.67",
-            "exp:say:the reason:  a fold|squaring sends spokes 1, 11, 19, 29 to 1, and 7, 13, 17, 23 to 19"
+            "exp:mute:MA counted,MA rebuilt:1.5:1.8",
+            "delay:1.56:exp:hoursquares:20.91",
+            "exp:say:squares on E8's clock|1² = 1,  7² = 49 → 19,  11² = 121 → 1,  13² = 169 → 19, …:  only hours 1 and 19"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Why {1|one} and {19|nineteen}? Square any gold hour, and see where it lands on {E8's|E eight's} clock. {1² = 1.|One stays at one.} {7² = 49,|Seven squared is forty-nine,} hour {19|nineteen}. {11² = 121,|Eleven squared, a hundred and twenty-one, is} hour {1|one}; {13² = 169,|thirteen squared, a hundred and sixty-nine,} hour {19|nineteen}. All eight gold hours, squared, land on {1|one} or {19|nineteen}: the only two square hours on the clock."
         },
         {
           "id": "xs5_04",
+          "text": "Follow one prime's powers round the clock, the radius growing with the logarithm. Seven sits on hour seven. Seven squared, forty-nine, on nineteen. Seven cubed, three hundred and forty-three, on thirteen. Seven to the fourth, two thousand four hundred and one, back on hour one. Every even power lands on one or nineteen.",
+          "camera": "orbit:on=centre;at=80260.0,-8.0,0>80261.0,-6.0,0;fit=211.9,119.2>211.9,119.2;el=89.5;az=-90;spin=0;raise=0.035;span=2",
+          "actions": [
+            "exp:hide:MB squares",
+            "exp:show:MB fold",
+            "exp:hidechild:MB fold:arcs",
+            "exp:hidechild:MB fold:primes",
+            "delay:4.47:exp:powerwalk:7:4:13.35",
+            "exp:say:the powers of 7|7 → 49 → 343 → 2401:  hours 7, 19, 13, 1"
+          ],
+          "pause": 0.8,
+          "caption": "Follow one prime's powers round the clock, the radius growing with the logarithm. {7:|Seven sits on} hour {7|seven}. {7² = 49:  hour 19.|Seven squared, forty-nine, on nineteen.} {7³ = 343:  hour 13.|Seven cubed, three hundred and forty-three, on thirteen.} {7<sup>4</sup> = 2401:|Seven to the fourth, two thousand four hundred and one,} back on hour {1|one}. Every even power lands on {1|one} or {19|nineteen}."
+        },
+        {
+          "id": "xs5_05",
+          "text": "Now every prime at once: an arc from each prime to its square. The zeros count prime powers, not only primes, and squaring folds every spoke onto one or nineteen.",
+          "camera": "orbit:on=centre;at=80261.0,-6.0,0>80260.0,-8.0,0;fit=211.9,119.2>376.6,211.9;el=89.5;az=-90;spin=0;raise=0.035;span=3",
+          "actions": [
+            "exp:hide:MB powers 7",
+            "delay:0.21:exp:showchild:MB fold:primes",
+            "delay:1.91:exp:showchild:MB fold:arcs",
+            "delay:1.91:exp:drawon:MB fold/arcs:9.48",
+            "exp:say:the reason:  a fold|squaring sends spokes 1, 11, 19, 29 to 1, and 7, 13, 17, 23 to 19"
+          ],
+          "pause": 0.8,
+          "caption": "Now every prime at once: an arc from each prime to its square. The zeros count prime powers, not only primes, and squaring folds every spoke onto {1|one} or {19|nineteen}."
+        },
+        {
+          "id": "xs5_06",
           "text": "Seven squared is forty-nine, on spoke nineteen. Eleven squared, one hundred and twenty-one, lands on one. Thirteen squared, one sixty-nine, on nineteen. Twenty-nine squared, eight forty-one, on one.",
-          "camera": "orbit:on=centre;at=80087.5,-7.0,0>80260.0,-8.0,0;fit=496.8,279.4>376.6,211.9;el=89.5;az=-90;spin=0;raise=0.035;span=3",
+          "camera": "orbit:on=centre;at=80260.0,-8.0,0;fit=376.6,211.9;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "delay:0.00:exp:callfold:49:1,1:7² = 49:  spoke 19",
             "delay:2.97:exp:callfold:121:-1,1:11² = 121:  spoke 1",
             "delay:6.86:exp:callfold:169:1,-1:13² = 169:  spoke 19",
             "delay:10.11:exp:callfold:841:-1,-1:29² = 841:  spoke 1"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{7² = 49,|Seven squared is forty-nine,} on spoke {19|nineteen}. {11² = 121|Eleven squared, one hundred and twenty-one,} lands on {1.|one.} {13² = 169,|Thirteen squared, one sixty-nine,} on {19.|nineteen.} {29² = 841,|Twenty-nine squared, eight forty-one,} on {1.|one.}"
         },
         {
-          "id": "xs5_05",
+          "id": "xs5_07",
           "text": "Every square of a prime above five lands on spoke one or nineteen: all four hundred and forty-three of them up to ten million. A count of primes leaves out half a prime for each. Put them back, and watch the race even out.",
           "camera": "orbit:on=centre;at=80260.0,-8.0,0>80087.5,-7.0,0;fit=376.6,211.9>496.8,279.4;el=89.5;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
             "exp:uncall",
+            "exp:unmute:MA counted:1",
             "delay:9.04:exp:racemorph:2.89",
             "delay:9.04:exp:pulse:MB fold:2.4",
             "exp:say:put the squares back:  a fair race|218 squares on spoke 1,  225 on spoke 19,  none elsewhere"
           ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs5_06",
-          "text": "The same fold turns up in a second race. For minus twenty-three, a prime's family is decided by how it acts on the three roots of x cubed minus x minus one.",
-          "camera": "orbit:on=centre;at=80087.5,-7.0,0>80260.0,-1.0,0;fit=496.8,279.4>170.7,96.0;el=89.5;az=-90;spin=0;raise=0.035;span=4",
-          "actions": [
-            "delay:0.05:exp:mute:MA counted:1.5",
-            "delay:0.05:exp:hide:MB fold",
-            "delay:4.30:exp:show:S3 identity",
-            "exp:say:x³ − x − 1:  three roots|r<sub>1</sub> = 1.3247,  r<sub>2</sub>, r<sub>3</sub> = −0.6624 ± 0.5623i"
-          ],
-          "pause": 0.8
-        },
-        {
-          "id": "xs5_07",
-          "text": "Fifty-nine splits it into three factors: every root stays put, the identity. Two leaves it whole: the roots turn round, a rotation. Five gives one root: two roots swap, a reflection.",
-          "camera": "orbit:on=centre;at=80260.0,-1.0,0;fit=170.7,96.0;el=89.5;az=-90;spin=0;raise=0.035",
-          "actions": [
-            "delay:4.40:exp:hide:S3 identity",
-            "delay:4.40:exp:show:S3 rotation",
-            "delay:7.95:exp:hide:S3 rotation",
-            "delay:7.95:exp:show:S3 reflection",
-            "exp:say:how a prime acts on the roots|identity · rotation · reflection"
-          ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Every square of a prime above five lands on spoke {1|one} or {19|nineteen}: all {443|four hundred and forty-three} of them up to {10 million|ten million}. A count of primes leaves out half a prime for each. Put them back, and watch the race even out."
         },
         {
           "id": "xs5_08",
-          "text": "And a reflection done twice is the identity. So the squares of half of all primes fall in the principal family, which runs behind its share and is never in the lead.",
-          "camera": "orbit:on=centre;at=80260.0,-1.0,0>80087.5,-7.0,0;fit=170.7,96.0>496.8,279.4;el=89.5;az=-90;spin=0;raise=0.035;span=6;hold=4",
+          "text": "The same fold turns up in a second race. For minus twenty-three, a prime's family is decided by how many roots x cubed minus x minus one has among the numbers modulo that prime. Take five: five numbers, zero to four. Put each one in. Only two gives a multiple of five, eight minus two minus one: one root.",
+          "camera": "orbit:on=centre;at=80087.5,-7.0,0>80260.0,-1.0,0;fit=496.8,279.4>206.0,115.9;el=89.5;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
-            "delay:0.81:exp:hide:S3 reflection",
-            "delay:0.81:exp:show:S3 square",
-            "delay:2.40:exp:hide:S3 square",
-            "delay:2.40:exp:show:MC fold",
-            "delay:2.40:exp:twgroup:MC fold:0,0,0:1:6.61",
-            "delay:2.40:exp:mute:MA counted,MA rebuilt:1:2",
-            "delay:3.40:exp:hide:MA counted",
-            "delay:3.40:exp:hide:MA rebuilt",
-            "delay:2.40:exp:show:MC race",
-            "delay:2.40:exp:drawon:MC race/class:3",
-            "exp:say:a reflection, twice:  the identity|the inert primes' squares land in the principal family"
+            "delay:0.04:exp:mute:MA counted:1.5",
+            "delay:0.04:exp:hide:MB fold",
+            "delay:12.44:exp:modptest:5:7.19",
+            "exp:say:x³ − x − 1 modulo a prime|5:  0, 1, 2, 3, 4  →  only x = 2 gives 8 − 2 − 1 = 5 ≡ 0"
+          ],
+          "pause": 0.8,
+          "caption": "The same fold turns up in a second race. For {−23|minus twenty-three}, a prime's family is decided by how many roots {x³ − x − 1|x cubed minus x minus one} has among the numbers modulo that prime. Take five: five numbers, zero to four. Put each one in. Only two gives a multiple of five, {8 − 2 − 1:|eight minus two minus one:} one root."
+        },
+        {
+          "id": "xs5_09",
+          "text": "Two has two numbers, zero and one, and neither is a root. Fifty-nine has fifty-nine, and exactly three of them are roots: four, thirteen and forty-two.",
+          "camera": "orbit:on=centre;at=80278.5,-1.0,0;fit=229.5,129.1;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "delay:0.00:exp:modptest:2:3.83",
+            "delay:3.83:exp:modptest:59:6.20",
+            "exp:say:count the roots|2:  none   ·   5:  one   ·   59:  three (4, 13, 42)"
+          ],
+          "pause": 0.8,
+          "caption": "Two has two numbers, zero and one, and neither is a root. {59|Fifty-nine} has {59|fifty-nine}, and exactly three of them are roots: {4|four}, {13|thirteen} and {42|forty-two}."
+        },
+        {
+          "id": "xs5_10",
+          "text": "Those counts tell how the prime moves the three roots of x cubed minus x minus one. Three roots fixed: the identity, nothing moves. No root fixed: a rotation, all three move round. One root fixed: a reflection, the mirror: one root stays and the other two swap.",
+          "camera": "orbit:on=centre;at=80278.5,-1.0,0>80260.0,-1.0,0;fit=229.5,129.1>170.7,96.0;el=89.5;az=-90;spin=0;raise=0.035;span=3",
+          "actions": [
+            "delay:0.00:exp:hide:S3 mod 2",
+            "delay:0.00:exp:hide:S3 mod 5",
+            "delay:0.00:exp:hide:S3 mod 59",
+            "delay:6.15:exp:show:S3 identity",
+            "delay:6.15:exp:s3anim:identity:2.88",
+            "delay:9.03:exp:hide:S3 identity",
+            "delay:9.03:exp:show:S3 rotation",
+            "delay:9.03:exp:s3anim:rotation:4.21",
+            "delay:13.25:exp:hide:S3 rotation",
+            "delay:13.25:exp:show:S3 reflection",
+            "delay:13.25:exp:s3anim:reflection:5.42",
+            "exp:say:how a prime moves the roots|3 roots: identity  ·  none: rotation  ·  1 root: reflection"
+          ],
+          "pause": 0.8,
+          "caption": "Those counts tell how the prime moves the three roots of {x³ − x − 1|x cubed minus x minus one}. Three roots fixed: the identity, nothing moves. No root fixed: a rotation, all three move round. One root fixed: a reflection, the mirror: one root stays and the other two swap."
+        },
+        {
+          "id": "xs5_11",
+          "text": "And a reflection done twice is the identity: swap, then swap back. So the square of every prime with one root, like twenty-five, five squared, acts like a prime with three roots, and lands in the principal family.",
+          "camera": "orbit:on=centre;at=80260.0,-1.0,0;fit=170.7,96.0;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "delay:0.95:exp:hide:S3 reflection",
+            "delay:0.95:exp:show:S3 square",
+            "delay:0.95:exp:s3anim:square:4.41",
+            "exp:say:a reflection, twice:  the identity|5 has one root;  25 = 5² lands in the principal family x² + xy + 6y²"
+          ],
+          "pause": 0.8,
+          "caption": "And a reflection done twice is the identity: swap, then swap back. So the square of every prime with one root, like {25 = 5²,|twenty-five, five squared,} acts like a prime with three roots, and lands in the principal family."
+        },
+        {
+          "id": "xs5_12",
+          "text": "Half of all primes have one root, so their squares fall in the principal family, which runs behind its share and is never in the lead.",
+          "camera": "orbit:on=centre;at=80260.0,-1.0,0>80087.5,-7.0,0;fit=170.7,96.0>496.8,279.4;el=89.5;az=-90;spin=0;raise=0.035;span=4;hold=1",
+          "actions": [
+            "delay:0.00:exp:hide:S3 square",
+            "delay:0.00:exp:show:MC fold",
+            "delay:0.00:exp:twgroup:MC fold:0,0,0:1:8.97",
+            "delay:0.00:exp:mute:MA counted,MA rebuilt:1:2",
+            "delay:3.71:exp:hide:MA counted",
+            "delay:3.71:exp:hide:MA rebuilt",
+            "delay:2.71:exp:show:MC race",
+            "delay:2.71:exp:drawon:MC race/class:3",
+            "exp:say:the squares of the reflections|land in the principal family:  it runs behind"
           ],
           "pause": 0.8
         },
         {
-          "id": "xs5_09",
+          "id": "xs5_13",
           "text": "Put those squares back too, and this race evens out as well. Why it matters: one fold explains both races. Chebyshev noticed the bias in eighteen fifty-three; what Claude and I add is one picture for E eight's wheel and for the families of minus twenty-three.",
           "camera": "orbit:on=centre;at=80087.5,-7.0,0;fit=496.8,279.4;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
             "delay:0.00:exp:familymorph:5.35",
             "exp:say:what is new|one fold:  E8's wheel and the families of −23"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Put those squares back too, and this race evens out as well. Why it matters: one fold explains both races. Chebyshev noticed the bias in {1853|eighteen fifty-three}; what Claude and I add is one picture for {E8's|E eight's} wheel and for the families of {−23|minus twenty-three}."
         }
       ]
     },
@@ -3585,7 +3951,8 @@
           "actions": [
             "delay:5.35:exp:tw:pw.n:2:2.2"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Take the height {t = 1.|t equal to one.} The first arrow is one unit long and points to the right. The second is {1/√2|one over the square root of two} long, and it turns away from the first by {log 2:|the logarithm of two:} {40°.|forty degrees.}"
         },
         {
           "id": "xz1_03",
@@ -3595,7 +3962,8 @@
             "delay:0.06:exp:tw:pw.n:3:2.2",
             "delay:7.08:exp:pulse:PW path:1.6"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "The third is {1/√3|one over root three} long, and turns a further {log(3/2), 23°.|log of three halves, twenty-three degrees.} Its direction is the sum of the turns: {log 3 = 63°|log three, sixty-three degrees} from the first. Every direction is a logarithm."
         },
         {
           "id": "xz1_04",
@@ -3608,7 +3976,8 @@
             "delay:3.19:exp:tw:pw.n:7:0.7",
             "delay:4.24:exp:tw:pw.n:8:0.7"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Four, five, six, seven, eight: shorter and shorter arrows, turning less and less, {17°, 13°, 10°, 9° and 8°,|seventeen degrees, then thirteen, ten, nine and eight,} because the logarithm climbs more and more slowly."
         },
         {
           "id": "xz1_05",
@@ -3616,12 +3985,13 @@
           "camera": "orbit:on=pathplane;at=11.5,-17.5,0>10,-4,0;fit=114.7,64.5>58,36;el=89.5;az=-90;spin=0;raise=0.035;span=10",
           "actions": [
             "exp:tw:pw.marks:0:0.8",
-            "delay:0.13:exp:tw:pw.n:1000:2",
-            "delay:0.13:exp:tw:pw.t:10:11.70:geo",
-            "delay:11.83:exp:tw:pw.tail:1:1.6",
+            "delay:0.08:exp:tw:pw.n:1000:2",
+            "delay:0.08:exp:tw:pw.t:10:9.89:geo",
+            "delay:9.97:exp:tw:pw.tail:1:1.6",
             "exp:say:raising t|every angle is t × a logarithm;  the tail adds all the arrows beyond"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now raise the height t. Every angle is t times a logarithm, so the path winds up tighter. The arrows go on forever, but past a point the rest add up to a simple tail, drawn in orange, and the end of that tail is {ζ(½ + it).|zeta of one half plus i t.}"
         },
         {
           "id": "xz1_06",
@@ -3632,7 +4002,8 @@
             "delay:4.03:exp:callpathzeta:0:0,0,0.12,ffd973:ζ(½ + 14.13i) = 0",
             "exp:say:the first zero|t = 14.1347:  ζ(½ + it) = 0"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "At {t =|t equal to} {14.13|fourteen point one three}, the end lands exactly on zero. That is the first zero of zeta: all the arrows, from one to infinity, cancel out."
         },
         {
           "id": "xz1_07",
@@ -3645,7 +4016,8 @@
             "delay:0.37:exp:tw:pw.t:32:18.67:linear",
             "exp:say:the curve of ζ on the critical line|the plane climbs the t axis;  the curve touches it at every zero"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now let t run on, and stand the plane up on a t axis, so that it climbs as t grows. The end of the path leaves a trail, the curve of zeta along the critical line. It touches the axis at every zero: {21.02|twenty-one point zero two}, {25.01|twenty-five point zero one}, {30.42|thirty point four two}."
         },
         {
           "id": "xz1_08",
@@ -3655,7 +4027,8 @@
             "exp:tw:pw.t:50:15.98:linear",
             "exp:say:Riemann's hypothesis|every nontrivial zero of ζ has real part ½"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Between the zeros, the curve swings out and comes back. Riemann's hypothesis says that every zero of this kind lies on this line, {Re s = ½.|real part one half.} Trillions have been checked, and every one does, but no one has proved that all of them must."
         },
         {
           "id": "xz1_09",
@@ -3721,23 +4094,25 @@
             "delay:14.77:exp:callpath:18:0,0:spoke 3:  n ≈ 18",
             "exp:say:spoke k at n ≈ t / 2πk|where each arrow turns a whole number of turns from the last"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Between the vortices the path runs straight. Those straight runs are the spokes, where each arrow turns by a whole number of full turns from the last. They sit near {n ≈ t/2πk:|n equal to t over two pi k:} at the {159th|hundred and fifty-ninth} zero, {53|fifty-three}, {27|twenty-seven} and {18|eighteen}."
         },
         {
           "id": "xz2_04",
-          "text": "Each vortex has an eye, and each eye is a mirror image: the path's own k-th vertex, reflected through zeta's phase. The crosses mark those mirror points, and they land inside the rings.",
+          "text": "Each vortex has an eye, and each eye is a mirror image: the path's own kay-th vertex, reflected through zeta's phase. The crosses mark those mirror points, and they land inside the rings.",
           "camera": "orbit:on=pathplane;at=4,-4,0;fit=52,32;el=78;az=-5.79;spin=1;raise=0.035",
           "actions": [
             "exp:uncall",
-            "delay:7.63:exp:tw:pw.mirrors:1:1.2",
+            "delay:7.20:exp:tw:pw.mirrors:1:1.2",
             "exp:say:every eye is a mirror|eye of vortex k = the path's k-th vertex, reflected through ζ's phase"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Each vortex has an eye, and each eye is a mirror image: the path's own {k-th|kay-th} vertex, reflected through zeta's phase. The crosses mark those mirror points, and they land inside the rings."
         },
         {
           "id": "xz2_05",
           "text": "Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in cyan, always sits on a circle of radius one.",
-          "camera": "orbit:on=pathplane;at=0,0,10;fit=60,40>90,70;el=70>26;az=7.33;spin=6;raise=0.035;span=10",
+          "camera": "orbit:on=pathplane;at=0,0,10;fit=60,40>90,70;el=70>26;az=6.45;spin=6;raise=0.035;span=10",
           "actions": [
             "exp:tw:pw.mirrors:0:1",
             "exp:tw:pw.trails:1:0",
@@ -3749,20 +4124,44 @@
         {
           "id": "xz2_06",
           "text": "Look straight down the axis. The eyes of ten thousand zeros, stacked: the unit circle of vortex one, and rings for all the others.",
-          "camera": "orbit:on=pathplane;at=0,0,0;fit=90,70>56,40;el=26>89.5;az=86.64;spin=4;raise=0.035;span=6",
+          "camera": "orbit:on=pathplane;at=0,0,0;fit=90,70>56,40;el=26>89.5;az=85.75;spin=4;raise=0.035;span=6",
           "actions": [
             "delay:1.98:exp:tw:pw.alleyes:1:2",
             "delay:1.98:exp:tw:pw.eyes:0:1",
             "delay:1.98:exp:tw:pw.trails:0.25:2",
             "exp:say:all 10 000 zeros, down the axis|the vortices belong to the counting numbers"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Look straight down the axis. The eyes of {10,000|ten thousand} zeros, stacked: the unit circle of vortex one, and rings for all the others."
         },
         {
           "id": "xz2_07",
-          "text": "So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex belongs to a counting number: a reflection of the path's own beginning.",
-          "camera": "orbit:on=pathplane;at=0,0,0;fit=56,40>64,46;el=89.5>70;az=121.3;spin=3;raise=0.035;span=12",
+          "text": "Look closer: the eyes thin out beyond a faint circle at radius one point seven one, and a brighter ring glows at zero point two nine. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, one over root two long.",
+          "camera": "orbit:on=pathplane;at=0,0,0;fit=64,46>128,72;el=89.5;az=-90;spin=0;raise=0.035;span=3",
           "actions": [
+            "delay:1.13:exp:pulse:PW path:1.2",
+            "delay:14.27:exp:eyelimits:14",
+            "exp:say:a faint circle at r = 1.71|vortex 2's eye:  |1 + 2<sup>−½ − iγ</sup>|,  one plus an arrow 1/√2 long"
+          ],
+          "pause": 0.8,
+          "caption": "Look closer: the eyes thin out beyond a faint circle at radius {1.71|one point seven one}, and a brighter ring glows at {0.29|zero point two nine}. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, {1/√2|one over root two} long."
+        },
+        {
+          "id": "xz2_08",
+          "text": "That arrow can point any way, so the eye stays between one minus one over root two and one plus one over root two, and it lingers at those two extremes, so both circles glow. Beyond one point seven one only vortex three and higher can reach, and the eyes thin out.",
+          "camera": "orbit:on=pathplane;at=0,0,0;fit=128,72;el=89.5;az=-90;spin=0;raise=0.035",
+          "actions": [
+            "exp:say:between 1 − 1/√2 = 0.29 and 1 + 1/√2 = 1.71|beyond 1.71 only vortices 3 and up:  the eyes thin out 2.7-fold"
+          ],
+          "pause": 0.8,
+          "caption": "That arrow can point any way, so the eye stays between {1 − 1/√2|one minus one over root two} and {1 + 1/√2,|one plus one over root two,} and it lingers at those two extremes, so both circles glow. Beyond {1.71|one point seven one} only vortex three and higher can reach, and the eyes thin out."
+        },
+        {
+          "id": "xz2_09",
+          "text": "So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex belongs to a counting number: a reflection of the path's own beginning.",
+          "camera": "orbit:on=pathplane;at=0,0,0;fit=128,72>64,46;el=89.5>70;az=-90;spin=3;raise=0.035;span=12",
+          "actions": [
+            "exp:clearchild:PW limits",
             "exp:say:how the vortices develop|one per counting number, each a mirror of the path's start"
           ],
           "pause": 1.4
@@ -3781,6 +4180,8 @@
         "exp:tw:fw.gamma:14.134725:0",
         "exp:tw:fw.n:0:0",
         "exp:tw:fw.lift:0:0",
+        "exp:tw:fw.dim:0:0",
+        "exp:tw:fw.stretch:1:0",
         "exp:tw:fw.coil:0:0",
         "exp:tw:fw.tail:0:0",
         "exp:tw:fw.path:1:0",
@@ -3797,27 +4198,29 @@
             "delay:12.06:exp:callfun:30:0,0:30 = 2·3·5:  log 30 = 3.40",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "This is {E8's|E eight's} factor funnel. Every counting number sits at its hour on the wheel of {30|thirty}, with a column as tall as its logarithm. {7,|Seven,} at hour {7|seven}: {log 7 = 1.95.|one point nine five.} {30 = 2 · 3 · 5,|Thirty, two times three times five,} at {hour 0:  log 30 = 3.40.|hour zero: three point four.}"
         },
         {
           "id": "xz3_02",
-          "text": "Grey it out, and light the powers of two. Two is one piece, log two tall. Four is two pieces, eight is three, sixteen is four: each column is its prime factors' logarithms, stacked.",
+          "text": "Grey it out, and light the powers of two. Two is one piece, log two tall, on the arm of hour two. Four is two pieces, eight is three, sixteen is four: each column is its prime factors' logarithms, stacked.",
           "camera": "orbit:on=centre;at=68000,0,-16>68002,-2,-9;fit=124,140>72,44;el=26>22;az=-65.48;spin=1;raise=0.035;span=5",
           "actions": [
             "exp:uncall",
             "delay:0.00:exp:mute:GB factor columns:1.2",
-            "delay:2.40:exp:fwhl:2:logs",
-            "delay:4.87:exp:fwhl:4",
-            "delay:6.04:exp:fwhl:8",
-            "delay:6.91:exp:fwhl:16:logs",
+            "delay:2.68:exp:fwhl:2:logs",
+            "delay:6.64:exp:fwhl:4",
+            "delay:7.91:exp:fwhl:8",
+            "delay:9.02:exp:fwhl:16:logs",
             "exp:say:a column is its prime factors, stacked|log 16 = log 2 + log 2 + log 2 + log 2"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Grey it out, and light the powers of two. Two is one piece, {log 2|log two} tall, on the arm of hour {2|two}. {4 is 2 pieces, 8 is 3, 16 is 4:|Four is two pieces, eight is three, sixteen is four:} each column is its prime factors' logarithms, stacked."
         },
         {
           "id": "xz3_03",
           "text": "Now the path of partial sums at the first zero, t equal to fourteen point one three, on the funnel's floor. Arrow one, arrow two, arrow three, and on, each one over root n long, each turned by t times log n.",
-          "camera": "orbit:on=centre;at=68002,-2,-9>68006.8,0.2,0;fit=72,44>40,22.5;el=22>84;az=-52.04;spin=-2.267;raise=0.035;span=4",
+          "camera": "orbit:on=centre;at=68002,-2,-9>68006.8,0.2,0;fit=72,44>40,22.5;el=22>84;az=-49.95;spin=-2.392;raise=0.035;span=4",
           "actions": [
             "exp:fwunhl",
             "exp:mute:GB factor columns:1.5:1.85",
@@ -3827,40 +4230,50 @@
             "delay:10.36:exp:tw:fw.n:15:5.39:linear",
             "exp:say:the path at the first zero|arrow n:  1/√n long, turned 14.13 · log n"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now the path of partial sums at the first zero, {t =|t equal to} {14.13|fourteen point one three}, on the funnel's floor. Arrow one, arrow two, arrow three, and on, each {1/√n|one over root n} long, each turned by {t · log n.|t times log n.}"
         },
         {
           "id": "xz3_04",
-          "text": "Its tail closes it on the axis: that is what a zero is. Now lift every arrow to the height of its own number: arrow two to log two, arrow three to log three, arrow four to log four, twice as high as two.",
-          "camera": "orbit:on=centre;at=68006.8,0.2,0>68002,0,-7;fit=40,22.5>44,40;el=84>22;az=-90.0;spin=1.5;raise=0.04;span=6",
+          "text": "Its tail closes it on the axis: that is what a zero is. Now lift every arrow to the height of its own number, keeping its direction and its length: arrow two to log two, arrow three to log three, arrow four to log four, twice as high as two. The arrows shrink as they climb, like a horn.",
+          "camera": "orbit:on=centre;at=68006.8,0.2,0>68002,0,-8;fit=40,22.5>56,40;el=84>22;az=-90.0;spin=1.5;raise=0.04;span=6",
           "actions": [
+            "exp:tw:fw.stretch:0:0",
             "exp:tw:fw.tail:1:1.2",
-            "delay:4.26:exp:tw:fw.tail:0:1",
-            "delay:4.26:exp:tw:fw.axis:1:1",
-            "delay:4.26:exp:tw:fw.path:0:10.28",
-            "delay:4.26:exp:tw:fw.lift:1:10.28",
-            "delay:8.37:exp:fwhl:2",
-            "delay:10.30:exp:fwhl:3",
-            "delay:12.04:exp:fwhl:4",
-            "exp:say:lift arrow n to the height log n|keeping its direction:  −14.13 · log n"
+            "delay:4.30:exp:tw:fw.tail:0:1",
+            "delay:4.30:exp:tw:fw.axis:1:1",
+            "delay:4.30:exp:tw:fw.path:0:14.05",
+            "delay:4.30:exp:tw:fw.lift:1:11.71",
+            "delay:10.28:exp:fwhl:2",
+            "delay:11.82:exp:fwhl:3",
+            "delay:13.54:exp:fwhl:4",
+            "delay:17.40:exp:tw:fw.coil:0.5:2",
+            "exp:say:lift arrow n to the height log n|keeping its direction −14.13 · log n and its length 1/√n"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Its tail closes it on the axis: that is what a zero is. Now lift every arrow to the height of its own number, keeping its direction and its length: arrow two to {log 2|log two}, arrow three to {log 3|log three}, arrow four to {log 4|log four}, twice as high as two. The arrows shrink as they climb, like a horn."
         },
         {
           "id": "xz3_05",
-          "text": "Each arrow becomes a hand, pointing out from the axis at the top of its number's column. Through their tips runs a coil that turns by gamma for every unit of height: the zero, wound up E eight's funnel.",
-          "camera": "orbit:on=centre;at=68000,0,-14;fit=66,74;el=22;az=-66.69;spin=-1.911;raise=0.04",
+          "text": "Stretch each arrow by the square root of its number, its distance from the centre on the Sacks spiral and on this floor. One over root n times root n is one: every arrow becomes one unit long, and only its direction is left. Through their tips runs a coil that turns by gamma for every unit of height: the zero, wound up E eight's funnel.",
+          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-14;fit=56,40>76,74;el=22;az=-60.98;spin=-1.448;raise=0.04;span=6",
           "actions": [
             "exp:fwunhl",
-            "delay:5.53:exp:tw:fw.coil:1:5.67",
-            "exp:say:the coil:  the hands at every height|turning 14.13 per unit of height, one turn every 0.44"
+            "delay:0.00:exp:tw:fw.stretch:1:12.21",
+            "delay:0.00:exp:fwhl:2",
+            "delay:12.71:exp:fwunhl",
+            "delay:12.71:exp:tw:fw.coil:0:0",
+            "delay:12.71:exp:tw:fw.coil:1:6.33",
+            "exp:say:stretch arrow n by √n|1/√n × √n = 1:  every arrow one unit long, only its direction left",
+            "delay:12.71:exp:say:the coil:  the hands at every height|turning 14.13 per unit of height, one turn every 0.44"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Stretch each arrow by the square root of its number, its distance from the centre on the Sacks spiral and on this floor. {1/√n × √n = 1:|One over root n times root n is one:} every arrow becomes one unit long, and only its direction is left. Through their tips runs a coil that turns by {γ|gamma} for every unit of height: the zero, wound up {E8's|E eight's} funnel."
         },
         {
           "id": "xz3_06",
           "text": "The coil multiplies by adding heights. Four is two times two, so its hand has turned twice the turn of two. Six is two times three: the turn of two plus the turn of three.",
-          "camera": "orbit:on=centre;at=68000,0,-14>68004,-1,-9.5;fit=66,74>64,36;el=22>64;az=-90;spin=0;raise=0.035;span=5",
+          "camera": "orbit:on=centre;at=68000,0,-14>68004,-1,-9.5;fit=76,74>72,40.5;el=22>64;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
             "exp:tw:fw.coil:0.32:2",
             "exp:tw:fw.dim:1:2",
@@ -3872,12 +4285,13 @@
             "delay:9.99:exp:fwangles:6",
             "exp:say:multiplying is adding heights|γ·log 4 = 2 γ·log 2   ·   γ·log 6 = γ·log 2 + γ·log 3"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "The coil multiplies by adding heights. {4 = 2 · 2,|Four is two times two,} so its hand has turned twice the turn of two. {6 = 2 · 3:|Six is two times three:} the turn of two plus the turn of three."
         },
         {
           "id": "xz3_07",
           "text": "Every zero winds its own coil. Twenty-one point zero two turns each hand further, the higher ones more; twenty-five point zero one, further still.",
-          "camera": "orbit:on=centre;at=68004,-1,-9.5>68000,0,-14;fit=64,36>66,74;el=64>24;az=-90;spin=0;raise=0.04;span=5",
+          "camera": "orbit:on=centre;at=68004,-1,-9.5>68000,0,-14;fit=72,40.5>76,74;el=64>24;az=-90;spin=0;raise=0.04;span=5",
           "actions": [
             "exp:fwunhl",
             "exp:clearchild:FW angles",
@@ -3887,12 +4301,13 @@
             "delay:6.59:exp:tw:fw.gamma:25.010858:2.2",
             "exp:say:other zeros, other coils|γ = 21.02,  25.01"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Every zero winds its own coil. {21.02|Twenty-one point zero two} turns each hand further, the higher ones more; {25.01|twenty-five point zero one}, further still."
         },
         {
           "id": "xz3_08",
           "text": "At a height that is not a zero, like eighteen, the hands turn just the same, but drop them back onto the floor and the path does not close: its tail ends away from the axis.",
-          "camera": "orbit:on=centre;at=68000,0,-14>68024.5,-3,0;fit=66,74>51.2,28.8;el=24>84;az=-90;spin=0;raise=0.035;span=6",
+          "camera": "orbit:on=centre;at=68000,0,-14>68024.5,-3,0;fit=76,74>51.2,28.8;el=24>84;az=-90;spin=0;raise=0.035;span=6",
           "actions": [
             "exp:tw:fw.coil:0:1.5",
             "delay:1.78:exp:tw:fw.gamma:18:2",
@@ -3901,7 +4316,8 @@
             "delay:7.40:exp:tw:fw.tail:1:1.5",
             "exp:say:t = 18:  not a zero|the arrows dropped back into the path:  it ends away from the axis"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "At a height that is not a zero, like {18|eighteen}, the hands turn just the same, but drop them back onto the floor and the path does not close: its tail ends away from the axis."
         },
         {
           "id": "xz3_09",
@@ -3916,7 +4332,8 @@
             "exp:tw:fw.coil:1:4",
             "exp:say:the bridge|the turn of n at a zero = γ × log n = γ × (the sum of log p over its prime factors)"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "That is the bridge between a zero and {E8's|E eight's} layout: the zero's height, times the height of n's column, is the turn of n's arrow. Each prime factor adds its own turn."
         }
       ]
     },
@@ -3930,6 +4347,8 @@
         "exp:zfunnel",
         "exp:fwinit",
         "exp:tw:fw.n:0:0",
+        "exp:tw:fw.dim:0:0",
+        "exp:tw:fw.stretch:1:0",
         "exp:mute:GB factor columns:0"
       ],
       "lines": [
@@ -3942,7 +4361,8 @@
             "exp:reveal:JM coils:3.81,4.98,6.57",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Every zero winds its own coil up the funnel. Here are the first {three:|three,} {14.13|fourteen point one three}, {21.02|twenty-one point zero two} and {25.01|twenty-five point zero one}, over the greyed-out columns."
         },
         {
           "id": "xz4_02",
@@ -3954,7 +4374,8 @@
             "delay:5.21:exp:reveal:JM disc 7:0,0.8,1.8,3.4",
             "exp:say:at the height of 7, a prime|10 500 coils lean to −1:  mean −0.115,  Landau −0.115"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Take all {10,500|ten thousand five hundred} zeros, and look at one height: the top of seven's column. Each coil points somewhere there; on average they lean towards {−1|minus one}, by {−0.115|minus point one one five}, exactly as Landau's formula predicts for a prime."
         },
         {
           "id": "xz4_03",
@@ -3967,7 +4388,8 @@
             "delay:3.18:exp:reveal:JM disc 6:0,0.8,1.8,3.4",
             "exp:say:at the height of 6 = 2·3|the coils cancel:  mean 0.000"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "At the top of six's column, {6 = 2 · 3,|two times three,} the coils point every way, and their mean is zero. The zeros lean only at the powers of primes."
         },
         {
           "id": "xz4_04",
@@ -3988,7 +4410,8 @@
             "delay:15.87:exp:calltooth:10:-1,0.1,0.12,ff6b5a:10:  dark",
             "delay:16.52:exp:calltooth:12:-1,0.8,0.12,ff6b5a:12:  dark"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Now do it at every height. A ring climbs the axis, and at each height all the coils add up to one hand, drawn out to the side. Where they agree, at a prime power, it shoots out to the top of that prime's column: {7, 8, 9.|seven, eight, nine.} At {6|six}, {10|ten} and {12|twelve} it stays at the axis."
         },
         {
           "id": "xz4_05",
@@ -4000,15 +4423,16 @@
             "delay:3.61:exp:tw:fw.scan:100:0",
             "exp:say:ζ's comb|a tooth at every prime power"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Climbing on, it lights every prime power up to {400|four hundred}: a comb, the master wave from the first discovery, stood up along the logarithm."
         },
         {
           "id": "xz4_06",
-          "text": "But the comb is the same in every direction. Spin it round the axis, and each tooth draws a ring through its prime's column. Zeta's zeros know how high a prime sits, not its hour on the wheel.",
-          "camera": "orbit:on=centre;at=68008,0,-19>68000,0,-20;fit=130,73>124,118;el=8>30;az=-90;spin=0;raise=0.04;span=4",
+          "text": "But the comb is the same in every direction. Spin it round the axis, slowly, and watch each tooth sweep out a ring through its prime's column. Zeta's zeros know how high a prime sits, not its hour on the wheel.",
+          "camera": "orbit:on=centre;at=68008,0,-19>68000,0,-18;fit=130,73>227.6,128;el=8>40;az=-90;spin=0;raise=0.035;span=3.5",
           "actions": [
-            "delay:2.62:exp:hide:JM comb labels",
-            "delay:4.10:exp:tw:fw.spin:1:4.83",
+            "delay:2.45:exp:hide:JM comb labels",
+            "delay:2.85:exp:tw:fw.spin:1:9.44",
             "exp:say:spun round the axis:  a ring per prime power|ζ's zeros fix the height, not the hour"
           ],
           "pause": 0.8
@@ -4016,7 +4440,7 @@
         {
           "id": "xz4_07",
           "text": "E eight knows more. Its field has eight L-functions, and at the height of seven each one's zeros light the tooth of seven, turned by its own character: along one, minus one, i or minus i.",
-          "camera": "orbit:on=centre;at=68000,0,-20>68000,0,-12;fit=124,118>34,30;el=30>70;az=-90;spin=0;raise=0.04;span=5",
+          "camera": "orbit:on=centre;at=68000,0,-18>68000,0,-12;fit=227.6,128>34,30;el=40>70;az=-90;spin=0;raise=0.04;span=5",
           "actions": [
             "delay:0.00:exp:tw:fw.spin:0:3",
             "delay:3.54:exp:tw:fw.scan:-1:0",
@@ -4026,7 +4450,8 @@
             "delay:5.89:exp:fwchars:7",
             "exp:say:eight L-functions at the height of 7|each tooth turned by its character χ(7):  1, −1, i or −i"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{E8|E eight} knows more. Its field has eight L-functions, and at the height of seven each one's zeros light the tooth of seven, turned by its own character: along {1, −1, i or −i.|one, minus one, i or minus i.}"
         },
         {
           "id": "xz4_08",
@@ -4036,7 +4461,8 @@
             "delay:0.00:exp:fwturn:7:10.92",
             "exp:say:turned back by χ(h), and chained|the eight line up only for the hour of 7"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Turn each one back by its character at an hour, and chain the eight. At every other hour they cancel; only at hour {7|seven} do all eight line up, and the chain swings onto {the spoke of 7.|the spoke of seven.}"
         },
         {
           "id": "xz4_09",
@@ -4063,7 +4489,8 @@
             "delay:3.53:exp:callfun:41:0,0:41 = 11 + 30",
             "exp:say:7 420 zeros up to t = 1000|ζ's give the height, the other seven the hour"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{49 = 7² lights on spoke 19.|Forty-nine lights on spoke nineteen, as seven squared.} {11|Eleven} and {41|forty-one} share spoke {11|eleven}. {7,400|Seven thousand four hundred} zeros sort every prime up to {400|four hundred} onto its spoke."
         },
         {
           "id": "xz4_11",
@@ -4075,7 +4502,8 @@
             "exp:show:JM coils",
             "exp:say:the zeros are frequencies of the height|they rebuild the primes:  they do not predict them"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "So the zeros are not points in the stack. They are frequencies of its height. Added up, they rebuild the prime powers, and turned by {E8's|E eight's} characters, they put each prime on its spoke. They reconstruct the primes; they do not predict them."
         }
       ]
     },
@@ -4090,14 +4518,30 @@
         "exp:hide:E8 spiral",
         "exp:hide:E8 impostors",
         "exp:hide:E8 rings",
-        "exp:e8tower:60:attach:16",
+        "exp:e8tower:120:attach:16",
         "exp:hide:E8 tower A",
         "exp:hide:E8 tower B",
         "exp:hide:E8 tower C",
-        "exp:e8cubesat:7:22,0,96:1.6:3:.4:60",
-        "exp:e8cubesat:6:-62,0,80:1.6:3:.4:60",
+        "exp:e8links:7:16",
+        "exp:e8cubesat:1:30,0,0:1.6:3:.4:70",
+        "exp:e8cubesat:2:30,0,16:1.6:3:.4:70",
+        "exp:e8cubesat:3:30,0,32:1.6:3:.4:70",
+        "exp:e8cubesat:4:30,0,48:1.6:3:.4:70",
+        "exp:e8cubesat:5:30,0,64:1.6:3:.4:70",
+        "exp:e8cubesat:6:30,0,80:1.6:3:.4:70",
+        "exp:e8cubesat:7:30,0,96:1.6:3:.4:70",
+        "exp:hide:E8 cubes 1",
+        "exp:hide:E8 cubes 2",
+        "exp:hide:E8 cubes 3",
+        "exp:hide:E8 cubes 4",
+        "exp:hide:E8 cubes 5",
         "exp:hide:E8 cubes 6",
         "exp:hide:E8 cubes 7",
+        "exp:hide:E8 cubes 1 label",
+        "exp:hide:E8 cubes 2 label",
+        "exp:hide:E8 cubes 3 label",
+        "exp:hide:E8 cubes 4 label",
+        "exp:hide:E8 cubes 5 label",
         "exp:hide:E8 cubes 6 label",
         "exp:hide:E8 cubes 7 label"
       ],
@@ -4111,7 +4555,8 @@
             "exp:reveal:E8 rings:4.70",
             "exp:snap"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{E8|E eight} has {240|two hundred and forty} roots, shown here in its Coxeter plane as eight rings of {30|thirty}. So how can so few points hold infinitely many counting numbers?"
         },
         {
           "id": "xz5_02",
@@ -4122,7 +4567,8 @@
             "exp:e8walk:line",
             "exp:say:E8's clock:  30 hours|the 8 gold hours:  1, 7, 11, 13, 17, 19, 23, 29"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "They don't have to. The roots set {E8's|E eight's} clock: its Coxeter element turns the plane by a thirtieth of a turn, so the wheel has {30|thirty} hours, and eight of them, {E8's|E eight's} exponents, are gold."
         },
         {
           "id": "xz5_03",
@@ -4132,27 +4578,29 @@
             "delay:0.00:exp:reveal:E8 spiral:8.78",
             "exp:say:every n at its hour|n mod 30:  the hours repeat, the radius grows"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Drop every counting number onto the wheel at its hour, {n mod 30,|n mod thirty,} one turn further out each time round. The spiral never ends."
         },
         {
           "id": "xz5_04",
-          "text": "Grey it out and follow one hour. Seven, thirty-seven, sixty-seven and ninety-seven all land on hour seven, each one turn further out: all four are primes. One hundred and twenty-seven, too.",
+          "text": "Grey it out and follow one hour, its arm drawn from the centre. Seven, thirty-seven, sixty-seven and ninety-seven all land on hour seven, each one turn further out: all four are primes. One hundred and twenty-seven, too.",
           "camera": "orbit:on=centre;at=36300.0,0.0,0>36324,2,0;fit=270.7,152.3>60,40;el=89.5;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
             "delay:0.00:exp:mute:E8 spiral:1.2",
-            "delay:1.88:exp:e8hl:7:spoke",
-            "delay:2.40:exp:e8hl:37",
-            "delay:3.19:exp:e8hl:67",
-            "delay:4.05:exp:e8hl:97",
-            "delay:10.53:exp:e8hl:127",
-            "delay:1.88:exp:calle8:7:-0.3,1,0.1:7",
-            "delay:2.40:exp:calle8:37:-0.1,-1,0.12:37 = 7 + 30",
-            "delay:3.19:exp:calle8:67:0.1,1,0.12:67 = 7 + 2·30",
-            "delay:4.05:exp:calle8:97:0.3,-1,0.12:97 = 7 + 3·30",
-            "delay:10.53:exp:calle8:127:0.6,1,0.12:127 = 7 + 4·30",
+            "delay:3.73:exp:e8hl:7:spoke",
+            "delay:4.28:exp:e8hl:37",
+            "delay:5.27:exp:e8hl:67",
+            "delay:6.35:exp:e8hl:97",
+            "delay:12.54:exp:e8hl:127",
+            "delay:3.73:exp:calle8:7:-0.3,1,0.1:7",
+            "delay:4.28:exp:calle8:37:-0.1,-1,0.12:37 = 7 + 30",
+            "delay:5.27:exp:calle8:67:0.1,1,0.12:67 = 7 + 2·30",
+            "delay:6.35:exp:calle8:97:0.3,-1,0.12:97 = 7 + 3·30",
+            "delay:12.54:exp:calle8:127:0.6,1,0.12:127 = 7 + 4·30",
             "exp:say:one hour:  7, 37, 67, 97, 127|n ≡ 7 (mod 30)"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Grey it out and follow one hour, its arm drawn from the centre. {7|Seven}, {37|thirty-seven}, {67|sixty-seven} and {97|ninety-seven} all land on hour {7|seven}, each one turn further out: all four are primes. {127|One hundred and twenty-seven}, too."
         },
         {
           "id": "xz5_05",
@@ -4169,7 +4617,8 @@
             "delay:4.80:exp:calle8:96:0,0,0.16,ff6b5a:96 = 2<sup>5</sup>·3",
             "exp:say:hour 6:  6, 36, 66, 96|multiples of 6, off the gold spokes"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Hour {6|six} holds {6|six}, {36|thirty-six}, {66|sixty-six} and {96|ninety-six}: every one a multiple of six, off the gold spokes. The clock sorts out two, three and five; the rest it cannot see."
         },
         {
           "id": "xz5_06",
@@ -4183,50 +4632,89 @@
             "delay:8.80:exp:reveal:E8 tower A:1.78",
             "exp:say:E8 is a lattice:  shells|the 240 roots are its first shell, at distance √2"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "And {E8|E eight} itself is not {240|two hundred and forty} points. It is an infinite lattice, and the roots are only its first shell: the points at distance {√2.|root two.} Tilt the wheel, and the next shells appear beneath it."
         },
         {
           "id": "xz5_07",
-          "text": "The next shell, at distance two, holds two thousand one hundred and sixty points. Then six thousand seven hundred and twenty, then seventeen thousand five hundred and twenty. Every counting number n has a shell of its own, at distance root two n.",
-          "camera": "orbit:on=centre;at=36300,0,16>36300,0,40;fit=150,84.4>263,148;el=34>38;az=-90;spin=0;raise=0.035;span=8",
+          "text": "Each shell n holds the points at distance root two n: two thousand one hundred and sixty for n equal to two, six thousand seven hundred and twenty for three, seventeen thousand five hundred and twenty for four, and on down to seven. Every counting number has a shell of its own.",
+          "camera": "orbit:on=centre;at=36300,0,16>36296,0,42;fit=150,84.4>291.6,164;el=34>32;az=-90;spin=2.5;raise=0.035;span=6",
           "actions": [
-            "delay:6.76:exp:reveal:E8 tower B:1.5",
-            "delay:9.07:exp:reveal:E8 tower C:2",
+            "delay:9.31:exp:reveal:E8 tower B:1.5",
+            "delay:13.03:exp:reveal:E8 tower C:2",
             "exp:say:a shell for every counting number|shell n:  the points at distance √2n:  240, 2 160, 6 720, 17 520, …"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Each shell n holds the points at distance {√(2n):|root two n:} {2,160|two thousand one hundred and sixty} for {n =|n equal to} {2|two}, {6,720|six thousand seven hundred and twenty} {for 3,|for three,} {17,520|seventeen thousand five hundred and twenty} {for 4,|for four,} and on down to {7.|seven.} Every counting number has a shell of its own."
         },
         {
           "id": "xz5_08",
-          "text": "And each shell knows its number's divisors: it holds two hundred and forty times the sum of the cubes of n's divisors. Seven is prime: one plus three hundred and forty-three, times two forty, makes eighty-two thousand five hundred and sixty.",
-          "camera": "orbit:on=centre;at=36300,0,40>36302,0,82;fit=263,148>130,73;el=38>30;az=-90;spin=0;raise=0.035;span=5",
+          "text": "Each shell's size is two hundred and forty times a sum of cubes, one cube for each divisor of n. One has the single cube one. Two has one and eight. Three has one and twenty-seven.",
+          "camera": "orbit:on=centre;at=36296,0,42>36284,0,14;fit=291.6,164>131.6,74;el=32>30;az=-90;spin=0;raise=0.035;span=4",
           "actions": [
-            "exp:mute:E8 tower A,E8 tower B,E8 tower axis:2:1.6",
-            "exp:reveal:E8 cubes 7:8.29,9.57",
-            "exp:say:shell n holds 240 σ<sub>3</sub>(n) points|σ<sub>3</sub>(n):  the sum of the cubes of n's divisors"
+            "delay:3.45:exp:mute:E8 tower B,E8 tower C:1.5:1.5",
+            "delay:3.45:exp:reveal:E8 cubes 1:0.3",
+            "delay:0.89:exp:reveal:E8 cubes 2:7.11,8.34",
+            "delay:8.71:exp:reveal:E8 cubes 3:7.77,9.78",
+            "exp:say:shell n holds 240 σ<sub>3</sub>(n) points|σ<sub>3</sub>(n):  one cube d³ for each divisor d of n"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Each shell's size is {240|two hundred and forty} times a sum of cubes, one cube for each divisor of n. {1 has the single cube 1.|One has the single cube one.} {2 has 1 and 8.|Two has one and eight.} {3 has 1 and 27.|Three has one and twenty-seven.}"
         },
         {
           "id": "xz5_09",
-          "text": "Six has four divisors, one, two, three and six, so its cubes are one, eight, twenty-seven and two hundred and sixteen: sixty thousand four hundred and eighty points, with cubes in between for its factors.",
-          "camera": "orbit:on=centre;at=36302,0,82>36284,0,78;fit=130,73>150,84;el=30;az=-90;spin=0;raise=0.035;span=4",
+          "text": "Four has one, eight and sixty-four: its divisors one, two and four. Five, a prime, has only one and a hundred and twenty-five. Six has four cubes: one, eight, twenty-seven and two hundred and sixteen. Seven, a prime, has one and three hundred and forty-three.",
+          "camera": "orbit:on=centre;at=36284,0,14>36280,0,66;fit=131.6,74>184.9,104;el=30;az=-90;spin=0;raise=0.035;span=5",
           "actions": [
-            "exp:show:E8 cubes 6 label",
-            "exp:reveal:E8 cubes 6:4.18,4.63,5.00,6.22",
-            "exp:say:6:  1 + 8 + 27 + 216 = 252|240 × 252 = 60 480"
+            "exp:unmute:E8 tower B,E8 tower C:1.5",
+            "exp:mute:E8 tower A:1.5:1.5",
+            "delay:0.00:exp:reveal:E8 cubes 4:0.43,0.81,1.14",
+            "delay:4.48:exp:reveal:E8 cubes 5:6.12,7.02",
+            "delay:8.02:exp:reveal:E8 cubes 6:9.36,9.75,10.07,11.55",
+            "delay:12.30:exp:reveal:E8 cubes 7:13.55,14.36",
+            "exp:say:the cubes of the divisors|4:  1 + 8 + 64   ·   5:  1 + 125   ·   6:  1 + 8 + 27 + 216   ·   7:  1 + 343"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "{4 has 1, 8 and 64:|Four has one, eight and sixty-four:} its divisors {1, 2 and 4.|one, two and four.} {5,|Five,} a prime, has only {1|one} and {125|a hundred and twenty-five}. {6|Six} has four cubes: {1|one}, {8|eight}, {27|twenty-seven} and {216|two hundred and sixteen}. {7,|Seven,} a prime, has {1|one} and {343|three hundred and forty-three}."
         },
         {
           "id": "xz5_10",
-          "text": "Counted over every shell at once, the points of E eight give its own zeta function: two hundred and forty times zeta of s, times zeta of s minus three. A finite symmetry, and infinitely many shells, one for every counting number.",
-          "camera": "orbit:on=centre;at=36284,0,78>36290,0,40;fit=150,84>260,146;el=30>38;az=-90;spin=0;raise=0.035;span=8",
+          "text": "So the shells are linked by divisibility: each shell sends its cube to the shells of its multiples. One feeds every shell. Two feeds four and six. Three feeds six.",
+          "camera": "orbit:on=centre;at=36280,0,66>36292,0,42;fit=184.9,104>291.6,164;el=30>32;az=-90;spin=-1.5;raise=0.035;span=4",
           "actions": [
-            "exp:unmute:E8 tower A,E8 tower B,E8 tower axis:2",
+            "exp:unmute:E8 tower A:1.5",
+            "delay:5.50:exp:showchild:E8 links:link 1-",
+            "delay:5.50:exp:drawon:E8 links/arc 1-:1.5",
+            "delay:6.99:exp:showchild:E8 links:link 2-",
+            "delay:6.99:exp:drawon:E8 links/arc 2-:1.2",
+            "delay:8.56:exp:showchild:E8 links:link 3-",
+            "delay:8.56:exp:drawon:E8 links/arc 3-:1",
+            "exp:say:linked by divisibility|shell d sends d³ to every shell n that d divides"
+          ],
+          "pause": 0.8,
+          "caption": "So the shells are linked by divisibility: each shell sends its cube to the shells of its multiples. {1|One} feeds every shell. {2 feeds 4 and 6.|Two feeds four and six.} {3 feeds 6.|Three feeds six.}"
+        },
+        {
+          "id": "xz5_11",
+          "text": "That is why the shells are a useful way to look at numbers. A prime's shell holds the fewest points it can, just one and p cubed. Every extra cube is a divisor: six's extra cubes, eight and twenty-seven, are two cubed and three cubed, so E eight's geometry has factored six.",
+          "camera": "orbit:on=centre;at=36292,0,42>36300,0,78;fit=291.6,164>142.2,80;el=32>30;az=-90;spin=0;raise=0.035;span=5",
+          "actions": [
+            "delay:3.43:exp:pulse:E8 cubes 5,E8 cubes 7:1.6",
+            "delay:18.54:exp:pulse:E8 cubes 6:2",
+            "exp:say:a prime's shell:  240 (1 + p³), the fewest|6:  the extra cubes 8 = 2³ and 27 = 3³ are its factors"
+          ],
+          "pause": 0.8,
+          "caption": "That is why the shells are a useful way to look at numbers. A prime's shell holds the fewest points it can, just {1 and p³.|one and p cubed.} Every extra cube is a divisor: {6's|six's} extra cubes, {8|eight} and {27|twenty-seven}, are {2³ and 3³,|two cubed and three cubed,} so {E8's|E eight's} geometry has factored {6.|six.}"
+        },
+        {
+          "id": "xz5_12",
+          "text": "Counted over every shell at once, the points of E eight give its own zeta function: two hundred and forty times zeta of s, times zeta of s minus three. A finite symmetry, and infinitely many shells, one for every counting number.",
+          "camera": "orbit:on=centre;at=36300,0,78>36304,0,42;fit=142.2,80>291.6,164;el=30>34;az=-90;spin=1.5;raise=0.035;span=8",
+          "actions": [
             "exp:say:Σ 240 σ<sub>3</sub>(n) n<sup>−s</sup> = 240 ζ(s) ζ(s − 3)|a finite symmetry, a shell for every counting number"
           ],
-          "pause": 1.4
+          "pause": 1.4,
+          "caption": "Counted over every shell at once, the points of {E8|E eight} give its own zeta function: {240 ζ(s) ζ(s − 3).|two hundred and forty times zeta of s, times zeta of s minus three.} A finite symmetry, and infinitely many shells, one for every counting number."
         }
       ]
     }

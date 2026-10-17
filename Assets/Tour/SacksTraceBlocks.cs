@@ -152,6 +152,10 @@ public partial class SacksSpiral
         {
             Vector3 at = E8Hour(hour, e8HourRadius * 1.08f) + Vector3.back * .6f;
             RingAround(g, $"hour {hour}", at, Vector3.back, unit * .35f, Color.white * .9f, unit * .05f, AttentionIntensity);
+            // the clock arm of the hour, from the centre to the rim
+            LineRenderer arm = ExpLine(g, $"arm {hour}", unit * .14f, new Color(1f, 1f, 1f, .75f), Factory.SoftGlowIntensity,
+                new[] { e8WheelCenter + Vector3.back * .45f, E8Hour(hour, e8HourRadius * 1.04f) + Vector3.back * .45f });
+            OnTop(arm, 19);
             if (marked.Count > 2) continue;
             TextBox tag = ExpLabelWide(g, $"hour {hour}", E8Hour(hour, e8HourRadius * 1.08f + unit * 1.4f) + Vector3.back * .7f, unit * 16f, Color.white);
             Outline(tag.TextField);

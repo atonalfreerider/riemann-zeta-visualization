@@ -479,6 +479,11 @@ public partial class TourDirector : MonoBehaviour
             // every chapter starts from a cleared stage plus its own setup, so it looks the same whether it follows the
             // chapter before it or is started (or recorded) on its own
             ResetStage();
+            // the long-form segments are composed 16:9; in a tall frame their labels grow and their callouts stay in proportion
+            bool tall = RecordOnStart || Storyboard || Recorder.IsOffscreen ? Recorder.Height > Recorder.Width : Portrait;
+            bool longForm = PlayingExperiment && (chapter.id.StartsWith("xs") || chapter.id.StartsWith("xz"));
+            SacksSpiral.LabelBoost = longForm && tall ? 1.45f : 1f;
+            SacksSpiral.CalloutScale = longForm && tall ? .62f / SacksSpiral.LabelBoost : 1f;
             ApplyActions(chapter.setup);
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
@@ -686,7 +691,7 @@ public partial class TourDirector : MonoBehaviour
         }
 
         float duration = clip != null ? Mathf.Max(clip.length, timing.duration) : timing.duration;
-        Captions.SetLine(timing);
+        Captions.SetLine(TourScriptLoader.DisplayTiming(timing, line.caption));
         Captions.SetFootnote(line.footnote);
         LineDuration = duration + Mathf.Max(0f, line.pause);
         LineElapsed = 0f;

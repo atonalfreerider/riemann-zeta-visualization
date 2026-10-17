@@ -532,7 +532,7 @@ public partial class SacksSpiral
         bool prime = Tw("nw.mix", 0f) < .5f;
         float terms = L.BetaP > 0f ? 1000f * Mathf.Pow(10f, L.BetaP) : L.TermsP;
         string text = prime
-            ? (L.FirstP > 1 && L.TermsP == 1 ? $"zero #{L.FirstP} of ζ alone" : $"{terms:N0} zero{(terms > 1.5f ? "s" : "")} of ζ")
+            ? (L.FirstP > 1 && L.TermsP == 1 ? $"zero #{L.FirstP} of ζ alone" : $"{terms:N0} zero{(Mathf.Abs(terms - 1f) < .5f ? "" : "s")} of ζ")
             : (L.TermsD == 1 ? "Voronoi's first wave" : $"{L.TermsD:N0} of Voronoi's waves");
         Color c = prime ? Factory.Palette.Cosine : DivisorWaveColor;
         Hud(0, text, new Color(c.r, c.g, c.b, counter));

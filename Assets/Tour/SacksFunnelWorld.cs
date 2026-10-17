@@ -21,7 +21,9 @@ using UnityEngine;
 /// </summary>
 public partial class SacksSpiral
 {
-    const float FwPathScale = 18f, FwCoilR = 9f;
+    // the coil's radius is the floor path's own scale: an arrow of length 1/√n (drawn FwPathScale/√n) stretched by √n is
+    // exactly FwCoilR long (fw.stretch), so the coil carries each arrow's direction at its true scale of one unit
+    const float FwPathScale = 18f, FwCoilR = 18f;
     const int FwHands = 15;
 
     class FwScene
@@ -30,6 +32,8 @@ public partial class SacksSpiral
         public LineRenderer Path, Tail, Coil, Axis;
         public LineRenderer[] Arrows = new LineRenderer[FwHands + 1];
         public TextBox[] Tags = new TextBox[FwHands + 1];
+        public readonly List<LineRenderer> Turns = new();   // the coil, one line per turn, each a gradient (fw.coil)
+        public TextBox StretchTag;
         public GameObject Zeta;
         public string Sig = "";
         public readonly Dictionary<long, Transform> Lit = new();
@@ -51,6 +55,8 @@ public partial class SacksSpiral
         fwScanRing = fwScanHand = null;
         fwScanTag = null;
         fwArcs.Clear();
+        fwGhosts.Clear();
+        fwOutline = null;
         Array.Clear(fwFans, 0, fwFans.Length);
         fwCombGroup = fwCombLabels = null;
         fwMorphSig = "";
@@ -73,6 +79,10 @@ public partial class SacksSpiral
 
         fw.Zeta = Factory.NewSphere("zeta", 1.2f, Factory.Palette.Zero, AttentionIntensity);
         fw.Zeta.transform.SetParent(fw.Root, false);
+        fw.Coil.gameObject.SetActive(false);
+        fw.StretchTag = ExpLabelWide(fw.Root, "", FwOrigin, 16f, Color.white, TextAlignmentOptions.Left);
+        Outline(fw.StretchTag.TextField);
+        fw.StretchTag.gameObject.SetActive(false);
         StartCoroutine(FunnelWorldLoop(fw));
     }
 
@@ -90,9 +100,9 @@ public partial class SacksSpiral
     {
         double g = Tw("fw.gamma", 14.134725f);
         float shown = Tw("fw.n", 0f), lift = Tw("fw.lift", 0f), coil = Tw("fw.coil", 0f), pathVis = Tw("fw.path", 1f), tail = Tw("fw.tail", 0f);
-        float hands = Tw("fw.hands", 1f), axis = Tw("fw.axis", 0f), dim = Tw("fw.dim", 0f);
+        float hands = Tw("fw.hands", 1f), axis = Tw("fw.axis", 0f), dim = Tw("fw.dim", 0f), stretch = Tw("fw.stretch", 1f);
         string lit = string.Join(",", s.Lit.Keys) + "/" + string.Join(",", fwAngleHands);
-        string sig = $"{g:F5}|{shown:F3}|{lift:F3}|{coil:F3}|{pathVis:F3}|{tail:F3}|{hands:F3}|{axis:F3}|{dim:F3}|{lit}";
+        string sig = $"{g:F5}|{shown:F3}|{lift:F3}|{coil:F3}|{pathVis:F3}|{tail:F3}|{hands:F3}|{axis:F3}|{dim:F3}|{stretch:F4}|{lit}";
         if (sig == s.Sig) return;
         s.Sig = sig;
         Vector3 o = FwOrigin + Vector3.back * .15f;
@@ -140,7 +150,9 @@ public partial class SacksSpiral
             if (!on) continue;
             float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((lift - (n - 1) / (float)FwHands * .55f) / .45f));
             double h = Math.Log(n), dir = -g * h;
-            Vector3 handTail = o + FwUp(h), handHead = handTail + FwDir(dir) * FwCoilR;
+            // lifted, the arrow keeps its true length 1/√n until it is stretched by √n (fw.stretch) to the coil's radius
+            float handLen = Mathf.Lerp(FwPathScale / Mathf.Sqrt(n), FwCoilR, stretch);
+            Vector3 handTail = o + FwUp(h), handHead = handTail + FwDir(dir) * handLen;
             Vector3 t0 = Vector3.Lerp(floor[n - 1], handTail, u), t1 = Vector3.Lerp(Vector3.Lerp(floor[n - 1], floor[n], exist), handHead, u);
             a.SetPositions(new[] { t0 + Vector3.back * .05f, t1 + Vector3.back * .05f });
             bool bright = s.Lit.ContainsKey(n) || fwAngleHands.Contains(n);
@@ -156,24 +168,50 @@ public partial class SacksSpiral
             }
         }
 
-        // the coil through the hands' tips, drawn from the floor up to coil × log 400
+        // the coil through the hands' tips, drawn from the floor up to coil × log 400, one line per turn: each turn a
+        // gradient from deep orange to bright yellow, so the turns can be counted as the coil tightens. Before the hands
+        // are stretched it is a horn: radius FwPathScale·e^(−h/2), the tips of the arrows at their true lengths.
         bool coilOn = coil > .001f;
-        s.Coil.gameObject.SetActive(coilOn);
-        if (coilOn)
+        double topH = Math.Log(ZmN) * coil;
+        int turns = coilOn ? Mathf.Max(1, Mathf.CeilToInt((float)(g * topH / (2 * Math.PI)))) : 0;
+        while (s.Turns.Count < turns)
         {
-            double top = Math.Log(ZmN) * coil;
-            int steps = Mathf.Max(2, Mathf.CeilToInt((float)(g * top / (2 * Math.PI)) * 64f));
+            LineRenderer l = ExpLine(s.Root, $"coil turn {s.Turns.Count}", .34f, Color.white, Factory.GlowIntensity, new[] { o, o });
+            s.Turns.Add(l);
+        }
+
+        for (int k = 0; k < s.Turns.Count; k++)
+        {
+            LineRenderer l = s.Turns[k];
+            bool on = k < turns;
+            l.gameObject.SetActive(on);
+            if (!on) continue;
+            double h0 = 2 * Math.PI * k / g, h1 = Math.Min(topH, 2 * Math.PI * (k + 1) / g);
+            const int steps = 48;
             Vector3[] pts = new Vector3[steps + 1];
             for (int i = 0; i <= steps; i++)
             {
-                double h = top * i / steps;
-                pts[i] = o + FwUp(h) + FwDir(-g * h) * FwCoilR;
+                double h = h0 + (h1 - h0) * i / steps;
+                float r = Mathf.Lerp(FwPathScale * Mathf.Exp(-(float)h * .5f), FwCoilR, stretch);
+                pts[i] = o + FwUp(h) + FwDir(-g * h) * r;
             }
 
-            s.Coil.positionCount = pts.Length;
-            s.Coil.SetPositions(pts);
-            Color cc = new(1f, .85f, .1f, 1f - .9f * dim);
-            s.Coil.startColor = s.Coil.endColor = cc;
+            l.positionCount = pts.Length;
+            l.SetPositions(pts);
+            float a = 1f - .9f * dim, part = (float)((h1 - h0) / (2 * Math.PI / g));
+            l.startColor = new Color(1f, .42f, .08f, a);
+            l.endColor = Color.Lerp(new Color(1f, .42f, .08f, a), new Color(1f, .95f, .35f, a), part);
+        }
+
+        // the stretch, labelled at the hand of 2 while it happens
+        bool stretching = stretch > .02f && stretch < .98f && whole >= 2;
+        s.StretchTag.gameObject.SetActive(stretching);
+        if (stretching)
+        {
+            double h2 = Math.Log(2);
+            float len = Mathf.Lerp(FwPathScale / Mathf.Sqrt(2f), FwCoilR, stretch);
+            s.StretchTag.transform.position = o + FwUp(h2) + FwDir(-g * h2) * (len + 3f) + Vector3.back * .4f;
+            s.StretchTag.TextField.text = $"1/√2 × √2 = 1";
         }
 
         s.Axis.gameObject.SetActive(axis > .01f);
@@ -221,10 +259,21 @@ public partial class SacksSpiral
         Vector3 top = b + FwUp(h);
         ExpDot(g, "top", top + Vector3.back * .2f, 1.1f, n > 1 && Factorize(n).Count == 1 ? PrimeGold : Color.white, AttentionIntensity);
         Flare(top + Vector3.back * .3f, 3f, 1.2f, 2);
+        // the clock arm: on the floor, from the axis out through the base of n's column to the rim, at hour n mod 30
+        int hour = (int)(n % 30);
+        // the arm reaches a little past the column's base, so a close shot holds it and its hour
+        float ah = (90f - 12f * hour) * Mathf.Deg2Rad, rim = Mathf.Max(ZmS * Mathf.Sqrt(n) + 3f, 9f);
+        Vector3 hourDir = new(Mathf.Cos(ah), Mathf.Sin(ah), 0f);
+        Color hourCol = GoldHour(hour) ? PrimeGold : new Color(.85f, .88f, 1f);
+        LineRenderer arm = ExpLine(g, "hour arm", .22f, Color.white, AttentionIntensity, new[] { o + Vector3.back * .15f, o + hourDir * rim + Vector3.back * .15f });
+        OnTop(arm, 18);
+        StartCoroutine(SettleRoutine(arm, hourCol, 1f));
+        TextBox hourTag = ExpLabelWide(g, $"hour {hour}", o + hourDir * (rim + 3f) + Vector3.back * .4f, 14f, hourCol);
+        Outline(hourTag.TextField);
         // the level: a ring round the axis and a line from the column's top to the axis
         Vector3 c = o + FwUp(h);
         Vector3[] ring = new Vector3[65];
-        for (int i = 0; i <= 64; i++) ring[i] = c + FwDir(i * Math.PI / 32) * (FwCoilR * 1.12f) + Vector3.back * .05f;
+        for (int i = 0; i <= 64; i++) ring[i] = c + FwDir(i * Math.PI / 32) * 10f + Vector3.back * .05f;
         ExpLine(g, "level ring", .12f, new Color(.85f, .9f, 1f, .7f), Factory.SoftGlowIntensity, ring);
         ExpLine(g, "level line", .12f, new Color(.85f, .9f, 1f, .7f), Factory.SoftGlowIntensity, new[] { top + Vector3.back * .05f, c + Vector3.back * .05f });
         string name = n == 1 ? "1" : Factorize(n).Count == 1 ? $"{n}:  prime" : $"{n} = {FactorString(n)}";

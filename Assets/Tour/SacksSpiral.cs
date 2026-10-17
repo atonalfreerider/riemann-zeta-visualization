@@ -896,9 +896,18 @@ public partial class SacksSpiral : MonoBehaviour
         if (t != null) t.localScale = Vector3.one * baseScale;
     }
 
+    /// <summary>
+    /// Scales every scene label made from now on: the long-form segments, recorded 9:16, frame their wide pictures by width,
+    /// so their labels would come out at about 60 % of their 16:9 size (TourDirector sets it per chapter).
+    /// </summary>
+    public static float LabelBoost = 1f;
+
+    /// <summary>Callout labels are sized by the camera's distance, so in a tall frame they shrink back by this (and LabelBoost).</summary>
+    public static float CalloutScale = 1f;
+
     TextBox TextBoxLabel(string text, float size, Color color)
     {
-        TextBox label = TextBox.Create(text, size);
+        TextBox label = TextBox.Create(text, size * LabelBoost);
         label.transform.SetParent(transform, false);
         label.Alignment = TextAlignmentOptions.Center;
         label.Color = color;

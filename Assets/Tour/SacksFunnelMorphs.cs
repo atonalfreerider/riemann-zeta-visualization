@@ -52,6 +52,10 @@ public partial class SacksSpiral
     LineRenderer fwScanRing, fwScanHand;
     TextBox fwScanTag;
     readonly List<(long m, double z, float r, LineRenderer arc)> fwArcs = new();
+    // the sweep: a faint copy of the comb's outline left behind every 15° as it turns
+    readonly List<LineRenderer> fwGhosts = new();
+    Vector3[] fwOutline;
+    float fwSpinMax;
     readonly LineRenderer[] fwFans = new LineRenderer[8];
     Transform fwCombGroup, fwCombLabels;
     string fwMorphSig = "";
@@ -133,6 +137,13 @@ public partial class SacksSpiral
         }
 
         // ---- the spin: the comb turns about the axis, each tooth drawing its ring ----
+        if (spin <= .002f)
+        {
+            fwSpinMax = 0f;
+            foreach (LineRenderer gl in fwGhosts) if (gl != null && gl.gameObject.activeSelf) gl.gameObject.SetActive(false);
+        }
+        else foreach (LineRenderer gl in fwGhosts) if (gl != null && !gl.gameObject.activeSelf) gl.gameObject.SetActive(true);
+
         if (spin > 0f && fwCombGroup != null)
         {
             if (fwArcs.Count == 0)
@@ -156,6 +167,42 @@ public partial class SacksSpiral
             float ang = spin * 360f;
             fwCombGroup.rotation = Quaternion.AngleAxis(ang, Vector3.back);
             fwCombGroup.position = o - fwCombGroup.rotation * o;
+            // the comb's outline (out to each tooth's tip and back to the axis), copied every 15° of the turn
+            if (fwOutline == null)
+            {
+                List<Vector3> ol = new();
+                List<(double z, float r)> tips = new();
+                foreach (var (m, zm, r, _) in fwArcs) tips.Add((zm, r));
+                tips.Sort((a, b) => a.z.CompareTo(b.z));
+                foreach (var (zm, r) in tips)
+                {
+                    ol.Add(o + FwUp(zm));
+                    ol.Add(o + FwUp(zm) + side * r);
+                    ol.Add(o + FwUp(zm));
+                }
+
+                fwOutline = ol.ToArray();
+            }
+
+            int ghosts = Mathf.FloorToInt(spin * 24f + 1e-4f);
+            while (fwGhosts.Count < Mathf.Min(ghosts, 24))
+            {
+                Quaternion q = Quaternion.AngleAxis(fwGhosts.Count * 15f, Vector3.back);
+                Vector3[] pts = new Vector3[fwOutline.Length];
+                for (int i = 0; i < pts.Length; i++) pts[i] = o + q * (fwOutline[i] - o);
+                LineRenderer gl = ExpLine(s.Root, $"sweep {fwGhosts.Count}", .07f, new Color(1f, 1f, 1f, .3f), Factory.SoftGlowIntensity, pts);
+                fwGhosts.Add(gl);
+            }
+
+            // the ghosts stay while the comb turns out; when it turns back they fade with it
+            fwSpinMax = Mathf.Max(fwSpinMax, spin);
+            float fade = spin >= fwSpinMax - .001f ? 1f : Mathf.Clamp01(spin / Mathf.Max(.001f, fwSpinMax)) * .5f;
+            for (int i = 0; i < fwGhosts.Count; i++)
+                if (fwGhosts[i] != null)
+                {
+                    float age = Mathf.Clamp01((spin * 24f - i) / 24f);
+                    fwGhosts[i].startColor = fwGhosts[i].endColor = new Color(.9f, .92f, 1f, Mathf.Lerp(.32f, .1f, age) * (spin < .999f ? 1f : .6f) * fade);
+                }
             foreach (var (m, zm, r, arc) in fwArcs)
             {
                 int steps = Mathf.Max(2, Mathf.CeilToInt(spin * 96f));

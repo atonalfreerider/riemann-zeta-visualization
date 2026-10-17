@@ -71,13 +71,7 @@ public partial class SacksSpiral
         Transform g = ExpGroup("LF landscape").transform;
         const float lo = -3f, hi = 3f;
         float step = (hi - lo) / cells, unit = size / (hi - lo);
-        int[,] off = new int[cells, cells];
-        for (int i = 0; i < cells; i++)
-            for (int j = 0; j < cells; j++)
-            {
-                float l2 = lo + (i + .5f) * step, l3 = lo + (j + .5f) * step;
-                off[i, j] = Mathf.Max(0, FiveTotal(l2, l3) - FiveOnLine(l2, l3));
-            }
+        int[,] off = FiveGrid(cells);
 
         int top = 0;
         foreach (int v in off) top = Mathf.Max(top, v);

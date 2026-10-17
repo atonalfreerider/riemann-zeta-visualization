@@ -93,10 +93,12 @@ public partial class SacksSpiral
             "= the identity:  every reflection squares to it",
         };
         Color[] cols = { gold, blue, grey, gold };
+        s3Scale = scale;
         for (int k = 0; k < 4; k++)
         {
             Transform g = ExpGroup(names[k]).transform;
             Vector3 c = o + Vector3.right * (gap * (k - 1.5f));
+            s3Centre[names[k]] = c;
             S3Triangle(g, c, scale, labelSize, cols[k] * .8f);
             switch (k)
             {

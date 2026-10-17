@@ -57,8 +57,11 @@ public partial class SacksSpiral
     {
         Transform g = ExpGroup("LA lattices").transform;
         const float s = 4.2f;
-        int[] ns = { 6, 13, 59 };
-        Color[] ringCol = { new(1f, .4f, .35f), new(.45f, 1f, .55f), Color.white };
+        // the rings: 2 and 3 (primes on the second family), 6 = 2·3, 13 and 59; each family's points on ring n are "lit k n"
+        int[] ns = { 2, 3, 6, 13, 59 };
+        Color[] ringCol = { new(1f, .62f, .2f), new(.78f, .55f, 1f), new(1f, .4f, .35f), new(.45f, 1f, .55f), Color.white };
+        laLatticeScale = s;
+        laLatticeOrigin = o;
         string[] names = { "x² + xy + 6y²", "2x² + xy + 3y²", "2x² − xy + 3y²" };
         for (int k = 0; k < 3; k++)
         {
@@ -101,16 +104,17 @@ public partial class SacksSpiral
                 }
 
                 ExpLine(g, $"ring {k} {ns[r]}", .16f, ringCol[r] * .75f, Factory.SoftGlowIntensity, ring);
-                foreach (var (x, y) in FormReps(f, ns[r], true))
+                lit.Clear(); lc.Clear(); ls.Clear();
+                foreach (var (x, y) in FormReps(f, ns[r], false))
                 {
                     Vector2 p = FormPoint(f, x, y);
                     lit.Add(c + new Vector3(p.x * s, p.y * s, -.2f));
                     lc.Add(ringCol[r]);
                     ls.Add(1.6f);
                 }
-            }
 
-            ExpPointCloud(g, $"lit {k}", lit, lc, ls, Factory.GlowIntensity);
+                if (lit.Count > 0) ExpPointCloud(g, $"lit {k} {ns[r]}", lit, lc, ls, Factory.GlowIntensity);
+            }
             ExpLabelWide(g, names[k], c + new Vector3(0f, 52f, 0f), labelSize * .24f, FormColors[k]).gameObject.name = $"name {k}";
             ExpLabelWide(g, k == 0 ? "the principal family" : k == 1 ? "a second family" : "its mirror image", c + new Vector3(0f, 46f, 0f), labelSize * .17f,
                 new Color(.75f, .78f, .9f)).gameObject.name = $"sub {k}";
@@ -368,6 +372,7 @@ public partial class SacksSpiral
         foreach (var (lam, col, name) in heights)
         {
             ExpLine(g, $"height {lam}", .22f, col * .9f, Factory.GlowIntensity, new[] { P(0, lam) + Vector3.forward * .1f, P(50, lam) + Vector3.forward * .1f });
+            dots.Clear(); dc.Clear(); ds.Clear();
             for (int k = 1; k < R.Length; k++)
             {
                 if (Math.Abs(R[k] - R[k - 1]) > 4d || (R[k] - lam) * (R[k - 1] - lam) > 0d) continue;
@@ -376,9 +381,10 @@ public partial class SacksSpiral
                 dc.Add(col);
                 ds.Add(1.3f);
             }
-        }
 
-        ExpPointCloud(g, "crossings", dots, dc, ds, Factory.GlowIntensity);
+            // each height's crossings on their own, so a line can light one height at a time
+            ExpPointCloud(g, $"crossings {lam}", dots, dc, ds, Factory.GlowIntensity);
+        }
         // the zeros off the line for every λ (all of the mixture's zeros, counted by the argument principle, minus those on the
         // line), on the same axis: none only in two small windows, round the two L-functions
         int[] off = ClassGroupData.MixOffLine;

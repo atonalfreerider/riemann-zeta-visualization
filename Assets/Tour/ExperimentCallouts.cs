@@ -176,7 +176,7 @@ public partial class SacksSpiral
         }
 
         dir.Normalize();
-        TextBox label = ExpLabelWide(g, text, target, d * .42f, col);
+        TextBox label = ExpLabelWide(g, text, target, d * .42f * CalloutScale, col);
         TMP_Text t = label.TextField;
         Outline(t);
         OnTop(t.GetComponent<Renderer>(), 31);

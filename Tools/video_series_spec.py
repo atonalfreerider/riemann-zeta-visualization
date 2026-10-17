@@ -77,10 +77,11 @@ def BOX(x0, x1, y0, y1, aspect=16 / 9):
     return dict(at=f"{(x0 + x1) / 2:.1f},{(y0 + y1) / 2:.1f},0", fit=f"{fh * aspect:.1f},{fh:.1f}")
 
 
-def TOP(*boxes, **kw):
-    """A shot from straight above framing a box in the safe band; with two boxes it eases from the first to the second."""
+def TOP(*boxes, el=89.5, **kw):
+    """A shot from above framing a box in the safe band; with two boxes it eases from the first to the second. el below
+    89.5 tilts the camera a little (the picture leans back, so the depth shows)."""
     b = [BOX(*x) for x in boxes]
-    return C(at=">".join(x["at"] for x in b), fit=">".join(x["fit"] for x in b), el=89.5, az=-90, spin=0, rise=.035, **kw)
+    return C(at=">".join(x["at"] for x in b), fit=">".join(x["fit"] for x in b), el=el, az=-90, spin=0, rise=.035, **kw)
 
 
 def LINE(n, fit="170,96", y=3):
@@ -106,35 +107,60 @@ def uncurl(word, end, h_to=22, dot_to=2):
             at(end, tw("nw.labels", 1, 1.5))]
 
 
+NW_INIT = ["exp:stage", "exp:backdrop:off", "exp:nwinit", tw("nw.vis", 1, 0), tw("nw.labels", 1, 0), tw("nw.dot", 2, 0),
+           tw("nw.label", 14, 0), tw("nw.h", 5, 0), tw("nw.terms.p", 0, 0), tw("nw.terms.d", 1, 0), tw("nw.mix", 0, 0),
+           tw("nw.stand", 0, 0), tw("nw.wave", 1, 0), tw("nw.count", 0, 0), tw("nw.counter", 0, 0)]
+ROWS = TOP((99946, 100140, -9, 47))          # the line to 30 with the formula's rows above it and the critical line at the left
 XS1 = dict(
     id="xs1", title="The saddle is a wave", subtitle="discovery 1 of 5:  two master waves on the Sacks spiral",
-    setup=["exp:stage", "exp:backdrop:off", "exp:nwinit", tw("nw.vis", 1, 0), tw("nw.labels", 1, 0), tw("nw.dot", 2, 0),
-           tw("nw.label", 14, 0), tw("nw.h", 22, 0), tw("nw.terms.p", 1, 0), tw("nw.terms.d", 1, 0), tw("nw.mix", 0, 0),
-           tw("nw.stand", 0, 0), tw("nw.wave", 0, 0), tw("nw.count", 0, 0)],
+    setup=["exp:stage", "exp:backdrop:off"],
     lines=[
-        dict(text="Claude, an AI math research assistant, and I went looking for the geometry hidden in the counting numbers. "
-                  "We begin with the plainest picture of them, the number line: one dot for each number, the primes in gold. "
-                  "Two, three, five, seven, eleven, thirteen.",
-             camera=LINE(16),
-             actions=[say("the number line", "one dot for each counting number;  the primes in gold"),
-                      "@0.8|" + tw("nw.count", 32, "{went~two}", "linear"),
-                      at("two", "exp:nwflare:2"), at("three", "exp:nwflare:3"), at("five", "exp:nwflare:5"),
-                      at("seven", "exp:nwflare:7"), at("eleven", "exp:nwflare:11"), at("thirteen", "exp:nwflare:13"), "exp:snap"]),
-        dict(text="Over this line the zeros of zeta draw a wave. The first zero, at height fourteen point one three, adds a single "
-                  "cosine. Its crests tick on the logarithm of n: at seven point four, eleven point five, eighteen and twenty-eight, "
-                  "each about one and a half times the last.",
-             camera=LINE(16),
-             actions=[at("draw", tw("nw.wave", 1, 2.5)), at("draw", tw("nw.counter", 1, 1)),
-                      say("one zero, one wave", "−cos(14.13 · log n):  its crests tick on log n"),
+        # the teaser: where the segment is going
+        dict(text="Claude, an AI math research assistant, and I set out to find the geometry hidden in the counting numbers. "
+                  "This is where it leads: the Sacks spiral on its saddle, carrying the master wave of zeta's zeros, which "
+                  "spikes at every prime, and the curve of zeta rising out of the saddle's centre, touching its axis at every "
+                  "zero. Here is how it is built.",
+             camera="home_orbit",
+             actions=["exp:home:240:line", say("where this leads", "ζ's master wave on the Sacks spiral  ·  ζ's curve rising from the saddle's centre"),
+                      "exp:snap"]),
+        dict(text="We begin with the plainest picture: the counting numbers on a line, one dot for each. A prime can be divided "
+                  "only by one and itself. {2, 3, 5 and 7|Two, three, five and seven} are prime, and so are eleven and thirteen, in gold. {4 = 2 · 2,|Four "
+                  "is two times two,} {6 = 2 · 3,|six is two times three,} {9 = 3 · 3:|nine is three times three:} those are not.",
+             camera=LINE(8, fit="100,56", y=2),
+             actions=NW_INIT + ["exp:snap", say("the counting numbers", "a prime can be divided only by 1 and itself"),
+                      at("begin", tw("nw.count", 16, "{begin~prime}", "linear")),
+                      at("two", "exp:nwflare:2"), at("two", call("nw", "2", -.3, 1, "2", col=GOLD)),
+                      at("three", "exp:nwflare:3"), at("three", call("nw", "3", 0, 1, "3", col=GOLD)),
+                      at("five", "exp:nwflare:5"), at("five", call("nw", "5", 0, 1, "5", col=GOLD)),
+                      at("seven", "exp:nwflare:7"), at("seven", call("nw", "7", 0, 1, "7", col=GOLD)),
+                      at("eleven", "exp:nwflare:11"), at("eleven", call("nw", "11", 0, 1, "11", col=GOLD)),
+                      at("thirteen", "exp:nwflare:13"), at("thirteen", call("nw", "13", .3, 1, "13", col=GOLD)),
+                      at("four", call("nw", "4", -.3, -1, "4 = 2·2", col=RED)), at("six", call("nw", "6", 0, -1, "6 = 2·3", col=RED)),
+                      at("nine", call("nw", "9", .3, -1, "9 = 3·3", col=RED))]),
+        # the first zero enters: from the critical line into the formula, then onto the line
+        dict(text="Over this line the zeros of zeta draw a wave. The zeros lie on the critical line, real part one half, and "
+                  "the first is at height fourteen point one three. That height becomes the frequency of a cosine: {−cos(14.13 · log x)|minus cos "
+                  "of fourteen point one three times log x}. Its crests tick on the logarithm: at seven point four, eleven point "
+                  "five, eighteen and twenty-eight, each about one and a half times the last.",
+             camera=TOP((99960, 100080, -9, 30), (99946, 100140, -9, 47), span=4),
+             actions=["exp:uncall", tw("nw.count", 32, 3), at("zeros#1", "exp:nwrows:p:3:13:3.5:30"),
+                      say("each zero, one wave", "the zero ½ + 14.13i:  its height is the frequency of −cos(14.13 · log x)"),
+                      at("first", "exp:nwenter:1:{first~seven}"), at("cos", tw("nw.counter", 1, 1)),
                       at("seven", call("nw", "7.39", 0, 0, "7.4")), at("eleven", call("nw", "11.53", 0, 0, "11.5")),
                       at("eighteen", call("nw", "17.98", 0, 0, "18.0")), at("twentyeight", call("nw", "28.05", 0, 0, "28.1"))]),
+        dict(text="The second zero, at twenty-one point zero two, adds its own cosine, and the third, at twenty-five point zero "
+                  "one, another. Each zero's height is the frequency of one wave, and the waves add up.",
+             camera=ROWS,
+             actions=["exp:uncall", at("second", "exp:nwenter:2:{second~third}"), at("third", "exp:nwenter:3:{third~waves}"),
+                      say("three zeros, three waves", "−cos(14.13 · log x) − cos(21.02 · log x) − cos(25.01 · log x)")]),
         dict(text="Add the waves of more zeros: ten, a hundred, a thousand, ten thousand. They agree at the primes and cancel "
                   "between them, and the sum sharpens into spikes, one at every prime and at every power of a prime.",
              camera=LINE(22, fit="220,124"),
-             actions=["exp:uncall", tw("nw.count", 45, 3), tw("nw.terms.p", 10000, "{add~ten#2}", "geo"),
-                      say("adding zeros", "they agree at the primes and cancel between them")]),
-        dict(text="Seven is a prime, and it has a spike. Eight is two cubed, a power of two, and it has one too; so does nine, "
-                  "three squared. But ten, two times five, has no spike, and neither does twelve, two squared times three.",
+             actions=["exp:uncall", "exp:mute:NW rows:1.2:1.9", tw("nw.h", 22, 1.5), tw("nw.count", 45, 3),
+                      tw("nw.terms.p", 10000, "{add~ten#2}", "geo"), at("agree", "exp:nwrowsclear"),
+                      say("adding zeros", "−Σ cos(γ · log x) over the zeros ½ + iγ:  they agree at the primes")]),
+        dict(text="{7|Seven} is a prime, and it has a spike. {8 = 2³|Eight is two cubed}, a power of {2|two}, and it has one too; so does {9 = 3².|nine, "
+                  "three squared.} But {10 = 2 · 5|ten, two times five,} has no spike, and neither does {12 = 2² · 3.|twelve, two squared times three.}",
              camera=LINE(9.5, fit="64,36", y=3),
              # the callouts wait for the graph to finish shrinking (nw.h), so they land on the spikes as drawn
              actions=[tw("nw.h", 7, 1.2), at("seven+1.3", call("nw", "7", -.3, 1, "7:  prime")), at("eight", call("nw", "8", .1, 1, "8 = 2³")),
@@ -155,10 +181,20 @@ XS1 = dict(
                      [at("squares", tw("nw.rays", 1, 1.5)),
                       at("ray+0.3", call("nw", "16", 0, 0, "16 = 4²", col=BLUE)), at("ray+0.9", call("nw", "25", 0, 0, "25 = 5²", col=BLUE)),
                       say("curling the line", "one turn for each step of √n:  the Sacks spiral")]),
+        # the square root is the critical line's one half
+        dict(text="The square root is {n<sup>½</sup>:|n to the power one half:} the same {½|one half} as zeta's critical line. On that line every "
+                  "zero's wave swells like the square root of n, the radius of this very spiral, while every term of zeta "
+                  "shrinks like one over it. The spiral and the critical line are mirror images through the power {½,|one half,} "
+                  "which is why they reflect the same distribution of primes.",
+             camera=C(**SPIRAL),
+             actions=["exp:uncall", at("root", "exp:nwradius:100:24:radius √100 = 10"),
+                      at("same", say("one half, twice", "the spiral's radius √n = n<sup>½</sup>   ·   ζ's critical line:  Re s = ½")),
+                      at("swells", say("one half, twice", "each zero's wave swells like n<sup>½</sup>   ·   each term of ζ shrinks like n<sup>−½</sup>"))]),
         dict(text="Now stand the graph up out of the plane. On the spiral it becomes the curtain of the home view: a spike on every "
-                  "prime and every prime power; ninety-seven, a prime, and sixty-four, two to the sixth.",
+                  "prime and every prime power; ninety-seven, a prime, and {64 = 2<sup>6</sup>.|sixty-four, two to the sixth.}",
              camera=C(**SPIRAL, el="89.5>40", az=-90, spin=0, span=7),
-             actions=["exp:uncall", tw("nw.rays", 0, 1.5), at("stand", tw("nw.stand", 1, "{stand~home}")), at("stand", tw("nw.h", 6, "{stand~home}")),
+             actions=["exp:uncall", "exp:nwradius:0:24:", tw("nw.rays", 0, 1.5), at("stand", tw("nw.stand", 1, "{stand~home}")),
+                      at("stand", tw("nw.h", 6, "{stand~home}")),
                       at("ninetyseven", call("nw", "97", 0, 0, "97:  prime")), at("sixtyfour", call("nw", "64", 0, 0, f"64 = 2{sup(6)}")),
                       say("the master wave on the Sacks spiral", "the home view's curtain")]),
         dict(text="One zero's wave on its own looks very different here. Take the hundredth zero alone. Its crests still tick on "
@@ -173,28 +209,38 @@ XS1 = dict(
              actions=[at("first", tw("nw.first.p", 1, 0)), at("first", tw("nw.ribbon", 0, 1.5)), at("uncurl", tw("nw.stand", 0, 2.5))] +
                      uncurl("uncurl", "back#2") + [say("uncurling", "the first zero's wave, back on the number line")]),
         dict(text="Now count divisors instead of primes. Voronoi found in nineteen oh four that the count of divisors has waves of "
-                  "its own. His first wave ticks on the square root of n, so its crests spread apart only slowly: eight point six, "
-                  "eleven point eight, fifteen point five.",
+                  "its own. His first wave is a sine of {4π√x|four pi times the square root of x}, so it ticks on the square root, and "
+                  "its crests spread apart only slowly: eight point six, eleven point eight, fifteen point five.",
              camera=LINE(15),
              actions=[at("count", tw("nw.mix", 1, "{count~his}")),
                       at("eight", call("nw", "8.63", 0, 0, "8.6")), at("eleven", call("nw", "11.82", 0, 0, "11.8")),
                       at("fifteen", call("nw", "15.5", 0, 0, "15.5")),
-                      say("Voronoi's first wave", "sin(4π√n − π/4):  it ticks on √n")]),
+                      say("Voronoi's first wave", "sin(4π√x − π/4):  it ticks on √x")]),
+        # his next waves enter, each as strong as its number's count of divisors
+        dict(text="His wave number m ticks on {√(mx),|the square root of m times x,} and its strength is m's own count of divisors. {2|Two} "
+                  "has two divisors, {1 and 2;|one and two;} {3|three} has two; {4|four} has three, {1, 2 and 4.|one, two and four.} Each enters his formula as "
+                  "one more wave.",
+             camera=TOP((99946, 100140, -9, 52)),
+             actions=["exp:uncall", tw("nw.h", 5, 1.2), "exp:nwrows:d:4:13:3:30:2",
+                      say("Voronoi's waves", "the wave of m:  d(m) · m<sup>−¼</sup> · sin(4π√(mx) − π/4),  d(m) its divisors"),
+                      at("two#2", "exp:nwenter:2:{two#2~three#1}"), at("three#1", "exp:nwenter:3:{three#1~four}"),
+                      at("four", "exp:nwenter:4:{four~end}")]),
         dict(text="Add more of his waves, ten, a hundred, four thousand, and they too sharpen into spikes. But now there is a "
                   "spike at every whole number, and each one stands as tall as its number's count of divisors.",
              camera=LINE(20, fit="200,112"),
-             actions=["exp:uncall", tw("nw.count", 45, 3), tw("nw.terms.d", 4000, "{add~divisors}", "geo"),
+             actions=["exp:uncall", "exp:mute:NW rows:1.2:1.9", tw("nw.h", 22, 1.5), tw("nw.count", 45, 3),
+                      tw("nw.terms.d", 4000, "{add~divisors}", "geo"), at("spike", "exp:nwrowsclear"),
                       say("Voronoi's divisor wave", "a spike at every n, as tall as its count of divisors")]),
-        dict(text="Seven, a prime, has two divisors, one and seven, so its spike is short. Twelve has six: one, two, three, four, "
-                  "six and twelve. Sixteen, two to the fourth, has five.",
+        dict(text="{7,|Seven,} a prime, has two divisors, {1 and 7,|one and seven,} so its spike is short. {12|Twelve} has six: one, two, three, four, "
+                  "six and twelve. {16 = 2<sup>4</sup>|Sixteen, two to the fourth,} has five.",
              camera=LINE(11.5, fit="64,36", y=3),
              actions=[tw("nw.h", 12, 1.2), at("seven#1+1.3", call("nw", "7", 0, 0, "7:  2 divisors", col=GOLD)),
                       at("twelve", call("nw", "12", 0, 0, "12:  6 divisors")), at("one#2", "exp:nwdivisors:12:ffd973:{one#2~twelve#2}"),
                       at("sixteen", "exp:uncall"), at("sixteen+0.1", call("nw", "16", 0, 0, f"16 = 2{sup(4)}:  5 divisors")),
                       say("the spikes count divisors", "7:  2   ·   12:  6   ·   16:  5")]),
-        dict(text="The count comes from the prime factors: add one to each exponent, and multiply. Twelve is two squared times "
-                  "three, so three times two, six. Thirty is two times three times five, two times two times two, eight. And "
-                  "thirty-six, two squared times three squared, has three times three, nine.",
+        dict(text="The count comes from the prime factors: add one to each exponent, and multiply. {12 = 2² · 3,|Twelve is two squared times "
+                  "three,} so {3 · 2 = 6.|three times two, six.} {30 = 2 · 3 · 5,|Thirty is two times three times five,} {2 · 2 · 2 = 8.|two times two times two, eight.} And "
+                  "{36 = 2² · 3²|thirty-six, two squared times three squared,} has {3 · 3 = 9.|three times three, nine.}",
              camera=LINE(24, fit="170,96"),
              actions=["exp:uncall", tw("nw.h", 22, 1.5), say("count the divisors from the factors", "n = p<sup>a</sup> q<sup>b</sup> …  has  (a + 1)(b + 1) …  divisors"),
                       at("twelve#1+1.5", call("nw", "12", -.5, 1, "12 = 2²·3:  3·2 = 6")),
@@ -204,38 +250,45 @@ XS1 = dict(
              camera=COIL,
              actions=["exp:uncall", tw("nw.count", 150, 1.5), tw("nw.terms.d", 1, "{take~curl}", "geo")] + curl("curl", "end", h_to=1) +
                      [say("curling Voronoi's first wave", "the same Sacks spiral")]),
+        # where his crests sit: 22.5° before the squares and the pronic numbers
         dict(text="On the spiral his first wave stands still: two crests on every turn, at the same two angles turn after turn, "
-                  "beside the ray of the squares, like sixty-four, and the ray of the pronic numbers, like seventy-two.",
+                  "{22.5°|twenty-two and a half degrees} before the ray of the squares, just short of sixty-four, and before the ray of "
+                  "the pronic numbers, just short of seventy-two.",
              camera=C(**SPIRAL, el=86, az=-90, spin=0),
-             actions=[tw("nw.stand", 1, 1.5), tw("nw.ribbon", 1, 1.5), at("squares", tw("nw.rays", 1, 1.5)),
+             actions=[tw("nw.stand", 1, 1.5), tw("nw.ribbon", 1, 1.5), at("same", tw("nw.rays", 1, 1.5)),
+                      at("twentytwo", "exp:nwangle:on:24"),
                       at("sixtyfour", call("nw", "64", 0, 0, "64 = 8²", col=WHITE)),
                       at("seventytwo", call("nw", "72", 0, 0, "72 = 8·9", col=WHITE)),
-                      say("Voronoi's first wave on the spiral", "two crests per turn, on the same two rays")]),
+                      say("Voronoi's first wave on the spiral", "two crests per turn, 22.5° before the squares and the pronic numbers")]),
         dict(text="Turn it into a zero's wave on the same spiral, and its crests start to drift into arms, because the zeros tick "
                   "on the logarithm. Turn it back: Voronoi's waves tick on the square root, the spiral's own clock, so each one "
                   "stands still.",
              camera=C(**SPIRAL, el=86, az=-90, spin=0),
-             actions=["exp:uncall", tw("nw.rays", 0, 1.5), tw("nw.first.p", 100, 0), at("turn", tw("nw.mix", 0, "{turn~drift}")),
+             actions=["exp:uncall", "exp:nwangle:off", tw("nw.rays", 0, 1.5), tw("nw.first.p", 100, 0), at("turn", tw("nw.mix", 0, "{turn~drift}")),
                       at("back", tw("nw.mix", 1, "{back~square}")),
                       say("two clocks", "ζ's zeros tick on log n  ·  Voronoi's waves tick on √n")]),
-        dict(text="Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every "
-                  "turn, its valleys along those same two rays. The saddle has the shape of Voronoi's first wave, turned over.",
+        dict(text="Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, "
+                  "its valleys along the rays of the squares and the pronic numbers, where primes are scarcest. Voronoi's first "
+                  "wave has the same shape, turned over and turned by {22.5°:|twenty-two and a half degrees:} the {−π/4|minus pi over four} in "
+                  "his formula moves every crest by a sixteenth of a turn.",
              camera=C(at="100000,0,-3", fit="106,59.6>56,42", el="86>26", az=-90, spin=2, rise=.04, span=8),
              actions=[at("bend", tw("nw.bend", 1, "{bend~rays}")), at("bend", tw("nw.h", .4, "{bend~rays}")),
-                      say("the saddle", "down twice and up twice on every turn:  Voronoi's first wave, turned over")]),
+                      at("valleys", tw("nw.rays", 1, 1.5)), at("voronois", "exp:nwangle:on:0"),
+                      say("the saddle", "down twice and up twice on every turn:  valleys on the squares and pronic numbers"),
+                      at("voronois", say("the saddle and Voronoi's first wave", "the same shape, turned over and turned 22.5°:  the phase −π/4 in his formula"))]),
         dict(text="Now build both master waves on the saddle, on this one spiral. The zeros' waves light the primes; turn them "
                   "into the whole numbers' own waves, and every number lights up by its count of divisors.",
              camera=C(at="100000,0,-3", fit="64,50", el=34, az="+", spin=2, rise=.075),
-             actions=[tw("nw.ribbon", 0, 1.5), tw("nw.first.p", 1, 0), at("build", tw("nw.mix", 0, 2)),
+             actions=["exp:nwangle:off", tw("nw.rays", 0, 1.5), tw("nw.ribbon", 0, 1.5), tw("nw.first.p", 1, 0), at("build", tw("nw.mix", 0, 2)),
                       at("build", tw("nw.terms.p", 10000, "{build~light}", "geo")), at("build", tw("nw.terms.d", 4000, "{build~light}", "geo")),
                       at("build", tw("nw.h", 6, 2)), at("turn", tw("nw.mix", 1, "{turn~divisors}")),
                       say("two master waves on one saddle", "ζ's zeros light the primes  ·  the whole numbers count divisors")]),
         dict(text="Voronoi's formula is from nineteen oh four, and the explicit formula for the primes from Riemann and von "
                   "Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first "
-                  "wave, and both master waves ride the same spiral.",
+                  "wave, turned a sixteenth of a turn, and both master waves ride the same spiral.",
              camera=C(at="100000,0,-3", fit="64,50>70,54", el="34>28", az="+", spin=2, rise=.075, span=14),
              actions=[at("explicit", tw("nw.mix", 0, 3)), at("both", tw("nw.mix", 1, 3)),
-                      say("what is new", "the saddle is Voronoi's first wave;  both master waves ride one spiral")], pause=1.4),
+                      say("what is new", "the saddle is Voronoi's first wave, turned 22.5°;  both master waves ride one spiral")], pause=1.4),
     ])
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -266,86 +319,108 @@ PATH_WHEEL = (103998, 104057, -23.5, 6.5)
 BLOCK15 = (104005.5, 104014.1, -14.6, -10.8)
 WHEEL_BARS = (104024, 104106, -23.5, 6.5)
 ALL2 = (103998, 104106, -23.5, 6.5)
+TILT = 74            # the clock and the gold path seen a little from the side, so the picture has depth
+CLIMB = C(at="104006,-8,-20", fit="161.8,91", el=62, az=-90, spin=0, rise=.035)   # the plane up its t axis, the ground below
 XS2 = dict(
     id="xs2", title="E8 sets the vortices", subtitle="discovery 2 of 5:  E8's clock inside zeta's path of partial sums",
-    setup=PATH_SETUP + [f"exp:e8wheel:40:150:11:12:{CLOCK}:6", "exp:hide:E8 spiral", "exp:hide:E8 impostors", "exp:hide:E8 rings"],
+    setup=PATH_SETUP + [tw("pw.logh", 1, 0), tw("pw.ground", 0, 0), f"exp:e8wheel:40:150:11:12:{CLOCK}:6", "exp:hide:E8 spiral",
+                        "exp:hide:E8 impostors", "exp:hide:E8 rings"],
     lines=[
         dict(text="Discovery two. Claude and I drew zeta's series as a path of partial sums: one arrow for every counting number "
-                  "n, one over root n long, each turning from the last by t times the logarithm of n over n minus one.",
-             camera=PC(at="11,-7,0>12,-16,0", fit="44,26>70,42", span=6, hold=8),
+                  "n, one over root n long, each turning from the last by {t · log(n/(n − 1)).|t times the logarithm of n over n minus one.}",
+             camera=PC(at="11,-7,0>12,-16,0", fit="44,26>70,42", el=80, span=6, hold=8),
              actions=[say("the path of partial sums", "one arrow n<sup>−½ − it</sup> for every counting number, laid end to end"),
                       at("arrow", tw("pw.n", 1, 1.2)), at("over", tw("pw.n", 2, 1.4)), at("turning", tw("pw.n", 3, 1.4)),
                       at("logarithm", tw("pw.n", 4, 1.4)), at("minus", tw("pw.n", 8, "{minus~end}", "linear")), "exp:snap"]),
-        dict(text="Raise t, and the path winds up. At the first zero, t equal to fourteen point one three, its end lands on zero. "
-                  "Higher still, at the hundred and fifty-ninth zero, three hundred thirty-three point six, the path curls into "
-                  "vortices, with straight spokes between them.",
-             camera=PC(at="12,-16,0>5,-5,0", fit="70,42>56,32", span=6),
-             actions=[tw("pw.marks", 0, .8), tw("pw.n", 1000000, 1.5), at("raise", tw("pw.t", 14.134725, "{raise~lands}", "geo")),
-                      at("winds", tw("pw.tail", 1, 1.5)), at("zero#2", call("pathzeta", 0, 0, 0, "ζ = 0", col=GOLD)),
+        # the plane climbs its t axis; the ground (t = 0) stays below
+        dict(text="Raise t, and the path climbs its axis, winding up as it goes; the grid below is the ground, where t is zero. "
+                  "At the first zero, t equal to fourteen point one three, the path's end lands on zero. Higher still, at the "
+                  "hundred and fifty-ninth zero, three hundred thirty-three point six, it curls into vortices, with straight "
+                  "spokes between them.",
+             camera=C(at="104012,-12,0>104006,-8,-20", fit="70,42>161.8,91", el="80>62", az=-90, spin=0, rise=.035, span=5),
+             actions=[tw("pw.marks", 0, .8), tw("pw.n", 1000000, 1.5), at("raise", tw("pw.ground", 1, 1.5)),
+                      at("raise", tw("pw.rise", 1, "{raise~ground}")), at("raise", tw("pw.axis", 1, 1.5)),
+                      at("raise", tw("pw.t", 14.134725, "{raise~lands}", "geo")),
+                      at("lands", tw("pw.tail", 1, 1.5)), at("zero#3", call("pathzeta", 0, 0, 0, "ζ = 0", col=GOLD)),
                       at("higher", "exp:uncall"), at("higher", tw("pw.t", 333.645, "{higher~vortices}", "geo")),
                       at("vortices", tw("pw.eyes", 1, 1.5)),
-                      say("winding up", "the first zero, t = 14.13;  the 159th, t = 333.6")]),
-        dict(text="The spokes sit near n equal to t over two pi k: fifty-three, twenty-seven, eighteen. Crossing spoke k, the path "
-                  "moves by the k-th term of zeta's reflected series, so every vortex belongs to a counting number.",
-             camera=PC(at="5,-5,0", fit="56,32"),
+                      say("climbing the t axis", "the first zero, t = 14.13;  the 159th, t = 333.6;  the ground is t = 0")]),
+        dict(text="The spokes sit near {n ≈ t/2πk:|n equal to t over two pi k:} fifty-three, twenty-seven, eighteen. Crossing spoke k, the path "
+                  "moves by the {k-th|kay-th} term of zeta's reflected series, so every vortex belongs to a counting number.",
+             camera=CLIMB,
              actions=[say("spoke k at n ≈ t / 2πk", "t = 333.6:  53,  27,  18, …"),
                       at("fiftythree", call("path", 53, 0, 0, "spoke 1:  n ≈ 53")), at("twentyseven", call("path", 27, 0, 0, "spoke 2:  n ≈ 27")),
                       at("eighteen", call("path", 18, 0, 0, "spoke 3:  n ≈ 18")),
                       at("crossing", say("each spoke is a counting number", "crossing spoke k, the path moves by χ(s) k<sup>s−1</sup>"))]),
-        dict(text="Now bring in E eight's clock: its two hundred and forty roots turn by a thirtieth of a circle, and eight of the "
-                  "thirty hours are gold, the ones with no factor two, three or five. Keep only the arrows of numbers on those eight "
-                  "hours: the other arrows shrink away, and the path re-forms.",
-             camera=TOP(PATH_WHEEL),
-             actions=["exp:uncall", tw("pw.eyes", 0, 1), at("clock", "exp:reveal:E8 rings:{clock~eight#2}"),
+        # back down to the ground, where E8's clock lies
+        dict(text="Bring the plane back down to the ground, and beside it, E eight's clock: its two hundred and forty roots turn by "
+                  "a thirtieth of a circle, and eight of the thirty hours are gold, the ones with no factor two, three or five. Keep "
+                  "only the arrows of numbers on those eight hours: the other arrows shrink away, and the path re-forms.",
+             camera=C(at=f"104006,-8,-20>{BOX(*PATH_WHEEL)['at']}", fit=f"161.8,91>{BOX(*PATH_WHEEL)['fit']}", el=f"62>{TILT}",
+                      az=-90, spin=0, rise=.035, span=5),
+             actions=["exp:uncall", tw("pw.eyes", 0, 1), at("bring", tw("pw.rise", 0, "{bring~clock}")), at("bring", tw("pw.axis", 0, 1.5)),
+                      at("clock", tw("pw.ground", 0, 1.5)), at("clock", "exp:reveal:E8 rings:{clock~eight#2}"),
                       at("eight#2", "exp:e8walk:{eight#2~keep}"), at("keep", tw("pw.gold", 1, "{keep~reforms}")),
                       say("E8's clock and its eight gold hours", "keep only the arrows of n with no factor 2, 3 or 5")]),
         dict(text="Raise t to five thousand. The gold path stretches out: a tangle at the start, then long smooth runs, and at its "
                   "end a coil of tiny loops.",
-             camera=TOP(PATH_WHEEL),
+             camera=TOP(PATH_WHEEL, el=TILT),
              actions=[at("raise", tw("pw.t", 5000, "{raise~stretches}", "geo")),
                       say("the gold path at t = 5000", "only the n on E8's eight gold hours:  25 795 terms")]),
-        dict(text="Look closely at the long run near n equal to fifteen ninety. It is made of blocks of eight arrows, one for each "
-                  "gold hour, and in every block all eight arrows point the same way.",
-             camera=TOP(PATH_WHEEL, BLOCK15, span=4),
-             actions=[at("blocks", "exp:tbblock:15"), at("blocks", "exp:mute:PW path:1.5"),
-                      say("one run, close up", "blocks of eight arrows:  1577, 1579, 1583, 1589, 1591, 1597, 1601, 1603")]),
+        # these are the arrows of actual counting numbers
+        dict(text="Look closely at the long run near n equal to fifteen ninety. These are the arrows of actual counting numbers: "
+                  "fifteen seventy-seven, fifteen seventy-nine, fifteen eighty-three and on to sixteen oh three, the eight numbers "
+                  "here on E eight's gold hours, one for each hour. All eight arrows point the same way.",
+             camera=TOP(PATH_WHEEL, BLOCK15, el=TILT, span=4),
+             actions=[at("look", "exp:tbblock:15"), at("look", "exp:mute:PW path:1.5"),
+                      say("one run, close up", "the arrows of 1577, 1579, 1583, 1589, 1591, 1597, 1601, 1603:  one per gold hour")]),
+        # why the blocks sit there
+        dict(text="Why here? Thirty numbers on, each arrow has turned by about {30t/n.|thirty t over n.} Near {n = 30t/(2π · 15),|n equal to thirty t over two "
+                  "pi times fifteen,} about fifteen ninety, that is fifteen whole turns, so every thirty numbers the pattern "
+                  "repeats exactly: the run is block after block of the same eight arrows.",
+             camera=TOP(BLOCK15),
+             actions=[say("the turn over thirty numbers", "t · log((n + 30)/n) ≈ 30t/n = 2π · 15  at  n ≈ 30t / 30π ≈ 1590")]),
         dict(text="Lift one block onto E eight's clock. Seen from the block, each arrow points at fifteen times its own hour, and "
                   "every gold hour times fifteen is hour fifteen: all eight line up, and the block adds to minus eight.",
-             camera=TOP(BLOCK15, PATH_WHEEL, span=4),
+             camera=TOP(BLOCK15, PATH_WHEEL, el=TILT, span=4),
              actions=[at("lift", "exp:mute:E8 rings:1.5"), at("lift", "exp:tblift:15:{lift~seen}"), at("lift", "exp:tbscale:8"),
                       say("the block on E8's clock", "arrow n points at hour 15·n:  all eight at hour 15, the sum −8")]),
-        dict(text="Near n equal to forty-seven seventy, each arrow points at five times its hour: four land on hour five and four "
-                  "on hour twenty-five, and the block adds to four.",
-             camera=TOP(PATH_WHEEL),
+        dict(text="Near n equal to forty-seven seventy, each arrow points at five times its hour: four land on {hour 5|hour five} and four "
+                  "on {hour 25,|hour twenty-five,} and the block adds to four.",
+             camera=TOP(PATH_WHEEL, el=TILT),
              actions=["exp:clearchild:TB chain", at("near", "exp:tbblock:5"), at("near", call("block", 5, 0, 0, "n ≈ 4770")),
                       at("each", "exp:tblift:5:{each~four#2}"),
                       say("near n = 4770:  k = 5", "arrow n points at hour 5·n:  hours 5 and 25, the sum 4")]),
+        # the prime factors play no part: only the hours do
         dict(text="And at the very end, near n equal to twenty-three thousand eight hundred and eighty, each arrow points at its "
-                  "own hour, and the eight nearly cancel: minus one. Every tiny loop of that coil is one such block.",
-             camera=TOP(PATH_WHEEL),
+                  "own hour, and the eight nearly cancel: minus one. Their prime factors play no part. Twenty-three thousand eight "
+                  "hundred and eighty-one is eleven times thirteen times a hundred and sixty-seven, but on the clock it is simply "
+                  "hour one.",
+             camera=TOP(PATH_WHEEL, el=TILT),
              actions=["exp:uncall", "exp:clearchild:TB chain", at("near", "exp:tbblock:1"), at("near", call("block", 1, 0, 0, "n ≈ 23 880")),
                       at("each", "exp:tblift:1:{each~nearly}"),
-                      say("near n = 23 880:  k = 1", "arrow n points at its own hour:  the sum −1")]),
+                      say("near n = 23 880:  k = 1", "arrow n points at its own hour:  the sum −1"),
+                      at("prime", say("only the hour counts", "23 881 = 11 · 13 · 167:  on the clock, hour 1"))]),
         dict(text="Let k run from one to thirty, and the chain of the eight gold hours dances on the clock. Each time k is a whole "
                   "number it lands on a trace of E eight's Coxeter element: minus one, one, two, four, minus two, minus four, minus "
                   "eight, eight.",
-             camera=TOP(PATH_WHEEL, WHEEL_BARS, span=3),
+             camera=TOP(PATH_WHEEL, WHEEL_BARS, el=TILT, span=3),
              actions=["exp:uncall", "exp:clearchild:TB chain", "exp:clearchild:TB block", "exp:tbbars:104064,-9,0:14",
                       at("let", "exp:tbsweep:1:30:{let~end}"),
                       say("tr C<sup>k</sup>:  E8's Coxeter element", "the chain of the eight gold hours, each turned k hours per hour")]),
         dict(text="Measured on the path itself at t equal to five thousand, the charges of the spokes match these traces, to within "
                   "a quarter up to spoke twelve.",
-             camera=TOP(WHEEL_BARS),
+             camera=TOP(WHEEL_BARS, el=TILT),
              actions=[at("measured", "exp:tbbarsall:measured"),
                       say("measured on the gold path at t = 5000", "white: the charge of spoke k;  colour: tr C<sup>k</sup>")]),
         dict(text="Added up again, each turned by an hour, the thirty traces give back E eight's sieve: for seven they reach hour "
                   "seven on the rim; for six they close up at the centre.",
-             camera=TOP(WHEEL_BARS, WHEEL_BOX, span=3),
+             camera=TOP(WHEEL_BARS, WHEEL_BOX, el=TILT, span=3),
              actions=[at("seven", "exp:tbsieve:7:{seven~six}"), at("six", "exp:tbsieve:6:3"),
                       say("the sieve as a spectrum", "(1/30) Σ<sub>k</sub> tr C<sup>k</sup> e<sup>−2πikn/30</sup>:  1 on the gold hours, 0 off them")]),
         dict(text="Why it matters: a symmetry of eight dimensions sets the sign and the strength of every vortex of the gold path. "
                   "The identity is Ramanujan's; what Claude and I add is seeing E eight's clock inside zeta's own path.",
-             camera=TOP(WHEEL_BOX, ALL2, span=10),
+             camera=TOP(WHEEL_BOX, ALL2, el=TILT, span=10),
              actions=["exp:unmute:E8 rings,PW path:2",
                       say("what is new", "Ramanujan's sum c<sub>30</sub>(k) = tr C<sup>k</sup>:  E8's clock inside the path of ζ")], pause=1.4),
     ])
@@ -358,6 +433,7 @@ G1, G2, G3 = 14.134725, 21.022040, 25.010858
 FUNNEL = dict(at="68000,0,-16", fit="124,140", el=26, spin=2)
 FW = dict(at="68000,0,-9", fit="60,52", el=24, rise=.04)          # the coil, close
 FUNNEL_SETUP = ["exp:stage", "exp:backdrop:off", "exp:zfunnel", "exp:fwinit", tw("fw.gamma", G1, 0), tw("fw.n", 0, 0), tw("fw.lift", 0, 0),
+                tw("fw.dim", 0, 0), tw("fw.stretch", 1, 0),
                 tw("fw.coil", 0, 0), tw("fw.tail", 0, 0), tw("fw.path", 1, 0), tw("fw.hands", 1, 0)]
 XS3 = dict(
     id="xs3", title="Where the zeros live in E8", subtitle="discovery 3 of 5:  a zero is a coil up E8's factor funnel",
@@ -368,8 +444,9 @@ XS3 = dict(
                   "logarithm, cut at its prime factors.",
              camera=C(**FUNNEL, az=-100),
              actions=[say("E8's factor funnel", "n at its hour n mod 30, its column as tall as log n, cut at its prime factors"), "exp:snap"]),
-        dict(text="That is too much at once, so grey it out and light one number at a time. Seven is a prime, at hour seven: one "
-                  "piece, log seven tall. Six is two times three, at hour six: a piece log three tall, and on top of it one log two tall.",
+        dict(text="That is too much at once, so grey it out and light one number at a time. Seven is a prime: its arm points to "
+                  "hour seven on the floor, and its column is one piece, log seven tall. {6 = 2 · 3,|Six is two times three,} at hour six: a "
+                  "piece log three tall, and on top of it one log two tall.",
              camera=C(at="68000,0,-16>68004,0,-6", fit="124,140>36,28", el="26>22", az="+", spin=1, rise=.04, span=5),
              actions=[at("grey", "exp:mute:GB factor columns:1.2"), at("seven#1", "exp:fwhl:7:logs"),
                       at("six", "exp:fwunhl:7"), at("six", "exp:fwhl:6:logs"),
@@ -382,33 +459,42 @@ XS3 = dict(
                       at("tail", tw("fw.tail", 1, 1.5)),
                       say("the path at the first zero, on the floor", "t = 14.13:  its arrows n<sup>−½ − it</sup> close on the axis")]),
         dict(text="Lift each arrow to the height of its own number. Arrow n rises to log n, the top of n's column; its tail moves "
-                  "onto the axis, and it keeps its direction. Arrow one stays on the floor, arrow two rises to log two, arrow six "
-                  "to log six.",
-             camera=C(at="68006.8,0.2,0>68002,0,-7", fit="40,22.5>44,40", el="84>22", az="+", spin=1.5, rise=.04, span=6),
-             actions=[tw("fw.tail", 0, 1), tw("fw.axis", 1, 1), tw("fw.path", 0, "{lift~end}"), at("lift", tw("fw.lift", 1, "{lift~six}")),
-                      at("two#2", "exp:fwhl:2"), at("six", "exp:fwhl:6"),
-                      say("lift arrow n to the height log n", "its direction stays:  γ·log n")]),
+                  "onto the axis, and it keeps both its direction and its length, one over root n. Arrow one stays on the floor, "
+                  "arrow two rises to log two, arrow six to log six: stacked, the shrinking arrows narrow like a horn.",
+             camera=C(at="68006.8,0.2,0>68002,0,-8", fit="40,22.5>56,40", el="84>22", az="+", spin=1.5, rise=.04, span=6),
+             actions=[tw("fw.stretch", 0, 0), tw("fw.tail", 0, 1), tw("fw.axis", 1, 1), tw("fw.path", 0, "{lift~end}"),
+                      at("lift", tw("fw.lift", 1, "{lift~six#2}")), at("two#2", "exp:fwhl:2"), at("six#2", "exp:fwhl:6"),
+                      at("horn", tw("fw.coil", .5, "{horn~end}")),
+                      say("lift arrow n to the height log n", "it keeps its direction γ·log n and its length 1/√n:  a horn")]),
+        # the stretch by √n: the critical line's ½ cancels the spiral's radius
+        dict(text="Now stretch each arrow by the square root of its number: the distance of n from the centre on the Sacks "
+                  "spiral, and on this funnel's floor. {1/√n × √n = 1.|One over root n, times root n, is one.} On the critical line the length "
+                  "and the radius cancel, every arrow becomes one unit long, and all that is left is its direction.",
+             camera=C(at="68002,0,-8>68000,0,-12", fit="56,40>70,52", el=22, az="+", spin=1.5, rise=.04, span=6),
+             actions=["exp:fwunhl", at("stretch", tw("fw.stretch", 1, "{stretch~one#2}")), at("stretch", "exp:fwhl:2"),
+                      say("stretch arrow n by √n", "1/√n × √n = 1:  the critical line's ½ cancels the spiral's radius"),
+                      at("one#2", say("every arrow one unit long", "n<sup>−½</sup> · n<sup>½</sup> = 1:  only the direction γ·log n is left"))]),
         dict(text="Stacked, the arrows are the hands of a clock that turns by gamma for every unit of height, and a coil runs "
                   "through their tips, one turn every point four four. That coil is the zero, wound up E eight's funnel.",
-             camera=C(at="68000,0,-14", fit="66,74", el=22, az="+", az_to=-90, rise=.04),
-             actions=["exp:fwunhl", at("coil", tw("fw.coil", 1, "{coil~end}")),
+             camera=C(at="68000,0,-14", fit="76,74", el=22, az="+", az_to=-90, rise=.04),
+             actions=["exp:fwunhl", tw("fw.coil", 0, 0), at("coil", tw("fw.coil", 1, "{coil~end}")),
                       say("a zero is a coil", "one turn every 2π/γ = 0.44 of height")]),
         # the clock face from above: the hands of 2, 3 and 6 bright, the rest and the coil faded, the turns as arcs
-        dict(text="And the coil reads the prime factors. Six is two times three, so log six is log two plus log three, and the "
+        dict(text="And the coil reads the prime factors. {6 = 2 · 3,|Six is two times three,} so {log 6 = log 2 + log 3,|log six is log two plus log three,} and the "
                   "hand at six has turned the turn of two plus the turn of three.",
-             camera=C(at="68000,0,-14>68004,-1,-9.5", fit="66,74>64,36", el="22>64", az=-90, spin=0, rise=.035, span=5),
+             camera=C(at="68000,0,-14>68004,-1,-9.5", fit="76,74>72,40.5", el="22>64", az=-90, spin=0, rise=.035, span=5),
              actions=[tw("fw.coil", .32, 2), tw("fw.dim", 1, 2), at("six#1", "exp:fwhl:6:logs"), at("plus#1", "exp:fwangles:6"),
                       say("the hand of 6 = the hand of 2 + the hand of 3", "γ·log 6 = γ·log 2 + γ·log 3:  1.56 + 2.47 = 4.03 turns")]),
-        dict(text="Every zero is such a coil. The next two, twenty-one point zero two and twenty-five point zero one, turn every "
+        dict(text="Every zero is such a coil. {The next two:|The next two,} twenty-one point zero two and twenty-five point zero one, turn every "
                   "hand further, the higher ones more: tighter coils.",
-             camera=C(at="68004,-1,-9.5>68000,0,-14", fit="64,36>66,74", el="64>24", az=-90, spin=0, rise=.04, span=5),
+             camera=C(at="68004,-1,-9.5>68000,0,-14", fit="72,40.5>76,74", el="64>24", az=-90, spin=0, rise=.04, span=5),
              actions=["exp:fwunhl", "exp:clearchild:FW angles", tw("fw.dim", 0, 1.5), tw("fw.coil", 1, 2.5),
                       at("twentyone", tw("fw.gamma", G2, 2)), at("twentyfive", tw("fw.gamma", G3, 2)),
                       say("the next zeros", "γ = 21.02,  25.01:  tighter coils")]),
         dict(text="Now add the coils of all ten thousand five hundred zeros. A ring climbs the funnel's axis, and at each height "
                   "the coils add up to a single hand. Where they agree, at a prime or a power of a prime, the hand shoots out to the "
-                  "top of that prime's column: seven, eight, nine. At six and ten they cancel, and the hand stays at the axis.",
-             camera=C(at="68000,0,-14>68004,0,-10", fit="66,74>56,31.5", el="24>10", az=-90, spin=0, rise=.035, span=4),
+                  "top of that prime's column: {7, 8, 9.|seven, eight, nine.} At six and ten they cancel, and the hand stays at the axis.",
+             camera=C(at="68000,0,-14>68004,0,-10", fit="76,74>56,31.5", el="24>10", az=-90, spin=0, rise=.035, span=4),
              actions=[tw("fw.coil", 0, 1.5), tw("fw.hands", 0, 1.5), tw("fw.axis", 0, 1.5), "exp:mute:GB factor columns:1.5:1",
                       at("climbs", tw("fw.scan", 1.5, 0)), at("climbs", tw("fw.scan", 1.75, "{climbs~seven}")),
                       at("seven", tw("fw.scan", 2.32, "{seven~cancel}", "linear")),
@@ -422,8 +508,8 @@ XS3 = dict(
              actions=["exp:uncall", at("climbing", tw("fw.scan", 6.02, "{climbing~dark}")), at("comb", tw("fw.scan", 100, 0)),
                       say("ζ's comb", "a tooth at every prime power:  the master wave, along log n")]),
         dict(text="Zeta's zeros fix a prime's height but not its hour. E eight's field has seven more L-functions; turned back by "
-                  "their characters, they split the comb into eight fans, one for each gold hour. Forty-nine, seven squared, "
-                  "lands on hour nineteen.",
+                  "their characters, they split the comb into eight fans, one for each gold hour. {49 = 7² lands on hour 19.|Forty-nine, seven squared, "
+                  "lands on hour nineteen.}",
              camera=C(at="68008,0,-19>68000,0,-16", fit="130,73>130,130", el="8>50", az=-90, spin=0, rise=.04, span=8),
              actions=[at("split", tw("fw.scan", -1, 0)), at("split", "exp:hide:JM comb"), at("split", "exp:hide:JM comb labels"),
                       at("split", tw("fw.fan", 1, "{split~hour}")),
@@ -444,77 +530,154 @@ XS3 = dict(
 
 LATT = TOP((75858, 76142, -64, 56))                  # the three lattices with their names and what the rings meet
 STRIPS = (75876, 76124, -68, 78)                     # the four strips of zeros, the lattices shrunk onto their heads
+LAT1 = TOP((75980, 76020, -13, 13))                  # close on the second family's lattice: the rings of 2 and 3
+LAT0 = TOP((75884, 75920, -14, 14))                  # close on the first family's lattice: the rings of 2, 3 and 6
+TABLE = TOP((76020, 76195, -22, 38))                 # the counts at 2, 3 and 6
+WAVES = TOP((75835, 76062, -46, 52))                 # the two waves and the ratio, over the chart's t axis
+CHART = TOP((75830, 76120, -48, 52))                 # the chart of every mixture, with its histogram
+PLANE = TOP((76250, 76410, -75, 62))                 # −47's plane of mixtures, from above
+TERRAIN = C(at="76330,-6,-12", fit="220,124", el=38, az=-90, spin=2, rise=.035)
 XS4 = dict(
     id="xs4", title="What keeps zeros on the line", subtitle="discovery 4 of 5:  symmetry is not enough",
     setup=["exp:stage", "exp:backdrop:off", "exp:t5lattice3", "exp:t5families:76000,-8,0", "exp:t5mix:76000,0,0", "exp:t5plane:76330,-6,0",
+           "exp:t5terrain:76330,-6,0", tw("lf.build", 0, 0), tw("lf.h", 0, 0), tw("lf.slice", -10, 0),
+           "exp:lacounts:76040,28,0", "exp:lwaves:76000,0,0",
            "exp:hidechild:LA lattices:ring", "exp:hidechild:LA lattices:lit", "exp:hide:LC zeros", "exp:hide:LE mixtures",
-           "exp:twgroup:LF landscape:0,0,0:.02:0", "exp:hide:LF landscape"],
+           "exp:hide:LF landscape"],
     lines=[
         dict(text="Discovery four. Discriminant minus twenty-three has three families of quadratic forms, and each family is a "
-                  "lattice. A number lies on a family when the lattice has a point at that distance squared from the centre.",
+                  "lattice of points. A number lies on a family when some point of its lattice sits at that number's distance "
+                  "squared from the centre.",
              camera=LATT,
-             actions=[say("three families, three lattices", "x² + xy + 6y²  ·  2x² + xy + 3y²  ·  2x² − xy + 3y²"), "exp:snap"]),
-        dict(text="Fifty-nine, a prime, lies on the first family only. Thirteen, a prime, lies on the other two. But six, two times "
-                  "three, lies on all three: a composite shows up on more than one family.",
+             actions=[say("three families, three lattices", "x² + xy + 6y²  ·  2x² + xy + 3y²  ·  2x² − xy + 3y²"), "exp:snap",
+                      at("lies", "exp:showchild:LA lattices:ring 0 6"), at("lies", "exp:showchild:LA lattices:lit 0 6"),
+                      at("distance", call("lat", "0,0,1", 0, 0, "(0, 1):  0 + 0 + 6 = 6", col=RED))]),
+        dict(text="Fifty-nine, a prime, lies on the first family only. Thirteen, a prime, lies on the other two. But {6 = 2·3|six, two times "
+                  "three,} lies on all three: a composite shows up on more than one family.",
              camera=LATT,
-             actions=[at("fiftynine", "exp:showchild:LA lattices:ring 0 59"), at("fiftynine", "exp:showchild:LA lattices:lit"),
+             actions=["exp:uncall", at("fiftynine", "exp:showchild:LA lattices:ring 0 59"), at("fiftynine", "exp:showchild:LA lattices:lit 0 59"),
                       at("fiftynine", call("at", "75934.3,0,-0.4", 1, 1, "59:  4 points", col=WHITE)),
-                      at("thirteen", "exp:showchild:LA lattices:ring 1 13"), at("thirteen", "exp:showchild:LA lattices:ring 2 13"),
+                      at("thirteen", "exp:showchild:LA lattices:ring 1 13"), at("thirteen", "exp:showchild:LA lattices:lit 1 13"),
+                      at("thirteen", "exp:showchild:LA lattices:ring 2 13"), at("thirteen", "exp:showchild:LA lattices:lit 2 13"),
                       at("thirteen", call("at", "76015.1,0,-0.4", 1, 1, "13", col=GREEN)),
-                      at("six", "exp:showchild:LA lattices:ring 0 6"), at("six", "exp:showchild:LA lattices:ring 1 6"),
-                      at("six", "exp:showchild:LA lattices:ring 2 6"),
+                      at("six", "exp:showchild:LA lattices:ring 1 6"), at("six", "exp:showchild:LA lattices:lit 1 6"),
+                      at("six", "exp:showchild:LA lattices:ring 2 6"), at("six", "exp:showchild:LA lattices:lit 2 6"),
                       at("six", call("at", "76108.3,0,-0.4", 1, -1, "6 = 2·3:  on all three", col=RED))]),
+        # count the points: the second family at 2 and 3
+        dict(text="Now count the points on each ring. On the second family, two has two points, and three has two points.",
+             camera=LAT1,
+             actions=["exp:uncall", "exp:hidechild:LA lattices:ring", "exp:hidechild:LA lattices:lit", "exp:hidechild:LA lattices:row",
+                      at("two#2", "exp:showchild:LA lattices:ring 1 2"), at("two#2", "exp:showchild:LA lattices:lit 1 2"),
+                      at("two#2", call("lat", "1,1,0", 0, 0, "2:  (±1, 0)", col="ff9e33")),
+                      at("three", "exp:showchild:LA lattices:ring 1 3"), at("three", "exp:showchild:LA lattices:lit 1 3"),
+                      at("three", call("lat", "1,0,1", 0, 0, "3:  (0, ±1)", col="c78cff")),
+                      say("count the points on each ring", "2x² + xy + 3y²:  2 has 2 points,  3 has 2 points")]),
+        # the first family at 2, 3 and 6
+        dict(text="On the first family, two and three have no points at all. But {6 = 2·3|six, two times three,} has four.",
+             camera=LAT0,
+             actions=["exp:uncall", at("first", "exp:showchild:LA lattices:ring 0 2"), at("first", "exp:showchild:LA lattices:ring 0 3"),
+                      at("no", call("lat", "0,1,0", 1, 1, "2, 3:  no points", col=WHITE)),
+                      at("six", "exp:showchild:LA lattices:ring 0 6"), at("six", "exp:showchild:LA lattices:lit 0 6"),
+                      at("four", call("lat", "0,1,-1", 0, 0, "6:  4 points", col=RED)),
+                      say("count the points on each ring", "x² + xy + 6y²:  2 has none,  3 has none,  6 = 2·3 has 4")]),
+        # the table: the families' counts are not built from the primes; the class group's combination is
+        dict(text="So the first family's counts cannot be built from the prime factors: {0 × 0 ≠ 4.|zero times zero is not four.} But take "
+                  "the first family's count minus the second's, and halve it. {2 → −1,|Two gives minus one,} {3 → −1,|three gives minus one,} and "
+                  "{6 → +1 = (−1) × (−1).|six gives plus one, which is minus one times minus one.} Building every count from its prime factors is "
+                  "exactly what an Euler product does: zeta's own product over the primes.",
+             camera=TABLE,
+             actions=["exp:uncall", "exp:twgroup:LA lattices/family 2:0,0,0:.01:1", "exp:showchild:LA counts:header",
+                      "exp:showchild:LA counts:row 2", "exp:showchild:LA counts:row 3", "exp:showchild:LA counts:row 6",
+                      at("zero#1", "exp:showchild:LA counts:check 0"), at("take", "exp:pulse:LA counts:1.5"),
+                      at("six", "exp:showchild:LA counts:check 1"),
+                      say("counts built from the prime factors", "(first − second)/2:  6 → +1 = (−1) × (−1):  an Euler product")]),
         dict(text="Each family has its own zeta function, counting its lattice points by distance, with Riemann's symmetry. The "
                   "lattices move up to head their strips of zeros. Yet those zeros leave the critical line; one sits at real part "
                   "one point zero zero seven, where no function with an Euler product can vanish.",
              camera=TOP((75858, 76142, -64, 56), STRIPS, span=4),
-             actions=["exp:uncall", at("lattices", "exp:hidechild:LA lattices:row"), at("lattices", "exp:hidechild:LA lattices:name"),
-                      at("lattices", "exp:hidechild:LA lattices:sub"),
-                      # each lattice shrinks onto the head of its own strip; the mirror pair shares one (the same zeta function)
+             actions=["exp:uncall", "exp:hide:LA counts", "exp:twgroup:LA lattices/family 2:0,0,0:1:0",
+                      at("lattices", "exp:hidechild:LA lattices:name"), at("lattices", "exp:hidechild:LA lattices:sub"),
                       at("lattices", "exp:twgroup:LA lattices/family 0:2,66,0:.3:{lattices~strips}"),
                       at("lattices", "exp:twgroup:LA lattices/family 1:-45,66,0:.3:{lattices~strips}"),
                       at("lattices", "exp:twgroup:LA lattices/family 2:-117,66,0:.3:{lattices~strips}"),
                       at("strips", "exp:show:LC zeros"), at("strips", "exp:hidechild:LC zeros:tick"),
-                      at("strips", "exp:hidechild:LC zeros:section"),
-                      at("strips", "exp:drawon:LC zeros/line:2"),
+                      at("strips", "exp:hidechild:LC zeros:section"), at("strips", "exp:drawon:LC zeros/line:2"),
                       say("each family's own zeta function", "red: zeros off the critical line Re s = ½"),
                       at("leave", call("at", "75916.6,-30.5,-0.4", -1, 1, "0.953 + 16.29i", col=RED)),
                       at("one#2", call("at", "75982.1,-18.6,-0.4", 1, 1, "1.007 + 22.57i", col=RED))]),
-        dict(text="The class group's characters mix the families into two L-functions with Euler products, and those two keep every "
-                  "zero on the line: forty-four and forty-two zeros, all gold.",
+        dict(text="The two combinations of the families with Euler products keep every zero on the line: forty-four and forty-two "
+                  "zeros, all gold.",
              camera=TOP(STRIPS),
              actions=["exp:uncall", say("the class group's L-functions", "(Z<sub>1</sub> + 2Z<sub>2</sub>)/2 and (Z<sub>1</sub> − Z<sub>2</sub>)/2:  every zero on the line"),
                       at("fortyfour", call("at", "76032,-65.7,-0.4", -1, -1, "44 on the line", col=GOLD)),
                       at("fortytwo", call("at", "76096,-65.7,-0.4", 1, -1, "42 on the line", col=GOLD))]),
-        dict(text="Now mix the two families with any weight lambda. Fold the four strips down onto one chart: every zero on the line "
-                  "lands where a single curve crosses its height, lambda zero for the first family, two and minus one for the "
-                  "L-functions, and the second family's zeros become the curve's poles.",
-             camera=C(at=f"{BOX(*STRIPS)['at']}>76000,4,0", fit=f"{BOX(*STRIPS)['fit']}>300,165", el=89.5, az=-90, spin=0, span=4),
-             actions=["exp:uncall", at("fold", "exp:stripsmorph:76000,-8,0:76000,0,0:{fold~poles}"), at("fold", "exp:mute:LC zeros:2"),
-                      at("fold", "exp:mute:LA lattices:2"), at("lands", "exp:show:LE mixtures"), at("lands", "exp:drawon:LE mixtures/R:4"),
-                      say("every mixture at once", "the zeros of Λ<sub>1</sub> + λΛ<sub>2</sub> on the line:  where the curve meets the height λ")]),
-        dict(text="Sweep the height lambda through every mixture. Counted in full, up to height fifty, only two small windows of "
-                  "mixtures keep every zero on the line, and both surround the class group's L-functions.",
-             camera=C(at="76000,4,0", fit="300,165"),
-             actions=[at("sweep", "exp:mixsweep:-3:4:{sweep~counted}:76000,0,0"),
+        # where the chart's curves come from: the two families' waves on the critical line
+        dict(text="Now the curves of the chart, built step by step. On the critical line each family's completed zeta function is "
+                  "a real wave: gold for the first family, blue for the second. Their zeros are where the waves cross the axis.",
+             camera=WAVES,
+             actions=["exp:uncall", "exp:mute:LC zeros,LA lattices:1.2:1.95", at("real", "exp:showchild:LW waves:t axis"),
+                      at("real", "exp:showchild:LW waves:first"), at("real", "exp:drawon:LW waves/first:2"),
+                      at("gold", "exp:showchild:LW waves:name first"), at("blue", "exp:showchild:LW waves:second"),
+                      at("blue", "exp:drawon:LW waves/second:2"), at("blue", "exp:showchild:LW waves:name second"),
+                      at("zeros", "exp:showchild:LW waves:zeros"), at("zeros", "exp:showchild:LW waves:t label"),
+                      at("zeros+0.2", "exp:hide:LC zeros"), at("zeros+0.2", "exp:hide:LA lattices"),
+                      say("each family on the critical line", "Λ(½ + it) is real:  gold x² + xy + 6y²,  blue 2x² ± xy + 3y²")]),
+        dict(text="Mix them: the first plus lambda times the second. That mixture is zero where the first equals minus lambda "
+                  "times the second, that is, where the ratio, minus the first over the second, equals lambda. Sweep along t and "
+                  "plot that ratio: wherever the blue wave crosses zero it divides by zero and shoots off to infinity, so the "
+                  "curve breaks into these branches.",
+             camera=WAVES,
+             actions=[at("sweep", "exp:lratio:{sweep~end}"),
+                      say("Λ<sub>1</sub> + λΛ<sub>2</sub> = 0  ⟺  λ = −Λ<sub>1</sub>/Λ<sub>2</sub>", "the ratio of the two waves, with a pole at every zero of the blue one")]),
+        dict(text="A level line at height lambda crosses this curve exactly at that mixture's zeros on the line. At zero it meets "
+                  "the gold dots, the first family's own zeros. {At λ = 2 and λ = −1|At two and at minus one} it meets the two L-functions with Euler "
+                  "products, and every one of their zeros is there.",
+             camera=CHART,
+             actions=["exp:show:LE mixtures", "exp:hidechild:LE mixtures:R", "exp:hidechild:LE mixtures:height",
+                      "exp:hidechild:LE mixtures:crossings", "exp:mute:LW waves:1.2:1.7",
+                      at("zero#1", "exp:showchild:LE mixtures:height 0"), at("zero#1", "exp:showchild:LE mixtures:crossings 0"),
+                      at("at#4", "exp:showchild:LE mixtures:height 2"), at("at#4", "exp:showchild:LE mixtures:crossings 2"),
+                      at("at#4", "exp:showchild:LE mixtures:height -1"), at("at#4", "exp:showchild:LE mixtures:crossings -1"),
+                      say("a level line λ:  the zeros of Λ<sub>1</sub> + λΛ<sub>2</sub> on the line", "λ = 0:  the first family  ·  λ = 2 and −1:  the L-functions")]),
+        dict(text="Sweep lambda through every mixture. Each mixture has a set number of zeros up to height fifty; where the level "
+                  "line crosses the curve fewer times, the rest have left the line. Only two small windows of mixtures keep every "
+                  "zero on it, and both surround the L-functions.",
+             camera=CHART,
+             actions=[at("sweep", "exp:mixsweep:-3:4:{sweep~only}:76000,0,0"),
                       say("no zero off the line:  two small windows", "λ from 1.99 to 2,  and from −1.02 to −0.88"),
                       at("windows", call("at", "76072,24,-0.4", 1, 1, "λ = 2", col=GOLD)),
-                      at("both", call("at", "76072,-11.4,-0.4", 1, -1, "λ = −1", col=GOLD))]),
-        dict(text="With five families, for minus forty-seven, the line of mixtures grows into a plane. Colour each by its zeros off "
-                  "the line, and gold appears only in small islands: round the three L-functions, and one more island with no "
-                  "L-function in it.",
-             camera=C(at="76000,4,0>76170,-6,0", fit="300,165>480,270", el=89.5, az=-90, spin=0, span=4),
-             actions=["exp:uncall", at("grows", "exp:show:LF landscape"), at("grows", "exp:twgroup:LF landscape:0,0,0:1:{grows~colour}"),
-                      say("five families:  a plane of mixtures", "gold:  no zero off the line up to t = 50"),
-                      at("three", call("at", "76371.3,35.3,-0.4", 1, 1, "ζ(s) L(s, χ<sub>−47</sub>)", col=GOLD)),
-                      at("three", call("at", "76342.8,-39.4,-0.4", 1, -1, "L<sub>1</sub>", col=GOLD)),
-                      at("three", call("at", "76296.6,6.8,-0.4", -1, 1, "L<sub>2</sub>", col=GOLD)),
-                      at("island", call("at", "76364.1,18.8,-0.4", 1, -1, "no L-function here", col=WHITE))]),
+                      at("surround", call("at", "76072,-11.4,-0.4", 1, -1, "λ = −1", col=GOLD))]),
+        # minus forty-seven: a plane of mixtures, assembled row by row
+        dict(text="With five families, for minus forty-seven, there are two weights instead of one, and the mixtures fill a plane. "
+                  "Build it row by row: each row is a sweep like the one we just made, every cell coloured by how many zeros leave "
+                  "the line, gold where none do.",
+             camera=TOP((75830, 76120, -48, 52), (76250, 76410, -75, 62), span=4),
+             actions=["exp:uncall", "exp:hide:LW waves", "exp:mute:LE mixtures:1.5:2", at("five", "exp:clearlive"),
+                      at("build", tw("lf.build", 1, "{build~gold}", "linear")), at("build", "exp:hide:LE mixtures"),
+                      say("five families:  a plane of mixtures", "Λ<sub>1</sub> + λ<sub>2</sub>Λ<sub>2</sub> + λ<sub>3</sub>Λ<sub>3</sub>:  every row a sweep")]),
+        # the third dimension: raised by the zeros off the line, sliced
+        dict(text="Now raise every mixture by its number of zeros off the line, and the plane becomes a landscape. The gold patches "
+                  "are its valleys, at sea level. Slice through it, and each slice is a sweep like {−23's:|minus twenty-three's:} where it "
+                  "dips to the floor, a window.",
+             camera=C(at="76330,-6,0>76330,-6,-12", fit=f"{BOX(76250, 76410, -75, 62)['fit']}>220,124", el="89.5>38", az=-90, spin=2,
+                      rise=.035, span=5),
+             actions=[at("raise", tw("lf.h", 1, "{raise~landscape}")), at("slice", tw("lf.slice", -3, 0)),
+                      at("slice", tw("lf.slice", 3, "{slice~end}", "linear")),
+                      say("the landscape of mixtures", "height:  the zeros off the line up to t = 50;  gold valleys:  none")]),
+        dict(text="Three valleys surround the class group's three L-functions, and their counts, like {−23's,|minus twenty-three's,} are "
+                  "built from their prime factors: Euler products. One more valley has no L-function in it.",
+             camera=C(**TERRAIN | dict(az="+")),
+             actions=[tw("lf.slice", -10, 0),
+                      at("three#1", call("at", "76371.3,35.3,-0.4", 1, 1, "ζ(s) L(s, χ<sub>−47</sub>)", col=GOLD)),
+                      at("three#1", call("at", "76342.8,-39.4,-0.4", 1, -1, "L<sub>1</sub>", col=GOLD)),
+                      at("three#1", call("at", "76296.6,6.8,-0.4", -1, 1, "L<sub>2</sub>", col=GOLD)),
+                      at("one", call("at", "76364.1,18.8,-0.4", 1, -1, "no L-function here", col=WHITE)),
+                      say("the valleys", "round the three L-functions:  Euler products,  counts built from primes")]),
         dict(text="Why it matters: symmetry alone does not keep zeros on the line. Davenport and Heilbronn proved that in nineteen "
-                  "thirty-six. As far as anyone has checked, the functions that keep them there have Euler products. What Claude "
-                  "and I add is seeing every mixture at once.",
-             camera=C(at="76170,-6,0>76170,10,0", fit="480,270>500,290", el=89.5, az=-90, spin=0, span=14),
-             actions=["exp:uncall", "exp:unmute:LA lattices:3", say("what is new", "symmetry is not enough:  every mixture seen at once")], pause=1.4),
+                  "thirty-six. As far as anyone has checked, the functions that keep them there are the ones whose counts are built "
+                  "from their prime factors: the Euler products. What Claude and I add is seeing every mixture at once.",
+             camera=C(**TERRAIN | dict(az="+", spin=3)),
+             actions=["exp:uncall", say("what is new", "symmetry is not enough:  every mixture seen at once")], pause=1.4),
     ])
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -526,11 +689,16 @@ RACE_TOP = (79855, 80145, 8, 64)                    # the race counted to 10⁷
 RACES = (79855, 80145, -62, 64)                     # counted above, rebuilt from the zeros below
 RACE_FOLD = (79840, 80335, -78, 64)                 # the race beside E8's clock of squares (the fold, centred 80260, −8)
 FOLD = (80195, 80325, -72, 56)
+HOURCLOCK = (80222, 80298, -44, 28)                 # a small clock of 30 hours at the fold's centre
+POWERS = (80222, 80300, -42, 30)                    # the powers of 7 on the fold's logarithmic clock
+MOD5 = (80228, 80292, -36, 34)
+MODS = (80185, 80372, -40, 38)                      # 2, 5 and 59 dots
 S3 = (80215, 80305, -30, 28)                        # the triangle of roots, where the fold was
 XS5 = dict(
     id="xs5", title="Chebyshev's bias is a fold", subtitle="discovery 5 of 5:  why two of E8's spokes run behind",
     setup=["exp:stage", "exp:backdrop:off", "exp:t5race", "exp:t5fold:80330,0,0", "exp:s3roots:80260,-4,0:0",
            "exp:t5family:79914,9,0:80260,-8,0:60:280", "exp:twgroup:MC fold:0,0,0:.3:0", "exp:mute:MA rebuilt:0:1.9",
+           "exp:modp:2:80200,-4,0:10", "exp:modp:5:80260,-4,0:24", "exp:modp:59:80332,-4,0:28",
            "exp:hide:MB fair", "exp:hide:MB fold", "exp:hide:S3 identity", "exp:hide:S3 rotation", "exp:hide:S3 reflection",
            "exp:hide:S3 square", "exp:hide:MC fold", "exp:hide:MC race", "exp:hide:MC fair"],
     lines=[
@@ -545,44 +713,72 @@ XS5 = dict(
              camera=TOP(RACE_TOP, RACES, span=4),
              actions=["exp:uncall", say("spokes 1 and 19 run behind", "ahead of their share 0.3 % and 1.4 % of the way;  rebuilt from 6 771 zeros"),
                       at("below", "exp:unmute:MA rebuilt:1.2"), at("below", "exp:pulse:MA rebuilt:2.4")]),
-        dict(text="The reason is a fold. The zeros count prime powers, not only primes. Beside the race, E eight's clock of thirty, "
-                  "with an arc from every prime to its square: squaring folds every spoke onto one or nineteen.",
-             camera=TOP(RACES, RACE_FOLD, span=4),
-             actions=[at("reason", "exp:mute:MA rebuilt:1.5"), at("beside", "exp:show:MB fold"), at("beside", "exp:hidechild:MB fold:arcs"),
-                      at("arc", "exp:showchild:MB fold:arcs"), at("arc", "exp:drawon:MB fold/arcs:{arc~end}"),
+        # why one and nineteen: they are the only square hours
+        dict(text="Why one and nineteen? Square any gold hour, and see where it lands on E eight's clock. {1² = 1.|One stays at one.} {7² = 49,|Seven "
+                  "squared is forty-nine,} hour nineteen. {11² = 121,|Eleven squared, a hundred and twenty-one, is} hour one; {13² = 169,|thirteen squared, "
+                  "a hundred and sixty-nine,} hour nineteen. All eight gold hours, squared, land on one or nineteen: the only two "
+                  "square hours on the clock.",
+             camera=TOP(RACES, HOURCLOCK, span=3),
+             actions=["exp:mute:MA counted,MA rebuilt:1.5:1.8", at("square", "exp:hoursquares:{square~only}"),
+                      say("squares on E8's clock", "1² = 1,  7² = 49 → 19,  11² = 121 → 1,  13² = 169 → 19, …:  only hours 1 and 19")]),
+        # a prime's powers walk round the clock
+        dict(text="Follow one prime's powers round the clock, the radius growing with the logarithm. {7:|Seven sits on} hour seven. {7² = 49:  hour 19.|Seven "
+                  "squared, forty-nine, on nineteen.} {7³ = 343:  hour 13.|Seven cubed, three hundred and forty-three, on thirteen.} {7<sup>4</sup> = 2401:|Seven to the fourth, "
+                  "two thousand four hundred and one,} back on hour one. Every even power lands on one or nineteen.",
+             camera=TOP(HOURCLOCK, POWERS, span=2),
+             actions=["exp:hide:MB squares", "exp:show:MB fold", "exp:hidechild:MB fold:arcs", "exp:hidechild:MB fold:primes",
+                      at("seven#1", "exp:powerwalk:7:4:{seven#1~every}"),
+                      say("the powers of 7", "7 → 49 → 343 → 2401:  hours 7, 19, 13, 1")]),
+        dict(text="Now every prime at once: an arc from each prime to its square. The zeros count prime powers, not only primes, "
+                  "and squaring folds every spoke onto one or nineteen.",
+             camera=TOP(POWERS, FOLD, span=3),
+             actions=["exp:hide:MB powers 7", at("every", "exp:showchild:MB fold:primes"), at("arc", "exp:showchild:MB fold:arcs"),
+                      at("arc", "exp:drawon:MB fold/arcs:{arc~end}"),
                       say("the reason:  a fold", "squaring sends spokes 1, 11, 19, 29 to 1, and 7, 13, 17, 23 to 19")]),
-        dict(text="Seven squared is forty-nine, on spoke nineteen. Eleven squared, one hundred and twenty-one, lands on one. "
-                  "Thirteen squared, one sixty-nine, on nineteen. Twenty-nine squared, eight forty-one, on one.",
-             camera=TOP(RACE_FOLD, FOLD, span=3),
+        dict(text="{7² = 49,|Seven squared is forty-nine,} on spoke nineteen. {11² = 121|Eleven squared, one hundred and twenty-one,} lands on {1.|one.} "
+                  "{13² = 169,|Thirteen squared, one sixty-nine,} on {19.|nineteen.} {29² = 841,|Twenty-nine squared, eight forty-one,} on {1.|one.}",
+             camera=TOP(FOLD),
              actions=[at("seven", call("fold", 49, 1, 1, "7² = 49:  spoke 19")), at("eleven", call("fold", 121, -1, 1, "11² = 121:  spoke 1")),
                       at("thirteen", call("fold", 169, 1, -1, "13² = 169:  spoke 19")), at("twentynine", call("fold", 841, -1, -1, "29² = 841:  spoke 1"))]),
         dict(text="Every square of a prime above five lands on spoke one or nineteen: all four hundred and forty-three of them up "
                   "to ten million. A count of primes leaves out half a prime for each. Put them back, and watch the race even out.",
              camera=TOP(FOLD, RACE_FOLD, span=4),
-             actions=["exp:uncall", at("put", "exp:racemorph:{put~end}"), at("put", "exp:pulse:MB fold:2.4"),
+             actions=["exp:uncall", "exp:unmute:MA counted:1", at("put", "exp:racemorph:{put~end}"), at("put", "exp:pulse:MB fold:2.4"),
                       say("put the squares back:  a fair race", "218 squares on spoke 1,  225 on spoke 19,  none elsewhere")]),
-        # the second race: the triangle of x³ − x − 1 takes the fold's place
-        dict(text="The same fold turns up in a second race. For minus twenty-three, a prime's family is decided by how it acts on "
-                  "the three roots of x cubed minus x minus one.",
-             camera=TOP(RACE_FOLD, S3, span=4),
-             actions=[at("same", "exp:mute:MA counted:1.5"), at("same", "exp:hide:MB fold"), at("family", "exp:show:S3 identity"),
-                      say("x³ − x − 1:  three roots", "r<sub>1</sub> = 1.3247,  r<sub>2</sub>, r<sub>3</sub> = −0.6624 ± 0.5623i")]),
-        dict(text="Fifty-nine splits it into three factors: every root stays put, the identity. Two leaves it whole: the roots "
-                  "turn round, a rotation. Five gives one root: two roots swap, a reflection.",
+        # the second race: count the roots of x³ − x − 1 among the numbers mod p
+        dict(text="The same fold turns up in a second race. For minus twenty-three, a prime's family is decided by how many roots "
+                  "x cubed minus x minus one has among the numbers modulo that prime. Take five: five numbers, zero to four. Put "
+                  "each one in. Only two gives a multiple of five, {8 − 2 − 1:|eight minus two minus one:} one root.",
+             camera=TOP(RACE_FOLD, MOD5, span=4),
+             actions=[at("same", "exp:mute:MA counted:1.5"), at("same", "exp:hide:MB fold"), at("take", "exp:modptest:5:{take~one#3}"),
+                      say("x³ − x − 1 modulo a prime", "5:  0, 1, 2, 3, 4  →  only x = 2 gives 8 − 2 − 1 = 5 ≡ 0")]),
+        dict(text="Two has two numbers, zero and one, and neither is a root. Fifty-nine has fifty-nine, and exactly three of them are "
+                  "roots: four, thirteen and forty-two.",
+             camera=TOP(MODS),
+             actions=[at("two#1", "exp:modptest:2:{two#1~fiftynine#1}"), at("fiftynine#1", "exp:modptest:59:{fiftynine#1~end}"),
+                      say("count the roots", "2:  none   ·   5:  one   ·   59:  three (4, 13, 42)")]),
+        # what the counts mean: how the prime moves the three roots
+        dict(text="Those counts tell how the prime moves the three roots of x cubed minus x minus one. Three roots fixed: the "
+                  "identity, nothing moves. No root fixed: a rotation, all three move round. One root fixed: a reflection, the "
+                  "mirror: one root stays and the other two swap.",
+             camera=TOP(MODS, S3, span=3),
+             actions=[at("those", "exp:hide:S3 mod 2"), at("those", "exp:hide:S3 mod 5"), at("those", "exp:hide:S3 mod 59"),
+                      at("three#2", "exp:show:S3 identity"), at("three#2", "exp:s3anim:identity:{three#2~no}"),
+                      at("no", "exp:hide:S3 identity"), at("no", "exp:show:S3 rotation"), at("no", "exp:s3anim:rotation:{no~one#2}"),
+                      at("one#2", "exp:hide:S3 rotation"), at("one#2", "exp:show:S3 reflection"), at("one#2", "exp:s3anim:reflection:{one#2~end}"),
+                      say("how a prime moves the roots", "3 roots: identity  ·  none: rotation  ·  1 root: reflection")]),
+        dict(text="And a reflection done twice is the identity: swap, then swap back. So the square of every prime with one root, "
+                  "like {25 = 5²,|twenty-five, five squared,} acts like a prime with three roots, and lands in the principal family.",
              camera=TOP(S3),
-             actions=[at("two", "exp:hide:S3 identity"), at("two", "exp:show:S3 rotation"), at("five", "exp:hide:S3 rotation"),
-                      at("five", "exp:show:S3 reflection"), say("how a prime acts on the roots", "identity · rotation · reflection")]),
-        # the family race takes the prime race's place, and the fold of S3 the triangle's
-        dict(text="And a reflection done twice is the identity. So the squares of half of all primes fall in the principal family, "
-                  "which runs behind its share and is never in the lead.",
-             camera=TOP(S3, RACE_FOLD, span=6, hold=4),
-             actions=[at("twice", "exp:hide:S3 reflection"), at("twice", "exp:show:S3 square"),
-                      # the fold of S₃ grows out of the triangle's place as the camera pulls back to the races
-                      at("squares", "exp:hide:S3 square"), at("squares", "exp:show:MC fold"),
-                      at("squares", "exp:twgroup:MC fold:0,0,0:1:{squares~end}"),
-                      at("squares", "exp:mute:MA counted,MA rebuilt:1:2"), at("squares+1", "exp:hide:MA counted"),
+             actions=[at("twice", "exp:hide:S3 reflection"), at("twice", "exp:show:S3 square"), at("twice", "exp:s3anim:square:{twice~so}"),
+                      say("a reflection, twice:  the identity", "5 has one root;  25 = 5² lands in the principal family x² + xy + 6y²")]),
+        dict(text="Half of all primes have one root, so their squares fall in the principal family, which runs behind its share "
+                  "and is never in the lead.",
+             camera=TOP(S3, RACE_FOLD, span=4, hold=1),
+             actions=[at("half", "exp:hide:S3 square"), at("half", "exp:show:MC fold"), at("half", "exp:twgroup:MC fold:0,0,0:1:{half~end}"),
+                      at("half", "exp:mute:MA counted,MA rebuilt:1:2"), at("squares+1", "exp:hide:MA counted"),
                       at("squares+1", "exp:hide:MA rebuilt"), at("squares", "exp:show:MC race"), at("squares", "exp:drawon:MC race/class:3"),
-                      say("a reflection, twice:  the identity", "the inert primes' squares land in the principal family")]),
+                      say("the squares of the reflections", "land in the principal family:  it runs behind")]),
         dict(text="Put those squares back too, and this race evens out as well. Why it matters: one fold explains both races. "
                   "Chebyshev noticed the bias in eighteen fifty-three; what Claude and I add is one picture for E eight's wheel and "
                   "for the families of minus twenty-three.",
@@ -605,22 +801,22 @@ XZ1 = dict(
              camera=PC(at="11,-6.5,0", fit="44,26", rise=.035),
              actions=[say("the path of partial sums", "ζ(s) = 1 + 1/2<sup>s</sup> + 1/3<sup>s</sup> + …,  one arrow per term"),
                       at("arrow", tw("pw.n", 1, 1.5)), "exp:snap"]),
-        dict(text="Take the height t equal to one. The first arrow is one unit long and points to the right. The second is one over "
-                  "the square root of two long, and it turns away from the first by the logarithm of two: forty degrees.",
+        dict(text="Take the height {t = 1.|t equal to one.} The first arrow is one unit long and points to the right. The second is one over "
+                  "the square root of two long, and it turns away from the first by {log 2:|the logarithm of two:} {40°.|forty degrees.}",
              camera=PC(at="11,-6.5,0", fit="44,26", rise=.035),
              actions=[at("second", tw("pw.n", 2, 2.2))]),
-        dict(text="The third is one over root three long, and turns a further log of three halves, twenty-three degrees. Its "
-                  "direction is the sum of the turns: log three, sixty-three degrees from the first. Every direction is a logarithm.",
+        dict(text="The third is one over root three long, and turns a further {log(3/2), 23°.|log of three halves, twenty-three degrees.} Its "
+                  "direction is the sum of the turns: {log 3 = 63°|log three, sixty-three degrees} from the first. Every direction is a logarithm.",
              camera=PC(at="11,-6.5,0", fit="44,26", rise=.035),
              actions=[at("third", tw("pw.n", 3, 2.2)), at("sum", "exp:pulse:PW path:1.6")]),
-        dict(text="Four, five, six, seven, eight: shorter and shorter arrows, turning less and less, seventeen degrees, then "
-                  "thirteen, ten, nine and eight, because the logarithm climbs more and more slowly.",
+        dict(text="Four, five, six, seven, eight: shorter and shorter arrows, turning less and less, {17°, 13°, 10°, 9° and 8°,|seventeen degrees, then "
+                  "thirteen, ten, nine and eight,} because the logarithm climbs more and more slowly.",
              camera=PC(at="11,-6.5,0>11.5,-17.5,0", fit="44,26>114.7,64.5", span=4, rise=.035),
              actions=[at("four", tw("pw.n", 4, .7)), at("five", tw("pw.n", 5, .7)), at("six", tw("pw.n", 6, .7)),
                       at("seven", tw("pw.n", 7, .7)), at("eight#1", tw("pw.n", 8, .7))]),
         dict(text="Now raise the height t. Every angle is t times a logarithm, so the path winds up tighter. The arrows go on "
-                  "forever, but past a point the rest add up to a simple tail, drawn in orange, and the end of that tail is zeta "
-                  "of one half plus i t.",
+                  "forever, but past a point the rest add up to a simple tail, drawn in orange, and the end of that tail is {ζ(½ + it).|zeta "
+                  "of one half plus i t.}",
              camera=PC(at="11.5,-17.5,0>10,-4,0", fit="114.7,64.5>58,36", span=10),
              actions=[tw("pw.marks", 0, .8), at("raise", tw("pw.n", 1000, 2)), at("raise", tw("pw.t", 10, "{raise~tail}", "geo")),
                       at("tail", tw("pw.tail", 1, 1.6)),
@@ -638,7 +834,7 @@ XZ1 = dict(
                       at("run", tw("pw.t", 32, "{run~end}", "linear")),
                       say("the curve of ζ on the critical line", "the plane climbs the t axis;  the curve touches it at every zero")]),
         dict(text="Between the zeros, the curve swings out and comes back. Riemann's hypothesis says that every zero of this kind "
-                  "lies on this line, real part one half. Trillions have been checked, and every one does, but no one has proved "
+                  "lies on this line, {Re s = ½.|real part one half.} Trillions have been checked, and every one does, but no one has proved "
                   "that all of them must.",
              camera=PC(at="6,0,-10", fit="96,64>124,90", el="30>24", az="+", spin=3, span=12),
              actions=[tw("pw.t", 50, "{between~end}", "linear"),
@@ -669,14 +865,14 @@ XZ2 = dict(
              camera=PC(at="6,-2,0", fit="70,46", el=36, az="+", spin=3),
              actions=[tw("pw.t", 250, "line", "linear"), say("a vortex is born", "each time t/2π passes a whole number")]),
         dict(text="Between the vortices the path runs straight. Those straight runs are the spokes, where each arrow turns by a "
-                  "whole number of full turns from the last. They sit near n equal to t over two pi k: at the hundred and "
+                  "whole number of full turns from the last. They sit near {n ≈ t/2πk:|n equal to t over two pi k:} at the hundred and "
                   "fifty-ninth zero, fifty-three, twenty-seven and eighteen.",
              camera=PC(at="6,-4,0", fit="70,46>60,38", el="36>70", az="+", spin=1, span=8),
              actions=[tw("pw.t", 333.645, "{between~fiftythree}"),
                       at("fiftythree", call("path", 53, 0, 0, "spoke 1:  n ≈ 53")), at("twentyseven", call("path", 27, 0, 0, "spoke 2:  n ≈ 27")),
                       at("eighteen", call("path", 18, 0, 0, "spoke 3:  n ≈ 18")),
                       say("spoke k at n ≈ t / 2πk", "where each arrow turns a whole number of turns from the last")]),
-        dict(text="Each vortex has an eye, and each eye is a mirror image: the path's own k-th vertex, reflected through zeta's "
+        dict(text="Each vortex has an eye, and each eye is a mirror image: the path's own {k-th|kay-th} vertex, reflected through zeta's "
                   "phase. The crosses mark those mirror points, and they land inside the rings.",
              camera=PC(at="4,-4,0", fit="52,32", el=78, az="+", spin=1),
              actions=["exp:uncall", at("crosses", tw("pw.mirrors", 1, 1.2)),
@@ -691,10 +887,22 @@ XZ2 = dict(
              camera=PC(at="0,0,0", fit="90,70>56,40", el="26>89.5", az="+", spin=4, span=6),
              actions=[at("ten", tw("pw.alleyes", 1, 2)), at("ten", tw("pw.eyes", 0, 1)), at("ten", tw("pw.trails", .25, 2)),
                       say("all 10 000 zeros, down the axis", "the vortices belong to the counting numbers")]),
+        # the faint circle: vortex two's eye can never be farther than 1 + 1/√2 from the centre
+        dict(text="Look closer: the eyes thin out beyond a faint circle at radius one point seven one, and a brighter ring glows at "
+                  "zero point two nine. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus "
+                  "the arrow of two, {1/√2|one over root two} long.",
+             camera=PC(at="0,0,0", fit="64,46>128,72", el=89.5, az=-90, spin=0, span=3),
+             actions=[at("thin", "exp:pulse:PW path:1.2"), at("one#3", "exp:eyelimits:14"),
+                      say("a faint circle at r = 1.71", "vortex 2's eye:  |1 + 2<sup>−½ − iγ</sup>|,  one plus an arrow 1/√2 long")]),
+        dict(text="That arrow can point any way, so the eye stays between {1 − 1/√2|one minus one over root two} and {1 + 1/√2,|one plus one over root "
+                  "two,} and it lingers at those two extremes, so both circles glow. Beyond one point seven one only vortex three and "
+                  "higher can reach, and the eyes thin out.",
+             camera=PC(at="0,0,0", fit="128,72", el=89.5, az=-90, spin=0),
+             actions=[say("between 1 − 1/√2 = 0.29 and 1 + 1/√2 = 1.71", "beyond 1.71 only vortices 3 and up:  the eyes thin out 2.7-fold")]),
         dict(text="So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex "
                   "belongs to a counting number: a reflection of the path's own beginning.",
-             camera=PC(at="0,0,0", fit="56,40>64,46", el="89.5>70", az="+", spin=3, span=12),
-             actions=[say("how the vortices develop", "one per counting number, each a mirror of the path's start")], pause=1.4),
+             camera=PC(at="0,0,0", fit="128,72>64,46", el="89.5>70", az=-90, spin=3, span=12),
+             actions=["exp:clearchild:PW limits", say("how the vortices develop", "one per counting number, each a mirror of the path's start")], pause=1.4),
     ])
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -706,50 +914,57 @@ XZ3 = dict(
     setup=FUNNEL_SETUP,
     lines=[
         dict(text="This is E eight's factor funnel. Every counting number sits at its hour on the wheel of thirty, with a column "
-                  "as tall as its logarithm. Seven, at hour seven: one point nine five. Thirty, two times three times five, at "
-                  "hour zero: three point four.",
+                  "as tall as its logarithm. {7,|Seven,} at hour seven: {log 7 = 1.95.|one point nine five.} {30 = 2 · 3 · 5,|Thirty, two times three times five,} at "
+                  "{hour 0:  log 30 = 3.40.|hour zero: three point four.}",
              camera=C(**FUNNEL, az=-100),
              actions=[say("E8's factor funnel", "n at its hour n mod 30, its column as tall as log n"),
                       at("seven#2", call("fun", 7, 0, 0, "log 7 = 1.95")), at("thirty#2", call("fun", 30, 0, 0, "30 = 2·3·5:  log 30 = 3.40")),
                       "exp:snap"]),
-        dict(text="Grey it out, and light the powers of two. Two is one piece, log two tall. Four is two pieces, eight is three, "
-                  "sixteen is four: each column is its prime factors' logarithms, stacked.",
+        dict(text="Grey it out, and light the powers of two. Two is one piece, log two tall, on the arm of hour two. {4 is 2 "
+                  "pieces, 8 is 3, 16 is 4:|Four is two "
+                  "pieces, eight is three, sixteen is four:} each column is its prime factors' logarithms, stacked.",
              camera=C(at="68000,0,-16>68002,-2,-9", fit="124,140>72,44", el="26>22", az="+", spin=1, rise=.035, span=5),
              actions=["exp:uncall", at("grey", "exp:mute:GB factor columns:1.2"), at("two#2", "exp:fwhl:2:logs"), at("four", "exp:fwhl:4"),
                       at("eight", "exp:fwhl:8"), at("sixteen", "exp:fwhl:16:logs"),
                       say("a column is its prime factors, stacked", "log 16 = log 2 + log 2 + log 2 + log 2")]),
         dict(text="Now the path of partial sums at the first zero, t equal to fourteen point one three, on the funnel's floor. "
-                  "Arrow one, arrow two, arrow three, and on, each one over root n long, each turned by t times log n.",
+                  "Arrow one, arrow two, arrow three, and on, each one over root n long, each turned by {t · log n.|t times log n.}",
              camera=C(at="68002,-2,-9>68006.8,0.2,0", fit="72,44>40,22.5", el="22>84", az="+", az_to=-90, rise=.035, span=4),
              actions=["exp:fwunhl", "exp:mute:GB factor columns:1.5:1.85", at("arrow#1", tw("fw.n", 1, .8)), at("arrow#2", tw("fw.n", 2, .8)), at("arrow#3", tw("fw.n", 3, .8)),
                       at("on#2", tw("fw.n", 15, "{on#2~end}", "linear")),
                       say("the path at the first zero", "arrow n:  1/√n long, turned 14.13 · log n")]),
-        dict(text="Its tail closes it on the axis: that is what a zero is. Now lift every arrow to the height of its own number: "
-                  "arrow two to log two, arrow three to log three, arrow four to log four, twice as high as two.",
-             camera=C(at="68006.8,0.2,0>68002,0,-7", fit="40,22.5>44,40", el="84>22", az="+", spin=1.5, rise=.04, span=6),
-             actions=[tw("fw.tail", 1, 1.2), at("lift", tw("fw.tail", 0, 1)), at("lift", tw("fw.axis", 1, 1)), at("lift", tw("fw.path", 0, "{lift~end}")),
-                      at("lift", tw("fw.lift", 1, "{lift~end}")), at("two#2", "exp:fwhl:2"), at("three#2", "exp:fwhl:3"), at("four#2", "exp:fwhl:4"),
-                      say("lift arrow n to the height log n", "keeping its direction:  −14.13 · log n")]),
-        dict(text="Each arrow becomes a hand, pointing out from the axis at the top of its number's column. Through their tips "
-                  "runs a coil that turns by gamma for every unit of height: the zero, wound up E eight's funnel.",
-             camera=C(at="68000,0,-14", fit="66,74", el=22, az="+", az_to=-90, rise=.04),
-             actions=["exp:fwunhl", at("coil", tw("fw.coil", 1, "{coil~end}")),
-                      say("the coil:  the hands at every height", "turning 14.13 per unit of height, one turn every 0.44")]),
-        dict(text="The coil multiplies by adding heights. Four is two times two, so its hand has turned twice the turn of two. "
-                  "Six is two times three: the turn of two plus the turn of three.",
-             camera=C(at="68000,0,-14>68004,-1,-9.5", fit="66,74>64,36", el="22>64", az=-90, spin=0, rise=.035, span=5),
+        dict(text="Its tail closes it on the axis: that is what a zero is. Now lift every arrow to the height of its own number, "
+                  "keeping its direction and its length: arrow two to log two, arrow three to log three, arrow four to log four, "
+                  "twice as high as two. The arrows shrink as they climb, like a horn.",
+             camera=C(at="68006.8,0.2,0>68002,0,-8", fit="40,22.5>56,40", el="84>22", az="+", spin=1.5, rise=.04, span=6),
+             actions=[tw("fw.stretch", 0, 0), tw("fw.tail", 1, 1.2), at("lift", tw("fw.tail", 0, 1)), at("lift", tw("fw.axis", 1, 1)),
+                      at("lift", tw("fw.path", 0, "{lift~end}")), at("lift", tw("fw.lift", 1, "{lift~shrink}")),
+                      at("two#2", "exp:fwhl:2"), at("three#2", "exp:fwhl:3"), at("four#2", "exp:fwhl:4"), at("horn", tw("fw.coil", .5, 2)),
+                      say("lift arrow n to the height log n", "keeping its direction −14.13 · log n and its length 1/√n")]),
+        dict(text="Stretch each arrow by the square root of its number, its distance from the centre on the Sacks spiral and on "
+                  "this floor. {1/√n × √n = 1:|One over root n times root n is one:} every arrow becomes one unit long, and only its direction is "
+                  "left. Through their tips runs a coil that turns by gamma for every unit of height: the zero, wound up E eight's "
+                  "funnel.",
+             camera=C(at="68002,0,-8>68000,0,-14", fit="56,40>76,74", el=22, az="+", az_to=-90, rise=.04, span=6),
+             actions=["exp:fwunhl", at("stretch", tw("fw.stretch", 1, "{stretch~left}")), at("stretch", "exp:fwhl:2"),
+                      at("through", "exp:fwunhl"), at("through", tw("fw.coil", 0, 0)), at("through", tw("fw.coil", 1, "{through~end}")),
+                      say("stretch arrow n by √n", "1/√n × √n = 1:  every arrow one unit long, only its direction left"),
+                      at("through", say("the coil:  the hands at every height", "turning 14.13 per unit of height, one turn every 0.44"))]),
+        dict(text="The coil multiplies by adding heights. {4 = 2 · 2,|Four is two times two,} so its hand has turned twice the turn of two. "
+                  "{6 = 2 · 3:|Six is two times three:} the turn of two plus the turn of three.",
+             camera=C(at="68000,0,-14>68004,-1,-9.5", fit="76,74>72,40.5", el="22>64", az=-90, spin=0, rise=.035, span=5),
              actions=[tw("fw.coil", .32, 2), tw("fw.dim", 1, 2), at("four", "exp:fwhl:4:logs"), at("twice", "exp:fwangles:4"), at("six", "exp:fwunhl"), at("six", "exp:clearchild:FW angles"),
                       at("six+0.1", "exp:fwhl:6:logs"), at("plus", "exp:fwangles:6"),
                       say("multiplying is adding heights", "γ·log 4 = 2 γ·log 2   ·   γ·log 6 = γ·log 2 + γ·log 3")]),
         dict(text="Every zero winds its own coil. Twenty-one point zero two turns each hand further, the higher ones more; "
                   "twenty-five point zero one, further still.",
-             camera=C(at="68004,-1,-9.5>68000,0,-14", fit="64,36>66,74", el="64>24", az=-90, spin=0, rise=.04, span=5),
+             camera=C(at="68004,-1,-9.5>68000,0,-14", fit="72,40.5>76,74", el="64>24", az=-90, spin=0, rise=.04, span=5),
              actions=["exp:fwunhl", "exp:clearchild:FW angles", tw("fw.dim", 0, 1.5), tw("fw.coil", 1, 2.5), at("twentyone", tw("fw.gamma", G2, 2.2)),
                       at("twentyfive", tw("fw.gamma", G3, 2.2)),
                       say("other zeros, other coils", "γ = 21.02,  25.01")]),
         dict(text="At a height that is not a zero, like eighteen, the hands turn just the same, but drop them back onto the floor "
                   "and the path does not close: its tail ends away from the axis.",
-             camera=C(at="68000,0,-14>68024.5,-3,0", fit="66,74>51.2,28.8", el="24>84", az=-90, spin=0, rise=.035, span=6),
+             camera=C(at="68000,0,-14>68024.5,-3,0", fit="76,74>51.2,28.8", el="24>84", az=-90, spin=0, rise=.035, span=6),
              actions=[tw("fw.coil", 0, 1.5), at("eighteen", tw("fw.gamma", 18, 2)), at("drop", tw("fw.lift", 0, "{drop~path}")),
                       at("drop", tw("fw.path", 1, 1.5)), at("tail", tw("fw.tail", 1, 1.5)),
                       say("t = 18:  not a zero", "the arrows dropped back into the path:  it ends away from the axis")]),
@@ -767,9 +982,10 @@ XZ3 = dict(
 
 XZ4 = dict(
     id="xz4", title="Lamps and spokes", subtitle="the zeros inside E8, part 4:  all the coils together",
-    setup=["exp:stage", "exp:backdrop:off", "exp:zfunnel", "exp:fwinit", tw("fw.n", 0, 0), "exp:mute:GB factor columns:0"],
+    setup=["exp:stage", "exp:backdrop:off", "exp:zfunnel", "exp:fwinit", tw("fw.n", 0, 0), tw("fw.dim", 0, 0), tw("fw.stretch", 1, 0),
+           "exp:mute:GB factor columns:0"],
     lines=[
-        dict(text="Every zero winds its own coil up the funnel. Here are the first three, fourteen point one three, twenty-one point "
+        dict(text="Every zero winds its own coil up the funnel. Here are the first {three:|three,} fourteen point one three, twenty-one point "
                   "zero two and twenty-five point zero one, over the greyed-out columns.",
              camera=C(at="68000,0,-18", fit="62,92", el=12, az=-96, spin=3, rise=.04),
              actions=[say("every zero, a coil", "γ = 14.13,  21.02,  25.01"), "exp:reveal:JM coils:{fourteen},{twentyone},{twentyfive}", "exp:snap"]),
@@ -779,14 +995,15 @@ XZ4 = dict(
              camera=C(at="68000,0,-12", fit="74,74", el=40, az=-100, spin=2, rise=.04),
              actions=["exp:show:JM coils", at("sevens", "exp:fwhl:7"), at("each", "exp:reveal:JM disc 7:0,0.8,1.8,3.4"),
                       say("at the height of 7, a prime", "10 500 coils lean to −1:  mean −0.115,  Landau −0.115")]),
-        dict(text="At the top of six's column, two times three, the coils point every way, and their mean is zero. The zeros lean "
+        dict(text="At the top of six's column, {6 = 2 · 3,|two times three,} the coils point every way, and their mean is zero. The zeros lean "
                   "only at the powers of primes.",
              camera=C(at="68000,0,-11", fit="74,74", el=40, az=-80, spin=2, rise=.04),
              actions=["exp:fwunhl", "exp:hide:JM disc 7", at("sixs", "exp:fwhl:6"), at("coils", "exp:reveal:JM disc 6:0,0.8,1.8,3.4"),
                       say("at the height of 6 = 2·3", "the coils cancel:  mean 0.000")]),
         dict(text="Now do it at every height. A ring climbs the axis, and at each height all the coils add up to one hand, drawn "
-                  "out to the side. Where they agree, at a prime power, it shoots out to the top of that prime's column: seven, eight, "
-                  "nine. At six, ten and twelve it stays at the axis.",
+                  "out to the side. Where they agree, at a prime power, it shoots out to the top of that prime's column: {7, 8, "
+                  "9.|seven, eight, "
+                  "nine.} At six, ten and twelve it stays at the axis.",
              camera=C(at="68000,0,-11>68004,0,-10", fit="74,74>56,31.5", el="40>10", az=-90, spin=0, rise=.035, span=4),
              actions=["exp:fwunhl", "exp:hide:JM coils", "exp:hide:JM disc 6",
                       at("climbs", tw("fw.scan", 1.5, 0)), at("climbs", tw("fw.scan", 1.75, "{climbs~seven}")),
@@ -800,20 +1017,20 @@ XZ4 = dict(
              camera=C(at="68004,0,-10>68008,0,-19", fit="56,31.5>130,73", el=8, az=-90, spin=0, rise=.035, span=6),
              actions=["exp:uncall", at("climbing", tw("fw.scan", 6.02, "{climbing~comb}")), at("comb", tw("fw.scan", 100, 0)),
                       say("ζ's comb", "a tooth at every prime power")]),
-        dict(text="But the comb is the same in every direction. Spin it round the axis, and each tooth draws a ring through its "
-                  "prime's column. Zeta's zeros know how high a prime sits, not its hour on the wheel.",
-             camera=C(at="68008,0,-19>68000,0,-20", fit="130,73>124,118", el="8>30", az=-90, spin=0, span=4, rise=.04),
-             actions=[at("spin", "exp:hide:JM comb labels"), at("each", tw("fw.spin", 1, "{each~sits}")),
+        dict(text="But the comb is the same in every direction. Spin it round the axis, slowly, and watch each tooth sweep out a "
+                  "ring through its prime's column. Zeta's zeros know how high a prime sits, not its hour on the wheel.",
+             camera=C(at="68008,0,-19>68000,0,-18", fit="130,73>227.6,128", el="8>40", az=-90, spin=0, span=3.5, rise=.035),
+             actions=[at("spin", "exp:hide:JM comb labels"), at("spin+0.4", tw("fw.spin", 1, "{spin~sits}")),
                       say("spun round the axis:  a ring per prime power", "ζ's zeros fix the height, not the hour")]),
         dict(text="E eight knows more. Its field has eight L-functions, and at the height of seven each one's zeros light the tooth "
-                  "of seven, turned by its own character: along one, minus one, i or minus i.",
-             camera=C(at="68000,0,-20>68000,0,-12", fit="124,118>34,30", el="30>70", az=-90, spin=0, span=5, rise=.04),
+                  "of seven, turned by its own character: along {1, −1, i or −i.|one, minus one, i or minus i.}",
+             camera=C(at="68000,0,-18>68000,0,-12", fit="227.6,128>34,30", el="40>70", az=-90, spin=0, span=5, rise=.04),
              actions=[at("e", tw("fw.spin", 0, 3)), at("height", tw("fw.scan", -1, 0)), at("height", "exp:hide:JM comb"),
                       at("height", "exp:hide:JM comb labels"),
                       at("height", "exp:fwhl:7"), at("light", "exp:fwchars:7"),
                       say("eight L-functions at the height of 7", "each tooth turned by its character χ(7):  1, −1, i or −i")]),
         dict(text="Turn each one back by its character at an hour, and chain the eight. At every other hour they cancel; only at "
-                  "hour seven do all eight line up, and the chain swings onto the spoke of seven.",
+                  "hour seven do all eight line up, and the chain swings onto {the spoke of 7.|the spoke of seven.}",
              camera=C(at="68000,0,-12", fit="34,30", el=70, az=-90, spin=0, rise=.04),
              actions=[at("turn", "exp:fwturn:7:{turn~end}"), say("turned back by χ(h), and chained", "the eight line up only for the hour of 7")]),
         dict(text="Do this at every height, and the comb splits into eight fans, one for each gold hour: only the primes on spoke h "
@@ -821,7 +1038,7 @@ XZ4 = dict(
              camera=C(at="68000,0,-12>68000,0,-16", fit="34,30>130,130", el="70>46", az=-90, spin=0, span=2.5, rise=.04),
              actions=["exp:fwunhl", "exp:clearchild:FW chars", at("splits", tw("fw.fan", 1, "{splits~survive}")),
                       say("eight L-functions, eight fans", "only the primes on spoke h survive")]),
-        dict(text="Forty-nine lights on spoke nineteen, as seven squared. Eleven and forty-one share spoke eleven. Seven thousand "
+        dict(text="{49 = 7² lights on spoke 19.|Forty-nine lights on spoke nineteen, as seven squared.} Eleven and forty-one share spoke eleven. Seven thousand "
                   "four hundred zeros sort every prime up to four hundred onto its spoke.",
              camera=C(at="68000,0,-16", fit="130,130>110,110", el="46>62", az="+", spin=2, span=10, rise=.04),
              actions=[at("fortynine", "exp:fwhl:49"), at("fortynine", call("fun", 49, 0, 0, "49 = 7²:  hour 19")),
@@ -842,12 +1059,12 @@ XZ4 = dict(
 
 TOWER = dict(el=22, spin=1, rise=.08)
 WHEEL5 = (36254, 36346, -46, 46)                    # E8's wheel with the spiral to radius 40 and its hour labels
+CUBES = "".join(f"exp:e8cubesat:{n}:30,0,{16 * (n - 1)}:1.6:3:.4:70|" for n in range(1, 8)).rstrip("|").split("|")
 XZ5 = dict(
     id="xz5", title="240 roots, infinitely many numbers", subtitle="the zeros inside E8, part 5:  E8's clock and E8's shells",
     setup=["exp:stage", "exp:backdrop:off", "exp:e8wheel:66:150:15:40", "exp:hide:E8 spiral", "exp:hide:E8 impostors", "exp:hide:E8 rings",
-           "exp:e8tower:60:attach:16", "exp:hide:E8 tower A", "exp:hide:E8 tower B", "exp:hide:E8 tower C",
-           "exp:e8cubesat:7:22,0,96:1.6:3:.4:60", "exp:e8cubesat:6:-62,0,80:1.6:3:.4:60", "exp:hide:E8 cubes 6", "exp:hide:E8 cubes 7",
-           "exp:hide:E8 cubes 6 label", "exp:hide:E8 cubes 7 label"],
+           "exp:e8tower:120:attach:16", "exp:hide:E8 tower A", "exp:hide:E8 tower B", "exp:hide:E8 tower C", "exp:e8links:7:16"] + CUBES +
+          [f"exp:hide:E8 cubes {n}" for n in range(1, 8)] + [f"exp:hide:E8 cubes {n} label" for n in range(1, 8)],
     lines=[
         dict(text="E eight has two hundred and forty roots, shown here in its Coxeter plane as eight rings of thirty. So how can "
                   "so few points hold infinitely many counting numbers?",
@@ -857,12 +1074,12 @@ XZ5 = dict(
                   "so the wheel has thirty hours, and eight of them, E eight's exponents, are gold.",
              camera=C(at=f"36300,0,0>{BOX(*WHEEL5)['at']}", fit=f"44,50>{BOX(*WHEEL5)['fit']}", el=89.5, az=-90, spin=0, hold=.5, span=3, rise=.035),
              actions=["exp:show:E8 rings", "exp:e8walk:line", say("E8's clock:  30 hours", "the 8 gold hours:  1, 7, 11, 13, 17, 19, 23, 29")]),
-        dict(text="Drop every counting number onto the wheel at its hour, n mod thirty, one turn further out each time round. The "
+        dict(text="Drop every counting number onto the wheel at its hour, {n mod 30,|n mod thirty,} one turn further out each time round. The "
                   "spiral never ends.",
              camera=TOP(WHEEL5),
              actions=[at("drop", "exp:reveal:E8 spiral:{drop~end}"), say("every n at its hour", "n mod 30:  the hours repeat, the radius grows")]),
-        dict(text="Grey it out and follow one hour. Seven, thirty-seven, sixty-seven and ninety-seven all land on hour seven, "
-                  "each one turn further out: all four are primes. One hundred and twenty-seven, too.",
+        dict(text="Grey it out and follow one hour, its arm drawn from the centre. Seven, thirty-seven, sixty-seven and ninety-seven "
+                  "all land on hour seven, each one turn further out: all four are primes. One hundred and twenty-seven, too.",
              camera=C(at=f"{BOX(*WHEEL5)['at']}>36324,2,0", fit=f"{BOX(*WHEEL5)['fit']}>60,40", el=89.5, az=-90, spin=0, rise=.035, span=4),
              actions=[at("grey", "exp:mute:E8 spiral:1.2"), at("seven#1", "exp:e8hl:7:spoke"), at("thirtyseven", "exp:e8hl:37"),
                       at("sixtyseven", "exp:e8hl:67"), at("ninetyseven", "exp:e8hl:97"), at("twentyseven", "exp:e8hl:127"),
@@ -878,34 +1095,55 @@ XZ5 = dict(
                       at("ninetysix", call("e8", 96, 0, 0, "96 = 2<sup>5</sup>·3", frac=.16, col=RED)),
                       say("hour 6:  6, 36, 66, 96", "multiples of 6, off the gold spokes")]),
         dict(text="And E eight itself is not two hundred and forty points. It is an infinite lattice, and the roots are only its first "
-                  "shell: the points at distance root two. Tilt the wheel, and the next shells appear beneath it.",
+                  "shell: the points at distance {√2.|root two.} Tilt the wheel, and the next shells appear beneath it.",
              camera=C(at=f"{BOX(*WHEEL5)['at']}>36300,0,16", fit=f"{BOX(*WHEEL5)['fit']}>150,84.4", el="89.5>34", az=-90, spin=0, span=6, rise=.035),
              actions=["exp:uncall", "exp:e8unhl", at("infinite", "exp:hide:E8 spiral"), at("infinite", "exp:hide:E8 walk"),
                       at("tilt", "exp:reveal:E8 tower A:{tilt~appear}"),
                       say("E8 is a lattice:  shells", "the 240 roots are its first shell, at distance √2")]),
-        dict(text="The next shell, at distance two, holds two thousand one hundred and sixty points. Then six thousand seven hundred "
-                  "and twenty, then seventeen thousand five hundred and twenty. Every counting number n has a shell of its own, at "
-                  "distance root two n.",
-             camera=C(at="36300,0,16>36300,0,40", fit="150,84.4>263,148", el="34>38", az=-90, spin=0, span=8, rise=.035),
-             actions=[at("seventeen", "exp:reveal:E8 tower B:1.5"), at("every", "exp:reveal:E8 tower C:2"),
+        # the whole tower, turning: one shell for every counting number
+        dict(text="Each shell n holds the points at distance {√(2n):|root two n:} two thousand one hundred and sixty for n equal to two, six "
+                  "thousand seven hundred and twenty {for 3,|for three,} seventeen thousand five hundred and twenty {for 4,|for four,} and on down to "
+                  "{7.|seven.} Every counting number has a shell of its own.",
+             camera=C(at="36300,0,16>36296,0,42", fit="150,84.4>291.6,164", el="34>32", az=-90, spin=2.5, span=6, rise=.035),
+             actions=[at("seventeen", "exp:reveal:E8 tower B:1.5"), at("seven#2", "exp:reveal:E8 tower C:2"),
                       say("a shell for every counting number", "shell n:  the points at distance √2n:  240, 2 160, 6 720, 17 520, …")]),
-        dict(text="And each shell knows its number's divisors: it holds two hundred and forty times the sum of the cubes of n's "
-                  "divisors. Seven is prime: one plus three hundred and forty-three, times two forty, makes eighty-two thousand "
-                  "five hundred and sixty.",
-             camera=C(at="36300,0,40>36302,0,82", fit="263,148>130,73", el="38>30", az=-90, spin=0, span=5, rise=.035),
-             actions=["exp:mute:E8 tower A,E8 tower B,E8 tower axis:2:1.6", "exp:reveal:E8 cubes 7:{one},{fortythree}",
-                      say("shell n holds 240 σ<sub>3</sub>(n) points", "σ<sub>3</sub>(n):  the sum of the cubes of n's divisors")]),
-        dict(text="Six has four divisors, one, two, three and six, so its cubes are one, eight, twenty-seven and two hundred and "
-                  "sixteen: sixty thousand four hundred and eighty points, with cubes in between for its factors.",
-             camera=C(at="36302,0,82>36284,0,78", fit="130,73>150,84", el=30, az=-90, spin=0, span=4, rise=.035),
-             actions=["exp:show:E8 cubes 6 label", "exp:reveal:E8 cubes 6:{one#2},{eight},{twentyseven},{sixteen}",
-                      say("6:  1 + 8 + 27 + 216 = 252", "240 × 252 = 60 480")]),
-        dict(text="Counted over every shell at once, the points of E eight give its own zeta function: two hundred and forty times "
-                  "zeta of s, times zeta of s minus three. A finite symmetry, and infinitely many shells, one for every counting "
+        # the cubes, floor by floor: one cube for each divisor
+        dict(text="Each shell's size is two hundred and forty times a sum of cubes, one cube for each divisor of n. {1 has the single cube 1.|One has the single "
+                  "cube one.} {2 has 1 and 8.|Two has one and eight.} {3 has 1 and 27.|Three has one and twenty-seven.}",
+             camera=C(at="36296,0,42>36284,0,14", fit="291.6,164>131.6,74", el="32>30", az=-90, spin=0, span=4, rise=.035),
+             actions=[at("one#1", "exp:mute:E8 tower B,E8 tower C:1.5:1.5"), at("one#1", "exp:reveal:E8 cubes 1:0.3"),
+                      at("two#1", "exp:reveal:E8 cubes 2:{one#3},{eight}"), at("three", "exp:reveal:E8 cubes 3:{one#4},{twentyseven}"),
+                      say("shell n holds 240 σ<sub>3</sub>(n) points", "σ<sub>3</sub>(n):  one cube d³ for each divisor d of n")]),
+        dict(text="{4 has 1, 8 and 64:|Four has one, eight and sixty-four:} its divisors {1, 2 and 4.|one, two and four.} {5,|Five,} a prime, has only one and a hundred and "
+                  "twenty-five. {6|Six} has four cubes: one, eight, twenty-seven and two hundred and sixteen. {7,|Seven,} a prime, has one "
+                  "and three hundred and forty-three.",
+             camera=C(at="36284,0,14>36280,0,66", fit="131.6,74>184.9,104", el=30, az=-90, spin=0, span=5, rise=.035),
+             actions=["exp:unmute:E8 tower B,E8 tower C:1.5", "exp:mute:E8 tower A:1.5:1.5",
+                      at("four#1", "exp:reveal:E8 cubes 4:{one#1},{eight#1},{sixtyfour}"), at("five", "exp:reveal:E8 cubes 5:{one#3},{twentyfive}"),
+                      at("six", "exp:reveal:E8 cubes 6:{one#4},{eight#2},{twentyseven},{sixteen}"),
+                      at("seven", "exp:reveal:E8 cubes 7:{one#5},{fortythree}"),
+                      say("the cubes of the divisors", "4:  1 + 8 + 64   ·   5:  1 + 125   ·   6:  1 + 8 + 27 + 216   ·   7:  1 + 343")]),
+        # the links between the shells: divisibility
+        dict(text="So the shells are linked by divisibility: each shell sends its cube to the shells of its multiples. {1|One} feeds every "
+                  "shell. {2 feeds 4 and 6.|Two feeds four and six.} {3 feeds 6.|Three feeds six.}",
+             camera=C(at="36280,0,66>36292,0,42", fit="184.9,104>291.6,164", el="30>32", az=-90, spin=-1.5, span=4, rise=.035),
+             actions=["exp:unmute:E8 tower A:1.5", at("one", "exp:showchild:E8 links:link 1-"), at("one", "exp:drawon:E8 links/arc 1-:1.5"),
+                      at("two", "exp:showchild:E8 links:link 2-"), at("two", "exp:drawon:E8 links/arc 2-:1.2"),
+                      at("three", "exp:showchild:E8 links:link 3-"), at("three", "exp:drawon:E8 links/arc 3-:1"),
+                      say("linked by divisibility", "shell d sends d³ to every shell n that d divides")]),
+        # why this is useful: the extra cubes are the factors
+        dict(text="That is why the shells are a useful way to look at numbers. A prime's shell holds the fewest points it can, just {1 "
+                  "and p³.|one "
+                  "and p cubed.} Every extra cube is a divisor: {6's|six's} extra cubes, eight and twenty-seven, are {2³ and 3³,|two cubed and three "
+                  "cubed,} so E eight's geometry has factored {6.|six.}",
+             camera=C(at="36292,0,42>36300,0,78", fit="291.6,164>142.2,80", el="32>30", az=-90, spin=0, span=5, rise=.035),
+             actions=[at("primes", "exp:pulse:E8 cubes 5,E8 cubes 7:1.6"), at("six#1", "exp:pulse:E8 cubes 6:2"),
+                      say("a prime's shell:  240 (1 + p³), the fewest", "6:  the extra cubes 8 = 2³ and 27 = 3³ are its factors")]),
+        dict(text="Counted over every shell at once, the points of E eight give its own zeta function: {240 ζ(s) ζ(s − 3).|two hundred and forty times "
+                  "zeta of s, times zeta of s minus three.} A finite symmetry, and infinitely many shells, one for every counting "
                   "number.",
-             camera=C(at="36284,0,78>36290,0,40", fit="150,84>260,146", el="30>38", az=-90, spin=0, span=8, rise=.035),
-             actions=["exp:unmute:E8 tower A,E8 tower B,E8 tower axis:2",
-                      say("Σ 240 σ<sub>3</sub>(n) n<sup>−s</sup> = 240 ζ(s) ζ(s − 3)", "a finite symmetry, a shell for every counting number")],
+             camera=C(at="36300,0,78>36304,0,42", fit="142.2,80>291.6,164", el="30>34", az=-90, spin=1.5, span=8, rise=.035),
+             actions=[say("Σ 240 σ<sub>3</sub>(n) n<sup>−s</sup> = 240 ζ(s) ζ(s − 3)", "a finite symmetry, a shell for every counting number")],
              pause=1.4),
     ])
 
