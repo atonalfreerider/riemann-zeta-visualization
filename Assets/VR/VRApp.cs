@@ -64,7 +64,8 @@ public partial class VRApp : MonoBehaviour
         Visual = VRHandVisual.Create(Rig, Hands, Poker, Grab);
         Perf = VRPerf.Create(Rig);
 
-        while (TourDirector.Instance == null || TourDirector.Instance.Captions == null || TourDirector.Instance.Rig == null || TourDirector.Instance.Annotations == null)
+        while (TourDirector.Instance == null || TourDirector.Instance.Captions == null || TourDirector.Instance.Rig == null || TourDirector.Instance.Annotations == null
+               || ModelLab.Instance == null)
         {
             yield return null;
         }
@@ -116,11 +117,25 @@ public partial class VRApp : MonoBehaviour
         Toast("Touch a chapter to begin. Pinch and drag in the air to move the model", 7f);
 
         // launch options for testing from the command line (adb shell am start ... -e unity "-vrview waves -vrdark")
+        //   -vrexperiment ID   play one experiment module;  -vrexperiment all   play every module, one after the other
+        //   -vrmodel ID        open a model of the lab (paths, e8, unified, zeros) on the Models page
         string[] args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "-vrview" && i + 1 < args.Length) ApplyView(args[++i]);
+            else if (args[i] == "-vrmodel" && i + 1 < args.Length)
+            {
+                ModelLab.Instance.Enter(args[++i]);
+                ShowPage(3);
+            }
             else if (args[i] == "-vrdark") SetRoom(false);
+            else if (args[i] == "-vrexperiment" && i + 1 < args.Length)
+            {
+                string id = args[++i];
+                bool all = id == "all";
+                if (all && tour.ExperimentChapters.Length > 0) id = tour.ExperimentChapters[0].id;
+                PlayExperiment(id, all);
+            }
         }
     }
 

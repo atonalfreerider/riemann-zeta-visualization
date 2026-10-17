@@ -77,10 +77,12 @@ public class CaptionDisplay : MonoBehaviour
         }
         else
         {
+            // drawn by a camera at the origin over the main camera's frame: steady however far out the main camera is
             canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = cam;
-            canvas.planeDistance = 0.5f;
+            canvas.worldCamera = CaptionCamera.Create(cam);
+            canvas.planeDistance = 1f;
             canvas.sortingOrder = 100;
+            gameObject.layer = CaptionCamera.Layer;
 
             CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -150,6 +152,14 @@ public class CaptionDisplay : MonoBehaviour
 
         BuildCard();
         board = MakePanel("Board", 54, FontStyles.Bold, TextAlignmentOptions.Center, out boardText);
+        for (int i = 0; i < 2; i++)
+        {
+            corners[i] = MakeText(transform, i == 0 ? "CornerLeft" : "CornerRight", 40, FontStyles.Bold, i == 0 ? TextAlignmentOptions.TopLeft : TextAlignmentOptions.TopRight);
+            corners[i].outlineWidth = .22f;
+            corners[i].outlineColor = new Color32(0, 0, 0, 220);
+            corners[i].gameObject.SetActive(false);
+        }
+
         legend = MakePanel("EquationLegend", 32, FontStyles.Normal, TextAlignmentOptions.Left, out legendText);
         SetLayout(false);
         Clear();
@@ -177,6 +187,7 @@ public class CaptionDisplay : MonoBehaviour
             footnoteRect.anchoredPosition = new Vector2(0, 150);
             PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -40), 1500);
             PlacePanel(legend, new Vector2(0f, 1f), new Vector2(40, -110), 640);
+            PlaceCorners(new Vector2(52, -205), 700);
         }
         else
         {
@@ -190,6 +201,7 @@ public class CaptionDisplay : MonoBehaviour
             footnoteRect.anchoredPosition = new Vector2(0, 200);
             PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -130), 1000);
             PlacePanel(legend, new Vector2(0.5f, 1f), new Vector2(0, -120), 760);
+            PlaceCorners(new Vector2(44, -330), 480);
         }
 
         Landscape = landscape;
@@ -230,6 +242,38 @@ public class CaptionDisplay : MonoBehaviour
         panel.pivot = new Vector2(anchor.x, 1f);
         panel.anchoredPosition = offset;
         panel.sizeDelta = new Vector2(width, panel.sizeDelta.y);
+    }
+
+    // ---- corner readouts (a count, a dial value): fixed on the screen, so they never move with the camera ----
+    readonly TextMeshProUGUI[] corners = new TextMeshProUGUI[2];
+
+    void PlaceCorners(Vector2 offset, float width)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (corners[i] == null) continue;
+            RectTransform r = corners[i].rectTransform;
+            r.anchorMin = r.anchorMax = new Vector2(i, 1f);
+            r.pivot = new Vector2(i, 1f);
+            r.anchoredPosition = new Vector2(i == 0 ? offset.x : -offset.x, offset.y);
+            r.sizeDelta = new Vector2(width, 120);
+        }
+    }
+
+    /// <summary>Show a readout in the top-left (0) or top-right (1) corner, under the board.</summary>
+    public void ShowCorner(int which, string richText, Color color)
+    {
+        TextMeshProUGUI t = corners[Mathf.Clamp(which, 0, 1)];
+        if (t == null) return;
+        if (t.text != richText) t.text = richText;
+        t.color = color;
+        if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+    }
+
+    public void HideCorner(int which)
+    {
+        TextMeshProUGUI t = corners[Mathf.Clamp(which, 0, 1)];
+        if (t != null && t.gameObject.activeSelf) t.gameObject.SetActive(false);
     }
 
     /// <summary>Top-centre board: the multiplication being built on the spiral, the skipped spot, the primes so far.</summary>
@@ -632,6 +676,75 @@ public class CaptionDisplay : MonoBehaviour
         chapterIndex.text = "";
         titleGroup.alpha = 0f;
         HideBoard();
+        HideStrip();
+        HideCorner(0);
+        HideCorner(1);
         if (legend != null) legend.gameObject.SetActive(false);
+    }
+
+    // ---- strip (just above the captions: a length cut into coloured pieces, lit one at a time; see StripView) ----
+    RectTransform strip;
+    StripView stripView;
+
+    /// <summary>Put the strip at the bottom edge instead of above the captions (the model lab shows no captions).</summary>
+    public bool StripAtBottom;
+
+    /// <summary>
+    /// A bar cut into pieces as wide as <paramref name="weights"/>, in their colours with a label inside each; the values at
+    /// the cuts above it (<paramref name="marks"/>, one more than the pieces); and under each run of pieces in
+    /// <paramref name="groups"/> (first piece, last piece, label, colour) a bracket with its label. Every piece starts dim
+    /// with only the first mark showing; <see cref="StripLight"/> lights them in order.
+    /// </summary>
+    public void ShowStrip(float[] weights, Color[] colors, string[] inner, string[] marks, (int first, int last, string label, Color color)[] groups)
+    {
+        if (VRMode.Enabled || weights == null || weights.Length == 0) return;
+        EnsureStrip();
+        stripView.Show(weights, colors, inner, marks, groups, Landscape ? 1380f : 900f);
+        strip.gameObject.SetActive(true);
+    }
+
+    /// <summary>The strip of a number: its column laid on its side (the same as the stair modules show).</summary>
+    public void ShowStrip(int n)
+    {
+        if (VRMode.Enabled || n < 2) return;
+        EnsureStrip();
+        stripView.Show(n, Landscape ? 1380f : 900f);
+        strip.gameObject.SetActive(true);
+    }
+
+    void EnsureStrip()
+    {
+        if (strip == null)
+        {
+            GameObject go = new("Strip");
+            go.transform.SetParent(transform, false);
+            strip = go.AddComponent<RectTransform>();
+            Image bg = go.AddComponent<Image>();
+            bg.color = new Color(0.02f, 0.02f, 0.05f, 0.62f);
+            bg.raycastTarget = false;
+            stripView = new StripView(strip, 1f, (parent, text, size) =>
+            {
+                TextMeshProUGUI t = MakeText(parent, "strip text", size, FontStyles.Bold, TextAlignmentOptions.Center);
+                t.text = text;
+                return t;
+            });
+        }
+
+        float barWidth = Landscape ? 1380f : 900f;
+        strip.anchorMin = strip.anchorMax = new Vector2(0.5f, 0f);
+        strip.pivot = new Vector2(0.5f, 0f);
+        strip.anchoredPosition = new Vector2(0f, StripAtBottom ? 18f : Landscape ? 272f : 574f);
+        strip.sizeDelta = new Vector2(barWidth + 100f, 236f);
+    }
+
+    /// <summary>Light the first <paramref name="lit"/> pieces of the strip; show the marks up to the last lit cut and the brackets of the finished runs.</summary>
+    public void StripLight(int lit)
+    {
+        if (stripView != null) stripView.Light(lit);
+    }
+
+    public void HideStrip()
+    {
+        if (strip != null) strip.gameObject.SetActive(false);
     }
 }

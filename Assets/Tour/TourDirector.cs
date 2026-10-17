@@ -12,7 +12,7 @@ using UnityEngine.InputSystem;
 ///
 /// Keys:  T start/stop tour · N skip to next line · F9 start/stop recording · P toggle portrait · M side menu
 /// </summary>
-public class TourDirector : MonoBehaviour
+public partial class TourDirector : MonoBehaviour
 {
     public static TourDirector Instance { get; private set; }
 
@@ -21,6 +21,10 @@ public class TourDirector : MonoBehaviour
     /// <summary>Storyboard: snap the camera per line, compress each line to a few seconds and save two PNGs per line.</summary>
     public bool Storyboard;
     public float StoryboardSecondsPerLine = 3f;
+    /// <summary>Storyboard frames per line: 0 for the two default ones (at 45 % and at the end), else this many, evenly spaced.</summary>
+    public int StoryboardFrames;
+    /// <summary>Storyboard lines last as long as their narration (or its estimate), so cues fire as in the video.</summary>
+    bool StoryboardRealTime => Storyboard && StoryboardSecondsPerLine <= 0f;
     public string StoryboardDirectory = "";
     /// <summary>Where full recordings go (empty = Recordings/&lt;timestamp&gt; next to the project).</summary>
     public string RecordDirectory = "";
@@ -94,6 +98,9 @@ public class TourDirector : MonoBehaviour
         audioSource.spatialBlend = 0f;
 
         script = TourScriptLoader.Load();
+        experiments = TourScriptLoader.LoadExperiments();
+        SacksSpiral.WarmZeroModule(); // the zeros module's sums, on a worker thread, so it opens without a stall
+        ModelLab.Create(this);
         if (!VRMode.Enabled)
         {
             SideMenu.Create(this);
@@ -181,6 +188,7 @@ public class TourDirector : MonoBehaviour
     public void StartTour()
     {
         if (Running) return;
+        if (ModelLab.Instance != null) ModelLab.Instance.Close();
         Running = true;
         skipRequested = false;
         replayRequested = false;
@@ -223,6 +231,7 @@ public class TourDirector : MonoBehaviour
         Captions.Clear();
         Rig.Release();
         if (Recorder.IsRecording) StopRecording();
+        EndExperiment();
         CurrentChapterId = "";
         CurrentChapterIndex = -1;
         CurrentLineId = "";
@@ -255,12 +264,16 @@ public class TourDirector : MonoBehaviour
     /// <summary>Start (or restart) the narrated tour at a chapter, from a clean stage.</summary>
     public void GoToChapter(string chapterId, bool continueOn = true)
     {
+        if (ModelLab.Instance != null) ModelLab.Instance.Close();
+        bool experiment = PlayingExperiment; // a jump between modules stays among the modules
         if (Running)
         {
             jumping = true;
-            StopTour();
+            StopTour(); // ends the experiment, which puts the main script back
             jumping = false;
         }
+
+        if (experiment) UseExperimentsScript();
 
         Main.CancelAnimations();
         Annotations.CancelAnimations();
@@ -319,7 +332,7 @@ public class TourDirector : MonoBehaviour
     IEnumerator Delayed(float seconds, string action)
     {
         int serial = lineSerial;
-        yield return new WaitForSeconds(Storyboard ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
+        yield return new WaitForSeconds(Storyboard && !StoryboardRealTime ? seconds * (StoryboardSecondsPerLine / Mathf.Max(currentLineSeconds, 0.1f)) : seconds);
         // only if the tour is still on the line that scheduled it (skipping ahead cancels it)
         if (Running && serial == lineSerial) ApplyActions(new[] { action });
     }
@@ -466,6 +479,12 @@ public class TourDirector : MonoBehaviour
             // every chapter starts from a cleared stage plus its own setup, so it looks the same whether it follows the
             // chapter before it or is started (or recorded) on its own
             ResetStage();
+            // the long-form segments are composed 16:9; in a tall frame their labels grow and their callouts stay in proportion
+            bool tall = RecordOnStart || Storyboard || Recorder.IsOffscreen ? Recorder.Height > Recorder.Width : Portrait;
+            bool longForm = PlayingExperiment && (chapter.id.StartsWith("xs") || chapter.id.StartsWith("xz"));
+            SacksSpiral.LabelBoost = longForm && tall ? 1.3f : 1f;
+            SacksSpiral.CalloutScale = longForm && tall ? .75f / SacksSpiral.LabelBoost : 1f;
+            SacksSpiral.Tall = longForm && tall;
             ApplyActions(chapter.setup);
             Captions.SetChapterIndex(c + 1, total, chapter.title);
             Captions.ShowChapterTitle(chapter.title, chapter.subtitle, ChapterTitleSeconds);
@@ -485,6 +504,7 @@ public class TourDirector : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
         Running = false;
         Rig.Release();
+        EndExperiment();
         bool explore = exploreAfterTour && !Storyboard && !Recorder.IsOffscreen;
         if (Recorder.IsRecording) StopRecording();
         else if (Recorder.IsOffscreen) Recorder.EndOffscreen();
@@ -545,6 +565,8 @@ public class TourDirector : MonoBehaviour
         Captions.HideBoard();
         Captions.ShowEquations("off");
         Captions.SetFootnote("");
+        Annotations.Sacks.ClearExperiments();
+        Annotations.Sacks.ClearBackdrop();
     }
 
     // ---- seeking within a chapter (the scrubber) ------------------------------------------------------
@@ -645,12 +667,13 @@ public class TourDirector : MonoBehaviour
         {
             EndSeek();
         }
-        Rig.SetCue(line.camera);
+        Rig.SetCue(line.camera, PlayingExperiment ? 4f : 2.5f);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);
-        currentLineSeconds = Storyboard ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
+        currentLineSeconds = Storyboard && !StoryboardRealTime ? StoryboardSecondsPerLine : (clip != null ? clip.length : (timing ?? TourScriptLoader.Estimate(line.text)).duration);
         ApplyActions(line.actions);
+        if (PlayingExperiment && CurrentLineIndex == 0) Rig.Snap(); // an experiment opens framed on its subject, not flying in
         if (timing == null)
         {
             timing = TourScriptLoader.Estimate(line.text);
@@ -669,7 +692,7 @@ public class TourDirector : MonoBehaviour
         }
 
         float duration = clip != null ? Mathf.Max(clip.length, timing.duration) : timing.duration;
-        Captions.SetLine(timing);
+        Captions.SetLine(TourScriptLoader.DisplayTiming(timing, line.caption));
         Captions.SetFootnote(line.footnote);
         LineDuration = duration + Mathf.Max(0f, line.pause);
         LineElapsed = 0f;
@@ -720,21 +743,31 @@ public class TourDirector : MonoBehaviour
 
     IEnumerator StoryboardLine(TourLine line, LineTiming timing, float realDuration)
     {
-        // compress the real line duration into StoryboardSecondsPerLine, keeping the same amount of animation
-        float seconds = Mathf.Max(0.5f, StoryboardSecondsPerLine);
+        // compress the real line duration into StoryboardSecondsPerLine, keeping the same amount of animation (or, in real
+        // time, play the line at its own length with the camera flying as in the video)
+        float seconds = StoryboardRealTime ? realDuration : Mathf.Max(0.5f, StoryboardSecondsPerLine);
         Main.SpeedMultiplier = realDuration / seconds;
-        Rig.Snap();
-        yield return null;
-        Rig.Snap();
+        if (!StoryboardRealTime)
+        {
+            Rig.Snap();
+            yield return null;
+            Rig.Snap();
+        }
 
         int index = storyboardIndex++;
         float start = Time.time;
         bool first = false;
+        int shot = 0;
         while (Time.time - start < seconds)
         {
             float elapsed = Time.time - start;
             Captions.SetTime(elapsed / seconds * timing.duration);
-            if (!first && elapsed >= seconds * 0.45f)
+            if (StoryboardFrames > 1)
+            {
+                if (shot < StoryboardFrames - 1 && elapsed >= seconds * (shot + 1) / StoryboardFrames)
+                    Recorder.Snapshot($"{index:D2}_{line.id}_{++shot}.png");
+            }
+            else if (!first && elapsed >= seconds * 0.45f)
             {
                 first = true;
                 Recorder.Snapshot($"{index:D2}_{line.id}_a.png");
@@ -743,7 +776,7 @@ public class TourDirector : MonoBehaviour
             yield return null;
         }
 
-        Recorder.Snapshot($"{index:D2}_{line.id}_b.png");
+        Recorder.Snapshot(StoryboardFrames > 1 ? $"{index:D2}_{line.id}_{StoryboardFrames}.png" : $"{index:D2}_{line.id}_b.png");
         yield return null;
         yield return null;
     }
@@ -955,6 +988,7 @@ public class TourDirector : MonoBehaviour
                         else if (arg == "sweep") Annotations.SweepGhostBeta(float.Parse(parts[2], CultureInfo.InvariantCulture), float.Parse(parts[3], CultureInfo.InvariantCulture), Mathf.Max(2f, currentLineSeconds * 0.9f), parts.Length > 4 && parts[4] == "pingpong");
                         else Annotations.SetGhostZero(true, double.Parse(arg, CultureInfo.InvariantCulture), parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 14.134725);
                         break;
+                    case "exp": ApplyExperimentAction(parts); break;
                     case "show":
                     case "hide":
                         SetVisible(arg, verb == "show");

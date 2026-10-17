@@ -11,6 +11,7 @@ using UnityEngine.TestTools;
 ///
 ///   ZETA_OUT=/path/out ZETA_MODE=storyboard  Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter StoryboardRenderTest
 ///   ZETA_MODE=record (full video via ffmpeg), ZETA_CHAPTER=<id>, ZETA_STORYBOARD_SECONDS=3, ZETA_FPS=30
+///   ZETA_STORYBOARD_SECONDS=0 plays each line at its narrated length; ZETA_STORYBOARD_FRAMES=N saves N frames per line
 /// Skipped unless ZETA_OUT is set.
 /// </summary>
 public class StoryboardRenderTest
@@ -38,7 +39,8 @@ public class StoryboardRenderTest
         director.StoryboardDirectory = outDir;
         director.RecordOnStart = mode == "record";
         director.RecordDirectory = outDir;
-        if (float.TryParse(Environment.GetEnvironmentVariable("ZETA_STORYBOARD_SECONDS"), out float seconds)) director.StoryboardSecondsPerLine = seconds;
+        if (float.TryParse(Environment.GetEnvironmentVariable("ZETA_STORYBOARD_SECONDS"), out float seconds)) director.StoryboardSecondsPerLine = seconds; // 0: real time
+        if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_STORYBOARD_FRAMES"), out int frames)) director.StoryboardFrames = frames;
         string chapter = Environment.GetEnvironmentVariable("ZETA_CHAPTER");
         if (!string.IsNullOrEmpty(chapter)) director.StartChapter = chapter;
         string endChapter = Environment.GetEnvironmentVariable("ZETA_END_CHAPTER");
@@ -48,6 +50,7 @@ public class StoryboardRenderTest
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_WIDTH"), out int w)) director.Recorder.Width = w;
         if (int.TryParse(Environment.GetEnvironmentVariable("ZETA_HEIGHT"), out int hgt)) director.Recorder.Height = hgt;
 
+        if (Environment.GetEnvironmentVariable("ZETA_SCRIPT") == "experiments") director.UseExperimentsScript(); // the Experiments modules instead of the tour
         if (Environment.GetEnvironmentVariable("ZETA_NO_CAPTIONS") == "1") director.Captions.GetComponent<Canvas>().enabled = false; // clean frames for thumbnails
         yield return null;
         director.StartTour();

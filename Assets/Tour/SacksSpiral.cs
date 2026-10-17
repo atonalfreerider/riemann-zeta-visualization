@@ -9,7 +9,7 @@ using UnityEngine;
 /// onto a saddle z = (x² − y²)/k. Routes from the origin show where primes cluster
 /// (Euler's k²+k+41 curve) and where they never appear (the squares ray, the pronic ray).
 /// </summary>
-public class SacksSpiral : MonoBehaviour
+public partial class SacksSpiral : MonoBehaviour
 {
     public const int GridCount = 30;
     /// <summary>Numbers drawn: up to Euler's 40th prime, 39² + 39 + 41 = 1601, so his whole route is on the Sacks spiral.</summary>
@@ -896,9 +896,24 @@ public class SacksSpiral : MonoBehaviour
         if (t != null) t.localScale = Vector3.one * baseScale;
     }
 
+    /// <summary>
+    /// Scales every scene label made from now on: the long-form segments, recorded 9:16, frame their wide pictures by width,
+    /// so their labels would come out at about 60 % of their 16:9 size (TourDirector sets it per chapter).
+    /// </summary>
+    public static float LabelBoost = 1f;
+
+    /// <summary>Callout labels are sized by the camera's distance, so in a tall frame they shrink back by this (and LabelBoost).</summary>
+    public static float CalloutScale = 1f;
+
+    /// <summary>
+    /// True while a long-form segment plays in a tall (9:16) frame: its layouts stack side-by-side pictures vertically, and
+    /// an action argument written "WIDE^TALL" takes its tall side (ExperimentTour.Pick).
+    /// </summary>
+    public static bool Tall;
+
     TextBox TextBoxLabel(string text, float size, Color color)
     {
-        TextBox label = TextBox.Create(text, size);
+        TextBox label = TextBox.Create(text, size * LabelBoost);
         label.transform.SetParent(transform, false);
         label.Alignment = TextAlignmentOptions.Center;
         label.Color = color;

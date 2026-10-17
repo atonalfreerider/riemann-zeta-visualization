@@ -13,7 +13,8 @@ Writes, per line id:
 
 The timing JSON is derived from the ElevenLabs character alignment returned by the
 /with-timestamps endpoint, so the caption highlight follows the actual speech.
-Existing files are skipped unless --force is given.
+Existing files are skipped unless --force is given. Every new clip is faded out where its speech ends
+(Tools/fade_narration.py): ElevenLabs often ends a clip with a cut-off piece of the next line's first sound.
 """
 import argparse
 import re
@@ -25,6 +26,9 @@ import time
 from pathlib import Path
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fade_narration import fade_clip  # noqa: E402  (the exponential fade-out at the end of each clip)
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "Assets/Resources/Narration/script.json"
@@ -89,6 +93,10 @@ def words_from_alignment(text, alignment):
 PRONOUNCE = [
     (re.compile(r"\bEuler"), "Oiler"),             # Leonhard Euler: "oil-er", never "you-ler"
     (re.compile(r"\b([Cc])osine"), r"\1o-sign"),  # "co-sign"
+    (re.compile(r"\bVoronoi"), "Voronoy"),          # Georgy Voronoi: "vo-ro-NOY"
+    (re.compile(r"\b([Pp])ronic"), r"\1ro-nick"),  # "PRO-nick"
+    (re.compile(r"\bFermat"), "Fair-mah"),         # Pierre de Fermat: "fair-MAH", the t silent
+    (re.compile(r"\bi t\b"), "eye tee"),           # ζ(½ + it): the letters, never the word "it"
 ]
 
 
@@ -129,6 +137,8 @@ def main():
     parser.add_argument("--voice", default="JohnV4", help="ElevenLabs voice name (default: JohnV4)")
     parser.add_argument("--model", default="eleven_multilingual_v2")
     parser.add_argument("--only", help="chapter id or line id to generate")
+    parser.add_argument("--script", default="script",
+                        help="which script in Assets/Resources/Narration: script (the tour, default) or experiments")
     parser.add_argument("--force", action="store_true", help="regenerate existing files")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--speed", type=float, default=0.95, help="delivery speed, 0.7 to 1.2 (default 0.95: unhurried, not dragging)")
@@ -136,7 +146,8 @@ def main():
     parser.add_argument("--style", type=float, default=0.45, help="style exaggeration, 0 to 1 (default 0.45)")
     args = parser.parse_args()
 
-    script = json.loads(SCRIPT.read_text(encoding="utf-8"))
+    script_path = SCRIPT.with_name(f"{args.script}.json")
+    script = json.loads(script_path.read_text(encoding="utf-8"))
     lines = []
     for chapter in script["chapters"]:
         for line in chapter["lines"]:
@@ -183,7 +194,8 @@ def main():
         words = words_from_alignment(l["text"], alignment)
         duration = words[-1]["e"] if words else 0.0
         timing.write_text(json.dumps({"words": words, "duration": round(duration + 0.25, 3)}, indent=1), encoding="utf-8")
-        print(f"{duration:.1f}s")
+        # a clip often ends with a piece of the next line's first sound (the next line is passed as context): fade it out
+        print(f"{duration:.1f}s;", fade_clip(mp3).split(": ", 1)[1])
 
     print("done — open Unity so it imports the new clips, then play the tour.")
 

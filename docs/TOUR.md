@@ -32,6 +32,134 @@ chain, numbers, the red / blue / green curves, trail height, reset view — **Fo
 in the chosen format. The panel is a screen overlay, so it never appears in recordings; while recording, the
 window shows the frame being recorded, letterboxed.
 
+## Experiments section
+
+Below the chapter list the side menu has an **Experiments** section: directed explainer modules for the thought
+experiments on the saddle (findings and pictures in `docs/experiments/README.md`). Each module runs as a single
+chapter through the tour machinery (captions, camera cues, actions) from a clean stage and returns to the home view
+when it ends. Their script is `Assets/Resources/Narration/experiments.json`, in the same line format as the tour,
+narrated with ElevenLabs JohnV4 like the tour (`python Tools/generate_narration.py --script experiments`). All the
+modules are narrated. The modules are
+
+| module | id | what it shows |
+|---|---|---|
+| Cancellation curves | `xcurves` | the product curves, Euler's line cut by them in two families, the zeta wave along the line |
+| Level contours | `xlevels` | the saddle sliced by horizontal planes: hyperbolas, the numbers on them, the trail, the three product families |
+| The bend as a probe | `xprobe` | a fixed plane sweeping the product families as the bend goes from flat to twice the tour's |
+| Mirrors, not oracles | `xmirror` | the vortex eyes of the chain at a zero, their mirror points, the traces through the zero planes |
+| Two counting problems | `xlattice` | the divisor and circle problems' wobbles as charts, their waves added one by one, the saddle twisting from two waves per turn to one |
+| Primes of Euler's ring | `xideals` | split and inert primes; needles built from ζ's zeros, then the zeros of L(s, (·/163)) joining |
+| Mirror lines | `xmirrorlines` | k² − m² swinging into k² + m²; one pair proves 1601 prime, two pairs factor 221 and 1105; Fermat's walk to 1501 |
+| The discriminant comb | `xcomb` | a plane sliding across the comb with its prime count, the prime yield of every plane, Euler's and Landau's lines meeting at 197 and 1601 |
+| Pinching the spiral | `xpinch` | the fold and its one comb of every discriminant, the residue arms mod 30 and mod 4 on the saddle, the pleat gathering primes onto k² + k + 11 and k² + k + 17 (leftover composites in white), the residue lattice mod 3, 5, 7 |
+| The 12 × 12 torus | `xtorus` | numbers marked with turn and step; the board filling as the primes up to 10⁷ arrive (only 2 and 3 off the 48 gold cells); diagonals swept cell by cell; the board rolled into a torus |
+| The saddle computes (3/p) | `xlegendre` | the pinch to 24 arms, then the saddle rising so every prime falls or rises by (3/p); the same for (2/p) on 16 arms, (5/p) on 10, and 144 arms on a 12-fold saddle |
+| Base-12 fingerprints | `xfinger` | the last two base-12 digits as a board; the primes filling four columns; the squares, Euler's line, k² + k + 17 and the pronic numbers stamping their cells one value at a time |
+| The 144 clock | `xclock` | the 24 half-hours appearing one by one with their product families; the prime-free hours pulsing; 16k² + 11k + 2 beside hour 9; the clock on the saddle |
+| Mirrors for prime pairs | `xgoldbach` | Goldbach pairs as chords across the pronic ray and Euler's line, mirror by mirror with a running count; five curves' mirror strength against Hardy and Littlewood's prediction; the chords arriving on the Möbius band of unordered pairs |
+| The sieve machine | `xsieve` | Fermat's search through a dial of residue rings (mod 3 to 19) turning one hole per step: 1 501 = 19 × 79 at a = 49, the ring for 19 that never closes, 50 399 = 101 × 499 at a = 300, and the record of every candidate |
+| Twisted tori | `xtwist` | a walk along the (5, 7) torus knot of residues with flares at the primes; Euler's line on 12 beads; the spiral winding onto the umbilic torus so turn k lands in position k mod 3; the multiples of 3 of k² + k + 1 and k² + k + 3 on whole stacks; the untwisted torus for contrast |
+| Two norm surfaces | `xnorms` | the bowl x² + y² and the saddle x² − y² meeting along the squares; every curve laid on as a slice with its discriminant and prime count; the level sets of 13 and 65 with their factor points and square points |
+| Rings through lattices | `xlattices` | the rings of 13, 17, 19 and 23 over the square and triangular lattices (one prime per class mod 12), 1105 and 1729; Euler's lattice drawn ring by ring to 41² |
+| A twelve-dimensional torus | `xresidue` | the 144 shadows of the residue torus of 2 … 37 recoloured panel by panel as Euler's line (never on a cross) and the pronic numbers (on every cross) pass through; the 36 shadows close up |
+| The modular surface | `xmodular` | the curves' roots in the upper half plane: points, their j-invariants, closed geodesics and the cusp geodesics of the cancellation curves; the fundamental domain close up |
+| The lattice race | `xrace` | the race mod 4 rebuilt live from the zeros of Dirichlet's β, with flares at 26 861, 616 841 and 12 306 137; the four lattice classes mod 12 and the near miss at 48 231 785 |
+| Dropping onto E8 | `xe8` | E8's roots ring by ring in the Coxeter plane; the Coxeter element walking the 30 hours, the eight hours coprime to 30 lit as they are named; 1 … 600 dropped on the wheel at n mod 30, every prime above 5 on a gold spoke; the tower of spheres of norm 2n with their point counts, primes on the floor 240(1 + n³); one cube per divisor for 6, 7 and 35, and 35 = 5 × 7 recovered from the count |
+| E5 to E8, from mirrors | `xebuild` | one mirror and its root; two mirrors at 60° (a third of a turn, six roots) and at 90°; the E-series diagrams growing from E5 (= D5) to E8, and the infinite E9; the roots of E5–E8 on their Coxeter planes (40, 72, 126, 240) with the Coxeter element turning each by one hour; hours = roots ÷ mirrors (8, 12, 18, 30); the E-wheel stack, where 9 and 15 fall off at E6, 25 and 35 at E8, and 49, 77, 91 never |
+| The paths back | `xpaths` | E8's wheel lifted into factor columns that grow to the funnel z = log n and are cut by prime; the paths back of 397 (prime), 360 = 2³·3²·5 (drop by drop, the exponents tallied on the board and in the strip below), 256 = 2⁸, 343 = 7³, 210 = 2·3·5·7 and 324 = 2²·3⁴; the six paths unrolled side by side |
+
+Their actions start with `exp:` (`exp:stage`, `exp:bend:B`, `exp:sweep:FROM:TO:SECONDS:H1,H2:families`,
+`exp:contours:H1,H2:planes`, `exp:family:squares|quarter|diagonal|all`, `exp:euler:KMAX`, `exp:zetawave`,
+`exp:vortexpanel:J`, `exp:tower:A:B[:derotate]`, `exp:towerall[:derotate][:KMAX]`, `exp:chainlive:FROM:TO:SECONDS[:rings][:mirrors]`
+(the chain redrawn every frame as the dial turns, its vortex eyes detected live; FROM / TO are dial values, `zN` for zero
+N, or `here`), `exp:towergrow:A:B:SECONDS` (the tower grown zero by zero with the chain climbing through the planes),
+`exp:snap` (cut to the line's shot instead of flying there), and for the section modules `exp:latticechart[live]`,
+`exp:twistlive`, `exp:idealwave`, `exp:mirrorswing`, `exp:eulershow`, `exp:fermatwalk`, `exp:combslide`, `exp:skyline`,
+`exp:meet`, the pinches `exp:fold`, `exp:residue`, `exp:pleat`, `exp:residuelattice` and `exp:pinchlive`, the twisted
+shapes `exp:goldbachlive`, `exp:goldbachsky`, `exp:mobiusband`, `exp:mobiuspoints`, `exp:mobiuslive`, `exp:sievedial`,
+`exp:dialring`, `exp:sieveboard`, `exp:knot`, `exp:knotwalk`, `exp:umbilic`, `exp:umbiliclive`, `exp:umbiliccurve` and
+`exp:noboard`, the intersecting geometries `exp:normbase`, `exp:normslice:I,J`, `exp:levelset:N:I`, `exp:ringlattice:N:X`,
+`exp:eulerlattice`, `exp:residuetorus:COUNT:CELL[:a;b]`, `exp:residuelive:CODE:SECONDS`,
+`exp:modular:UNIT:U:V:CMAX:LABEL:ARCS`, `exp:race:mod4|mod12:W:H:L[:x1,x2]` and `exp:racelive:SECONDS[:x1,x2]`, the generic
+`exp:reveal:GROUP:SECONDS` and `exp:hide:GROUP` (a group's items appear one by one, each with its caption-board note and
+flares; `exp:reveal:GROUP:T1,T2,…` shows item k at Tk seconds, to land each on the word that names it), the E8 module's `exp:e8wheel`, `exp:e8walk:SECONDS[:T1,…,T8]`, `exp:e8tower`, `exp:e8cubes:N:X:Z:VOXEL:GAP:DOT:LABEL`,
+`exp:e8solve:N` and `exp:e8close`, the construction and path modules' `exp:mirrorscene`, `exp:dihedral:M:X:Y`, `exp:dynkin`,
+`exp:coxpanels`, `exp:coxwalk:SECONDS`, `exp:estack`, `exp:fcolumns`, `exp:stair:N[:a,b,…]` (n's path back, split into
+reveal groups `stair N #k`, with n's column laid on its side in a strip above the captions: a piece lit per drop, the
+values at the cuts, the exponent under each run; `exp:strip` hides it) and `exp:descent`, the caption-board line
+`exp:say:HEAD|SMALL`, and more,
+and `exp:flare:N1,N2[:RADIUS]` (white flares at the numbers a line names, usually with a `delay:`);
+see `ExperimentTour.cs`).
+
+**The long-form segments** (horizontal, 1920 × 1080) are written in [`Tools/video_series_spec.py`](../Tools/video_series_spec.py)
+and built into `experiments.json` by [`Tools/video_series.py`](../Tools/video_series.py), which times each cue to the word
+that names it (`@word|exp:…`, from the narration's word timings, or estimated before it exists). Their scripts are in
+[`experiments/long-form-script.md`](experiments/long-form-script.md); they are left off the VR dock.
+
+| Segment | Id | What it shows |
+|---|---|---|
+| The saddle is a wave | `xs1` | a teaser of the home view (the saddle, the master wave, ζ's curve rising from the centre); the counting numbers with 2, 3, 5, 7, 11, 13 named prime and 4, 6, 9 shown as products; the first three zeros flying from the critical line into the formula −cos(γ log x), each row drawn and dropped into the sum; then up to 10 000 zeros, spiking at 7, 8 = 2³, 9 = 3² but not at 10 or 12; the line curling into the Sacks spiral, whose radius √n = n^½ is the critical line's ½; the graph standing up into the curtain; one zero's wave drifting in arms; uncurled into Voronoi's wave, his waves m = 2, 3, 4 entering with their divisors, then 4 000 (7, 12 with its divisors ringed, 16, 30, 36); curled again, his first wave's crests 22.5° before the squares and pronic rays; the saddle, the same shape turned over and turned 22.5° by the phase −π/4; both waves on the saddle |
+| E8 sets the vortices | `xs2` | the path of partial sums laid arrow by arrow; the plane climbing a logarithmic t axis above the ground (t = 0), seen at an angle, to the first zero and the 159th (vortices, spokes at n ≈ 53, 27, 18); back on the ground beside E8's clock, the arrows off its gold hours shrinking away; the gold path at t = 5000; the arrows of 1577 … 1603 named with their hours, and why they repeat every 30 numbers (15 whole turns at n ≈ 1590); the block lifted onto the clock (sum −8), k = 5 (4), k = 1 (−1, prime factors irrelevant: 23 881 = 11·13·167 is hour 1); k sliding 1 … 30 into the chart of traces; the measured charges; the sieve |
+| Where the zeros live in E8 | `xs3` | E8's factor funnel, greyed out; 7 and 6 lit with their arms on the floor and their factors' pieces; the path at the first zero on the floor, its arrows lifted at their true lengths into a horn, then stretched by √n to one unit each (the critical line's ½ cancels the spiral's radius) and joined by the coil, drawn turn by turn in a gradient; from above, the hand of 6 as the turns of 2 and 3 (1.56 + 2.47 = 4.03 turns); tighter coils; a ring climbing the axis draws the comb; the eight fans |
+| What keeps zeros on the line | `xs4` | the three lattices of −23 and the points at distance² 6, 59, 13; close-ups counting the points of 2, 3 and 6 on both families and the table (0, 0, 4 against −1, −1, +1 = (−1)(−1): an Euler product); the lattices shrinking onto their strips of zeros; the L-functions; the two families' real waves on the critical line, and the ratio −Λ₁/Λ₂ swept along t into the chart's branches; level lines at λ = 0, 2, −1; the sweep and its two windows; −47's plane of mixtures built row by row, raised into a landscape by the zeros off the line and sliced; its valleys round the L-functions |
+| Chebyshev's bias is a fold | `xs5` | the race on E8's spokes, then rebuilt from the zeros; every gold hour squared landing on 1 or 19; the powers of 7 walking the clock (7, 49, 343, 2401); every prime's arc to its square; the race easing into the fair race; x³ − x − 1 tested on 5, 2 and 59 dots (one root, none, three: 4, 13, 42); the roots moving under the identity, a rotation, a reflection and a reflection twice; the fold of S₃ and the race between the families evening out |
+| The path of partial sums | `xz1` | t = 1: arrows 1, 2, 3, … laid with their lengths 1/√n, turns log(n/(n − 1)) and directions log n; t raised to the first zero; the plane standing up on a t axis, ζ(½ + it) leaving its curve through every zero; Riemann's hypothesis |
+| How the vortices develop | `xz2` | the climbing path from t = 50 to 333.6 at a fixed scale: vortices born, spokes at n ≈ t/2πk, the eyes' mirrors; the eyes kept at every zero as a tower; 10 000 zeros' eyes down the axis, and why they thin out beyond r = 1 + 1/√2 = 1.71 (vortex 2's eye is one plus an arrow 1/√2 long) |
+| From a zero to E8's heights | `xz3` | the funnel greyed out; 2, 4, 8, 16 lit as stacks of log 2 with their arms; the path at the first zero on the floor, its arrows lifted into a horn and stretched by √n into the coil; 4 = 2·2 and 6 = 2·3 as chained turns; other zeros' coils; t = 18, where the dropped arrows miss |
+| Lamps and spokes | `xz4` | three coils; all 10 500 coils at the tops of 7 and 6; a ring climbing the axis draws the comb (7, 8, 9 lit; 6, 10, 12 dark); the comb spun slowly, its sweep left behind, into rings; the eight characters at the height of 7, turned back and chained (they line up only for hour 7); the eight fans (49 on hour 19; 11 and 41 on hour 11) |
+| 240 roots, infinitely many numbers | `xz5` | E8's 240 roots; its clock of 30 hours; the spiral of numbers greyed out with hour 7's arm (7, 37, 67, 97, 127) and hour 6's; the wheel tilting into the tower of shells n = 1 … 7, turning; the cubes of every floor (1; 1, 8; 1, 27; 1, 8, 64; 1, 125; 1, 8, 27, 216; 1, 343); arcs carrying each shell's cube to its multiples; a prime's shell the fewest, every extra cube a divisor; 240 ζ(s) ζ(s − 3) |
+
+Their actions add callouts, `exp:callKIND:TARGET:DX,DY[,FRAC[,RRGGBB]]:TEXT`: a label with an arrow that grows to the
+target, blooms white as it lands and rings it (KIND `num`, `wave`, `fun`, `fold`, `e8`, `bar`, `wheel`, `vertex`,
+`clock`, `clockend`, `zeta`, `chain`, `nw`, `path`, `pathzeta`, `hand`, `block`, `at`; DX,DY is the label's direction on the screen, and 0,0 picks one away from the
+middle; a label turns away from other callouts and keeps itself in the picture as the camera moves), `exp:uncall`,
+`exp:focus:G1,G2[:LEVEL]` and `exp:unfocus` (every other group dimmed), `exp:pulse:G1,G2[:SECONDS[:PEAK]]`,
+`exp:drawon:G[/PREFIX]:SECONDS[:seq]`, `exp:hidechild|showchild:GROUP:PREFIX`, the number waves
+`exp:nwave:prime|divisor|term|zero|zeros:K:HEIGHT:XMAX[:DX]` and `exp:nwavelive:TERMS:HEIGHT:XMAX:SECONDS[:HOLD]`,
+`exp:divisors:N[@KIND]`, `exp:numbers:N`, the zeta plane `exp:zplane`, `exp:zcurve:T1`, `exp:zcurvelive:T0:T1:SECONDS[:chain]`
+and `exp:zchain:T:SECONDS`, the clocks `exp:zclocks:N`, `exp:zclockhands:GAMMA[:RRGGBB[:chain]]` and
+`exp:zclockslive:GAMMA:FROM:TO:SECONDS[:tail]`, `exp:s3roots`, `exp:mixsweep:LAM0:LAM1:SECONDS`, and `exp:chainlive`'s
+`flat` (no t axis, no climbing) and `wide` (framed for 16:9). The continuous scenes are driven by eased parameters,
+`exp:tw:KEY:TO:SECONDS[:linear|geo]` (SECONDS may be `line`): the number line `exp:nwinit` (`nw.roll.p|d`, `nw.bend`,
+`nw.terms.p|d`, `nw.first.p`, `nw.wave.*`, `nw.count.*`, `nw.h`, …; callouts `exp:callnw:N@p|d`, `exp:nwdivisors`,
+`exp:nwflare`), the path of partial sums `exp:pwinit` (`pw.t`, `pw.n`, `pw.marks`, `pw.tail`, `pw.rise`, `pw.curve`,
+`pw.eyes`, `pw.mirrors`, `pw.trails`, `pw.alleyes`, `pw.gold`; camera `on=pathplane`; callouts `exp:callpath:K`,
+`exp:callpathzeta`) and the coil over the funnel `exp:fwinit` (`fw.gamma`, `fw.n`, `fw.lift`, `fw.coil`, `fw.tail`,
+`fw.path`, `fw.hands`, `fw.axis`, `fw.dim` (every hand but the lit ones, and the coil, faded), `fw.scan` (a ring
+climbing the axis draws the comb), `fw.spin`, `fw.fan`; `exp:fwhl:N[:logs]`, `exp:fwunhl[:N]`, `exp:fwangles:N`,
+`exp:fwchars:N`, `exp:fwturn:N:SECONDS`, `exp:callhand:N`). E8's clock inside the gold path: `exp:tbblock:K` (the block
+of eight arrows near spoke K, with their numbers and hours), `exp:tblift:K:SECONDS`, `exp:tbscale:SIZE`,
+`exp:tbbars:X,Y,Z:SIZE`, `exp:tbbarsall[:measured]`, `exp:tbsweep:K0:K1:SECONDS`, `exp:tbsieve:N:SECONDS`. Charts that
+merge: `exp:twgroup:GROUP[/PART]:DX,DY,DZ:SCALE:SECONDS`, `exp:stripsmorph`, `exp:racemorph`, `exp:familymorph`,
+`exp:e8tower:SIZE:attach:GAP`, `exp:t5family:X,Y,Z:FX,FY,FZ:RIM` (the fold of S₃ placed where another picture stood).
+Round five: any argument or shot value may be written `WIDE^TALL` for the two recording shapes; `nw.frame`, `nw.split`,
+`exp:nwquarters`, `exp:tboverlay:K:SECONDS`, `exp:wheelhome:SECONDS`, `exp:modpshow:P`, `exp:calllat`, `exp:callrace`,
+`exp:mute:GROUP/PART` (one named part of a group), `NAME$` in a group list (that group only, not every name it begins),
+`exp:reveal:GROUP:T1,T2,…:own` (a reveal on its own clock, so several can run in one line)
+(Tools/find_blank_frames.py checks a recording for empty stretches). Round four adds `exp:home:TMAX:SECONDS` (the teaser), `exp:nwrows` / `exp:nwenter` / `exp:nwangle` / `exp:nwradius`
+(the terms entering the master waves), `pw.logh` / `pw.ground` (the climb above the ground), `fw.stretch` (the horn
+stretched into the coil), `exp:calllat`, `exp:lacounts`, `exp:lwaves`, `exp:lratio`, `exp:t5terrain` with `lf.build`,
+`lf.h`, `lf.slice` (discovery four), `exp:hoursquares`, `exp:powerwalk`, `exp:modp`, `exp:modptest`, `exp:s3anim`
+(discovery five), `exp:eyelimits` and `exp:e8links`; captions written `{display|spoken}` (Tools/caption_markup.py).
+`exp:mute:G1,G2[:SECONDS[:DEPTH]]` / `exp:unmute:G1,G2[:SECONDS]` grey groups out (a depth up to 2 fades them nearly
+out) and back; `exp:clearchild:PREFIX` removes groups; `exp:e8hl:N1,N2[:spoke]` lights numbers on E8's wheel; the
+stills (`t5…`, `s3roots`, `mixsweep`, `ztrees`, `e8wheel`) take a position so a segment can put one where the picture
+it replaces stands. A camera `on=nwboxp|nwboxd` frames a number line by its bounds while it winds up (every orbit cue
+tightens its smoothing once the cut is done, so a moving subject is followed closely); callouts are sized and placed for the shot the camera is moving to. Readouts that
+change every frame sit in the screen's corners (`SacksSpiral.Hud`), cleared by `exp:stage`.
+
+Anything that moves or happens in a module draws the eye with white bloom (`ExperimentAttention.cs`): a moving line
+gets a wide white halo that shines while it moves and fades when it settles (the swinging mirror lines, the twisting
+squares and pronics, the wave sum as each wave arrives, the plane sliding across the comb and each quadratic it reads,
+Fermat's step ring and the curve he finds), events flare white (the square that ends Fermat's search, the numbers the
+narration points at), and the growing needles throw white sparks at their tips while zeros join. Their shots are written into the
+script as moving orbits, `orbit:on=centre|panel|tower|live|towerfocus;at=x,y,z[>x,y,z];d=FROM>TO;el=FROM>TO;az=A;spin=DEG_PER_S;fov=F;span=S;h=FRAC`
+(distance, elevation above the saddle and look point eased over `span` seconds, after waiting `hold=S` seconds, while the camera circles; see
+`CameraRig.OrbitCue`). `fit=W,H[>W2,H2]` replaces the distance with the one that frames a W × H box at the current
+aspect, so one shot works in 16:9 and 9:16, and `raise=F` lifts the subject by F of the frame's height above the captions, and each module opens already framed on its first shot. To storyboard them headlessly, add `ZETA_SCRIPT=experiments` to the
+storyboard command below; to record them as narrated videos, one per module, run
+`python Tools/render_chapters.py --unity <Unity.exe> --script experiments --shapes vertical --out <folder>`.
+
 ## Running it
 
 | Where | How |
@@ -195,6 +323,10 @@ Contact sheets for a quick look:
 ```bash
 ffmpeg -framerate 1 -pattern_type glob -i '/tmp/storyboard/*.png' -vf "scale=360:640,tile=3x2" /tmp/sheet_%02d.png
 ```
+
+To check that cues land on their words, play each line at its narrated length (or its estimate, before it is narrated)
+with the camera flying as in the video, and save several frames per line: `ZETA_STORYBOARD_SECONDS=0
+ZETA_STORYBOARD_FRAMES=4` writes `NN_<line>_1.png` … `_4.png`, a quarter of the line apart.
 
 Full video (real time, no narration yet; mux audio afterwards with `Tools/mux_recording.py`):
 

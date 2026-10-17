@@ -6,8 +6,9 @@ using UnityEngine;
 /// The pages of the dock and the palm menu. Every control is a big icon with a short word under it, pushed with one
 /// finger; nothing needs a ray, a controller or a pinch.
 ///
-///   Tour      one button per chapter (touch the playing one to restart it)
-///   Views     fly to a visualization on its own, and show or hide its layers
+///   Tour         one button per chapter (touch the playing one to restart it)
+///   Experiments  the thought experiments on the saddle, one button per module (the same modules as the desktop menu)
+///   Views        fly to a visualization on its own, and show or hide its layers
 ///   Space     zoom, turn, tilt and move the model; reset the view
 ///   Settings  captions, hands, comfort, volume, model distance
 ///   Footer    previous / replay / play-pause / skip / next, follow the story, room or dark
@@ -30,7 +31,7 @@ public partial class VRApp
     readonly List<RectTransform> pages = new();
     readonly List<VRButton> tabs = new();
     int page;
-    TextMeshProUGUI nowLabel;
+    TextMeshProUGUI nowLabel, labLabel;
     VRButton replayButton, skipButton, prevChapterButton, nextChapterButton;
     bool autoNextChapter = true;
     const double ExploreLoopEnd = 100d;
@@ -53,22 +54,27 @@ public partial class VRApp
     {
         Dock = VRPanel.Create("Dock", new Vector2(DockWidth, DockHeight), Rig.Ui);
 
-        string[] tabNames = { "Tour", "Views", "Space", "Settings" };
-        VRIcons.Id[] tabIcons = { VRIcons.Id.List, VRIcons.Id.Cube, VRIcons.Id.Move, VRIcons.Id.Gear };
+        string[] tabNames = { "Tour", "Experiments", "Views", "Models", "Space", "Settings" };
+        VRIcons.Id[] tabIcons = { VRIcons.Id.List, VRIcons.Id.Flask, VRIcons.Id.Cube, VRIcons.Id.E8, VRIcons.Id.Move, VRIcons.Id.Gear };
+        float[] tabWidths = { 68f, 120f, 76f, 84f, 72f, 88f };
+        float tabX = 8f;
         for (int i = 0; i < tabNames.Length; i++)
         {
             int index = i;
-            VRButton tab = Dock.AddButton(8 + i * 124, 8, 120, 54, tabNames[i], tabIcons[i], () => ShowPage(index), true, () => page == index, 22f);
+            VRButton tab = Dock.AddButton(tabX, 8, tabWidths[i], 54, tabNames[i], tabIcons[i], () => ShowPage(index), true, () => page == index, 21f);
             tabs.Add(tab);
+            tabX += tabWidths[i] + 4f;
         }
 
-        Dock.AddButton(508, 8, 84, 54, "", VRIcons.Id.Close, () => Dock.SetOpen(false));
+        Dock.AddButton(540, 8, 52, 54, "", VRIcons.Id.Close, () => Dock.SetOpen(false));
 
-        for (int i = 0; i < 4; i++) pages.Add(Dock.AddPage(tabNames[i], 0, PageTop, DockWidth, PageHeight));
+        for (int i = 0; i < tabNames.Length; i++) pages.Add(Dock.AddPage(tabNames[i], 0, PageTop, DockWidth, PageHeight));
         BuildTourPage(pages[0]);
-        BuildViewsPage(pages[1]);
-        BuildSpacePage(pages[2]);
-        BuildSettingsPage(pages[3]);
+        BuildLabPage(pages[1]);
+        BuildViewsPage(pages[2]);
+        BuildModelsPage(pages[3]);
+        BuildSpacePage(pages[4]);
+        BuildSettingsPage(pages[5]);
         ShowPage(0);
         BuildFooter();
     }
@@ -91,7 +97,7 @@ public partial class VRApp
             string label = $"{i + 1}  {(i < ChapterShort.Length ? ChapterShort[i] : chapters[i].title)}";
             VRIcons.Id icon = i < ChapterIcon.Length ? ChapterIcon[i] : VRIcons.Id.Play;
             Dock.AddButton(8 + col * 118, 2 + row * 134, 110, 128, label, icon,
-                () => PlayChapter(index), true, () => tour.Running && tour.CurrentChapterIndex == index, 21f, p);
+                () => PlayChapter(index), true, () => tour.Running && !tour.PlayingExperiment && tour.CurrentChapterIndex == index, 21f, p);
         }
 
         nowLabel = Dock.AddLabel(10, 272, 580, 26, "", 21f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
@@ -99,9 +105,89 @@ public partial class VRApp
 
     void PlayChapter(int index)
     {
+        CloseLab();
+        tour.LeaveExperiment(); // the chapter numbers are the tour's, not the experiment modules'
         Guide.ResetOffsets();
         Guide.SetFollow(true, true);
         tour.GoToChapter(index, autoNextChapter);
+    }
+
+    // ---- experiments page ------------------------------------------------------------------------------
+
+    /// <summary>The short name and the icon of each experiment module (the desktop menu lists the full titles).</summary>
+    static readonly Dictionary<string, (string label, VRIcons.Id icon)> LabInfo = new()
+    {
+        ["xcurves"] = ("Curves", VRIcons.Id.Curves),
+        ["xlevels"] = ("Levels", VRIcons.Id.Contours),
+        ["xprobe"] = ("Probe", VRIcons.Id.Probe),
+        ["xmirror"] = ("Mirrors", VRIcons.Id.Mirror),
+        ["xlattice"] = ("Counting", VRIcons.Id.Lattice),
+        ["xideals"] = ("Ideals", VRIcons.Id.Ideals),
+        ["xmirrorlines"] = ("Lines", VRIcons.Id.Chords),
+        ["xcomb"] = ("Comb", VRIcons.Id.Comb),
+        ["xpinch"] = ("Pinch", VRIcons.Id.Pinch),
+        ["xtorus"] = ("Torus", VRIcons.Id.Torus),
+        ["xlegendre"] = ("Legendre", VRIcons.Id.Legendre),
+        ["xfinger"] = ("Prints", VRIcons.Id.Fingerprint),
+        ["xclock"] = ("Clock", VRIcons.Id.Clock),
+        ["xgoldbach"] = ("Pairs", VRIcons.Id.Pair),
+        ["xsieve"] = ("Sieve", VRIcons.Id.Sieve),
+        ["xtwist"] = ("Twist", VRIcons.Id.Twist),
+        ["xnorms"] = ("Norms", VRIcons.Id.Saddle),
+        ["xlattices"] = ("Rings", VRIcons.Id.Lattice),
+        ["xresidue"] = ("12-torus", VRIcons.Id.Torus),
+        ["xmodular"] = ("Modular", VRIcons.Id.Mirror),
+        ["xrace"] = ("Race", VRIcons.Id.Speed),
+        ["xe8"] = ("Drop on E8", VRIcons.Id.E8),
+        ["xebuild"] = ("E5 to E8", VRIcons.Id.E8),
+        ["xpaths"] = ("Paths", VRIcons.Id.Funnel),
+        ["xzeros"] = ("Zeros", VRIcons.Id.Zeros),
+        ["xtop5"] = ("Top five", VRIcons.Id.Flask),
+    };
+
+    // 28 places: every module fits (7 across, 4 down, above the line that names the one playing)
+    const int LabColumns = 7, LabRows = 4;
+
+    /// <summary>The long-form horizontal segments (xs1 …, xz1 …) are videos for the desktop, not modules for the dock.</summary>
+    static bool LongForm(string id) => id.Length == 3 && id[0] == 'x' && (id[1] == 's' || id[1] == 'z') && char.IsDigit(id[2]);
+
+    void BuildLabPage(RectTransform p)
+    {
+        TourChapter[] modules = tour.ExperimentChapters;
+        int shown = 0;
+        foreach (TourChapter m in modules) if (!LongForm(m.id)) shown++;
+        if (shown > LabColumns * LabRows) Debug.LogWarning($"VR: {shown} experiment modules, room for {LabColumns * LabRows} on the page");
+        int slot = 0;
+        for (int i = 0; i < modules.Length && slot < LabColumns * LabRows; i++)
+        {
+            if (LongForm(modules[i].id)) continue;
+            int index = i;
+            (string label, VRIcons.Id icon) = LabInfo.TryGetValue(modules[i].id, out var info) ? info : (modules[i].title, VRIcons.Id.Flask);
+            int col = slot % LabColumns, row = slot / LabColumns;
+            slot++;
+            Dock.AddButton(8 + col * 83, 2 + row * 66, 79, 62, label, icon,
+                () => PlayExperiment(index), true, () => tour.Running && tour.PlayingExperiment && tour.CurrentChapterIndex == index, 15f, p);
+        }
+
+        labLabel = Dock.AddLabel(10, 272, 580, 26, "", 21f, VRStyle.TextDim, TextAlignmentOptions.Left, FontStyles.Normal, p);
+    }
+
+    /// <summary>Play one experiment module (they play alone; Next goes on to the one after).</summary>
+    public void PlayExperiment(int index)
+    {
+        CloseLab();
+        Guide.ResetOffsets();
+        Guide.SetFollow(true, true);
+        tour.PlayExperiment(index);
+    }
+
+    /// <summary>For the command line: one module by id, or all of them one after the other.</summary>
+    public void PlayExperiment(string id, bool chain)
+    {
+        CloseLab();
+        Guide.ResetOffsets();
+        Guide.SetFollow(true, true);
+        tour.PlayExperiment(id, chain);
     }
 
     // ---- views page ----------------------------------------------------------------------------------
@@ -188,6 +274,7 @@ public partial class VRApp
     /// <summary>Leave the narrated tour and show one visualization on its own, framed for the user, running.</summary>
     public void ApplyView(string id)
     {
+        CloseLab();
         if (tour.Running) tour.StopTour();
         tour.RestoreFreeRoam();
         main.Speed = 1.8d;
@@ -433,17 +520,18 @@ public partial class VRApp
         replayButton.Interactable = running;
         skipButton.Interactable = running;
         prevChapterButton.Interactable = running;
-        if (nowLabel != null)
-        {
-            bool known = running && tour.CurrentChapterIndex >= 0 && tour.CurrentChapterIndex < tour.Chapters.Length;
-            int key = known ? tour.CurrentChapterIndex * 2 + (tour.Paused ? 1 : 0) : -1;
-            if (key != nowKey)
-            {
-                nowKey = key;
-                nowLabel.text = known
-                    ? $"<color=#FFD129>{tour.CurrentChapterIndex + 1}</color>  {tour.Chapters[tour.CurrentChapterIndex].title}" + (tour.Paused ? "   (paused)" : "")
-                    : "Touch a chapter to hear the story";
-            }
-        }
+
+        // while a module plays, Chapters is the experiments' list: each page describes only its own kind
+        bool lab = tour.PlayingExperiment;
+        TourChapter[] chapters = tour.Chapters;
+        bool known = running && tour.CurrentChapterIndex >= 0 && tour.CurrentChapterIndex < chapters.Length;
+        int key = known ? (tour.CurrentChapterIndex * 2 + (tour.Paused ? 1 : 0)) * 2 + (lab ? 1 : 0) : -1;
+        if (key == nowKey) return;
+        nowKey = key;
+        string playing = known
+            ? $"<color=#FFD129>{tour.CurrentChapterIndex + 1}</color>  {chapters[tour.CurrentChapterIndex].title}" + (tour.Paused ? "   (paused)" : "")
+            : null;
+        if (nowLabel != null) nowLabel.text = playing != null && !lab ? playing : "Touch a chapter to hear the story";
+        if (labLabel != null) labLabel.text = playing != null && lab ? playing : "Touch an experiment to watch it";
     }
 }
