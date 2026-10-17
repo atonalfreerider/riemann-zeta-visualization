@@ -100,6 +100,7 @@ PRONOUNCE = [
     # the verb "to wind" (a path winds up, a coil is wound): "wined", never the wind that blows; respelled on "wine" and
     # "wow" so the vowel cannot go the other way ("winds" as "wines": "wine-dz" was read "windees" in context, and the d
     # of "winds" is swallowed in speech anyway)
+    (re.compile(r"\b([Uu])nwind\b"), r"\1n-wined"),
     (re.compile(r"\b([Ww])inding\b"), r"\1ine-ding"),
     (re.compile(r"\b([Ww])inds\b"), r"\1ines"),
     (re.compile(r"\b([Ww])ind\b"), r"\1ined"),

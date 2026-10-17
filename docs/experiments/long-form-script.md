@@ -229,7 +229,7 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
 
 ## xz2: How the vortices develop
 
-*the zeros inside E8, part 2:  the path of partial sums high up*  ·  9 lines, 340 words
+*the zeros inside E8, part 2:  the path of partial sums high up*  ·  12 lines, 538 words
 
 1. Climbing higher, the path needs about t over pi arrows before its tail takes over, and it curls into knots: vortices. The rings mark their eyes, numbered from the far end of the path.
    *Board:* **vortices** — about t/2π of them at height t
@@ -240,15 +240,21 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
    *Callouts:* spoke 1:  n ≈ 53; spoke 2:  n ≈ 27; spoke 3:  n ≈ 18
 4. Each vortex has an eye, and each eye is a mirror image: the path's own k-th vertex, reflected through zeta's phase. The crosses mark those mirror points, and they land inside the rings.
    *Board:* **every eye is a mirror** — eye of vortex k = the path's k-th vertex, reflected through ζ's phase
-5. Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in cyan, always sits on a circle of radius one.
+5. Now unwind the path onto the number line. Every arrow drops onto its own counting number, in the colour of its vortex. Vortex one lands between 27 and 53, vortex two between 18 and 27, vortex three between 13 and 18. Each stretch is shorter than the last, and below seven the vortices are smaller than one arrow: a tangle.
+   *Board:* **the vortices on the number line** — the 159th zero:  vortex k on the arrows from t/2π(k + 1) to t/2πk
+6. Now the mirror that puts each eye in place: arrow n goes to t/2πn, here 53/n. On the mirror's side, vortex one fills the stretch from one to two, vortex two from two to three: lined up on one axis, the vortices are evenly spaced, one for every counting number. The two sides meet at √53 = 7.3.
+   *Board:* **the mirror:  n → t/2πn** — vortex k fills the stretch from k to k + 1:  one vortex for every counting number
+7. Slide the mirror's side onto the line, and the colours read the same both ways from 7.3: one counting number for each vortex on one side, its long stretch of arrows on the other. Wind the line into the Sacks spiral, and the fold becomes a circle: inside it the first seven counting numbers, outside it the vortices, bands of the spiral that widen toward the rim.
+   *Board:* **the vortices on the Sacks spiral** — the fold is a circle:  counting numbers inside, vortices outside, the same colours
+8. Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in cyan, always sits on a circle of radius one.
    *Board:* **the eyes through the zeros** — kept at every zero:  vortex 1 on a circle of radius 1
-6. Look straight down the axis. The eyes of 10,000 zeros, stacked: the unit circle of vortex one, and rings for all the others.
+9. Look straight down the axis. The eyes of 10,000 zeros, stacked: the unit circle of vortex one, and rings for all the others.
    *Board:* **all 10 000 zeros, down the axis** — the vortices belong to the counting numbers
-7. Look closer: the eyes thin out beyond a faint circle at radius 1.71, and a brighter ring glows at 0.29. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, 1/√2 long.
+10. Look closer: the eyes thin out beyond a faint circle at radius 1.71, and a brighter ring glows at 0.29. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, 1/√2 long.
    *Board:* **a faint circle at r = 1.71** — vortex 2's eye:  |1 + 2^−½ − iγ|,  one plus an arrow 1/√2 long
-8. That arrow can point any way, so the eye stays between 1 − 1/√2 and 1 + 1/√2, and it lingers at those two extremes, so both circles glow. Beyond 1.71 only vortex three and higher can reach, and the eyes thin out.
+11. That arrow can point any way, so the eye stays between 1 − 1/√2 and 1 + 1/√2, and it lingers at those two extremes, so both circles glow. Beyond 1.71 only vortex three and higher can reach, and the eyes thin out.
    *Board:* **between 1 − 1/√2 = 0.29 and 1 + 1/√2 = 1.71** — beyond 1.71 only vortices 3 and up:  the eyes thin out 2.7-fold
-9. So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex belongs to a counting number: a reflection of the path's own beginning.
+12. So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex belongs to a counting number: a reflection of the path's own beginning.
    *Board:* **how the vortices develop** — one per counting number, each a mirror of the path's start
 
 ## xz3: From a zero to E8's heights

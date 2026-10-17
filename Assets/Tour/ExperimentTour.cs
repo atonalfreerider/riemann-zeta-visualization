@@ -658,6 +658,9 @@ public partial class TourDirector
             case "hoursquares": sacks.ExpHourSquares(Seconds(A(2), 6f), 220f); break;
             // E8's wheel onto a block of the gold path (no arrow turns) and back: exp:tboverlay:K:SECONDS · exp:wheelhome:SECONDS
             case "tboverlay": sacks.ExpTraceOverlay(I(2, 15), Seconds(A(3), 4f)); break;
+            // the vortices on the number line (SacksVortexLine.cs): exp:vlinit takes the path as it is; then exp:tw on
+            // vl.unwind, vl.marks, vl.fold, vl.merge, vl.curl, vl.vis
+            case "vlinit": sacks.ExpVortexLine(); break;
             case "wheelhome": sacks.ExpWheelHome(Seconds(A(2), 3f)); break;
             // exp:e8links:MAXN:GAP — the divisor links beside E8's tower · exp:eyelimits:SECONDS — why the eyes thin out at 1.71
             case "e8links": sacks.ExpE8Links(I(2, 7), F(3, 16f), 220f); break;

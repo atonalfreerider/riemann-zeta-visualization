@@ -3761,6 +3761,29 @@ master wave and ζ's trail rising from the centre) and build every formula on sc
   of 2 and 3 (and of 5, 6 and 7) stopped each other and the cubes came a line late; `exp:reveal:GROUP:T1,T2,…:own` runs
   a reveal on its own clock, from the start of the line.
 
+*Round six (October 2026).*
+
+* **"Wind" as in winding a clock.** The voice read the verb as the wind that blows. It is now respelled for the voice only
+  (the captions keep the word): wind → wined, winds → wines, winding → wine-ding, unwind → un-wined, wound → wownd
+  ([`Tools/generate_narration.py`](../../Tools/generate_narration.py) `PRONOUNCE`), and the seventeen lines that use it are
+  re-narrated. "wine-dz" for "winds" was read "windees" in context, so "winds" is "wines": the d of "winds" is swallowed
+  in speech anyway.
+* **The vortices on the number line** (xz2, [`SacksVortexLine.cs`](../../Assets/Tour/SacksVortexLine.cs)). At height t,
+  arrow n of the path belongs to vortex k when it lies between spokes k + 1 and k, from n = t/2π(k + 1) to t/2πk; its eye
+  is where the arrows fold back, n ≈ t/2π(k + ½). At the 159th zero (t/2π = 53.1) vortex 1 covers arrows 27 to 53,
+  vortex 2 covers 18 to 27, vortex 3 covers 13 to 18: each stretch is t/2πk(k + 1) long, and below √(t/2π) = 7.3 the
+  stretches are shorter than one arrow (the tangle at the start of the path). The scene unwinds the path onto a number line
+  (`vl.unwind`), lays the mirror n ↦ t/2πn beside it (`vl.fold`; on the mirror's side vortex k fills the unit stretch from
+  k to k + 1, its eye at k + ½: the same mirror that puts each eye at −χ·conj(S<sub>k</sub>)), slides the two lines
+  together (`vl.merge`; the colours then read the same both ways from the fold) and curls the line into the Sacks spiral
+  (`vl.curl`, the tangent turned by the curl times the spiral's own tangent angle 2πw + atan 2πw, w = √n, so the arc
+  length is kept). On the spiral the fold n = √(t/2π) is a circle of radius (t/2π)<sup>¼</sup>: the counting numbers
+  1 … 7 inside, the vortices outside as bands of 2.1, 0.95, 0.56, 0.38 … turns. The structure that emerges is that
+  inversion and nothing more: the spokes' angles 2π√(t/2πk) fall at no common rays. The camera follows the scene's bounds
+  (`on=vlbox`), and lines and labels keep their size on the screen through the tenfold zoom.
+* **Verticals posted one by one.** A watcher muxes each vertical segment as soon as its raw video is written and makes a
+  720p copy for review (ffmpeg needs `-nostdin` there: it read the watcher's input and swallowed the next segment's line).
+
 *Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
 of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
 height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate

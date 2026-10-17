@@ -589,11 +589,12 @@ public class CameraRig : MonoBehaviour
             float a = (az0 + spin * age) * Mathf.Deg2Rad;
             Vector3 hdir = new(Mathf.Cos(a), Mathf.Sin(a), 0f);
             Vector2 f0 = fit0, f1 = fit1;
-            if (on.StartsWith("nwbox"))
+            bool vlbox = on == "vlbox";
+            if (on.StartsWith("nwbox") || vlbox)
             {
-                // follow a number-line lane's bounds as it winds up: frame the box as the camera sees it, blended from the
-                // cue's own shot (fit, at) towards it by `follow`
-                Bounds b = s.NwBounds(on.EndsWith("d") ? "d" : "p");
+                // follow a number-line lane's bounds as it winds up (or the vortices' line as it curls, vlbox): frame the box
+                // as the camera sees it, blended from the cue's own shot (fit, at) towards it by `follow`
+                Bounds b = vlbox ? s.VlBounds() : s.NwBounds(on.EndsWith("d") ? "d" : "p");
                 Vector3 upV = (Vector3.back * Mathf.Cos(el) - hdir * Mathf.Sin(el)).normalized;
                 Vector3 fwd = -(hdir * Mathf.Cos(el) + Vector3.back * Mathf.Sin(el));
                 Vector3 rightV = Vector3.Cross(upV, fwd).normalized;
@@ -611,7 +612,9 @@ public class CameraRig : MonoBehaviour
                 Vector2 own = Vector2.Lerp(fit0, fit1, u);
                 // the height goes in the band between the caption board and the captions (.57 of the frame; raise .035)
                 bool tallFrame = Aspect < 1f;
-                Vector2 boxed = new(Mathf.Max(w * (tallFrame ? 1.09f : 1.12f), 30f), Mathf.Max(hgt / (tallFrame ? .51f : .6f), 17f));
+                // (the vortices' line curls into a spiral a few units across: no floor that would stop the camera closing in)
+                float minW = vlbox ? 3f : 30f, minH = vlbox ? 2f : 17f;
+                Vector2 boxed = new(Mathf.Max(w * (tallFrame ? 1.09f : 1.12f), minW), Mathf.Max(hgt / (tallFrame ? .51f : .6f), minH));
                 f0 = f1 = own.x > 0f ? Vector2.Lerp(own, boxed, follow) : boxed;
             }
 

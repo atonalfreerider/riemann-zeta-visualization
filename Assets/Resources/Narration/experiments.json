@@ -3620,10 +3620,10 @@
           "camera": "orbit:on=centre;at=75948.5,3.0,0^75962.5,2.5,0;fit=288.4,162.2^158.9,282.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
           "actions": [
             "exp:uncall",
-            "exp:mute:LC zeros,LA lattices:2.5:1.95",
+            "exp:mute:LC zeros,LA lattices:2.5:1.6",
             "exp:showchild:LW waves:t axis",
-            "delay:3.21:exp:showchild:LW waves:first",
-            "delay:3.21:exp:drawon:LW waves/first:3",
+            "delay:0.23:exp:showchild:LW waves:first",
+            "delay:0.23:exp:drawon:LW waves/first:7.44",
             "delay:7.67:exp:showchild:LW waves:name first",
             "delay:9.07:exp:showchild:LW waves:second",
             "delay:9.07:exp:drawon:LW waves/second:2",
@@ -3880,7 +3880,7 @@
         {
           "id": "xs5_09",
           "text": "Two has two numbers, zero and one, and neither is a root. Fifty-nine has fifty-nine, and exactly three of them are roots: four, thirteen and forty-two.",
-          "camera": "orbit:on=centre;at=80278.5,-1.0,0^80000.0,-51.5,0>80000.0,-144.0,0;fit=229.5,129.1^100.9,179.4>77.9,138.5;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=2;hold=0^3.53",
+          "camera": "orbit:on=centre;at=80278.5,-1.0,0^80000.0,-49.5,0>80000.0,-144.0,0;fit=229.5,129.1^105.1,186.8>77.9,138.5;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=2;hold=0^3.53",
           "actions": [
             "delay:0.00:exp:modptest:2:3.83",
             "delay:3.83:exp:modptest:59:6.20",
@@ -4148,9 +4148,54 @@
         },
         {
           "id": "xz2_05",
-          "text": "Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in cyan, always sits on a circle of radius one.",
-          "camera": "orbit:on=pathplane;at=0,0,10;fit=60,40>90,70^45,80>70,124;el=70>26;az=6.45;spin=6;raise=0.035;span=10",
+          "text": "Now unwind the path onto the number line. Every arrow drops onto its own counting number, in the colour of its vortex. Vortex one lands between twenty-seven and fifty-three, vortex two between eighteen and twenty-seven, vortex three between thirteen and eighteen. Each stretch is shorter than the last, and below seven the vortices are smaller than one arrow: a tangle.",
+          "camera": "orbit:on=vlbox;at=0,0,0;fit=50,30;el=89.5;az=-90;spin=0;raise=0.035^0.045;follow=1",
           "actions": [
+            "exp:vlinit",
+            "exp:mute:PW path:1.2:2",
+            "exp:tw:pw.mirrors:0:1",
+            "exp:tw:pw.eyes:0:1",
+            "exp:tw:pw.axis:0:1",
+            "delay:0.42:exp:tw:vl.unwind:1:5.10",
+            "delay:5.52:exp:tw:vl.marks:1:1.5",
+            "exp:say:the vortices on the number line|the 159th zero:  vortex k on the arrows from t/2π(k + 1) to t/2πk"
+          ],
+          "pause": 0.8,
+          "caption": "Now unwind the path onto the number line. Every arrow drops onto its own counting number, in the colour of its vortex. Vortex one lands between {27|twenty-seven} and {53|fifty-three}, vortex two between {18|eighteen} and {27|twenty-seven}, vortex three between {13|thirteen} and {18|eighteen}. Each stretch is shorter than the last, and below seven the vortices are smaller than one arrow: a tangle."
+        },
+        {
+          "id": "xz2_06",
+          "text": "Now the mirror that puts each eye in place: arrow n goes to t over two pi n, here fifty-three over n. On the mirror's side, vortex one fills the stretch from one to two, vortex two from two to three: lined up on one axis, the vortices are evenly spaced, one for every counting number. The two sides meet at the square root of fifty-three, seven point three.",
+          "camera": "orbit:on=vlbox;at=0,0,0;fit=50,30;el=89.5;az=-90;spin=0;raise=0.035^0.045;follow=1",
+          "actions": [
+            "delay:3.05:exp:tw:vl.fold:1:13.40",
+            "exp:say:the mirror:  n → t/2πn|vortex k fills the stretch from k to k + 1:  one vortex for every counting number",
+            "delay:23.37:exp:say:the fold:  √(t/2π) = 7.3|the arrows before it make the tangle;  the arrows after it make the vortices"
+          ],
+          "pause": 0.8,
+          "caption": "Now the mirror that puts each eye in place: arrow n goes to {t/2πn,|t over two pi n,} here {53/n.|fifty-three over n.} On the mirror's side, vortex one fills the stretch from one to two, vortex two from two to three: lined up on one axis, the vortices are evenly spaced, one for every counting number. The two sides meet at {√53 = 7.3.|the square root of fifty-three, seven point three.}"
+        },
+        {
+          "id": "xz2_07",
+          "text": "Slide the mirror's side onto the line, and the colours read the same both ways from seven point three: one counting number for each vortex on one side, its long stretch of arrows on the other. Wind the line into the Sacks spiral, and the fold becomes a circle: inside it the first seven counting numbers, outside it the vortices, bands of the spiral that widen toward the rim.",
+          "camera": "orbit:on=vlbox;at=0,0,0;fit=50,30;el=89.5;az=-90;spin=0;raise=0.035^0.045;follow=1",
+          "actions": [
+            "delay:0.00:exp:tw:vl.merge:1:2.5",
+            "delay:10.86:exp:tw:vl.curl:1:3.69",
+            "exp:say:the vortices on the Sacks spiral|the fold is a circle:  counting numbers inside, vortices outside, the same colours"
+          ],
+          "pause": 0.8,
+          "caption": "Slide the mirror's side onto the line, and the colours read the same both ways from {7.3|seven point three}: one counting number for each vortex on one side, its long stretch of arrows on the other. Wind the line into the Sacks spiral, and the fold becomes a circle: inside it the first seven counting numbers, outside it the vortices, bands of the spiral that widen toward the rim."
+        },
+        {
+          "id": "xz2_08",
+          "text": "Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in cyan, always sits on a circle of radius one.",
+          "camera": "orbit:on=pathplane;at=0,0,10;fit=60,40>90,70^45,80>70,124;el=70>26;az=-90.0;spin=6;raise=0.035;span=10",
+          "actions": [
+            "exp:tw:vl.vis:0:1",
+            "exp:unmute:PW path:1.5",
+            "exp:tw:pw.eyes:1:1",
+            "exp:tw:pw.axis:1:1.5",
             "exp:tw:pw.mirrors:0:1",
             "exp:tw:pw.trails:1:0",
             "exp:tw:pw.t:420:11.53:linear",
@@ -4159,9 +4204,9 @@
           "pause": 0.8
         },
         {
-          "id": "xz2_06",
+          "id": "xz2_09",
           "text": "Look straight down the axis. The eyes of ten thousand zeros, stacked: the unit circle of vortex one, and rings for all the others.",
-          "camera": "orbit:on=pathplane;at=0,0,0;fit=90,70>56,40^70,124>49.2,87.5;el=26>89.5;az=85.75;spin=4;raise=0.035;span=6",
+          "camera": "orbit:on=pathplane;at=0,0,0;fit=90,70>56,40^70,124>49.2,87.5;el=26>89.5;az=-10.7;spin=4;raise=0.035;span=6",
           "actions": [
             "delay:1.98:exp:tw:pw.alleyes:1:2",
             "delay:1.98:exp:tw:pw.eyes:0:1",
@@ -4172,7 +4217,7 @@
           "caption": "Look straight down the axis. The eyes of {10,000|ten thousand} zeros, stacked: the unit circle of vortex one, and rings for all the others."
         },
         {
-          "id": "xz2_07",
+          "id": "xz2_10",
           "text": "Look closer: the eyes thin out beyond a faint circle at radius one point seven one, and a brighter ring glows at zero point two nine. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, one over root two long.",
           "camera": "orbit:on=pathplane;at=0,0,0;fit=64,46>128,72^49.2,87.5;el=89.5;az=-90;spin=0;raise=0.035;span=3",
           "actions": [
@@ -4184,7 +4229,7 @@
           "caption": "Look closer: the eyes thin out beyond a faint circle at radius {1.71|one point seven one}, and a brighter ring glows at {0.29|zero point two nine}. At a zero, vortex two's eye is as far from the centre as the path's second vertex: one, plus the arrow of two, {1/√2|one over root two} long."
         },
         {
-          "id": "xz2_08",
+          "id": "xz2_11",
           "text": "That arrow can point any way, so the eye stays between one minus one over root two and one plus one over root two, and it lingers at those two extremes, so both circles glow. Beyond one point seven one only vortex three and higher can reach, and the eyes thin out.",
           "camera": "orbit:on=pathplane;at=0,0,0;fit=128,72^49.2,87.5;el=89.5;az=-90;spin=0;raise=0.035",
           "actions": [
@@ -4194,7 +4239,7 @@
           "caption": "That arrow can point any way, so the eye stays between {1 − 1/√2|one minus one over root two} and {1 + 1/√2,|one plus one over root two,} and it lingers at those two extremes, so both circles glow. Beyond {1.71|one point seven one} only vortex three and higher can reach, and the eyes thin out."
         },
         {
-          "id": "xz2_09",
+          "id": "xz2_12",
           "text": "So the vortices develop as t climbs. New ones are born at the start, the spokes slide outward, and every vortex belongs to a counting number: a reflection of the path's own beginning.",
           "camera": "orbit:on=pathplane;at=0,0,0;fit=128,72>64,46^49.2,87.5>44,78;el=89.5>70;az=-90;spin=3;raise=0.035;span=12",
           "actions": [

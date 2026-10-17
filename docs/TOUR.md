@@ -135,7 +135,9 @@ merge: `exp:twgroup:GROUP[/PART]:DX,DY,DZ:SCALE:SECONDS`, `exp:stripsmorph`, `ex
 Round five: any argument or shot value may be written `WIDE^TALL` for the two recording shapes; `nw.frame`, `nw.split`,
 `exp:nwquarters`, `exp:tboverlay:K:SECONDS`, `exp:wheelhome:SECONDS`, `exp:modpshow:P`, `exp:calllat`, `exp:callrace`,
 `exp:mute:GROUP/PART` (one named part of a group), `NAME$` in a group list (that group only, not every name it begins),
-`exp:reveal:GROUP:T1,T2,…:own` (a reveal on its own clock, so several can run in one line)
+`exp:reveal:GROUP:T1,T2,…:own` (a reveal on its own clock, so several can run in one line). Round six: `exp:vlinit` with
+`vl.unwind`, `vl.marks`, `vl.fold`, `vl.merge`, `vl.curl`, `vl.vis` (the vortices of the path on the number line, the mirror
+n ↦ t/2πn, the Sacks spiral) and the orbit cue `on=vlbox` that follows that scene
 (Tools/find_blank_frames.py checks a recording for empty stretches). Round four adds `exp:home:TMAX:SECONDS` (the teaser), `exp:nwrows` / `exp:nwenter` / `exp:nwangle` / `exp:nwradius`
 (the terms entering the master waves), `pw.logh` / `pw.ground` (the climb above the ground), `fw.stretch` (the horn
 stretched into the coil), `exp:calllat`, `exp:lacounts`, `exp:lwaves`, `exp:lratio`, `exp:t5terrain` with `lf.build`,
