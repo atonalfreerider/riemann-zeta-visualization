@@ -3373,6 +3373,182 @@ square lies in C, the mean is −(r(C)/|C| − 1): −3 for the principal family
 Chebotarev's density theorem. What the fold adds is one picture for E8's wheel and for the families of −23. In both, the
 identity's class receives the squares of four elements and runs three behind.
 
+## NA–ND. Symmetry, frequency and space: E8's ceiling, the families' curve, and how the race is won
+
+Exploration, October 2026 (τ = 2π, one turn, from here on). The questions: is there structure inside the convergence of E8's
+shells toward their ceiling that shows primality and the way to the prime factors as space rather than counting; and how
+the valleys of the families' landscape (section LF) connect to the race between the families (MA–MC), E8's clock and the
+zeta curve.
+
+### NA. The ceiling of E8's shells
+
+Shell n of E8 holds 240 σ<sub>3</sub>(n) points, and σ<sub>3</sub>(n)/n³ = Σ<sub>d | n</sub> 1/d³ lies between 1 and the
+ceiling ζ(3) = 1.2021 (its average over n is ζ(4) = 1.0823). Plotted as log(σ<sub>3</sub>(n)/n³ − 1) against log n
+(n ≤ 200 000):
+
+![NA1](NA1-shell-ceiling-wedge.jpg)
+
+* every prime lies exactly on the line of slope −3 (σ<sub>3</sub>(p) = 1 + p³; the largest deviation is 2·10⁻¹⁵);
+* every composite lies on or above the line of slope −3/2, touching it only at the squares of primes: its smallest factor
+  p is at most √n, so the excess is at least p⁻³ ≥ n<sup>−3/2</sup>. The wedge between the two lines is empty;
+* the composites stand in horizontal bands by their smallest prime factor, each band starting at p² on the −3/2 line:
+  2: [0.125, 0.2007], 3: [0.0370, 0.0511], 5: [0.0080, 0.0124], 7: [0.0029, 0.0043] (each within 1 … 2.1 times p⁻³).
+  The fullest shell below 200 000 is n = 166 320, at 1.2007 of its cube.
+
+Read as space: σ<sub>3</sub>(n) = Σ (n/d)³, the cubes of the divisors (xz5), and the band is the size of the shell's
+second-largest cube, the cube of n's largest proper divisor n/p, against its largest. A prime's shell has no second cube but
+the unit cube. The −3/2 boundary is the critical line's ½ once more: a composite has a divisor no larger than n<sup>½</sup>.
+
+![NA2](NA2-the-way-down.jpg)
+
+The way to the factors: dividing out the smallest factor moves a composite to its cofactor's place, so the descent visits
+the bands of its prime factors in increasing order (a prime of multiplicity k takes k steps along its band) and drops onto
+the prime line at the largest factor: 997 997 = 7·11·13·997 steps through the bands of 7, 11 and 13 and lands on 997.
+
+As frequency: σ<sub>3</sub>(n)/n³ − 1 = Σ<sub>d > 1</sub> d⁻³ [d | n] is a sum of combs, one of period d and height d⁻³
+for every d, and Ramanujan's expansion σ<sub>3</sub>(n) = n³ ζ(4) Σ<sub>q</sub> c<sub>q</sub>(n)/q⁴ (checked: 252.000 for
+6, 344.000 for 7, 2044.000 for 12) builds every shell from the sums c<sub>q</sub>(n) = Σ<sub>a ⊥ q</sub> e<sup>iτan/q</sup>:
+the trace of turning n hours on the clock of the primitive q-th roots of unity, of which E8's own clock is q = 30
+(c<sub>30</sub>(k) = tr C<sup>k</sup>, discovery two).
+
+What it is not is a test: to place n on this chart one needs σ<sub>3</sub>(n), and counting a shell's points is no easier
+than finding the divisors. The chart is a picture of the factorization, held by the geometry, not a shortcut to it.
+
+### NB. The way to the factors in a lattice that multiplies
+
+In a lattice whose points multiply (norms multiply), the factorization is a path through the shells. In the Hurwitz
+quaternions (the 4-dimensional cousin of E8's octavians; its 24 units are the 24-cell) the shell of norm n holds 24 σ(n)
+points for odd n: 576 for 15, 2304 for 77, 6048 for 221. A primitive point of norm p·q has, among the 24(p + 1) points of
+norm p, exactly 24 that divide it on the left: one direction of the p + 1 the shell offers, times the units, and likewise
+one of the q + 1 directions of norm q (Q = P·R, unique up to the units for each order of the primes; Conway and Smith).
+So the way down to the prime factors exists and is unique, a fact of the lattice; what makes factoring hard is the choice:
+the right shell, and the one direction of its p + 1. E8's octavians are the 8-dimensional version (240 units; the shell of
+norm p holds 240(1 + p³) points, 1 + p³ directions); their factorization, which is not associative, is the next thing to
+compute.
+
+### NC. The families' curve, and why the valleys are where they are
+
+On the critical line each family's completed zeta function is real, so the families form one real curve V(t): in the plane
+for −23 (two zeta functions), in space for −47 (three). A mixture vanishes on the line exactly when V(t) crosses that
+mixture's line (or plane) through the origin, so the landscape of section LF is a count of crossings.
+
+![NC1](NC1-families-direction-23.jpg)
+![NC2](NC2-crossings-by-direction-23.jpg)
+
+For −23 the two most-crossed lines are exactly the two L-functions: ζ(s)L(s, χ₋₂₃) (at 153.4°, crossed 44 times up to
+t = 50) and L(s, χ₃) (at 45°, 42 times); the least-crossed, Λ₂ alone, 28. The direction of V(t) climbs as a staircase:
+plateaus at the L-functions' directions, quick jumps between them (V turns 2.3 times round in all, and turns back 25 times).
+
+Why: written in L-functions, V = Σ<sub>j</sub> L<sub>j</sub>(t) b<sub>j</sub>, with b<sub>j</sub> the direction where all the
+other L-functions vanish. Euler products swing enormously in size (log |L(½ + it)| is roughly Gaussian, variance ½ log log t,
+Selberg), so most of the time one of them dominates and V lies along its b<sub>j</sub>, inside the zero planes of all the
+others, which it then crosses at every one of their zeros. A generic mixture's plane contains no b<sub>j</sub> and is crossed
+only in the jumps. For −47 V lies within 10° of one of the three b<sub>j</sub> 31 % of the time (a random direction: 5 %), one
+L-function carries over 80 % of it 85 % of the time, and the hugging grows with height (26 % below t = 25, 36 % above): the
+mechanism behind Bombieri and Hejhal's theorem that almost all zeros of a combination of L-functions lie on the line.
+
+![NC3](NC3-landscape-sphere-47.jpg)
+
+−47's landscape over the whole sphere of mixtures (equal area, centred on equal parts of the three L-functions, t ≤ 50):
+three gold valleys at the L-functions, joined by low troughs, with ridges between. Beyond the old window there are more
+zero-free patches, all among mixtures with almost none of the principal family; one of them is an artifact (its mixtures
+have zeros right of Re s = 2.2, outside the counting box). Along the great circle through L(χ₁) and L(χ₂) the count rises
+from 0 at the ends to 16 between: their zeros do not alternate (24 breaks by t = 50), so no whole circle is zero-free.
+
+Counted again to t = 100 (the three functions extended with `Tools/class_five_extend.py`, 3170 more values), every
+L-function keeps all its zeros on the line (ζ·L(χ₋₄₇) 118, L(χ₁) 118, L(χ₂) 117), while Λ₁, Λ₂ and Λ₃ alone have 24, 10
+and 12 off. Of the 111 zero-free directions at t = 50, 11 survive, every one within 4° of an L-function; the other 100,
+the accidental valleys, have filled in with 2 to 16 zeros off the line each:
+
+![NC3b](NC3b-landscape-sphere-47-t100.jpg)
+
+So the valleys that last are the class group's characters: the directions the symmetry picks out. How wide each one stays
+is decided by frequency, by how close that L-function's zeros come to one another. When a mixture is tilted away from an
+L-function, it is a pair of neighbouring zeros that leaves the line (they meet and become a complex pair), and the closer the
+pair, the smaller the tilt that does it. The zeros of one Euler product repel each other: up to t = 100 the closest pairs
+of L(χ₁) and L(χ₂) are 0.24 and 0.29 mean spacings apart. ζ·L(χ₋₄₇), the Dedekind zeta function of Q(√−47) (all five
+classes together), is two Euler products whose zeros ignore each other: a zero of ζ at t = 84.7355 and one of L(χ₋₄₇) at
+84.7260 are 0.015 mean spacings apart, and six pairs are closer than 0.2. (That pair is closer than the 0.02 step of the
+samples, so their sign changes cancelled and ζ·L(χ₋₄₇) first counted 116 of 118 on the line; the window t = 84.70 … 84.78
+was resampled every 0.001.) Tilted by a quarter of a degree, the mixtures round ζ·L(χ₋₄₇) already have 2 to 6 zeros off
+the line, exactly at its close pairs (near t = 48.0, 49.8, 56.5, 82.9, 84.7 and 95.9): its valley has shrunk to the
+point itself, while the two primitive valleys still reach 4° and 5° out (on the finer grid of the Unity dome below, 13 of
+13 140 directions are zero-free: the three corners and ten neighbours of L(χ₁) and L(χ₂)).
+
+The same in Unity (`ExperimentsRenderTest`, key `!`; data from `Tools/family_sphere_data.py`):
+
+![NC4](NC4-families-sphere.jpg)
+
+Left, the families' curve up to t = 100 on the dome of directions (taken up to sign, centred on equal parts of the three
+L-functions), in the L-functions' own coordinates W = (ζ·L(χ₋₄₇), L(χ₁), L(χ₂)). The three coordinate planes, the zero
+sets, are great circles making a triangle whose corners are the L-functions; each L-function's arc is the side opposite
+its own corner. The curve is bright in the colour of the L-function that carries it (within 12° of that corner) and faint
+in the jumps between corners; there is a bead wherever it crosses an arc, one for each of the 118 + 118 + 117 zeros, and
+the beads crowd the corners, because a function's zeros come while another one carries the curve. Right, the landscape
+over the same dome to t = 100: gold only at the corners (the dots are the zero-free directions), troughs along the
+triangle's sides (mixtures of two L-functions), ridges between.
+
+![NC5](NC5-a-corner-of-the-families-curve.jpg)
+
+One visit to the corner of L(χ₁), t = 64.98 … 66.02. L(χ₁) is large there and the other two are small and change sign;
+each change of sign is a crossing of that function's arc, so a zero on the line: ζ·L(χ₋₄₇) at 65.11 (a zero of ζ itself),
+65.47 and 65.84, L(χ₂) at 65.52 and 66.00.
+
+### ND. How the race is won
+
+For any system of families (the classes C of a Galois group G), the race is one formula:
+E<sub>C</sub>(x) = (log x/√x)(|G|/|C|·π(x; C) − π(x)) = −χ(C)·(ν + S(x)). Here χ(C) is the family's vector of character
+values; ν holds the Frobenius–Schur indicators (1 for each real representation: what squaring a prime adds); and
+S(x) = Σ<sub>γ</sub> 2(½ cos(γ log x) + γ sin(γ log x))/(¼ + γ²), one coordinate per L-function, from its zeros ½ + iγ.
+
+For −47 (G = D₅; representations sign, ρ₁, ρ₂, whose L-functions are L(s, χ₋₄₇), L(s, χ₁) and L(s, χ₂): the three valleys):
+χ = (1, 2, 2) for the principal family, (1, 0.618, −1.618) and (1, −1.618, 0.618) for the two pairs, (−1, 0, 0) for the
+primes on no family; ν = (1, 1, 1); the offsets are −5, 0, 0 and +1.
+
+![ND1](ND1-race-47-rebuilt.jpg)
+
+Counted to 10⁷ (664 578 primes, each by the reduced form of (p, b, (b² + 47)/4p)): shares 0.1000, 0.2001, 0.2001, 0.4999;
+log-means −6.86, +0.26, +0.21, +1.18. The principal family is last of the three 99.9 % of the time; the two pairs race fairly
+(2x² ± xy + 6y² ahead 48.2 % of the time). Rebuilt from only 40 + 47 + 48 zeros (t ≤ 50), the swings correlate 0.84 … 0.97
+with the counts, and the pairs' race 0.94 with −√5 (S₁ − S₂): it is decided by the interference of the zeros of L(χ₁) and
+L(χ₂) alone.
+
+So the race is a single point −(ν + S(x)) moving in the space of the characters, seen from each family's direction χ(C):
+the fold (squaring, ν) fixes where it sits, and the zeros of the valleys move it. ζ's own zeros belong to the trivial
+representation and cancel out of every race: they pace all the primes together. E8's spokes are the abelian case (eight
+characters mod 30, ν = 1 for the four real ones): offsets −3 for the squares 1 and 19, +1 for the rest (section MA).
+
+![ND2](ND2-the-race-column.jpg)
+
+The race between the three families in Unity. Their leads χ(C)·u differ only in the pair-characters' coordinates (the
+sign's coordinate is 1 for all three), so the floor is the plane of (ρ₁, ρ₂), cut into the three wedges where each
+family is ahead; up is log x from 10³ to 10⁷; the curve is the race point −(ν + S(x)) rebuilt from the zeros of L(χ₁)
+and L(χ₂) up to t = 100, coloured by the family ahead. The fold puts the point at (−1, −1): on the ray where the two
+pairs tie, and opposite the principal family's wedge, whose nearest point (the axis where all three tie) is √2 away. The
+zeros swing it round the fold by about one unit, across the pairs' tie line all the time (rebuilt, 2x² ± xy + 6y² is
+ahead 47.6 % of the time and 3x² ± xy + 4y² 52.2 %; counted, 48.2 % and 47.7 %, with the two counts exactly level the
+other 4.1 %) and into the principal family's wedge almost never (0.2 % rebuilt, never counted). With the zeros up to
+t = 100 the rebuilt races follow the counts more closely than with those up to t = 50: correlations 0.86, 0.96, 0.97
+and 0.98 for the principal family, the two pairs and the primes on no family (were 0.84, 0.94, 0.95 and 0.97), and 0.96
+for the race between the pairs (was 0.94).
+
+### What NA–ND give
+
+* **Is it prime, as space.** A prime's shell is the one with no second cube: in the chart of E8's shells against their
+  ceiling the primes are exactly the line of slope −3, every composite stands on or above the line of slope −3/2, and the
+  wedge between is empty. Space holds the answer, but reading it needs the shell's size σ<sub>3</sub>(n), which is as hard
+  to know as the divisors themselves.
+* **The prime factors, as a path.** Dividing out the smallest factor walks a composite down through the bands of its prime
+  factors, in order, onto the prime line. In a lattice that multiplies (the Hurwitz quaternions here, E8's octavians next),
+  a number's point has exactly one way down to the shell of each prime factor, unique up to the units. The path is a fact
+  of the geometry; choosing it (the right shell, and one direction of its p + 1) is the whole work of factoring.
+* **The families.** The valleys of the landscape that survive as t grows are exactly the class group's characters, the
+  directions the symmetry picks; how wide each stays is set by the spacing of its zeros, which repel within one Euler
+  product and ignore each other between two.
+* **The race.** One point in the characters' space, placed by the fold (what the squares of primes add) and swung by the
+  zeros of the valleys. The principal family is last because the fold puts the point opposite its wedge, and the zeros'
+  swings are too small to carry it across.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -3847,7 +4023,7 @@ every clip it writes.
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

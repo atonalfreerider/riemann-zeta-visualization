@@ -1912,6 +1912,52 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('!')) {
+        // NC–ND. −47's families on the sphere of directions, and the race between them (SacksFamilySphere.cs)
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        // a point on the plane through look that faces the camera, at (sx, sy) of the 16:9 frame's half-width and half-height
+        Vector3 OnScreen(Vector3 cam, Vector3 look, float fov, float sx, float sy)
+        {
+            Vector3 f = (look - cam).normalized, r = Vector3.Cross(Vector3.up, f).normalized, u = Vector3.Cross(f, r);
+            float h = (look - cam).magnitude * Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
+            return look + r * (sx * h * 16f / 9f) + u * (sy * h);
+        }
+
+        Vector3 nc = c + new Vector3(SacksSpiral.FamilySphereOffset, 0f, 0f);
+        const float ncLabel = 220f, ncR = 47f;
+        Vector3 domeL = nc + new Vector3(-72f, -6f, 0f), domeR = nc + new Vector3(72f, -6f, 0f);
+        sacks.ExpFamilyCurveDome(domeL, ncR, ncLabel);
+        sacks.ExpFamilyLandscapeDome(domeR, ncR, ncLabel);
+        sacks.ExpCaption(nc + new Vector3(-158f, 90f, -.3f), Vector3.down * 6.4f,
+            "−47's three families on the sphere of directions, in the L-functions' own coordinates|" +
+            "left:  the families' zeta curve on the critical line, t ≤ 100.  Each arc is the zero set of one L-function, the side of the triangle opposite its corner|" +
+            "the curve dwells at the corners, in the colour of the L-function that carries it there, and crosses the two arcs through that corner:  a bead for every zero|" +
+            "right:  every mixture of the families, coloured by its zeros off the line;  the L-functions, at the corners, are the only valleys that stay gold", 56f);
+        yield return Shot("NC4-families-sphere", nc + back * 400f, nc + new Vector3(0f, -2f, 0f), Vector3.up, 28.6f);
+        sacks.ClearExperiments();
+
+        sacks.ExpFamilyCurveDome(domeL, ncR, ncLabel, 1, 64.98f, 66.02f);
+        Vector3 corner = SacksSpiral.FamilyDomeCorner(domeL, ncR, 1), outward = (corner - domeL).normalized;
+        Vector3 zcam = corner + outward * 56f;
+        sacks.ExpCaption(OnScreen(zcam, corner, 22f, -.94f, .9f), Vector3.down * .5f,
+            "Close to the corner where L(χ<sub>1</sub>) carries the curve:  one visit, t = 64.98 … 66.02 (the other visits faint)|" +
+            "the other two L-functions are small here, and the curve crosses the arc of each wherever it changes sign:  each bead is one of its zeros on the line", 4.4f);
+        yield return Shot("NC5-a-corner-of-the-families-curve", zcam, corner, Vector3.up, 22f);
+        sacks.ClearExperiments();
+
+        Vector3 nd = nc + new Vector3(600f, 0f, 0f);
+        sacks.ExpFamilyRaceColumn(nd, 9f, 64f, ncLabel);
+        Vector3 ndLook = nd + new Vector3(-8f, 30f, -6f), ndCam = ndLook + new Vector3(.5f, .36f, -.79f).normalized * 136f;
+        sacks.ExpCaption(OnScreen(ndCam, ndLook, 55f, -.94f, .9f), Vector3.down * 5.2f,
+            "How the race between the three families is won|" +
+            "floor:  the coordinates of the two pair-characters' L-functions;  each family is ahead in one wedge (the sign's coordinate is the same for all three)|" +
+            "up:  the race point −(ν + S(x)) for x = 10³ … 10⁷, S from the zeros of L(χ<sub>1</sub>) and L(χ<sub>2</sub>), coloured by the family ahead|" +
+            "it winds round the fold, on the line where the two pairs tie and opposite the principal family's wedge:  x² + xy + 12y² is last 99.9 % of the way", 46f);
+        yield return Shot("ND2-the-race-column", ndCam, ndLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
