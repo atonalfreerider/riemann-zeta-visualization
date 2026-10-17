@@ -3784,6 +3784,24 @@ master wave and ζ's trail rising from the centre) and build every formula on sc
 * **Verticals posted one by one.** A watcher muxes each vertical segment as soon as its raw video is written and makes a
   720p copy for review (ffmpeg needs `-nostdin` there: it read the watcher's input and swallowed the next segment's line).
 
+*E8's finite shells and a number's infinitely many products.* Shell n of E8 holds 240 σ<sub>3</sub>(n) points, and pairing
+each divisor d with n/d gives σ<sub>3</sub>(n)/n³ = Σ<sub>d | n</sub> 1/d³: every divisor d of n adds exactly 1/d³ of n³ to
+the shell. So 7, which divides 14, 21, 28, … without end, adds the same 1/343 of each one's cube: infinitely many products,
+one finite share in each. The shares shrink so fast that their sum over every possible divisor converges, Σ 1/d³ = ζ(3) ≈
+1.202, so every shell lies between 240 n³ and 288.5 n³ points: a prime sits on the floor (1 + 1/p³), and numbers with many
+small factors climb toward ζ(3) (6: 1.167, 12: 1.183, 60: 1.192, 5040: 1.1997). E8 does not bound how many products 7
+has; it bounds, for each n, how many ways n is built. The infinite part is the stack of shells. Shells multiply as their
+numbers do (σ<sub>3</sub> is multiplicative: shell 14 = 9 × 344 × 240), and a prime's own shell governs all its powers:
+σ<sub>3</sub>(7n) = 344 σ<sub>3</sub>(n) − 343 σ<sub>3</sub>(n/7), 344 = 1 + 7³ (the Hecke operator T<sub>7</sub>, of which
+E8's theta series E<sub>4</sub> is an eigenform). The Coxeter element turns every shell into itself with no point fixed by any
+partial turn (its eigenvalues are primitive 30th roots of unity), so shell n is 8 σ<sub>3</sub>(n) rings of 30: each
+divisor d contributes 8 d³ rings. All of it is forced by E8's shape: an even unimodular lattice in 8 dimensions has a weight-4
+modular form for its theta series, and there is only one, E<sub>4</sub> = 1 + 240 Σ σ<sub>3</sub>(n) q<sup>n</sup>; summed
+over the shells, Σ 240 σ<sub>3</sub>(n) n<sup>−s</sup> = 240 ζ(s) ζ(s − 3), every multiple (ζ(s)) times every divisor weighted
+by its cube (ζ(s − 3)). And Ramanujan's expansion σ<sub>3</sub>(n) = n³ ζ(4) Σ<sub>q</sub> c<sub>q</sub>(n)/q⁴ builds the shells
+from the same Ramanujan sums c<sub>q</sub> that set the vortex charges (c<sub>30</sub>(k) = tr C<sup>k</sup>). What the shells
+are not is a fast way to factor: counting a shell's points is no easier than finding the divisors.
+
 *Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
 of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
 height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate
