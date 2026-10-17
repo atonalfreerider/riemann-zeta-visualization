@@ -20,12 +20,58 @@ public partial class SacksSpiral
     static readonly (float from, float to)[] FrobSectors = { (60f, 120f), (-60f, 60f), (120f, 300f) };
 
     /// <summary>One panel of the family race: three curves over log₁₀ x from 2 to 7, dashed means, ticks, a title.</summary>
+    // the family race's mapping and range, for the morph to the fair race
+    System.Func<float, float, Vector3> familyRaceP;
+    float familyLo, familyHi;
+
+    /// <summary>Morph the race between the families into its fair version (each p^k counted as 1/k), in place.</summary>
+    public void ExpFamilyMorph(float seconds) => StartCoroutine(FamilyMorphRoutine(seconds));
+
+    System.Collections.IEnumerator FamilyMorphRoutine(float seconds)
+    {
+        Transform g = ExpRoot().Find("MC race");
+        if (g == null || familyRaceP == null) yield break;
+        int n = FamilyRaceData.Count;
+        LineRenderer[] lines = new LineRenderer[3];
+        foreach (LineRenderer l in g.GetComponentsInChildren<LineRenderer>(true))
+            if (l.name.StartsWith("class ") && int.TryParse(l.name.Substring(6), out int k) && k >= 0 && k < 3) lines[k] = l;
+        float time = 0f;
+        while (true)
+        {
+            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(time / seconds));
+            for (int k = 0; k < 3; k++)
+            {
+                if (lines[k] == null) yield break;
+                Vector3[] pts = new Vector3[n];
+                for (int i = 0; i < n; i++)
+                {
+                    float e = Mathf.Lerp(FamilyRaceData.Race[k * n + i], FamilyRaceData.Fair[k * n + i], u);
+                    pts[i] = familyRaceP(FamilyRaceData.Log0 + FamilyRaceData.LogStep * i, Mathf.Clamp(e, familyLo, familyHi)) + Vector3.back * (.2f * (3 - k));
+                }
+
+                lines[k].positionCount = n;
+                lines[k].SetPositions(pts);
+            }
+
+            if (u >= 1f) yield break;
+            time += Time.deltaTime;
+            yield return null;
+        }
+    }
+
     void FamilyPanel(Transform g, Vector3 po, float w, float sy, float lo, float hi, float[] data, string title, bool xLabels,
         float labelSize, float[] means)
     {
         Color axisCol = new(.7f, .74f, .88f);
         int n = FamilyRaceData.Count;
         Vector3 P(float lg, float e) => po + new Vector3((lg - 4.5f) / 5f * w, (e - (lo + hi) * .5f) * sy, 0f);
+        if (g.name == "MC race")
+        {
+            familyRaceP = P;
+            familyLo = lo;
+            familyHi = hi;
+        }
+
         List<(Vector3, Vector3)> ax = new() { (P(2f, lo), P(7f, lo)), (P(2f, lo), P(2f, hi)) };
         for (int d = 2; d <= 7; d++)
         {
@@ -129,13 +175,15 @@ public partial class SacksSpiral
         ExpLabelWide(g, $"{landed[0]} of the {landed[0] + landed[1]} prime squares land here", at[0] + Vector3.down * 9.2f, labelSize * .14f, FrobColors[0]);
     }
 
-    /// <summary>MC1: the fold on the left, the race and the race with the squares put back on the right.</summary>
-    public void ExpFamilyRace(Vector3 o, float labelSize)
+    /// <summary>MC1: the fold on the left (or at <paramref name="foldAt"/>), the race and the race with the squares put back on the right.</summary>
+    public void ExpFamilyRace(Vector3 o, float labelSize, Vector3? foldAt = null, float rim = 46f, float raceW = 120f)
     {
-        ExpFamilyFold(o + new Vector3(-95f, -8f, 0f), 46f, labelSize);
-        FamilyPanel(ExpGroup("MC race").transform, o + new Vector3(86f, 26f, 0f), 120f, 2.7f, -10f, 4f, FamilyRaceData.Race,
+        ExpFamilyFold(foldAt ?? o + new Vector3(-95f, -8f, 0f), rim, labelSize);
+        // a wider race (raceW) takes the height with it, so it can stand in the place of the prime race
+        float sy = 2.7f * Mathf.Sqrt(raceW / 120f);
+        FamilyPanel(ExpGroup("MC race").transform, o + new Vector3(86f, 26f, 0f), raceW, sy, -10f, 4f, FamilyRaceData.Race,
             "the race:  the principal family is never ahead", false, labelSize, new[] { -3f, 0f, 1f });
-        FamilyPanel(ExpGroup("MC fair").transform, o + new Vector3(86f, -38f, 0f), 120f, 2.7f, -10f, 4f, FamilyRaceData.Fair,
+        FamilyPanel(ExpGroup("MC fair").transform, o + new Vector3(86f, -38f, 0f), raceW, sy, -10f, 4f, FamilyRaceData.Fair,
             "each p<sup>k</sup> counted as 1/k:  the gap mostly closes", true, labelSize, new[] { 0f });
     }
 }

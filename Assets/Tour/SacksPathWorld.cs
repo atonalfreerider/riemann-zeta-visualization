@@ -139,14 +139,26 @@ public partial class SacksSpiral
         float shown = Tw("pw.n", 1000f), tail = Tw("pw.tail", 1f), marks = Tw("pw.marks", 0f), rise = Tw("pw.rise", 0f);
         float curveVis = Tw("pw.curve", 0f), eyes = Tw("pw.eyes", 0f), trails = Tw("pw.trails", 0f), gold = Tw("pw.gold", 0f);
         float readout = Tw("pw.readout", 1f), axisVis = Tw("pw.axis", rise);
-        // the readout stays at its place in the shot every frame, as the camera moves
-        s.Readout.gameObject.SetActive(readout > .01f);
-        if (readout > .01f)
+        // the path's width follows the zoom, so a close-up on a few tiny arrows stays readable
+        Camera cam = Camera.main;
+        if (cam != null)
         {
-            s.Readout.TextField.text = $"t = {t:0.00}";
-            HudPlace(s.Readout, PathFocus, new Vector2(.045f, .74f), .045f);
-            s.Readout.TextField.alpha = readout;
+            // the distance to the part of the plane in view (not to the path's origin), so a close-up far from the origin
+            // draws the path as thin as a wide shot does
+            Vector3 cp = cam.transform.position, fwd = cam.transform.forward;
+            float dist = Vector3.Distance(cp, PathFocus);
+            if (Mathf.Abs(fwd.z) > .2f)
+            {
+                float along = (PathFocus.z - cp.z) / fwd.z;
+                if (along > 0f) dist = Mathf.Min(dist, along);
+            }
+
+            s.Path.widthMultiplier = Mathf.Clamp(dist * .0028f / .3f, .01f, 1f);
         }
+
+        // the readout, fixed in the top-left corner of the screen
+        s.Readout.gameObject.SetActive(false);
+        Hud(0, readout > .01f ? $"t = {t:0.00}" : "", new Color(1f, 1f, 1f, readout));
 
         string sig = $"{t:F5}|{shown:F3}|{tail:F3}|{marks:F3}|{rise:F3}|{curveVis:F3}|{eyes:F3}|{trails:F3}|{gold:F3}|{axisVis:F3}|{Tw("pw.mirrors", 0f):F3}|{Tw("pw.alleyes", 0f):F3}";
         if (sig == s.Sig) return;

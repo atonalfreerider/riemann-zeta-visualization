@@ -18,7 +18,10 @@ public partial class SacksSpiral
     public const float E8DropOffset = 36300f;
 
     Vector3 e8WheelCenter;
-    float e8HourRadius, e8LabelRadius, e8WheelLabel, e8WheelDot;
+    float e8HourRadius, e8LabelRadius, e8WheelLabel, e8WheelDot, e8Turn;
+
+    /// <summary>The centre of the wheel last drawn (the shells stack under it; the trace chains start from it).</summary>
+    public Vector3 E8WheelCenter => e8WheelCenter;
     bool e8WheelReady;
 
     static readonly Color E8Composite = new(1f, .42f, .4f);
@@ -141,6 +144,7 @@ public partial class SacksSpiral
         }
 
         float turn = Mathf.PI * .5f - Mathf.Atan2(p[baseRoot].y, p[baseRoot].x);
+        e8Turn = turn;
         Vector3 W(Vector2 q)
         {
             float c = Mathf.Cos(turn), s = Mathf.Sin(turn);
@@ -295,8 +299,15 @@ public partial class SacksSpiral
     /// same radius, floor n at depth (n − 1)·gap (+z, down the screen); gold for a prime, red for a composite. The floors are
     /// the items of the groups named in <paramref name="groups"/> (floors split by the ranges in <paramref name="splits"/>).
     /// </summary>
-    public void ExpE8Tower(Vector3 o, int nMax, float radius, float gap, float dot, float labelSize, string[] groups, int[] splits)
+    public void ExpE8Tower(Vector3 o, int nMax, float radius, float gap, float dot, float labelSize, string[] groups, int[] splits, bool attach = false)
     {
+        // attached: the shells stack under the wheel last drawn, turned and mirrored as it is, so that floor 1 is the wheel
+        if (attach && e8WheelReady)
+        {
+            o = e8WheelCenter;
+            radius = e8HourRadius;
+        }
+
         ExpEnsureSieve(nMax + 2);
         (double[] u1, double[] u2) = E8CoxeterPlane();
         Transform axisGroup = ExpGroup("E8 tower axis").transform;
@@ -322,15 +333,18 @@ public partial class SacksSpiral
             floor.transform.SetParent(items, false);
             List<Vector3> pts = new(shell.Count); List<Color> cols = new(shell.Count); List<float> sizes = new(shell.Count);
             float size = dot * Mathf.Clamp(1.6f / Mathf.Pow(shell.Count / 240f, .33f), .18f, 1f);
+            float ct = Mathf.Cos(e8Turn), st = Mathf.Sin(e8Turn);
             foreach (Vector2 q in proj)
             {
                 Vector2 s = q / maxR * radius;
+                if (attach) s = new Vector2(-(s.x * ct - s.y * st), s.x * st + s.y * ct); // the wheel's turn and mirror
                 pts.Add(c + new Vector3(s.x, s.y, 0f));
                 cols.Add(col * Mathf.Lerp(1f, .7f, s.magnitude / radius));
                 sizes.Add(size);
             }
 
-            ExpPointCloud(floor.transform, "points", pts, cols, sizes, Factory.SoftGlowIntensity);
+            // attached, floor 1 is the wheel itself: only its rim and labels are added
+            if (!(attach && n == 1)) ExpPointCloud(floor.transform, "points", pts, cols, sizes, Factory.SoftGlowIntensity);
             RingAround(floor.transform, "rim", c, Vector3.back, radius * 1.04f, col * .7f, dot * .18f, Factory.SoftGlowIntensity);
             long count = shell.Count, least = 240L * (1 + (long)n * n * n);
             if (labelSize > 0f)

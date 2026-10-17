@@ -3613,28 +3613,61 @@ Its scenes are the landscape stills of those sections, so it is drawn for a hori
 horizontal segments (`xs1` … `xs5`, `xz1` … `xz5`; scripts in [`long-form-script.md`](long-form-script.md)), narrated
 as the work of the author and Claude, an AI math research assistant. Each is one continuous sequence: a picture is
 built step by step and then turned into the next one (a parameter of the scene is eased, `exp:tw`), rather than
-cleared and replaced; the charts a segment compares are drawn side by side and the camera glides between them while
-the one being discussed is lit and the others greyed out (`exp:mute`, the GlowLine shader's `_Mute`). The number being
-discussed is isolated: its column, its prime factors (each piece labelled log p), its level and its hand are lit on the
-greyed-out picture (`exp:fwhl`, `exp:e8hl`), and callouts name it and its structure (12 = 2²·3 with its six divisors
-ringed one by one; 49 = 7² on hour 19; 6 = 2·3 dark among the lamps). Every cue lands on the word that names it.
+cleared and replaced. Two charts that compare the same thing are not set side by side for the camera to pan between:
+one becomes the other where it stands (below). The context is greyed out (`exp:mute`, the GlowLine shader's `_Mute`;
+`exp:mute:G:SECONDS:DEPTH` with a depth up to 2 fades it nearly out for close shots) and the number being discussed is
+isolated: its column, its prime factors (each piece labelled log p), its level and its hand are lit on the greyed-out
+picture (`exp:fwhl`, `exp:e8hl`), and callouts name it and its structure (12 = 2²·3 with its six divisors ringed one by
+one; 49 = 7² on hour 19; 6 = 2·3 dark among the lamps). Every cue lands on the word that names it.
 
 * **From the number line to the saddle** ([`SacksNumberWorld.cs`](../../Assets/Tour/SacksNumberWorld.cs)). The
-  numbers are laid on a straight line, and each master wave is first drawn over that line, as it would be in a book:
-  the zeros' wave −Σ cos(γ log x) (one zero, then ten, … ten thousand), and Voronoi's divisor wave (one wave, then four
-  thousand). The line then winds up into the Sacks spiral (one turn per unit of √x, every number keeping its distance
-  along the line), carrying its wave, and the plane bends into the saddle.
+  numbers are laid on a straight line, seen from straight above, and each master wave is first drawn over that line in
+  its plane, as it would be in a book: the zeros' wave −Σ cos(γ log x) (one zero, then ten, … ten thousand), and
+  Voronoi's divisor wave (one wave, then four thousand). The line then curls up in its own plane into the Sacks spiral
+  (one turn per unit of √x, every number keeping its distance along the line; `nw.roll` is eased geometrically, a
+  doubling of the curl at a time), carrying its graph, while the camera follows the line's bounds (`on=nwboxp`). Only
+  then does the graph stand up out of the plane into the home view's curtain, and the plane bend into the saddle.
 * **The path of partial sums** ([`SacksPathWorld.cs`](../../Assets/Tour/SacksPathWorld.cs)), what the earlier modules
   called the zeta chain: arrow n is 1/√n long and points t·log n from arrow 1, so it turns t·log(n/(n − 1)) from arrow
   n − 1; at t = 1 the turns are 40°, 23°, 17°, 13°, 10°, … Each arrow is laid with its length, its turn (gold arc) and
   its direction (blue arc) marked. The path is drawn at a fixed scale (the camera never re-fits it), the
   Euler–Maclaurin tail closes it at ζ(½ + it), and the plane then climbs a t axis while ζ(½ + it) leaves its curve and
   the vortices' eyes leave a tower.
+* **E8's clock inside the gold path** ([`SacksTraceBlocks.cs`](../../Assets/Tour/SacksTraceBlocks.cs)). Keeping only
+  the arrows of n on E8's eight gold hours, the path at t = 5000 (25 795 terms) runs in blocks of eight arrows, one per
+  gold hour. A block is lit on the path, each arrow with its number and hour, then lifted onto E8's clock beside it
+  (the roots greyed out): seen from the block, arrow n = c + h points at hour k·h, so the block adds up to tr Cᵏ
+  (−8 for k = 15 near n = 1590, 4 for k = 5, −1 for k = 1). Sliding k from 1 to 30 drops the bars of the traces into a
+  chart beside the clock, the measured spoke charges are laid over them, and the thirty traces chained by hour give back
+  the sieve.
 * **The coil, assembled** ([`SacksFunnelWorld.cs`](../../Assets/Tour/SacksFunnelWorld.cs)). The path at a zero is laid
   on the floor of E8's factor funnel; each arrow n rises to the top of n's column, at height log n, with its tail on the
   axis and its direction kept. The arrows become the hands of a clock turning γ per unit of height, and the coil runs
-  through their tips. Because log 6 = log 2 + log 3, the hand of 6 is the hand of 2 plus the hand of 3: the coil reads
-  the prime factors. Easing γ to another zero turns every hand by Δγ·log n.
+  through their tips. Because log 6 = log 2 + log 3, the hand of 6 is the hand of 2 plus the hand of 3: seen from
+  above, with every other hand and the coil faded (`fw.dim`), the turns of 2 and 3 are chained as arcs. Whole turns
+  change nothing on a clock, so each arc shows only what is left (γ·log 2 = 1.56 turns draws 0.56 of a turn), and
+  1.56 + 2.47 = 4.03 lands on the hand of 6. Easing γ to another zero turns every hand by Δγ·log n.
+* **The comb, the spin and the fans** ([`SacksFunnelMorphs.cs`](../../Assets/Tour/SacksFunnelMorphs.cs)). A ring
+  climbs the axis (`fw.scan`); at its height the coils of all 10 500 zeros add up to one hand, and each prime power's
+  tooth and number appear as the ring passes it, so the comb is drawn by the scan. Spun round the axis (`fw.spin`),
+  each tooth draws its ring. Split by E8's eight characters (`fw.fan`), eight copies of the comb swing out to the gold
+  hours and become the eight fans.
+* **Charts that merge** ([`ExperimentMorphs.cs`](../../Assets/Tour/ExperimentMorphs.cs)). Each lattice of −23 shrinks
+  onto the head of its own family's strip of zeros (the mirror pair shares one: the same zeta function;
+  `exp:twgroup:GROUP/PART:DX,DY,DZ:SCALE:SECONDS` moves one part of a group). The four strips fold down onto the chart
+  of every mixture (`exp:stripsmorph`), whose line of mixtures grows into the plane of −47. The prime race eases into
+  the fair race in place (`exp:racemorph`); E8's clock of squares gives way to the triangle of x³ − x − 1 at the same
+  place, the triangle to the fold of S₃, and the race between the families takes the prime race's place and evens out
+  in turn (`exp:familymorph`). E8's wheel becomes the first floor of its tower of shells (`exp:e8tower:…:attach`).
+
+*Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
+of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
+height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate
+that squares it to a flat picture by the end of the line. A scripted orbit cue tightens the camera's smoothing once the
+cut is done (its own moves are already eased), so the camera keeps up with a moving subject (a number line curling up,
+`on=nwbox…`; the path's plane climbing the t axis, `on=pathplane`) instead of trailing a second behind. Readouts that change every frame (t = …) sit
+in fixed screen corners (`SacksSpiral.Hud`, cleared by `exp:stage`), not in the scene, so they never shake with the
+camera.
 
 *The saddle and Voronoi's wave, made explicit.* The home view's master wave is −Σ cos(γ log x) over the zeros of ζ: it
 spikes at the primes and prime powers, and its waves tick on log x, so a single zero's wave drifts from turn to turn of

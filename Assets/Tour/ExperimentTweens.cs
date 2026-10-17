@@ -64,7 +64,7 @@ public partial class SacksSpiral
     /// Fade every renderer of the groups whose names start with one of <paramref name="groups"/> to grey
     /// (<paramref name="on"/>) or back to its colours, over <paramref name="seconds"/>; their labels go faint grey too.
     /// </summary>
-    public void ExpMute(string[] groups, bool on, float seconds = .8f)
+    public void ExpMute(string[] groups, bool on, float seconds = .8f, float depth = 1f)
     {
         List<Renderer> rs = new();
         List<TMP_Text> ts = new();
@@ -76,27 +76,30 @@ public partial class SacksSpiral
             foreach (TMP_Text t in g.GetComponentsInChildren<TMP_Text>(true)) ts.Add(t);
         }
 
-        StartCoroutine(MuteRoutine(rs, ts, on, seconds));
+        StartCoroutine(MuteRoutine(rs, ts, on, seconds, depth));
     }
 
-    IEnumerator MuteRoutine(List<Renderer> rs, List<TMP_Text> ts, bool on, float seconds)
+    IEnumerator MuteRoutine(List<Renderer> rs, List<TMP_Text> ts, bool on, float seconds, float depth)
     {
         float[] from = new float[rs.Count];
         for (int i = 0; i < rs.Count; i++) from[i] = rs[i] != null ? Factory.GetMute(rs[i]) : 0f;
         foreach (TMP_Text t in ts)
             if (t != null && on && !mutedText.ContainsKey(t)) mutedText[t] = (t.color, t.alpha);
+        Color[] textFrom = new Color[ts.Count];
+        for (int j = 0; j < ts.Count; j++) textFrom[j] = ts[j] != null ? ts[j].color : Color.clear;
+        float fade = Mathf.Lerp(1f, .2f, Mathf.Clamp01(depth - 1f));
         float time = 0f;
         while (true)
         {
             float u = seconds <= 0f ? 1f : Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(time / seconds));
             for (int i = 0; i < rs.Count; i++)
-                if (rs[i] != null) Factory.SetMute(rs[i], Mathf.Lerp(from[i], on ? 1f : 0f, u));
-            foreach (TMP_Text t in ts)
+                if (rs[i] != null) Factory.SetMute(rs[i], Mathf.Lerp(from[i], on ? depth : 0f, u));
+            for (int j = 0; j < ts.Count; j++)
             {
+                TMP_Text t = ts[j];
                 if (t == null || !mutedText.TryGetValue(t, out var orig)) continue;
-                Color grey = new(.36f, .38f, .46f, orig.alpha * .25f);
-                Color c = on ? Color.Lerp(orig.color, grey, u) : Color.Lerp(grey, orig.color, u);
-                t.color = c;
+                Color grey = new(.36f, .38f, .46f, orig.alpha * .25f * fade);
+                t.color = Color.Lerp(textFrom[j], on ? grey : orig.color, u);
             }
 
             if (u >= 1f) break;

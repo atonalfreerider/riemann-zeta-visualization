@@ -48,6 +48,14 @@ public partial class SacksSpiral
     {
         ClearTweens("fw.");
         fw = new FwScene { Root = ExpGroup("FW coil scene").transform };
+        fwScanRing = fwScanHand = null;
+        fwScanTag = null;
+        fwArcs.Clear();
+        Array.Clear(fwFans, 0, fwFans.Length);
+        fwCombGroup = fwCombLabels = null;
+        fwMorphSig = "";
+        fwAngleHands.Clear();
+        WarmFans();
         Color white = new(.95f, .97f, 1f);
         fw.Path = ExpLine(fw.Root, "path", .3f, white, Factory.SoftGlowIntensity, new[] { FwOrigin, FwOrigin });
         fw.Tail = ExpLine(fw.Root, "tail", .36f, new Color(1f, .55f, .2f), Factory.GlowIntensity, new[] { FwOrigin, FwOrigin });
@@ -73,6 +81,7 @@ public partial class SacksSpiral
         while (s == fw && s.Root != null)
         {
             FwUpdate(s);
+            FwMorphUpdate(s);
             yield return null;
         }
     }
@@ -81,8 +90,9 @@ public partial class SacksSpiral
     {
         double g = Tw("fw.gamma", 14.134725f);
         float shown = Tw("fw.n", 0f), lift = Tw("fw.lift", 0f), coil = Tw("fw.coil", 0f), pathVis = Tw("fw.path", 1f), tail = Tw("fw.tail", 0f);
-        float hands = Tw("fw.hands", 1f), axis = Tw("fw.axis", 0f);
-        string sig = $"{g:F5}|{shown:F3}|{lift:F3}|{coil:F3}|{pathVis:F3}|{tail:F3}|{hands:F3}|{axis:F3}";
+        float hands = Tw("fw.hands", 1f), axis = Tw("fw.axis", 0f), dim = Tw("fw.dim", 0f);
+        string lit = string.Join(",", s.Lit.Keys) + "/" + string.Join(",", fwAngleHands);
+        string sig = $"{g:F5}|{shown:F3}|{lift:F3}|{coil:F3}|{pathVis:F3}|{tail:F3}|{hands:F3}|{axis:F3}|{dim:F3}|{lit}";
         if (sig == s.Sig) return;
         s.Sig = sig;
         Vector3 o = FwOrigin + Vector3.back * .15f;
@@ -133,13 +143,16 @@ public partial class SacksSpiral
             Vector3 handTail = o + FwUp(h), handHead = handTail + FwDir(dir) * FwCoilR;
             Vector3 t0 = Vector3.Lerp(floor[n - 1], handTail, u), t1 = Vector3.Lerp(Vector3.Lerp(floor[n - 1], floor[n], exist), handHead, u);
             a.SetPositions(new[] { t0 + Vector3.back * .05f, t1 + Vector3.back * .05f });
-            a.widthMultiplier = Mathf.Lerp(.3f, .42f, u);
+            bool bright = s.Lit.ContainsKey(n) || fwAngleHands.Contains(n);
+            float alpha = bright ? Mathf.Max(hands, dim) : hands * (1f - .85f * dim);
+            a.widthMultiplier = Mathf.Lerp(.3f, .42f, u) * (bright ? 1f + .4f * dim : 1f);
             Color c = Color.Lerp(new Color(.95f, .97f, 1f), new Color(1f, .9f, .45f), u);
-            a.startColor = a.endColor = new Color(c.r, c.g, c.b, hands);
+            if (bright) c = Color.Lerp(c, Color.white, dim);
+            a.startColor = a.endColor = new Color(c.r, c.g, c.b, alpha);
             if (s.Tags[n] != null)
             {
                 s.Tags[n].transform.position = handHead + FwDir(dir) * 1.6f + Vector3.back * .3f;
-                s.Tags[n].TextField.alpha = hands * Mathf.Clamp01((u - .5f) * 2f);
+                s.Tags[n].TextField.alpha = alpha * Mathf.Clamp01((u - .5f) * 2f);
             }
         }
 
@@ -159,6 +172,8 @@ public partial class SacksSpiral
 
             s.Coil.positionCount = pts.Length;
             s.Coil.SetPositions(pts);
+            Color cc = new(1f, .85f, .1f, 1f - .9f * dim);
+            s.Coil.startColor = s.Coil.endColor = cc;
         }
 
         s.Axis.gameObject.SetActive(axis > .01f);
@@ -228,11 +243,18 @@ public partial class SacksSpiral
             if (fw.Lit[k] != null) Destroy(fw.Lit[k].gameObject);
             fw.Lit.Remove(k);
         }
+
+        if (n == 0) fwAngleHands.Clear();
     }
+
+    // the hands lit by ExpFunnelAngles: n and its prime factors (kept bright when fw.dim fades the rest)
+    readonly HashSet<long> fwAngleHands = new();
 
     /// <summary>
     /// At the level of n = p·q·…: the turn of each prime factor as an arc from the direction of the hand of 1 (the floor's
-    /// "right"), nested, and the hand of n as their sum, so that γ·log n = γ·log p + γ·log q + … (group "FW angles n").
+    /// "right"), the arcs chained, so that γ·log n = γ·log p + γ·log q + … Whole turns change nothing on a clock, so each
+    /// arc shows only what is left after them, and its label the full count ("γ·log 2 = 1.56 turns" draws .56 of a turn).
+    /// The hand of n is their sum (group "FW angles n"); n and its factors' hands stay bright under fw.dim.
     /// </summary>
     public void ExpFunnelAngles(long n)
     {
@@ -240,22 +262,34 @@ public partial class SacksSpiral
         double gm = Tw("fw.gamma", 14.134725f), hn = Math.Log(n);
         Vector3 c = FwOrigin + FwUp(hn) + Vector3.back * .25f;
         List<long> f = Factorize(n);
+        fwAngleHands.Clear();
+        fwAngleHands.Add(n);
+        foreach (long p in f) fwAngleHands.Add(p);
         double acc = 0;
-        float r = FwCoilR * .45f;
+        float r = FwCoilR * .42f;
         int i = 0;
+        // the start: the direction of the hand of 1
+        ExpLine(g, "zero", .14f, new Color(.8f, .84f, .95f), Factory.SoftGlowIntensity, new[] { c, c + FwDir(0) * FwCoilR * 1.05f });
         foreach (long p in f)
         {
-            double turn = -gm * Math.Log(p);
+            double full = gm * Math.Log(p), part = full - 2 * Math.PI * Math.Floor(full / (2 * Math.PI)), turn = -part;
+            float rr = r + i * 1.6f;
             List<Vector3> arc = new();
-            int steps = Mathf.Max(8, Mathf.CeilToInt((float)Math.Abs(turn) * 10f));
-            for (int k = 0; k <= steps; k++) arc.Add(c + FwDir(acc + turn * k / steps) * (r + i * .9f));
-            LineRenderer l = ExpLine(g, $"turn {p} #{i}", .3f, SegmentColor(p), Factory.GlowIntensity, arc.ToArray());
-            TextBox t = ExpLabelWide(g, $"γ·log {p}", arc[arc.Count / 2] + FwDir(acc + turn * .5) * 2.4f, 12f, SegmentColor(p));
+            int steps = Mathf.Max(8, Mathf.CeilToInt((float)part * 16f));
+            for (int k = 0; k <= steps; k++) arc.Add(c + FwDir(acc + turn * k / steps) * rr);
+            LineRenderer l = ExpLine(g, $"turn {p} #{i}", .34f, SegmentColor(p), Factory.GlowIntensity, arc.ToArray());
+            OnTop(l, 21);
+            ArrowHead(g, $"turn head {p} #{i}", arc[^2], arc[^1], .9f, SegmentColor(p), .26f);
+            TextBox t = ExpLabelWide(g, $"γ·log {p} = {full / (2 * Math.PI):0.00} turns", c + FwDir(acc + turn * .5) * (rr + 2.6f + i * .4f),
+                12f, SegmentColor(p));
             Outline(t.TextField);
             acc += turn;
             i++;
         }
 
-        ExpLine(g, "sum", .4f, Color.white, AttentionIntensity, new[] { c, c + FwDir(acc) * FwCoilR });
+        LineRenderer sum = ExpLine(g, "sum", .4f, Color.white, AttentionIntensity, new[] { c, c + FwDir(acc) * FwCoilR });
+        OnTop(sum, 22);
+        TextBox st = ExpLabelWide(g, $"γ·log {n} = {gm * hn / (2 * Math.PI):0.00} turns", c + FwDir(acc) * (FwCoilR + 3.4f), 13f, Color.white);
+        Outline(st.TextField);
     }
 }

@@ -64,6 +64,11 @@ public partial class SacksSpiral
         {
             var f = Forms23[k];
             Vector3 c = o + new Vector3(-98f + 98f * k, 0f, 0f);
+            // each family in its own part, so it can move on its own (exp:twgroup:LA lattices/family K:…)
+            Transform group = g;
+            Transform fam = new GameObject($"family {k}").transform;
+            fam.SetParent(group, false);
+            g = fam;
             List<Vector3> pts = new();
             List<Color> pc = new();
             List<float> ps = new();
@@ -106,8 +111,10 @@ public partial class SacksSpiral
             }
 
             ExpPointCloud(g, $"lit {k}", lit, lc, ls, Factory.GlowIntensity);
-            ExpLabelWide(g, names[k], c + new Vector3(0f, 52f, 0f), labelSize * .24f, FormColors[k]);
-            ExpLabelWide(g, k == 0 ? "the principal family" : k == 1 ? "a second family" : "its mirror image", c + new Vector3(0f, 46f, 0f), labelSize * .17f, new Color(.75f, .78f, .9f));
+            ExpLabelWide(g, names[k], c + new Vector3(0f, 52f, 0f), labelSize * .24f, FormColors[k]).gameObject.name = $"name {k}";
+            ExpLabelWide(g, k == 0 ? "the principal family" : k == 1 ? "a second family" : "its mirror image", c + new Vector3(0f, 46f, 0f), labelSize * .17f,
+                new Color(.75f, .78f, .9f)).gameObject.name = $"sub {k}";
+            g = group;
         }
 
         // what the rings meet
@@ -118,7 +125,8 @@ public partial class SacksSpiral
             "<color=#FF6659>6 = 2·3, the red ring:</color>  4 points on x² + xy + 6y² and 2 + 2 on the other two:  two representations",
         };
         for (int r = 0; r < rows.Length; r++)
-            ExpLabelWide(g, rows[r], o + new Vector3(-140f, -50f - 6.2f * r, 0f), labelSize * .19f, new Color(.82f, .85f, .94f), TextAlignmentOptions.Left);
+            ExpLabelWide(g, rows[r], o + new Vector3(-140f, -50f - 6.2f * r, 0f), labelSize * .19f, new Color(.82f, .85f, .94f), TextAlignmentOptions.Left)
+                .gameObject.name = $"row {r}";
     }
 
     // ================================================================================================
@@ -216,13 +224,14 @@ public partial class SacksSpiral
             ExpPointCloud(g, $"zeros {k}", pts, pc, ps, Factory.GlowIntensity);
             ExpLabelWide(g, name, P(.5, tMax) + Vector3.up * 9f, labelSize * .21f, col);
             ExpLabelWide(g, formula, P(.5, tMax) + Vector3.up * 4.4f, labelSize * .15f, new Color(.8f, .84f, .95f));
-            ExpLabelWide(g, $"{on.Length} on the line,  {2 * offRe.Length} off it", P(.5, 0) + Vector3.down * 4.2f, labelSize * .16f, offRe.Length > 0 ? new Color(1f, .5f, .45f) : PrimeGold);
+            ExpLabelWide(g, $"{on.Length} on the line,  {2 * offRe.Length} off it", P(.5, 0) + Vector3.down * 4.2f, labelSize * .16f,
+                offRe.Length > 0 ? new Color(1f, .5f, .45f) : PrimeGold).gameObject.name = $"count {k}";
             foreach ((double sg, string txt) in new[] { (0d, "0"), (.5d, "½"), (1d, "1") })
-                ExpLabelWide(g, txt, P(sg, 0) + Vector3.down * 8.6f, labelSize * .12f, new Color(.6f, .64f, .8f));
+                ExpLabelWide(g, txt, P(sg, 0) + Vector3.down * 8.6f, labelSize * .12f, new Color(.6f, .64f, .8f)).gameObject.name = $"tick {k}";
         }
 
-        ExpLabelWide(g, "the two families", o + new Vector3(-(w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f));
-        ExpLabelWide(g, "the class group's L-functions", o + new Vector3((w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f));
+        ExpLabelWide(g, "the two families", o + new Vector3(-(w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f)).gameObject.name = "section 0";
+        ExpLabelWide(g, "the class group's L-functions", o + new Vector3((w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f)).gameObject.name = "section 1";
     }
 
     // ================================================================================================

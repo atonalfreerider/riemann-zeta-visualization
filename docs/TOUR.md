@@ -98,20 +98,20 @@ that names it (`@word|exp:…`, from the narration's word timings, or estimated 
 
 | Segment | Id | What it shows |
 |---|---|---|
-| The saddle is a wave | `xs1` | the number line, the primes flaring as they are named; the zeros' wave over it, one zero (crests at 7.4, 11.5, 18, 28) then up to 10 000, spiking at 7, 8 = 2³, 9 = 3² but not at 10 or 12; the line winding into the Sacks spiral (squares on one ray) with its wave; one zero's wave drifting in arms; Voronoi's first wave on its own line (crests at 8.6, 11.8, 15.5), then 4 000 waves, spikes as tall as d(n) (7, 12 with its divisors ringed, 16, 30, 36); wound up, the first wave standing still beside the squares and pronic rays; the plane bending into the saddle; both waves on the saddle |
-| E8 sets the vortices | `xs2` | the path of partial sums laid arrow by arrow; t raised to the first zero (the end on 0) and the 159th (vortices, spokes at n ≈ 53, 27, 18); the arrows off E8's gold hours shrinking away; the gold path's spoke charges bar by bar; E8's Coxeter traces as eight-arrow paths (−1, 4, −8); the sieve of 2, 3, 5 on the wheel (7 → 1, 6 → 0) |
-| Where the zeros live in E8 | `xs3` | E8's factor funnel, greyed out; 7 and 6 lit with their factors' pieces; the path at the first zero laid on the funnel's floor, its arrows lifted to their numbers' heights and turned into the hands of the coil; the hand of 6 as the hands of 2 and 3; the next zeros' tighter coils; the comb (7, 8, 9 lit; 6, 10 dark); the eight fans (49 on hour 19) |
-| What keeps zeros on the line | `xs4` | the three lattices of −23 and the rings of 59, 13, 6; then, side by side and lit in turn, the families' zeros off the line, the L-functions', the sweep over every mixture, the two windows, the plane of −47 and its islands |
-| Chebyshev's bias is a fold | `xs5` | the race on E8's spokes; the fold drawn arc by arc (7² → 19, 11² → 1, 13² → 19, 29² → 1); the fair race; the roots of x³ − x − 1 under 59, 2, 5 and a reflection twice; the race between the families, all side by side |
+| The saddle is a wave | `xs1` | the number line seen from above, the primes flaring as they are named; the zeros' wave drawn in its plane, one zero (crests at 7.4, 11.5, 18, 28) then up to 10 000, spiking at 7, 8 = 2³, 9 = 3² but not at 10 or 12; the line curling in its plane into the Sacks spiral with its graph (squares on one ray), the graph then standing up into the curtain; one zero's wave drifting in arms; uncurled, the wave turning into Voronoi's (crests at 8.6, 11.8, 15.5), then 4 000 waves, spikes as tall as d(n) (7, 12 with its divisors ringed, 16, 30, 36); curled again, the first wave standing still beside the squares and pronic rays; the plane bending into the saddle; both waves on one saddle |
+| E8 sets the vortices | `xs2` | the path of partial sums laid arrow by arrow; t raised to the first zero (the end on 0) and the 159th (vortices, spokes at n ≈ 53, 27, 18); E8's clock beside it, the arrows off its gold hours shrinking away; the gold path at t = 5000; a block of eight arrows (1577 … 1603) lit and lifted onto the clock (sum −8), then k = 5 (4) and k = 1 (−1); k sliding 1 … 30, the traces dropping into a chart beside the clock, the measured charges over them; the sieve (7 → hour 7, 6 → 0) |
+| Where the zeros live in E8 | `xs3` | E8's factor funnel, greyed out; 7 and 6 lit with their factors' pieces; the path at the first zero laid on the funnel's floor, its arrows lifted to their numbers' heights and turned into the hands of the coil; from above, the hand of 6 as the turns of 2 and 3 (1.56 + 2.47 = 4.03 turns); the next zeros' tighter coils; a ring climbing the axis draws the comb (7, 8, 9 lit; 6, 10 dark); the comb splitting into the eight fans (49 on hour 19) |
+| What keeps zeros on the line | `xs4` | the three lattices of −23 and the rings of 59, 13, 6; each lattice shrinking onto the head of its family's strip of zeros (zeros off the line), then the L-functions' (all on it); the four strips folding into the chart of every mixture; the sweep and the two windows; the line of mixtures growing into the plane of −47 and its islands |
+| Chebyshev's bias is a fold | `xs5` | the race on E8's spokes, then rebuilt from the zeros; E8's clock of squares beside it, drawn arc by arc (7² → 19, 11² → 1, 13² → 19, 29² → 1); the race easing into the fair race in place; at the fold's place, the roots of x³ − x − 1 under 59, 2, 5 and a reflection twice, then the fold of S₃; the race between the families taking the race's place and evening out |
 | The path of partial sums | `xz1` | t = 1: arrows 1, 2, 3, … laid with their lengths 1/√n, turns log(n/(n − 1)) and directions log n; t raised to the first zero; the plane standing up on a t axis, ζ(½ + it) leaving its curve through every zero; Riemann's hypothesis |
 | How the vortices develop | `xz2` | the climbing path from t = 50 to 333.6 at a fixed scale: vortices born, spokes at n ≈ t/2πk, the eyes' mirrors; the eyes kept at every zero as a tower; 10 000 zeros' eyes down the axis |
-| From a zero to E8's heights | `xz3` | the funnel greyed out; 2, 4, 8, 16 lit as stacks of log 2; the path at the first zero on the floor, its arrows lifted into the coil; 4 = 2·2 and 6 = 2·3 as sums of turns; other zeros' coils; t = 18, where the dropped arrows miss |
-| Lamps and spokes | `xz4` | three coils; all 10 500 coils at the tops of 7 and 6; the comb (7, 8, 9 lit; 6, 10, 12 dark); the rings; the eight character trees; the eight fans (49 on hour 19; 11 and 41 on hour 11) |
-| 240 roots, infinitely many numbers | `xz5` | E8's 240 roots; its clock of 30 hours; the spiral of numbers greyed out with hour 7 (7, 37, 67, 97, 127) and hour 6 lit; the shells of the lattice (240, 2 160, 6 720, 17 520, …); 240σ₃(n) as cubes for 7 and 6; 240 ζ(s) ζ(s − 3) |
+| From a zero to E8's heights | `xz3` | the funnel greyed out; 2, 4, 8, 16 lit as stacks of log 2; the path at the first zero on the floor, its arrows lifted into the coil; from above, 4 = 2·2 and 6 = 2·3 as chained turns; other zeros' coils; t = 18, where the dropped arrows miss |
+| Lamps and spokes | `xz4` | three coils; all 10 500 coils at the tops of 7 and 6; a ring climbing the axis draws the comb (7, 8, 9 lit; 6, 10, 12 dark); the comb spun into rings; the eight characters at the height of 7, turned back and chained (they line up only for hour 7); the comb splitting into the eight fans (49 on hour 19; 11 and 41 on hour 11) |
+| 240 roots, infinitely many numbers | `xz5` | E8's 240 roots; its clock of 30 hours; the spiral of numbers greyed out with hour 7 (7, 37, 67, 97, 127) and hour 6 lit; the wheel tilting into the first floor of the tower of shells (240, 2 160, 6 720, 17 520, …); 240σ₃(n) as cubes for 7 and 6; 240 ζ(s) ζ(s − 3) |
 
 Their actions add callouts, `exp:callKIND:TARGET:DX,DY[,FRAC[,RRGGBB]]:TEXT`: a label with an arrow that grows to the
 target, blooms white as it lands and rings it (KIND `num`, `wave`, `fun`, `fold`, `e8`, `bar`, `wheel`, `vertex`,
-`clock`, `clockend`, `zeta`, `chain`, `at`; DX,DY is the label's direction on the screen, and 0,0 picks one away from the
+`clock`, `clockend`, `zeta`, `chain`, `nw`, `path`, `pathzeta`, `hand`, `block`, `at`; DX,DY is the label's direction on the screen, and 0,0 picks one away from the
 middle; a label turns away from other callouts and keeps itself in the picture as the camera moves), `exp:uncall`,
 `exp:focus:G1,G2[:LEVEL]` and `exp:unfocus` (every other group dimmed), `exp:pulse:G1,G2[:SECONDS[:PEAK]]`,
 `exp:drawon:G[/PREFIX]:SECONDS[:seq]`, `exp:hidechild|showchild:GROUP:PREFIX`, the number waves
@@ -125,11 +125,19 @@ and `exp:zchain:T:SECONDS`, the clocks `exp:zclocks:N`, `exp:zclockhands:GAMMA[:
 `exp:nwflare`), the path of partial sums `exp:pwinit` (`pw.t`, `pw.n`, `pw.marks`, `pw.tail`, `pw.rise`, `pw.curve`,
 `pw.eyes`, `pw.mirrors`, `pw.trails`, `pw.alleyes`, `pw.gold`; camera `on=pathplane`; callouts `exp:callpath:K`,
 `exp:callpathzeta`) and the coil over the funnel `exp:fwinit` (`fw.gamma`, `fw.n`, `fw.lift`, `fw.coil`, `fw.tail`,
-`fw.path`, `fw.hands`, `fw.axis`; `exp:fwhl:N[:logs]`, `exp:fwunhl`, `exp:fwangles:N`, `exp:callhand:N`). `exp:mute` /
-`exp:unmute:G1,G2[:SECONDS]` grey groups out and back; `exp:e8hl:N1,N2[:spoke]` lights numbers on E8's wheel; the
-stills (`t5…`, `s3roots`, `mixsweep`, `ztrees`, `e8wheel`) take a position so a segment can lay them side by side. A
-camera `on=nwboxp|nwboxd` frames a number line by its bounds while it winds up; callouts are sized and placed for the
-shot the camera is moving to.
+`fw.path`, `fw.hands`, `fw.axis`, `fw.dim` (every hand but the lit ones, and the coil, faded), `fw.scan` (a ring
+climbing the axis draws the comb), `fw.spin`, `fw.fan`; `exp:fwhl:N[:logs]`, `exp:fwunhl[:N]`, `exp:fwangles:N`,
+`exp:fwchars:N`, `exp:fwturn:N:SECONDS`, `exp:callhand:N`). E8's clock inside the gold path: `exp:tbblock:K` (the block
+of eight arrows near spoke K, with their numbers and hours), `exp:tblift:K:SECONDS`, `exp:tbscale:SIZE`,
+`exp:tbbars:X,Y,Z:SIZE`, `exp:tbbarsall[:measured]`, `exp:tbsweep:K0:K1:SECONDS`, `exp:tbsieve:N:SECONDS`. Charts that
+merge: `exp:twgroup:GROUP[/PART]:DX,DY,DZ:SCALE:SECONDS`, `exp:stripsmorph`, `exp:racemorph`, `exp:familymorph`,
+`exp:e8tower:SIZE:attach:GAP`, `exp:t5family:X,Y,Z:FX,FY,FZ:RIM` (the fold of S₃ placed where another picture stood).
+`exp:mute:G1,G2[:SECONDS[:DEPTH]]` / `exp:unmute:G1,G2[:SECONDS]` grey groups out (a depth up to 2 fades them nearly
+out) and back; `exp:clearchild:PREFIX` removes groups; `exp:e8hl:N1,N2[:spoke]` lights numbers on E8's wheel; the
+stills (`t5…`, `s3roots`, `mixsweep`, `ztrees`, `e8wheel`) take a position so a segment can put one where the picture
+it replaces stands. A camera `on=nwboxp|nwboxd` frames a number line by its bounds while it winds up (every orbit cue
+tightens its smoothing once the cut is done, so a moving subject is followed closely); callouts are sized and placed for the shot the camera is moving to. Readouts that
+change every frame sit in the screen's corners (`SacksSpiral.Hud`), cleared by `exp:stage`.
 
 Anything that moves or happens in a module draws the eye with white bloom (`ExperimentAttention.cs`): a moving line
 gets a wide white halo that shines while it moves and fades when it settles (the swinging mirror lines, the twisting

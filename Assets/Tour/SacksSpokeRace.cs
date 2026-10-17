@@ -86,10 +86,51 @@ public partial class SacksSpiral
     /// Two panels on one axis of log₁₀ x: above, the eight races counted from the primes; below, the same rebuilt from the
     /// zeros alone. Dashed: the predicted means −3 (the squares 1 and 19) and +1 (the other six).
     /// </summary>
+    // the counted race's mapping (log₁₀ x, E) → world, for the morph to the fair race
+    Func<float, float, Vector3> raceCountedP;
+
+    /// <summary>Morph the counted race's curves into the fair race (each p^k counted as 1/k) in place, over <paramref name="seconds"/>.</summary>
+    public void ExpRaceMorph(float seconds) => StartCoroutine(RaceMorphRoutine(seconds));
+
+    System.Collections.IEnumerator RaceMorphRoutine(float seconds)
+    {
+        Transform g = ExpRoot().Find("MA counted");
+        if (g == null || raceCountedP == null) yield break;
+        const float lo = -8f, hi = 6f;
+        int n = RaceData.Count;
+        Dictionary<int, LineRenderer> lines = new();
+        foreach (LineRenderer l in g.GetComponentsInChildren<LineRenderer>(true))
+            if (l.name.StartsWith("spoke ") && int.TryParse(l.name.Substring(6), out int h)) lines[h] = l;
+        float time = 0f;
+        while (true)
+        {
+            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(time / seconds));
+            for (int k = 0; k < 8; k++)
+            {
+                int h = RaceData.Hours[k];
+                if (!lines.TryGetValue(h, out LineRenderer l) || l == null) yield break;
+                bool sq = h == 1 || h == 19;
+                Vector3[] pts = new Vector3[n];
+                for (int i = 0; i < n; i++)
+                {
+                    float e = Mathf.Lerp(RaceData.Race[k * n + i], RaceData.Fair[k * n + i], u);
+                    pts[i] = raceCountedP(RaceData.Log0 + RaceData.LogStep * i, Mathf.Clamp(e, lo, hi)) + Vector3.back * ((sq ? .4f : 0f) + .03f * k);
+                }
+
+                l.positionCount = n;
+                l.SetPositions(pts);
+            }
+
+            if (u >= 1f) yield break;
+            time += Time.deltaTime;
+            yield return null;
+        }
+    }
+
     public void ExpSpokeRace(Vector3 o, float labelSize)
     {
         const float w = 280f, sy = 4f, gap = 70f;
-        RacePanel(ExpGroup("MA counted").transform, o + Vector3.up * (gap * .5f), w, sy, RaceData.Race, 1,
+        raceCountedP = RacePanel(ExpGroup("MA counted").transform, o + Vector3.up * (gap * .5f), w, sy, RaceData.Race, 1,
             "counted:  the primes up to 10<sup>7</sup>", false, labelSize, new[] { -3f, 1f });
         RacePanel(ExpGroup("MA rebuilt").transform, o + Vector3.down * (gap * .5f), w, sy, RaceData.Rebuild, RaceData.RebuildStride,
             $"rebuilt:  from the {RaceData.ZeroCount / 1000} {RaceData.ZeroCount % 1000:000} zeros of the seven L-functions mod 30 up to height 1000",

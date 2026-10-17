@@ -29,6 +29,9 @@ public class CameraRig : MonoBehaviour
     string activeCueName = "";
     float cueStartTime;
     float smoothTime = 1f;
+    // a scripted orbit cue tightens its smoothing once the cut is done: its own moves are already eased, and a subject
+    // that moves (a number line winding up, a plane climbing the t axis) would otherwise leave the camera a second behind
+    bool fastFollow;
     Vector3 positionVelocity;
     Vector3 lookVelocity;
     Vector3 currentLook;
@@ -462,6 +465,7 @@ public class CameraRig : MonoBehaviour
         activeCueName = name;
         cueStartTime = Time.time;
         smoothTime = Mathf.Max(0.15f, transitionSeconds * 0.4f);
+        fastFollow = name.StartsWith("orbit:");
     }
 
     /// <summary>
@@ -578,7 +582,8 @@ public class CameraRig : MonoBehaviour
                 float follow = Num(p.TryGetValue("follow", out string fo) ? fo : "", 1f);
                 look = Vector3.Lerp(look, b.center, follow);
                 Vector2 own = Vector2.Lerp(fit0, fit1, u);
-                Vector2 boxed = new(Mathf.Max(w * 1.12f, 30f), Mathf.Max(hgt * 1.25f, 17f));
+                // the height goes in the band between the caption board and the captions (.57 of the frame; raise .035)
+                Vector2 boxed = new(Mathf.Max(w * 1.12f, 30f), Mathf.Max(hgt / .6f, 17f));
                 f0 = f1 = own.x > 0f ? Vector2.Lerp(own, boxed, follow) : boxed;
             }
 
@@ -680,18 +685,19 @@ public class CameraRig : MonoBehaviour
         float drift = 0.012f * Vector3.Distance(target.Position, target.LookAt);
         target.Position += new Vector3(Mathf.Sin(Time.time * 0.37f), Mathf.Sin(Time.time * 0.23f) * .6f, Mathf.Cos(Time.time * 0.31f)) * drift;
         Transform t = cam.transform;
-        t.position = Vector3.SmoothDamp(t.position, target.Position, ref positionVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
-        currentLook = Vector3.SmoothDamp(currentLook, target.LookAt, ref lookVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+        float st = fastFollow ? Mathf.Lerp(smoothTime, .2f, Mathf.Clamp01((Time.time - cueStartTime - .4f) / 1.2f)) : smoothTime;
+        t.position = Vector3.SmoothDamp(t.position, target.Position, ref positionVelocity, st, Mathf.Infinity, Time.deltaTime);
+        currentLook = Vector3.SmoothDamp(currentLook, target.LookAt, ref lookVelocity, st, Mathf.Infinity, Time.deltaTime);
         Vector3 forward = currentLook - t.position;
         if (forward.sqrMagnitude > 1e-6f)
         {
             // the up direction turns smoothly too: a cue with another 'up' (the saddle's normal instead of world up)
             // tilts the picture over the transition instead of snapping its roll
-            currentUp = Vector3.Slerp(currentUp, target.Up, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(.05f, smoothTime * .8f))).normalized;
+            currentUp = Vector3.Slerp(currentUp, target.Up, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(.05f, st * .8f))).normalized;
             t.rotation = Quaternion.LookRotation(forward, currentUp);
         }
 
-        cam.fieldOfView = Mathf.SmoothDamp(cam.fieldOfView, target.Fov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+        cam.fieldOfView = Mathf.SmoothDamp(cam.fieldOfView, target.Fov, ref fovVelocity, st, Mathf.Infinity, Time.deltaTime);
     }
 
     void ApplyPortraitViewport()

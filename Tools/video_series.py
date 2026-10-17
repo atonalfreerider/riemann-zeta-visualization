@@ -142,10 +142,17 @@ def build():
                 acts.append(r)
             pause = ln.get("pause", 0.8)
             cam = ln["camera"]
-            cue = camera(cam, az_end)
             if isinstance(cam, dict):
+                # az_to: turn at the steady rate that reaches that azimuth as the line ends
+                cam = dict(cam)
                 az0 = float(az_end if cam.get("az") == "+" else cam.get("az", -90))
-                az_end = az0 + float(cam.get("spin", 3)) * line_seconds(lid, ln["text"], pause)
+                secs = line_seconds(lid, ln["text"], pause)
+                if "az_to" in cam:
+                    cam["spin"] = round((float(cam.pop("az_to")) - az0) / max(1.0, secs), 3)
+                cue = camera(cam, az_end)
+                az_end = az0 + float(cam.get("spin", 3)) * secs
+            else:
+                cue = camera(cam, az_end)
             lines.append({"id": lid, "text": ln["text"], "camera": cue, "actions": acts, "pause": pause})
         chapters.append({"id": ch["id"], "title": ch["title"], "subtitle": ch["subtitle"], "setup": ch.get("setup", []), "lines": lines})
     return chapters
@@ -199,7 +206,24 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--doc", action="store_true", help="also write docs/experiments/long-form-script.md")
+    ap.add_argument("--stale", action="store_true",
+                    help="list the lines whose narration was recorded from other words; with --delete, remove those clips")
+    ap.add_argument("--delete", action="store_true")
     args = ap.parse_args()
+    if args.stale:
+        audio = ROOT / "Assets/Resources/Narration/Audio"
+        for ch in SERIES:
+            for i, ln in enumerate(ch["lines"], 1):
+                lid = f"{ch['id']}_{i:02d}"
+                has = (TIMING / f"{lid}.json").exists()
+                if has and timing_for(lid, ln["text"]) is not None:
+                    continue
+                print(f"{lid}: {'changed' if has else 'not narrated'}")
+                if args.delete and has:
+                    for f in [audio / f"{lid}.mp3", audio / f"{lid}.mp3.meta", TIMING / f"{lid}.json", TIMING / f"{lid}.json.meta"]:
+                        if f.exists():
+                            f.unlink()
+        return
     chapters = build()
     if args.doc:
         write_doc(chapters)

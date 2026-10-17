@@ -97,6 +97,9 @@ public partial class TourDirector
         sacks.ShowRoutes(false);
         sacks.ExpSetBend(1f);
         sacks.ExpNumberField(SacksSpiral.Count);
+        // the corner readouts belong to the scene that wrote them
+        SacksSpiral.Hud(0, "", Color.white);
+        SacksSpiral.Hud(1, "", Color.white);
     }
 
     static float[] Heights(string list)
@@ -457,11 +460,15 @@ public partial class TourDirector
             }
             // ---- the E8 drop module (SacksE8Drop.cs) ----
             // exp:e8wheel:LABELSIZE[:NMAX[:FROM[:TO]]] — the numbers 1 … NMAX on a spiral from radius FROM to TO
-            // exp:e8wheel:LABELSIZE[:NMAX[:FROM[:TO[:X,Y,Z]]]] — the numbers 1 … NMAX on a spiral from radius FROM to TO, at X,Y,Z if given
+            // exp:e8wheel:LABELSIZE[:NMAX[:FROM[:TO[:X,Y,Z[:SCALE]]]]] — the numbers 1 … NMAX on a spiral from radius FROM to TO, at
+            // X,Y,Z if given, the roots at SCALE (8)
             case "e8wheel":
-                sacks.ExpE8Wheel(c + (A(6).Length > 0 ? ParseVector(A(6)) : new Vector3(SacksSpiral.E8DropOffset, 0f, 0f)), 8f, I(3, 600), F(4, 15f), F(5, 33f), .55f, F(2, 66f),
+            {
+                float sc = F(7, 8f);
+                sacks.ExpE8Wheel(c + (A(6).Length > 0 ? ParseVector(A(6)) : new Vector3(SacksSpiral.E8DropOffset, 0f, 0f)), sc, I(3, 600), F(4, 15f), F(5, 33f), .55f * sc / 8f, F(2, 66f),
                     new long[] { 49, 77, 91, 119, 121, 133 });
                 break;
+            }
             case "e8walk":
             {
                 // exp:e8walk:SECONDS[:T1,T2,…] — the walk once round, the eight hours lit at T1 … T8 (seconds from the start)
@@ -470,9 +477,14 @@ public partial class TourDirector
                 sacks.ExpE8WalkLive(Seconds(A(2), 8f), times.Count > 0 ? times.ToArray() : null);
                 break;
             }
+            // exp:e8tower:LABELSIZE[:attach[:GAP]] — attached, the shells stack under the wheel (floor 1 is the wheel)
             case "e8tower":
-                sacks.ExpE8Tower(c + new Vector3(SacksSpiral.E8DropOffset + 300f, 0f, 0f), 7, 30f, 34f, 1f, F(2, 80f),
-                    new[] { "E8 tower A", "E8 tower B", "E8 tower C" }, new[] { 3, 5 });
+                sacks.ExpE8Tower(c + new Vector3(SacksSpiral.E8DropOffset + 300f, 0f, 0f), 7, 30f, Has("attach") ? F(4, 34f) : 34f, 1f, F(2, 80f),
+                    new[] { "E8 tower A", "E8 tower B", "E8 tower C" }, new[] { 3, 5 }, Has("attach"));
+                break;
+            // exp:e8cubesat:N:DX,DY,DZ:VOXEL:GAP:DOT:LABEL — the cubes of n's divisors, placed from the wheel's centre
+            case "e8cubesat":
+                sacks.ExpDivisorCubes(sacks.E8WheelCenter + ParseVector(A(3)), I(2, 6), F(4, 2.2f), F(5, 3f), F(6, .5f), F(7, 75f));
                 break;
             case "e8cubes":
                 // exp:e8cubes:N:X:Z:VOXEL:GAP:DOT:LABEL — the cubes of n's divisors, based at (offset + 600 + X, 0, Z)
@@ -537,7 +549,9 @@ public partial class TourDirector
             case "calle8":
             case "callchain":
             case "callzeta":
+            case "callblock":
             case "callhand":
+            case "calltooth":
             case "callpath":
             case "callpathzeta":
             case "callnw":
@@ -569,6 +583,8 @@ public partial class TourDirector
                     "callnw" => sacks.NwPoint(num, nk.Length > 1 ? nk[1] : "p"),
                     "callpath" => sacks.PathVertex((int)num),
                     "callhand" => sacks.FwHandTip((long)num),
+                    "calltooth" => sacks.FwToothTip((long)num),
+                    "callblock" => sacks.TraceBlockAt((int)num),
                     "callpathzeta" => sacks.PathZeta(),
                     "callclock" => sacks.ClockPosition((int)num),
                     "callclockend" => sacks.ClockChainEnd(Gamma(nk[0])),
@@ -604,12 +620,29 @@ public partial class TourDirector
             case "pwinit": sacks.ExpPathWorld(); break;
             // the coil assembled from the path's arrows over the zeros module's funnel (SacksFunnelWorld.cs)
             case "fwinit": sacks.ExpFunnelWorld(); break;
+            // chart transforms (ExperimentMorphs.cs): exp:twgroup:GROUP:DX,DY,DZ:SCALE:SECONDS · exp:racemorph:SECONDS ·
+            // exp:familymorph:SECONDS · exp:stripsmorph:SX,SY,SZ:CX,CY,CZ:SECONDS
+            case "twgroup": sacks.ExpGroupMove(A(2), ParseVector(A(3)), F(4, 1f), Seconds(A(5), 2f)); break;
+            case "racemorph": sacks.ExpRaceMorph(Seconds(A(2), 4f)); break;
+            case "familymorph": sacks.ExpFamilyMorph(Seconds(A(2), 4f)); break;
+            case "stripsmorph": sacks.ExpStripsMorph(c + ParseVector(A(2)), c + ParseVector(A(3)), Seconds(A(4), 5f)); break;
+            // E8's clock inside the gold path (SacksTraceBlocks.cs): exp:tbblock:K · exp:tblift:K:SECONDS · exp:tbscale ·
+            // exp:tbbars:X,Y,Z · exp:tbbarsall[:measured] · exp:tbsweep:K0:K1:SECONDS · exp:tbsieve:N:SECONDS
+            case "tbblock": sacks.ExpTraceBlock(I(2, 15)); break;
+            case "tblift": sacks.ExpTraceLift(I(2, 15), Seconds(A(3), 3f)); break;
+            case "tbscale": sacks.ExpTraceScale(F(2, 2.2f)); break;
+            case "tbbars": sacks.ExpTraceBars(c + ParseVector(A(2)), F(3, 2f)); break;
+            case "tbbarsall": sacks.ExpTraceBarsAll(Has("measured")); break;
+            case "tbsweep": sacks.ExpTraceSweep(F(2, 1f), F(3, 30f), Seconds(A(4), 10f)); break;
+            case "tbsieve": sacks.ExpTraceSieve(I(2, 7), Seconds(A(3), 5f)); break;
             case "fwhl":
                 foreach (string one in A(2).Split(','))
                     if (long.TryParse(one.Trim(), out long hn)) sacks.ExpFunnelLight(hn, Has("logs"));
                 break;
             case "fwunhl": sacks.ExpFunnelUnlight(long.TryParse(A(2), out long un) ? un : 0); break;
             case "fwangles": sacks.ExpFunnelAngles(long.TryParse(A(2), out long an) ? an : 6); break;
+            case "fwchars": sacks.ExpFunnelChars(long.TryParse(A(2), out long cn) ? cn : 7); break;
+            case "fwturn": sacks.ExpFunnelTurn(long.TryParse(A(2), out long tn) ? tn : 7, Seconds(A(3), 6f)); break;
             case "nwdivisors":
             {
                 string[] nk = A(2).Split('@');
@@ -650,7 +683,8 @@ public partial class TourDirector
                 break;
             case "zbridgelive": sacks.ExpBridgeLive(Gamma(A(2)), I(3, 1), I(4, 12), Seconds(A(5), 12f), 170f); break;
             // the triangle of x³ − x − 1's roots and how a prime acts on it
-            case "s3roots": sacks.ExpS3Roots(c + Where(new Vector3(SacksSpiral.FamilyRaceOffset + 600f, 0f, 0f)), 18f, 92f, 260f); break;
+            // exp:s3roots[:X,Y,Z[:GAP]] — GAP 0 puts the four panels on top of each other (shown one at a time)
+            case "s3roots": sacks.ExpS3Roots(c + Where(new Vector3(SacksSpiral.FamilyRaceOffset + 600f, 0f, 0f)), 18f, F(3, 92f), 260f); break;
             // LE's chart with a sweeping height: exp:mixsweep:LAM0:LAM1:SECONDS
             // exp:mixsweep:LAM0:LAM1:SECONDS[:X,Y,Z]
             case "mixsweep":
@@ -664,7 +698,8 @@ public partial class TourDirector
             case "showchild": sacks.ExpSetChildren(A(2), string.Join(":", p, 3, Mathf.Max(0, p.Length - 3)), true); break;
             case "focus": sacks.ExpFocus(A(2).Split(','), F(3, .16f)); break;
             // exp:mute:G1,G2[:SECONDS] · exp:unmute:G1,G2[:SECONDS] — grey groups out (and back), for isolating one part
-            case "mute": sacks.ExpMute(A(2).Split(','), true, F(3, .8f)); break;
+            // exp:mute:G1,G2[:SECONDS[:DEPTH]] — grey the groups out; DEPTH up to 2 fades them nearly out
+            case "mute": sacks.ExpMute(A(2).Split(','), true, F(3, .8f), F(4, 1f)); break;
             case "unmute": sacks.ExpMute(A(2).Split(','), false, F(3, .8f)); break;
             // exp:tw:KEY:TO:SECONDS[:linear|geo] — ease a scene parameter
             case "tw": sacks.TwTo(A(2), F(3, 0f), Seconds(A(4), 1f), Has("linear") ? 0 : Has("geo") ? 2 : 1); break;
@@ -688,7 +723,12 @@ public partial class TourDirector
                 sacks.ExpFairRace(c + fo + new Vector3(82f, -12f, 0f), 130f, 3.6f, 220f);
                 break;
             }
-            case "t5family": sacks.ExpFamilyRace(c + Where(new Vector3(SacksSpiral.FamilyRaceOffset, 0f, 0f)), 220f); break;
+            // exp:t5family[:X,Y,Z[:FX,FY,FZ[:RIM[:RACEW]]]] — the fold of S3 at FX,FY,FZ (radius RIM) instead of beside the race,
+            // and the race RACEW wide (120)
+            case "t5family":
+                sacks.ExpFamilyRace(c + Where(new Vector3(SacksSpiral.FamilyRaceOffset, 0f, 0f)), 220f,
+                    A(3).Contains(",") ? c + ParseVector(A(3)) : null, F(4, 46f), F(5, 120f));
+                break;
             case "t5lattice3": sacks.ExpClassLattices(c + Where(new Vector3(SacksSpiral.ClassGroupOffset, 0f, 0f)), 220f); break;
             case "say":
             {

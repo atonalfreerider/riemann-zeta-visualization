@@ -5,23 +5,27 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// The number line that becomes the Sacks spiral, and then the saddle (the long-form segment on discovery 1). Two lanes,
-/// each the numbers 1 … 150 with a wave over them: "p", the zeros' wave −Σ cos(γ_k log x) (the home view's master wave),
-/// and "d", the derivative of Voronoi's divisor formula times √x (a spike at every n, as tall as its count of divisors).
-/// Each lane is drawn through one map from x to a point, with parameters the script eases (exp:tw):
-///   nw.roll.L   0: a straight number line from the lane's centre to the right, 1: the Sacks spiral (radius R√x, angle
-///               2π√x). In between, the curve with the spiral's turning times roll, so the line winds up continuously and
-///               every number keeps its distance along it (πR per unit of x, as on the spiral).
-///   nw.bend     0: flat, 1: the tour's saddle z = K(x² − y²) round each lane's centre; heights stand on its normal.
-///   nw.terms.L  the number of waves added (zeros of ζ from the nw.first.L-th, or terms of Voronoi's series), eased
-///               geometrically; above 1 000 zeros the sum blends into the baked 10 000-zero wave.
-///   nw.wave.L (0 … 1, times nw.h), nw.count.L (numbers shown), nw.labels.L, nw.dot, nw.label, nw.rays.L, nw.vis.L.
+/// The number line that coils into the Sacks spiral and bends into the saddle, carrying its wave (the long-form segment
+/// on discovery 1). One line of the numbers 1 … 150 and one wave over it, drawn through a single map with parameters the
+/// script eases (exp:tw), so every picture turns into the next:
+///   nw.roll    0: a straight line from the centre to the right; 1: the Sacks spiral (radius R√x, angle 2π√x). Between,
+///              the spiral's turning times roll: the line curls up continuously, every number keeping its distance along
+///              it (πR per unit of x, as on the spiral). Eased geometrically, each doubling of roll adds a visible curl.
+///   nw.stand   0: the wave is drawn in the plane, as a graph over the line (up = the line's left); 1: it stands out of
+///              the plane, as the home view's curtain. Between, it turns up about the line.
+///   nw.bend    0: flat; 1: the tour's saddle z = K(x² − y²); the wave stands on the surface's normal.
+///   nw.mix     0: the zeros' wave −Σ cos(γ log x) (nw.terms.p zeros from the nw.first.p-th; above 1 000 it blends
+///              into the baked 10 000-zero wave); 1: Voronoi's divisor wave (nw.terms.d of his waves, times √x so each
+///              spike is as tall as its count of divisors). Between, the two (each at its own scale) blend.
+///   nw.h (height), nw.wave (0 … 1), nw.count (numbers shown), nw.labels, nw.label (their size), nw.dot, nw.rays
+///   (the squares and pronic rays), nw.ribbon (the wave's sign painted on the line), nw.counter (the wave count, in a
+///   fixed corner of the screen), nw.vis.
 /// </summary>
 public partial class SacksSpiral
 {
     public const float NumberWorldOffset = 100000f;
     const int NwN = 150, NwSamples = 36000, NwLabelMax = 60;
-    const float NwXMin = 1.5f, NwColumnArc = .12f, NwLaneX = 22f;
+    const float NwXMin = 1.5f, NwColumnArc = .12f;
 
     static double[] nwW, nwLogX, nwPhiMid, nwDs;
     static int[] nwCols;
@@ -29,27 +33,24 @@ public partial class SacksSpiral
 
     class NwLane
     {
-        public string Name;
         public Vector3 Centre;
         public Transform Root;
-        public double[] Acc;
-        public double[] Baked;
-        public int Terms, First = 1;
-        public float Beta;
-        public readonly Vector3[] P = new Vector3[NwSamples + 1], Nrm = new Vector3[NwSamples + 1];
-        public readonly float[] Shown = new float[NwSamples + 1];
+        public double[] AccP, AccD, BakedP;
+        public int TermsP, FirstP = 1, TermsD;
+        public float BetaP;
+        public readonly float[] ShownP = new float[NwSamples + 1], ShownD = new float[NwSamples + 1], Shown = new float[NwSamples + 1];
+        public readonly Vector3[] P = new Vector3[NwSamples + 1], Up = new Vector3[NwSamples + 1], Left = new Vector3[NwSamples + 1];
         public LineRenderer Curve, Crest, RaySquares, RayPronic;
         public Mesh Curtain, Ribbon, Dots;
         public MeshRenderer CurtainR, RibbonR, DotsR;
         public TextBox[] Labels;
-        public TextBox Counter;
-        public string LayoutSig = "", DrawSig = "";
-        public Bounds Box;
+        public string LayoutSig = "", DrawSig = "", MixSig = "";
         public bool WavesChanged = true;
         public float LastCount;
+        public Bounds Box;
     }
 
-    NwLane[] nwLanes;
+    NwLane nw;
 
     public Vector3 NumberWorldOrigin => Center + new Vector3(NumberWorldOffset, 0f, 0f);
 
@@ -103,71 +104,69 @@ public partial class SacksSpiral
         return mesh;
     }
 
-    /// <summary>Set up the two lanes (both hidden until nw.vis.L is raised) and start the scene's frame loop.</summary>
+    /// <summary>Set up the line (hidden until nw.vis is raised) and start the scene's frame loop.</summary>
     public void ExpNumberWorld()
     {
         NwGrid();
         EnsureDivisorCounts(4001);
         ExpEnsureSieve(NwN + 2);
         ClearTweens("nw.");
-        nwLanes = new NwLane[2];
-        for (int k = 0; k < 2; k++)
+        NwLane L = new() { Centre = NumberWorldOrigin, Root = ExpGroup("NW line").transform };
+        L.AccP = new double[NwSamples + 1];
+        L.AccD = new double[NwSamples + 1];
+        L.Curve = ExpLine(L.Root, "number line", .12f, new Color(.62f, .66f, .85f), Factory.NoGlow, new[] { L.Centre, L.Centre });
+        L.Crest = ExpLine(L.Root, "wave", .22f, Factory.Palette.Cosine, Factory.GlowIntensity, new[] { L.Centre, L.Centre });
+        L.RaySquares = ExpLine(L.Root, "squares ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
+        L.RayPronic = ExpLine(L.Root, "pronic ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
+        L.Curtain = NwMesh(L.Root, "curtain", out L.CurtainR);
+        Factory.SetIntensity(L.CurtainR, .82f);
+        L.Ribbon = NwMesh(L.Root, "ribbon", out L.RibbonR);
+        Factory.SetIntensity(L.RibbonR, 1.1f);
+        L.Dots = NwMesh(L.Root, "numbers", out L.DotsR);
+        Factory.SetIntensity(L.DotsR, Factory.GlowIntensity);
+        L.Labels = new TextBox[NwLabelMax + 1];
+        for (int n = 1; n <= NwLabelMax; n++)
         {
-            NwLane L = new() { Name = k == 0 ? "p" : "d" };
-            L.Centre = NumberWorldOrigin + new Vector3(k == 0 ? -NwLaneX : NwLaneX, 0f, 0f);
-            L.Root = ExpGroup($"NW lane {L.Name}").transform;
-            L.Acc = new double[NwSamples + 1];
-            Color col = k == 0 ? Factory.Palette.Cosine : DivisorWaveColor;
-            L.Curve = ExpLine(L.Root, "number line", .12f, new Color(.62f, .66f, .85f), Factory.NoGlow, new[] { L.Centre, L.Centre });
-            L.Crest = ExpLine(L.Root, "wave", .22f, col, Factory.GlowIntensity, new[] { L.Centre, L.Centre });
-            L.RaySquares = ExpLine(L.Root, "squares ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
-            L.RayPronic = ExpLine(L.Root, "pronic ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
-            L.Curtain = NwMesh(L.Root, "curtain", out L.CurtainR);
-            Factory.SetIntensity(L.CurtainR, .82f);
-            L.Ribbon = NwMesh(L.Root, "ribbon", out L.RibbonR);
-            Factory.SetIntensity(L.RibbonR, 1.1f);
-            L.Dots = NwMesh(L.Root, "numbers", out L.DotsR);
-            Factory.SetIntensity(L.DotsR, Factory.GlowIntensity);
-            L.Labels = new TextBox[NwLabelMax + 1];
-            for (int n = 1; n <= NwLabelMax; n++)
-            {
-                bool prime = !expNotPrime[n] && n > 1;
-                L.Labels[n] = ExpLabelWide(L.Root, n.ToString(), L.Centre, 3f, prime ? new Color(1f, .86f, .45f) : new Color(.8f, .83f, .93f));
-                Outline(L.Labels[n].TextField, .2f);
-                L.Labels[n].gameObject.SetActive(false);
-            }
-
-            L.Counter = ExpLabelWide(L.Root, "", L.Centre, 4f, col, TextAlignmentOptions.Left);
-            Outline(L.Counter.TextField);
-            L.Root.gameObject.SetActive(false);
-            nwLanes[k] = L;
+            bool prime = !expNotPrime[n] && n > 1;
+            L.Labels[n] = ExpLabelWide(L.Root, n.ToString(), L.Centre, 3f, prime ? new Color(1f, .86f, .45f) : new Color(.8f, .83f, .93f));
+            Outline(L.Labels[n].TextField, .2f);
+            L.Labels[n].gameObject.SetActive(false);
         }
 
-        StartCoroutine(NumberWorldLoop(nwLanes));
+        L.Root.gameObject.SetActive(false);
+        nw = L;
+        StartCoroutine(NumberWorldLoop(L));
     }
 
-    IEnumerator NumberWorldLoop(NwLane[] lanes)
+    IEnumerator NumberWorldLoop(NwLane L)
     {
-        while (lanes == nwLanes && lanes[0].Root != null && lanes[1].Root != null)
+        while (L == nw && L.Root != null)
         {
-            foreach (NwLane L in lanes) NwUpdate(L);
+            NwUpdate(L);
             yield return null;
         }
     }
 
     void NwUpdate(NwLane L)
     {
-        string n = L.Name;
-        float vis = Tw($"nw.vis.{n}", 0f);
+        float vis = Tw("nw.vis", 1f);
         bool on = vis > .002f;
         if (L.Root.gameObject.activeSelf != on) L.Root.gameObject.SetActive(on);
+        NwCounter(L, Tw("nw.counter", 0f) * vis);
         if (!on) return;
-        float roll = Tw($"nw.roll.{n}", 0f), bend = Tw("nw.bend", 0f);
-        float h = Tw("nw.h", 22f) * Tw($"nw.wave.{n}", 0f);
-        float count = Tw($"nw.count.{n}", 0f), labels = Tw($"nw.labels.{n}", 0f), dot = Tw("nw.dot", 2f), lab = Tw("nw.label", 11f);
-        float rays = Tw($"nw.rays.{n}", 0f), counter = Tw($"nw.counter.{n}", 0f);
-        int first = Mathf.Max(1, Mathf.RoundToInt(Tw($"nw.first.{n}", 1f)));
-        NwTerms(L, first, Tw($"nw.terms.{n}", 0f));
+        float roll = Tw("nw.roll", 0f), bend = Tw("nw.bend", 0f), stand = Tw("nw.stand", 0f), mix = Tw("nw.mix", 0f);
+        float h = Tw("nw.h", 22f) * Tw("nw.wave", 0f);
+        float count = Tw("nw.count", 0f), labels = Tw("nw.labels", 0f), dot = Tw("nw.dot", 2f), lab = Tw("nw.label", 14f);
+        float rays = Tw("nw.rays", 0f), ribbon = Tw("nw.ribbon", 0f);
+        NwTerms(L, Mathf.Max(1, Mathf.RoundToInt(Tw("nw.first.p", 1f))), Tw("nw.terms.p", 0f), Tw("nw.terms.d", 0f));
+        string mixSig = $"{mix:F4}";
+        if (L.WavesChanged || mixSig != L.MixSig)
+        {
+            L.MixSig = mixSig;
+            for (int i = 0; i <= NwSamples; i++) L.Shown[i] = Mathf.Lerp(L.ShownP[i], L.ShownD[i], mix);
+            L.WavesChanged = true;
+        }
+
         string layout = $"{roll:F5}|{bend:F5}";
         bool moved = layout != L.LayoutSig;
         if (moved)
@@ -176,91 +175,84 @@ public partial class SacksSpiral
             NwLayout(L, roll, bend);
         }
 
-        // the lane's bounds (the curve and its wave), for the camera's "nwbox" shots while the line winds up
-        Bounds box = new(L.P[0], Vector3.zero);
-        int shownTo = Mathf.Clamp((int)(Math.Sqrt(Mathf.Max(1f, count)) / nwDw), 1, NwSamples);
-        for (int i = 0; i <= shownTo; i += 40)
-        {
-            box.Encapsulate(L.P[i]);
-            box.Encapsulate(L.P[i] + L.Nrm[i] * (h * .8f));
-        }
-
-        L.Box = box;
-        NwCounter(L, counter, vis);
-        string draw = $"{h:F3}|{count:F2}|{labels:F3}|{dot:F3}|{lab:F3}|{rays:F3}|{vis:F3}";
+        string draw = $"{h:F3}|{stand:F4}|{count:F2}|{labels:F3}|{dot:F3}|{lab:F3}|{rays:F3}|{vis:F3}|{ribbon:F3}";
         if (!moved && !L.WavesChanged && draw == L.DrawSig) return;
         L.DrawSig = draw;
         L.WavesChanged = false;
-        NwDraw(L, roll, h, count, labels, dot, lab, rays, vis);
+        NwDraw(L, roll, stand, h, count, labels, dot, lab, rays, vis, ribbon);
     }
 
-    /// <summary>Bring the lane's sum to the wanted number of terms (adding or removing waves), and refresh its display values.</summary>
-    void NwTerms(NwLane L, int first, float termsF)
+    /// <summary>Bring the two sums to the wanted numbers of terms (adding or removing waves) and refresh their display values.</summary>
+    void NwTerms(NwLane L, int firstP, float termsPF, float termsDF)
     {
-        bool prime = L.Name == "p";
-        int cap = prime ? 1000 : 4000;
-        int k = Mathf.Clamp(Mathf.RoundToInt(Mathf.Min(termsF, cap)), 0, cap);
-        float beta = prime && termsF > 1000f ? Mathf.Clamp01(Mathf.Log(termsF / 1000f) / Mathf.Log(10f)) : 0f;
-        bool changed = false;
-        if (first != L.First)
+        int kp = Mathf.Clamp(Mathf.RoundToInt(Mathf.Min(termsPF, 1000f)), 0, 1000);
+        float beta = termsPF > 1000f ? Mathf.Clamp01(Mathf.Log(termsPF / 1000f) / Mathf.Log(10f)) : 0f;
+        int kd = Mathf.Clamp(Mathf.RoundToInt(termsDF), 0, 4000);
+        bool changedP = false, changedD = false;
+        if (firstP != L.FirstP)
         {
-            Array.Clear(L.Acc, 0, L.Acc.Length);
-            L.Terms = 0;
-            L.First = first;
-            changed = true;
+            Array.Clear(L.AccP, 0, L.AccP.Length);
+            L.TermsP = 0;
+            L.FirstP = firstP;
+            changedP = true;
         }
 
-        if (k != L.Terms)
+        if (kp != L.TermsP)
         {
-            NwAddTerms(L, L.Terms, k);
-            L.Terms = k;
-            changed = true;
+            NwAddPrime(L, L.TermsP, kp);
+            L.TermsP = kp;
+            changedP = true;
         }
 
-        if (Mathf.Abs(beta - L.Beta) > 1e-4f)
+        if (Mathf.Abs(beta - L.BetaP) > 1e-4f)
         {
-            L.Beta = beta;
-            if (beta > 0f && L.Baked == null) L.Baked = NwBakedOnGrid();
-            changed = true;
+            L.BetaP = beta;
+            if (beta > 0f && L.BakedP == null) L.BakedP = NwBakedOnGrid();
+            changedP = true;
         }
 
-        if (!changed) return;
-        NwShown(L);
-        L.WavesChanged = true;
+        if (kd != L.TermsD)
+        {
+            NwAddDivisor(L, L.TermsD, kd);
+            L.TermsD = kd;
+            changedD = true;
+        }
+
+        if (changedP) NwShown(L, true);
+        if (changedD) NwShown(L, false);
+        if (changedP || changedD) L.WavesChanged = true;
     }
 
-    /// <summary>Add the terms with indices [from, to) to the lane's sum, or take [to, from) away.</summary>
-    void NwAddTerms(NwLane L, int from, int to)
+    void NwAddPrime(NwLane L, int from, int to)
     {
         int a = Mathf.Min(from, to), b = Mathf.Max(from, to);
         double sign = to > from ? 1.0 : -1.0;
-        int m = NwSamples;
         int i0 = (int)Math.Ceiling(Math.Sqrt(NwXMin) / nwDw);
-        if (L.Name == "p")
-        {
-            double[] zs = Main.Instance.zetaZeroValues;
-            for (int j = a; j < b; j++)
-            {
-                int z = L.First - 1 + j;
-                if (z >= zs.Length) break;
-                double g = zs[z];
-                for (int i = i0; i <= m; i++) L.Acc[i] -= sign * Math.Cos(g * nwLogX[i]);
-            }
-
-            return;
-        }
-
-        // Voronoi's m-th wave d(m) m^(−¼) sin(4π√m w − π/4), with the smooth weight of a 4 000-term sum; the phase is linear
-        // in w, so each sample is the last one turned by a fixed angle
+        double[] zs = Main.Instance.zetaZeroValues;
         for (int j = a; j < b; j++)
         {
-            int mm = L.First + j;
+            int z = L.FirstP - 1 + j;
+            if (z >= zs.Length) break;
+            double g = zs[z];
+            for (int i = i0; i <= NwSamples; i++) L.AccP[i] -= sign * Math.Cos(g * nwLogX[i]);
+        }
+    }
+
+    /// <summary>Voronoi's m-th wave d(m) m^(−¼) sin(4π√m w − π/4) with the smooth weight of a 4 000-term sum (a fixed turn per sample).</summary>
+    void NwAddDivisor(NwLane L, int from, int to)
+    {
+        int a = Mathf.Min(from, to), b = Mathf.Max(from, to);
+        double sign = to > from ? 1.0 : -1.0;
+        int i0 = (int)Math.Ceiling(Math.Sqrt(NwXMin) / nwDw);
+        for (int j = a; j < b; j++)
+        {
+            int mm = 1 + j;
             double wgt = Math.Exp(-4.0 * (mm / 4000.0) * (mm / 4000.0)) * waveDivisors[Mathf.Min(mm, waveDivisors.Length - 1)] * Math.Pow(mm, -.25);
             double step = 4.0 * Math.PI * Math.Sqrt(mm) * nwDw, c0 = -Math.PI / 4.0 + step * i0;
             double cr = Math.Cos(c0), ci = Math.Sin(c0), rr = Math.Cos(step), ri = Math.Sin(step);
-            for (int i = i0; i <= m; i++)
+            for (int i = i0; i <= NwSamples; i++)
             {
-                L.Acc[i] += sign * wgt * ci;
+                L.AccD[i] += sign * wgt * ci;
                 double nr = cr * rr - ci * ri;
                 ci = cr * ri + ci * rr;
                 cr = nr;
@@ -287,35 +279,34 @@ public partial class SacksSpiral
         return g;
     }
 
-    /// <summary>The display values: the wave (times √x·… for Voronoi's), scaled to its largest size over the outer three quarters.</summary>
-    void NwShown(NwLane L)
+    /// <summary>A wave's display values, scaled to its largest size over the outer three quarters.</summary>
+    void NwShown(NwLane L, bool prime)
     {
-        bool prime = L.Name == "p";
-        int m = NwSamples;
-        double top = 1e-9;
-        double xq = NwN * .25;
-        double[] v = new double[m + 1];
-        for (int i = 0; i <= m; i++)
+        float[] dst = prime ? L.ShownP : L.ShownD;
+        double top = 1e-9, xq = NwN * .25;
+        double[] v = new double[NwSamples + 1];
+        for (int i = 0; i <= NwSamples; i++)
         {
             double x = nwW[i] * nwW[i];
             if (x < NwXMin) continue;
-            double s = prime ? (L.Beta > 0f && L.Baked != null ? (1 - L.Beta) * L.Acc[i] + L.Beta * L.Baked[i] : L.Acc[i])
-                : -Math.Sqrt(2.0) * Math.Pow(x, .25) * L.Acc[i];
+            double s = prime ? (L.BetaP > 0f && L.BakedP != null ? (1 - L.BetaP) * L.AccP[i] + L.BetaP * L.BakedP[i] : L.AccP[i])
+                : -Math.Sqrt(2.0) * Math.Pow(x, .25) * L.AccD[i];
             v[i] = s;
             if (x >= xq && x <= NwN) top = Math.Max(top, Math.Abs(s));
         }
 
-        for (int i = 0; i <= m; i++) L.Shown[i] = Mathf.Clamp((float)(v[i] / top), -1.2f, 1.6f);
+        bool any = prime ? (L.TermsP > 0 || L.BetaP > 0f) : L.TermsD > 0;
+        for (int i = 0; i <= NwSamples; i++) dst[i] = any ? Mathf.Clamp((float)(v[i] / top), -1.2f, 1.6f) : 0f;
     }
 
-    /// <summary>The lane's curve this frame: the spiral's turning times roll, integrated from the centre, then bent onto the saddle.</summary>
+    /// <summary>The curve this frame: the spiral's turning times roll, integrated from the centre, then bent onto the saddle.</summary>
     void NwLayout(NwLane L, float roll, float bend)
     {
         Vector3 c = L.Centre;
         float k = bend * SaddleK;
         double px = 0, py = 0;
         L.P[0] = c;
-        L.Nrm[0] = Vector3.back;
+        L.Up[0] = Vector3.back;
         for (int i = 0; i < NwSamples; i++)
         {
             double psi = roll * nwPhiMid[i];
@@ -323,20 +314,36 @@ public partial class SacksSpiral
             py += nwDs[i] * Math.Sin(psi);
             float x = (float)px, y = (float)py;
             L.P[i + 1] = c + new Vector3(x, y, k * (x * x - y * y));
-            L.Nrm[i + 1] = new Vector3(2f * k * x, -2f * k * y, -1f).normalized;
+            L.Up[i + 1] = new Vector3(2f * k * x, -2f * k * y, -1f).normalized;
         }
+
+        // the line's left, within the surface (for a line along +x seen from above: up the screen)
+        for (int i = 0; i <= NwSamples; i++)
+        {
+            Vector3 t = (L.P[Mathf.Min(NwSamples, i + 1)] - L.P[Mathf.Max(0, i - 1)]).normalized;
+            L.Left[i] = Vector3.Cross(t, L.Up[i]).normalized;
+        }
+
+        L.Left[0] = L.Left[1];
     }
 
-    /// <summary>Where x sits on the lane's curve (between grid samples), and the normal there.</summary>
-    (Vector3 p, Vector3 n) NwAt(NwLane L, double x)
+    /// <summary>Where x sits on the curve, with its up and left there.</summary>
+    (Vector3 p, Vector3 up, Vector3 left) NwAt(NwLane L, double x)
     {
         double f = Math.Sqrt(Math.Max(0, x)) / nwDw;
         int i = Mathf.Clamp((int)f, 0, NwSamples - 1);
         float t = (float)(f - i);
-        return (Vector3.Lerp(L.P[i], L.P[i + 1], t), Vector3.Lerp(L.Nrm[i], L.Nrm[i + 1], t).normalized);
+        return (Vector3.Lerp(L.P[i], L.P[i + 1], t), Vector3.Lerp(L.Up[i], L.Up[i + 1], t).normalized, Vector3.Lerp(L.Left[i], L.Left[i + 1], t).normalized);
     }
 
-    /// <summary>The highest display value of the lane's wave within a quarter of a unit of x.</summary>
+    /// <summary>The wave's direction at a point: from the line's left (in the plane) turned up to the surface's normal.</summary>
+    static Vector3 NwDir(Vector3 up, Vector3 left, float stand)
+    {
+        float a = stand * Mathf.PI * .5f;
+        return (left * Mathf.Cos(a) + up * Mathf.Sin(a)).normalized;
+    }
+
+    /// <summary>The highest display value within a quarter of a unit of x.</summary>
     float NwPeak(NwLane L, double x)
     {
         int i0 = Mathf.Clamp((int)(Math.Sqrt(Math.Max(0, x - .25)) / nwDw), 0, NwSamples);
@@ -346,35 +353,31 @@ public partial class SacksSpiral
         return top;
     }
 
-    void NwDraw(NwLane L, float roll, float h, float count, float labels, float dot, float lab, float rays, float vis)
+    void NwDraw(NwLane L, float roll, float stand, float h, float count, float labels, float dot, float lab, float rays, float vis, float ribbon)
     {
-        bool prime = L.Name == "p";
-        Color col = prime ? Factory.Palette.Cosine : DivisorWaveColor;
+        float mix = Tw("nw.mix", 0f);
+        Color col = Color.Lerp(Factory.Palette.Cosine, DivisorWaveColor, mix);
         int cols = nwCols.Length - 1;
         int i0 = (int)Math.Ceiling(Math.Sqrt(NwXMin) / nwDw);
-        // the number line / spiral itself
+        bool smooth = L.BetaP <= 0f && (mix < .5f ? L.TermsP <= 3 : L.TermsD <= 3);
+        // the line (the spiral)
         List<Vector3> curve = new(cols + 1);
         for (int c = 0; c <= cols; c++) curve.Add(L.P[nwCols[c]]);
         L.Curve.positionCount = curve.Count;
         L.Curve.SetPositions(curve.ToArray());
-        L.Curve.widthMultiplier = Mathf.Lerp(.32f, .12f, roll);
-        // the wave: a curtain from the curve to the wave (a column per ~.12 units of arc, spanning the values it covers)
-        bool smooth = L.Terms <= 3 && L.Beta <= 0f;
-        bool waveOn = h > .01f;
+        L.Curve.widthMultiplier = Mathf.Lerp(.32f, .1f, roll);
+        // the wave: a filled band from the line to the wave (a column per ~.12 units of arc), its crest when it is smooth
+        bool waveOn = h > .005f;
         L.CurtainR.gameObject.SetActive(waveOn);
         L.Crest.gameObject.SetActive(waveOn && smooth);
-        L.RibbonR.gameObject.SetActive(waveOn && smooth && roll > .25f);
+        Bounds box = new(L.P[0], Vector3.zero);
         if (waveOn)
         {
             List<Vector3> verts = new(cols * 2);
             List<Color> vc = new(cols * 2);
             List<int> tris = new(cols * 12);
             List<Vector3> crest = new(cols);
-            List<Vector3> rv = new(cols * 2);
-            List<Color> rc = new(cols * 2);
-            List<int> rt = new(cols * 12);
-            Color foot = new(col.r, col.g, col.b, .1f), head = smooth ? new Color(col.r, col.g, col.b, Mathf.Lerp(.55f, .18f, roll)) : col;
-            Color down = new(.1f, .16f, .5f), mid = new(.07f, .07f, .12f);
+            Color foot = new(col.r, col.g, col.b, .12f), head = smooth ? new Color(col.r, col.g, col.b, .5f) : col;
             for (int c = 0; c < cols; c++)
             {
                 int a = Mathf.Max(nwCols[c], i0), b = nwCols[c + 1];
@@ -387,26 +390,19 @@ public partial class SacksSpiral
                 }
 
                 int j = (a + b) / 2;
-                Vector3 p = L.P[j], nrm = L.Nrm[j];
+                Vector3 p = L.P[j], d = NwDir(L.Up[j], L.Left[j], stand);
                 int v = verts.Count;
-                verts.Add(p + nrm * (lo * h));
-                verts.Add(p + nrm * (hi * h + .06f));
+                verts.Add(p + d * (lo * h));
+                verts.Add(p + d * (hi * h + .04f));
                 vc.Add(foot);
                 vc.Add(head);
                 if (v >= 2) tris.AddRange(new[] { v - 2, v - 1, v + 1, v - 2, v + 1, v, v - 2, v + 1, v - 1, v - 2, v, v + 1 });
-                if (smooth)
+                if (smooth) crest.Add(p + d * (L.Shown[j] * h + .05f) + L.Up[j] * .04f);
+                if ((c & 7) == 0)
                 {
-                    crest.Add(p + nrm * (L.Shown[j] * h + .08f));
-                    Vector3 along = (L.P[Mathf.Min(b, NwSamples)] - L.P[a]).normalized, side = Vector3.Cross(along, nrm).normalized;
-                    float s = Mathf.Clamp(L.Shown[j], -1f, 1f);
-                    Color cc = s >= 0f ? Color.Lerp(mid, col * 1.15f, s) : Color.Lerp(mid, down, -s);
-                    int r = rv.Count;
-                    float half = Mathf.Lerp(.3f, .62f, roll);
-                    rv.Add(p + side * half + nrm * .05f);
-                    rv.Add(p - side * half + nrm * .05f);
-                    rc.Add(cc);
-                    rc.Add(cc);
-                    if (r >= 2) rt.AddRange(new[] { r - 2, r - 1, r + 1, r - 2, r + 1, r, r - 2, r + 1, r - 1, r - 2, r, r + 1 });
+                    box.Encapsulate(p);
+                    box.Encapsulate(p + d * (hi * h));
+                    box.Encapsulate(p + d * (lo * h));
                 }
             }
 
@@ -419,13 +415,41 @@ public partial class SacksSpiral
             {
                 L.Crest.positionCount = crest.Count;
                 L.Crest.SetPositions(crest.ToArray());
-                L.Ribbon.Clear();
-                L.Ribbon.SetVertices(rv);
-                L.Ribbon.SetColors(rc);
-                L.Ribbon.SetTriangles(rt, 0);
-                L.Ribbon.RecalculateBounds();
-
+                L.Crest.startColor = L.Crest.endColor = col;
+                L.Crest.widthMultiplier = Mathf.Lerp(.3f, .16f, roll);
             }
+        }
+
+        // the ribbon: the wave's sign painted along the line (bright up, deep blue down), for reading a pattern from above
+        bool ribbonOn = ribbon > .01f && waveOn;
+        L.RibbonR.gameObject.SetActive(ribbonOn);
+        if (ribbonOn)
+        {
+            List<Vector3> rv = new(cols * 2);
+            List<Color> rc = new(cols * 2);
+            List<int> rt = new(cols * 12);
+            Color down = new(.1f, .16f, .5f), mid = new(.07f, .07f, .12f);
+            for (int c = 0; c < cols; c++)
+            {
+                int a = Mathf.Max(nwCols[c], i0), b = nwCols[c + 1];
+                if (b <= a) continue;
+                int j = (a + b) / 2;
+                float s = Mathf.Clamp(L.Shown[j], -1f, 1f);
+                Color cc = s >= 0f ? Color.Lerp(mid, col * 1.15f, s) : Color.Lerp(mid, down, -s);
+                cc.a = ribbon;
+                int r = rv.Count;
+                rv.Add(L.P[j] + L.Left[j] * .6f + L.Up[j] * .03f);
+                rv.Add(L.P[j] - L.Left[j] * .6f + L.Up[j] * .03f);
+                rc.Add(cc);
+                rc.Add(cc);
+                if (r >= 2) rt.AddRange(new[] { r - 2, r - 1, r + 1, r - 2, r + 1, r, r - 2, r + 1, r - 1, r - 2, r, r + 1 });
+            }
+
+            L.Ribbon.Clear();
+            L.Ribbon.SetVertices(rv);
+            L.Ribbon.SetColors(rc);
+            L.Ribbon.SetTriangles(rt, 0);
+            L.Ribbon.RecalculateBounds();
         }
 
         // the numbers: gold primes, blue squares, grey composites; each flares as it arrives
@@ -435,13 +459,14 @@ public partial class SacksSpiral
         List<int> dt = new(shown * 24);
         for (int n = 1; n <= shown; n++)
         {
-            var (p, nrm) = NwAt(L, n);
+            var (p, up, _) = NwAt(L, n);
             bool isPrime = n > 1 && !expNotPrime[n];
             int rt2 = Mathf.RoundToInt(Mathf.Sqrt(n));
             bool square = rt2 * rt2 == n;
             Color cc = isPrime ? PrimeBead : square ? new Color(.45f, .75f, 1f) : new Color(.55f, .58f, .7f);
             float s = dot * (isPrime || square ? .5f : .34f);
-            OctaPoint(dv, dcl, dt, p + nrm * (s * .6f), s, cc);
+            OctaPoint(dv, dcl, dt, p + up * (s * .6f), s, cc);
+            box.Encapsulate(p);
         }
 
         L.Dots.Clear();
@@ -453,20 +478,20 @@ public partial class SacksSpiral
             for (int n = Mathf.FloorToInt(L.LastCount) + 1; n <= shown; n++)
                 Flare(NwAt(L, n).p + Vector3.back * .3f, dot * 1.6f, .9f, 1);
         L.LastCount = count;
-        // the labels under the numbers on the line
+        // the labels, under the numbers (on the line's right side, away from the wave)
         for (int n = 1; n <= NwLabelMax; n++)
         {
             TextBox t = L.Labels[n];
             bool show = labels > .01f && n <= shown;
             if (t.gameObject.activeSelf != show) t.gameObject.SetActive(show);
             if (!show) continue;
-            var (p, nrm) = NwAt(L, n);
-            t.transform.position = p - nrm * (lab * .3f + dot * .6f) + Vector3.back * .01f;
+            var (p, up, left) = NwAt(L, n);
+            t.transform.position = p - left * (lab * .22f + dot * .6f) + up * .05f;
             t.TextField.fontSize = lab;
             t.TextField.alpha = labels * vis;
         }
 
-        // the squares ray and the pronic ray, on the plane (or the saddle)
+        // the squares ray and the pronic ray
         bool rayOn = rays > .01f;
         L.RaySquares.gameObject.SetActive(rayOn);
         L.RayPronic.gameObject.SetActive(rayOn);
@@ -490,23 +515,27 @@ public partial class SacksSpiral
             L.RayPronic.startColor = L.RayPronic.endColor = rcol;
         }
 
-        foreach (Renderer r in new Renderer[] { L.Curve, L.Crest, L.RaySquares, L.RayPronic, L.CurtainR, L.DotsR })
+        L.Box = box;
+        foreach (Renderer r in new Renderer[] { L.Curve, L.Crest, L.RaySquares, L.RayPronic, L.CurtainR, L.DotsR, L.RibbonR })
             Factory.SetColor(r, new Color(1f, 1f, 1f, vis));
-        Factory.SetColor(L.RibbonR, new Color(1f, 1f, 1f, vis * Mathf.Clamp01((roll - .25f) / .5f)));
     }
 
-    /// <summary>The count of waves added, held at a fixed place in the shot (left for the zeros, right for Voronoi's).</summary>
-    void NwCounter(NwLane L, float counter, float vis)
+    /// <summary>The count of waves added, fixed in the top-left corner of the screen (the zeros' or Voronoi's, by nw.mix).</summary>
+    void NwCounter(NwLane L, float counter)
     {
-        bool prime = L.Name == "p";
-        bool on = counter > .01f && (L.Terms > 0 || L.Beta > 0f);
-        L.Counter.gameObject.SetActive(on);
-        if (!on) return;
-        float terms = L.Beta > 0f ? 1000f * Mathf.Pow(10f, L.Beta) : L.Terms;
-        L.Counter.TextField.text = prime ? (L.First > 1 && L.Terms == 1 ? $"zero #{L.First} alone" : $"{terms:N0} zero{(terms > 1.5f ? "s" : "")} of ζ")
-            : (L.Terms == 1 ? "Voronoi's first wave" : $"{terms:N0} of Voronoi's waves");
-        HudPlace(L.Counter, L.Box.center, new Vector2(prime ? .045f : .955f, .74f), .038f);
-        L.Counter.TextField.alpha = counter * vis;
+        if (counter <= .01f)
+        {
+            Hud(0, "", Color.white);
+            return;
+        }
+
+        bool prime = Tw("nw.mix", 0f) < .5f;
+        float terms = L.BetaP > 0f ? 1000f * Mathf.Pow(10f, L.BetaP) : L.TermsP;
+        string text = prime
+            ? (L.FirstP > 1 && L.TermsP == 1 ? $"zero #{L.FirstP} of ζ alone" : $"{terms:N0} zero{(terms > 1.5f ? "s" : "")} of ζ")
+            : (L.TermsD == 1 ? "Voronoi's first wave" : $"{L.TermsD:N0} of Voronoi's waves");
+        Color c = prime ? Factory.Palette.Cosine : DivisorWaveColor;
+        Hud(0, text, new Color(c.r, c.g, c.b, counter));
     }
 
     /// <summary>An octahedron of half-size s at p (the point clouds' marker), appended to the lists.</summary>
@@ -521,26 +550,24 @@ public partial class SacksSpiral
         foreach (int i in f) tris.Add(v + i);
     }
 
-    /// <summary>A white flare at number n of lane L (as the narration names it).</summary>
+    /// <summary>A white flare at number n (as the narration names it).</summary>
     public void ExpNwFlare(double n, string lane)
     {
-        if (nwLanes == null) return;
-        NwLane L = lane == "d" ? nwLanes[1] : nwLanes[0];
-        var (p, nrm) = NwAt(L, n);
-        Flare(p + nrm * .4f, Tw("nw.dot", 2f) * 2.2f, 1.2f, 2);
+        if (nw == null) return;
+        var (p, up, _) = NwAt(nw, n);
+        Flare(p + up * .4f, Tw("nw.dot", 2f) * 2.2f, 1.2f, 2);
     }
 
-    /// <summary>The bounds of lane L as drawn now (its curve, the numbers shown and its wave), for the camera.</summary>
-    public Bounds NwBounds(string lane) =>
-        nwLanes == null ? new Bounds(NumberWorldOrigin, Vector3.one * 40f) : (lane == "d" ? nwLanes[1] : nwLanes[0]).Box;
+    /// <summary>The bounds of the line as drawn now (its curve, the numbers shown and its wave), for the camera.</summary>
+    public Bounds NwBounds(string lane) => nw == null ? new Bounds(NumberWorldOrigin, Vector3.one * 40f) : nw.Box;
 
-    /// <summary>For callouts: the top of lane L's wave at n (or its number's dot when the wave is down).</summary>
+    /// <summary>For callouts: the top of the wave at n (or its number's dot when the wave is down).</summary>
     public Vector3 NwPoint(double n, string lane)
     {
-        if (nwLanes == null) return NumberWorldOrigin;
-        NwLane L = lane == "d" ? nwLanes[1] : nwLanes[0];
-        var (p, nrm) = NwAt(L, n);
-        float h = Tw("nw.h", 22f) * Tw($"nw.wave.{L.Name}", 0f);
-        return p + nrm * (Mathf.Max(0f, NwPeak(L, n)) * h + Tw("nw.dot", 2f) * .7f);
+        if (nw == null) return NumberWorldOrigin;
+        var (p, up, left) = NwAt(nw, n);
+        float h = Tw("nw.h", 22f) * Tw("nw.wave", 0f);
+        Vector3 d = NwDir(up, left, Tw("nw.stand", 0f));
+        return p + d * (Mathf.Max(0f, NwPeak(nw, n)) * h) + up * (Tw("nw.dot", 2f) * .5f);
     }
 }

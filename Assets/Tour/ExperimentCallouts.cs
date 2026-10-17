@@ -69,19 +69,13 @@ public partial class SacksSpiral
         return cam.transform.right * (dx * w) + cam.transform.up * (dy * h);
     }
 
-    /// <summary>
-    /// Put a label at a fixed place in the shot (viewport coordinates, as the camera will see it), at the distance of
-    /// <paramref name="near"/>, its size a fraction of the frame's height: a readout that stays put while the scene moves.
-    /// </summary>
-    void HudPlace(TextBox label, Vector3 near, Vector2 viewport, float heightFrac)
+    /// <summary>A readout fixed in a corner of the screen (0 top-left, 1 top-right); empty text hides it.</summary>
+    public static void Hud(int corner, string text, Color color)
     {
-        Camera cam = Camera.main; // the camera as it is (a readout rides with the picture, even mid-flight)
-        if (cam == null) return;
-        float d = Mathf.Max(1f, Vector3.Distance(cam.transform.position, near));
-        label.transform.position = cam.ViewportToWorldPoint(new Vector3(viewport.x, viewport.y, d * .9f));
-        label.TextField.fontSize = 2f * d * .9f * Mathf.Tan(cam.fieldOfView * .5f * Mathf.Deg2Rad) * heightFrac * 11f;
-        label.Alignment = viewport.x < .3f ? TextAlignmentOptions.Left : viewport.x > .7f ? TextAlignmentOptions.Right : TextAlignmentOptions.Center;
-        OnTop(label.TextField.GetComponent<Renderer>(), 32);
+        CaptionDisplay captions = TourDirector.Instance != null ? TourDirector.Instance.Captions : null;
+        if (captions == null) return;
+        if (string.IsNullOrEmpty(text)) captions.HideCorner(corner);
+        else captions.ShowCorner(corner, text, color);
     }
 
     /// <summary>Draw a callout's part after the picture's transparent parts, so a curtain or a cloud never covers it.</summary>

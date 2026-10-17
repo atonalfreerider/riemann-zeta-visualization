@@ -152,6 +152,14 @@ public class CaptionDisplay : MonoBehaviour
 
         BuildCard();
         board = MakePanel("Board", 54, FontStyles.Bold, TextAlignmentOptions.Center, out boardText);
+        for (int i = 0; i < 2; i++)
+        {
+            corners[i] = MakeText(transform, i == 0 ? "CornerLeft" : "CornerRight", 40, FontStyles.Bold, i == 0 ? TextAlignmentOptions.TopLeft : TextAlignmentOptions.TopRight);
+            corners[i].outlineWidth = .22f;
+            corners[i].outlineColor = new Color32(0, 0, 0, 220);
+            corners[i].gameObject.SetActive(false);
+        }
+
         legend = MakePanel("EquationLegend", 32, FontStyles.Normal, TextAlignmentOptions.Left, out legendText);
         SetLayout(false);
         Clear();
@@ -179,6 +187,7 @@ public class CaptionDisplay : MonoBehaviour
             footnoteRect.anchoredPosition = new Vector2(0, 150);
             PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -40), 1500);
             PlacePanel(legend, new Vector2(0f, 1f), new Vector2(40, -110), 640);
+            PlaceCorners(new Vector2(52, -205), 700);
         }
         else
         {
@@ -192,6 +201,7 @@ public class CaptionDisplay : MonoBehaviour
             footnoteRect.anchoredPosition = new Vector2(0, 200);
             PlacePanel(board, new Vector2(0.5f, 1f), new Vector2(0, -130), 1000);
             PlacePanel(legend, new Vector2(0.5f, 1f), new Vector2(0, -120), 760);
+            PlaceCorners(new Vector2(44, -330), 480);
         }
 
         Landscape = landscape;
@@ -232,6 +242,38 @@ public class CaptionDisplay : MonoBehaviour
         panel.pivot = new Vector2(anchor.x, 1f);
         panel.anchoredPosition = offset;
         panel.sizeDelta = new Vector2(width, panel.sizeDelta.y);
+    }
+
+    // ---- corner readouts (a count, a dial value): fixed on the screen, so they never move with the camera ----
+    readonly TextMeshProUGUI[] corners = new TextMeshProUGUI[2];
+
+    void PlaceCorners(Vector2 offset, float width)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (corners[i] == null) continue;
+            RectTransform r = corners[i].rectTransform;
+            r.anchorMin = r.anchorMax = new Vector2(i, 1f);
+            r.pivot = new Vector2(i, 1f);
+            r.anchoredPosition = new Vector2(i == 0 ? offset.x : -offset.x, offset.y);
+            r.sizeDelta = new Vector2(width, 120);
+        }
+    }
+
+    /// <summary>Show a readout in the top-left (0) or top-right (1) corner, under the board.</summary>
+    public void ShowCorner(int which, string richText, Color color)
+    {
+        TextMeshProUGUI t = corners[Mathf.Clamp(which, 0, 1)];
+        if (t == null) return;
+        if (t.text != richText) t.text = richText;
+        t.color = color;
+        if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+    }
+
+    public void HideCorner(int which)
+    {
+        TextMeshProUGUI t = corners[Mathf.Clamp(which, 0, 1)];
+        if (t != null && t.gameObject.activeSelf) t.gameObject.SetActive(false);
     }
 
     /// <summary>Top-centre board: the multiplication being built on the spiral, the skipped spot, the primes so far.</summary>
@@ -635,6 +677,8 @@ public class CaptionDisplay : MonoBehaviour
         titleGroup.alpha = 0f;
         HideBoard();
         HideStrip();
+        HideCorner(0);
+        HideCorner(1);
         if (legend != null) legend.gameObject.SetActive(false);
     }
 
