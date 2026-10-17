@@ -3720,6 +3720,47 @@ master wave and ζ's trail rising from the centre) and build every formula on sc
 * **Both shapes.** The segments record 16:9 and 9:16; in the tall frame their scene labels are made 1.45 × larger and the
   callouts keep their proportion (`SacksSpiral.LabelBoost`, `CalloutScale`).
 
+*Round five (October 2026).*
+
+* **One script, two shapes.** Every argument of an action and every value of a shot may be written `WIDE^TALL`
+  (`alt(wide, tall)` in the spec): a 9:16 recording takes the tall side (`ExperimentTour.Pick`, `CameraRig.OrbitCueAt`).
+  `SacksSpiral.Tall` lets a layout rearrange itself for a tall frame: discovery four's lattices stand in a triangle, its
+  four strips are narrower, and its chart of mixtures (with the waves and the sweep that share its t axis) is narrower
+  and taller; discovery five's race is narrower and stacks over E8's clock of squares, and the mod-p circles stack one
+  above another; discovery two's E8 clock sits below the path and its chart of traces below the clock. `TOP(box,
+  tall=[box])` fits a box to either safe band (9:16: .29 … .80 of the height); the 3D shots' tall framings come from a
+  projection search over each shot's content. Callouts that used world positions now target the thing itself
+  (`exp:calllat:K,X,Y` a lattice point, `exp:callrace:LG,E` a point of the race), so they follow either layout.
+* **The curl stays visible.** Mid-curl the number line is an arc some 600 units tall, and the camera that framed the
+  whole line pulled back until the line, the numbers and the wave were below a pixel (the spiral "disappeared"). Now the
+  camera follows only the first numbers as they wind up (`nw.frame`), then takes in the whole spiral, and the line, its
+  crest and the numbers keep a few pixels on the screen at any distance.
+* **Voronoi's first wave, up and down.** On the spiral the angle is θ = 2π√n, so his first wave −sin(4π√n − π/4) =
+  −sin(2θ − π/4) rises and falls twice per turn. Stood up and seen from the side, it stands up in two opposite quarters
+  (crests at −22.5° and 157.5°, brown on the ribbon) and hangs down in the other two (blue); `exp:nwquarters` marks them.
+* **Both master waves on one saddle.** `nw.split` draws the zeros' wave above the saddle, spiking at the primes, and
+  Voronoi's divisor wave below it, reflected, each number reaching down by its count of divisors.
+* **The clock turns, not the arrows.** A block of the gold path is lifted onto E8's clock as a copy that only moves and
+  grows, each arrow keeping its direction; the clock turns until its hour 0 points the way the arrow of n = c would
+  (`exp:tboverlay:K`), and turns back before the sweep (`exp:wheelhome`).
+* **No empty pictures.** [`Tools/find_blank_frames.py`](../../Tools/find_blank_frames.py) lists every stretch of a
+  recording where the picture between the board and the captions is empty; the gaps it found (a picture hidden before
+  the next one was shown) are closed.
+* **Closer in a tall frame.** The vertical recordings stack their pictures and come closer: the formula's rows of zeros
+  and of Voronoi's waves are twice as far apart and larger (his formulas on two lines), the eight arrows of a block of the
+  gold path fill the frame with their numbers and hours, the chart of traces is wider under E8's clock, discovery five's
+  fold, mod-p circles and triangle sit right under the race, and E8's tower of shells and the chain of characters in the
+  funnel are framed tighter. Labels that ran off a 9:16 frame are moved (the ground's name, the eye limits, γ·log n
+  beside the coil's rim), and a callout now also avoids the scene's own labels, not only other callouts.
+* **Callouts belong to the shot they are made in.** A callout made while a shot still holds (before the camera moves on)
+  is placed for that shot, not for the one the camera is heading to, and is cleared before the move.
+* **Muting one part.** `exp:mute:GROUP/PART` mutes only the part of a group of that name (one floor of E8's tower),
+  `NAME$` names one group exactly ("S3 mod 5$" leaves "S3 mod 59" alone), and a board's subtitle may hold bars of its own
+  (`|1 + 2^−½|`).
+* **The cubes of the divisors appear on their words.** Only one reveal could run at a time, so the reveals of the cubes
+  of 2 and 3 (and of 5, 6 and 7) stopped each other and the cubes came a line late; `exp:reveal:GROUP:T1,T2,…:own` runs
+  a reveal on its own clock, from the start of the line.
+
 *Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
 of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
 height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate

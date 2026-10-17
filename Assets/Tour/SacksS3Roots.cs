@@ -78,20 +78,37 @@ public partial class SacksSpiral
         Color gold = new(1f, .8f, .32f), blue = new(.35f, .85f, 1f), grey = new(.85f, .87f, .95f);
         string[] names = { "S3 identity", "S3 rotation", "S3 reflection", "S3 square" };
         string[] heads = { "p = 59:  three roots", "p = 2:  no root", "p = 5:  one root", "a reflection, twice" };
-        string[] lines =
-        {
-            "x³ − x − 1 ≡ (x − 4)(x − 13)(x − 42)  mod 59",
-            "x³ − x − 1 has no root mod 2",
-            "x³ − x − 1 ≡ (x − 2)(x² + 2x + 3)  mod 5",
-            "swap r<sub>2</sub> and r<sub>3</sub>, then swap them back",
-        };
-        string[] foot =
-        {
-            "the identity:  x² + xy + 6y²,  1/6 of the primes",
-            "a rotation:  2x² ± xy + 3y²,  1/3 of the primes",
-            "a reflection:  neither family,  1/2 of the primes",
-            "= the identity:  every reflection squares to it",
-        };
+        // a 9:16 frame is too narrow for these on one line: two
+        string[] lines = Tall
+            ? new[]
+            {
+                "x³ − x − 1 ≡\n(x − 4)(x − 13)(x − 42)  mod 59",
+                "x³ − x − 1\nhas no root mod 2",
+                "x³ − x − 1 ≡\n(x − 2)(x² + 2x + 3)  mod 5",
+                "swap r<sub>2</sub> and r<sub>3</sub>,\nthen swap them back",
+            }
+            : new[]
+            {
+                "x³ − x − 1 ≡ (x − 4)(x − 13)(x − 42)  mod 59",
+                "x³ − x − 1 has no root mod 2",
+                "x³ − x − 1 ≡ (x − 2)(x² + 2x + 3)  mod 5",
+                "swap r<sub>2</sub> and r<sub>3</sub>, then swap them back",
+            };
+        string[] foot = Tall
+            ? new[]
+            {
+                "the identity:  x² + xy + 6y²\n1/6 of the primes",
+                "a rotation:  2x² ± xy + 3y²\n1/3 of the primes",
+                "a reflection:  neither family\n1/2 of the primes",
+                "= the identity:  every\nreflection squares to it",
+            }
+            : new[]
+            {
+                "the identity:  x² + xy + 6y²,  1/6 of the primes",
+                "a rotation:  2x² ± xy + 3y²,  1/3 of the primes",
+                "a reflection:  neither family,  1/2 of the primes",
+                "= the identity:  every reflection squares to it",
+            };
         Color[] cols = { gold, blue, grey, gold };
         s3Scale = scale;
         for (int k = 0; k < 4; k++)
@@ -122,9 +139,9 @@ public partial class SacksSpiral
                     break;
             }
 
-            ExpLabelWide(g, heads[k], c + Vector3.up * scale * 1.55f, labelSize * .2f, cols[k]);
-            ExpLabelWide(g, lines[k], c + Vector3.up * scale * 1.2f, labelSize * .14f, new Color(.82f, .85f, .94f));
-            ExpLabelWide(g, foot[k], c + Vector3.down * scale * 1.25f, labelSize * .15f, cols[k]);
+            ExpLabelWide(g, heads[k], c + Vector3.up * scale * (Tall ? 1.75f : 1.55f), labelSize * .2f, cols[k]);
+            ExpLabelWide(g, lines[k], c + Vector3.up * scale * (Tall ? 1.3f : 1.2f), labelSize * .14f, new Color(.82f, .85f, .94f));
+            ExpLabelWide(g, foot[k], c + Vector3.down * scale * (Tall ? 1.35f : 1.25f), labelSize * .15f, cols[k]);
         }
     }
 }

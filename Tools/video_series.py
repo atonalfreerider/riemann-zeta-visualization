@@ -93,7 +93,7 @@ def camera(cam, az_from):
     c = dict(cam)
     if c.get("az") == "+":
         c["az"] = round(az_from, 2)
-    order = ["on", "at", "fit", "d", "el", "az", "spin", "raise", "fov", "span", "hold", "h"]
+    order = ["on", "at", "fit", "d", "el", "az", "spin", "raise", "fov", "span", "hold", "h", "follow"]
     parts = []
     for k in order:
         if k in c and c[k] is not None:

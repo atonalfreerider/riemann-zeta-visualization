@@ -444,8 +444,8 @@ public class CameraRig : MonoBehaviour
         {
             if (name.StartsWith("orbit:"))
             {
-                var (at, settle) = OrbitCueAt(name.Substring(6));
-                orbitCues[name] = (at, settle);
+                var (at, settle, hold) = OrbitCueAt(name.Substring(6));
+                orbitCues[name] = (at, settle, hold);
                 cue = () => at(Time.time - cueStartTime);
                 cues[name] = cue;
             }
@@ -479,15 +479,42 @@ public class CameraRig : MonoBehaviour
     /// 9:16; raise=F moves the subject up the screen by F of the frame's height (to clear the captions).
     /// </summary>
     // the orbit cues as functions of the cue's age, and the age at which each has finished moving (hold + span)
-    readonly Dictionary<string, (Func<float, CueState> at, float settle)> orbitCues = new();
+    // (and how long each holds its first shot before it moves)
+    readonly Dictionary<string, (Func<float, CueState> at, float settle, float hold)> orbitCues = new();
 
     Func<CueState> OrbitCue(string spec)
     {
-        var (at, _) = OrbitCueAt(spec);
+        var (at, _, _) = OrbitCueAt(spec);
         return () => at(Time.time - cueStartTime);
     }
 
-    (Func<float, CueState> at, float settle) OrbitCueAt(string spec)
+    /// <summary>
+    /// A shot written for both frame shapes: any value "WIDE^TALL" takes its tall side when the camera's frame is taller
+    /// than wide (the long-form segments record 16:9 and 9:16 from one script).
+    /// </summary>
+    (Func<float, CueState> at, float settle, float hold) OrbitCueAt(string spec)
+    {
+        if (!spec.Contains('^')) return OrbitCueAtOne(spec);
+        static string Side(string s, bool tall)
+        {
+            System.Text.StringBuilder sb = new();
+            foreach (string part in s.Split(';'))
+            {
+                int k = part.IndexOf('^');
+                string v = k < 0 ? part : tall ? part.Substring(0, part.IndexOf('=') + 1) + part.Substring(k + 1) : part.Substring(0, k);
+                if (sb.Length > 0) sb.Append(';');
+                sb.Append(v);
+            }
+
+            return sb.ToString();
+        }
+
+        var wide = OrbitCueAtOne(Side(spec, false));
+        var tall = OrbitCueAtOne(Side(spec, true));
+        return (age => Aspect < 1f ? tall.at(age) : wide.at(age), Mathf.Max(wide.settle, tall.settle), Aspect < 1f ? tall.hold : wide.hold);
+    }
+
+    (Func<float, CueState> at, float settle, float hold) OrbitCueAtOne(string spec)
     {
         Dictionary<string, string> p = new();
         foreach (string part in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
@@ -583,7 +610,8 @@ public class CameraRig : MonoBehaviour
                 look = Vector3.Lerp(look, b.center, follow);
                 Vector2 own = Vector2.Lerp(fit0, fit1, u);
                 // the height goes in the band between the caption board and the captions (.57 of the frame; raise .035)
-                Vector2 boxed = new(Mathf.Max(w * 1.12f, 30f), Mathf.Max(hgt / .6f, 17f));
+                bool tallFrame = Aspect < 1f;
+                Vector2 boxed = new(Mathf.Max(w * (tallFrame ? 1.09f : 1.12f), 30f), Mathf.Max(hgt / (tallFrame ? .51f : .6f), 17f));
                 f0 = f1 = own.x > 0f ? Vector2.Lerp(own, boxed, follow) : boxed;
             }
 
@@ -604,7 +632,7 @@ public class CameraRig : MonoBehaviour
             }
 
             return new CueState { Position = position, LookAt = look, Up = upDir, Fov = fov };
-        }, settleAge);
+        }, settleAge, hold);
     }
 
     /// <summary>Where the active cue wants the camera now (the camera itself may still be flying there).</summary>
@@ -614,10 +642,15 @@ public class CameraRig : MonoBehaviour
         rotation = cam != null ? cam.transform.rotation : Quaternion.identity;
         fov = cam != null ? cam.fieldOfView : 55f;
         if (activeCue == null || VRMode.Enabled) return false;
-        // settled: where an orbit cue comes to rest (the end of its move), else where it is now
-        CueState target = settled && orbitCues.TryGetValue(activeCueName, out var oc)
-            ? oc.at(Mathf.Max(Time.time - cueStartTime, oc.settle))
-            : activeCue();
+        // settled: where an orbit cue comes to rest (the end of its move), else where it is now; while a cue still holds
+        // its first shot, that shot (a callout made then belongs to it, and goes before the camera moves on)
+        CueState target;
+        if (settled && orbitCues.TryGetValue(activeCueName, out var oc))
+        {
+            float age = Time.time - cueStartTime;
+            target = age < oc.hold ? oc.at(age) : oc.at(Mathf.Max(age, oc.settle));
+        }
+        else target = activeCue();
         Vector3 forward = target.LookAt - target.Position;
         if (forward.sqrMagnitude < 1e-6f) return false;
         position = target.Position;

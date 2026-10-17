@@ -95,11 +95,13 @@ public partial class SacksSpiral
                 for (int a = 1; a <= k; a++) if (k % a == 0) divs.Add(a.ToString());
                 string root = k == 1 ? "√x" : $"√({k}x)";
                 string amp2 = k == 1 ? "" : $"{d} · {k}<sup>−¼</sup> · ";
-                text = $"<color=#FFFFFF>m = {k}:  d({k}) = {d}</color>  ({string.Join(", ", divs)})   {amp2}sin(4π{root} − π/4)";
+                // a 9:16 frame is too narrow for the whole formula on one line at a readable size: two lines
+                text = $"<color=#FFFFFF>m = {k}:  d({k}) = {d}</color>  ({string.Join(", ", divs)}){(Tall ? "\n" : "   ")}{amp2}sin(4π{root} − π/4)";
             }
 
             // the formula above the row's left end
-            row.Label = ExpLabelWide(row.Root, text, b0 + L.Left[i0] * (amp + 1f + labelSize * .06f) + Vector3.back * .2f, labelSize, row.Col, TextAlignmentOptions.Left);
+            float lines = !zeros && Tall ? 2f : 1f;
+            row.Label = ExpLabelWide(row.Root, text, b0 + L.Left[i0] * (amp + 1f + labelSize * .06f * lines) + Vector3.back * .2f, labelSize, row.Col, TextAlignmentOptions.Left);
             Outline(row.Label.TextField);
             row.Root.gameObject.SetActive(false);
             nwRows.Add(row);
@@ -110,8 +112,10 @@ public partial class SacksSpiral
         {
             Transform axis = new GameObject("critical line").transform;
             axis.SetParent(nwRowsRoot, false);
-            Vector3 foot = L.P[i0] - Vector3.right * 40f + L.Left[i0] * (gap * .5f);
-            float top = gap * (count - first + 1.8f);
+            // (further left in a 9:16 frame, where the labels are larger: clear of the rows' formulas)
+            Vector3 foot = L.P[i0] - Vector3.right * (Tall ? 50f : 40f) + L.Left[i0] * (gap * .5f);
+            // (shorter in a 9:16 frame, so its name stays under the corner readout)
+            float top = gap * (count - first + (Tall ? 1.15f : 1.8f));
             ExpLine(axis, "line", .14f, PrimeGold * .8f, Factory.SoftGlowIntensity, new[] { foot, foot + L.Left[i0] * top });
             TextBox t = ExpLabelWide(axis, "Re s = ½", foot + L.Left[i0] * (top + labelSize * .14f), labelSize * .9f, PrimeGold);
             Outline(t.TextField);
@@ -121,7 +125,7 @@ public partial class SacksSpiral
                 float hgt = (float)(zs[k - 1] / gTop) * gap * (count - first + 1);
                 Vector3 at = foot + L.Left[i0] * hgt + Vector3.back * .3f;
                 GameObject dot = ExpDot(axis, $"zero {k}", at, labelSize * .09f, Factory.Palette.Zero, AttentionIntensity);
-                TextBox dl = ExpLabelWide(axis, $"½ + {zs[k - 1]:0.00}i", at + Vector3.right * (labelSize * .2f), labelSize * .8f, Color.white, TextAlignmentOptions.Left);
+                TextBox dl = ExpLabelWide(axis, $"½ + {zs[k - 1]:0.00}i", at + Vector3.right * (labelSize * (Tall ? .13f : .2f)), labelSize * (Tall ? .66f : .8f), Color.white, TextAlignmentOptions.Left);
                 Outline(dl.TextField);
                 nwZeroDots.Add((dot, dl));
             }
@@ -255,6 +259,36 @@ public partial class SacksSpiral
             if (labelSize <= 0f) continue;
             TextBox t = ExpLabelWide(g, "22.5°", Polar(from - 11.25f, rMax * .28f), labelSize, Color.white);
             Outline(t.TextField);
+        }
+    }
+
+    /// <summary>
+    /// On the flat spiral, where Voronoi's first wave −sin(4π√x − π/4) = −sin(2θ − π/4) stands up and where it hangs down:
+    /// the spiral's angle θ is 2π√x, so the wave goes up and down twice on every turn. An arrow out of the plane at each
+    /// quarter's middle, up (towards the viewer, the curtain's side) at −22.5° and 157.5°, down at 67.5° and 247.5°.
+    /// </summary>
+    public void ExpNwQuarters(bool on, float labelSize)
+    {
+        Transform old = ExpRoot().Find("NW quarters");
+        if (old != null) Destroy(old.gameObject);
+        if (!on || nw == null) return;
+        Transform g = ExpGroup("NW quarters").transform;
+        float rMax = R * Mathf.Sqrt(NwN), r = rMax * .66f, len = 8f;
+        Color upCol = DivisorWaveColor, downCol = new(.35f, .55f, 1f);
+        foreach (var (deg, upward) in new[] { (-22.5f, true), (157.5f, true), (67.5f, false), (247.5f, false) })
+        {
+            float a = deg * Mathf.Deg2Rad;
+            Vector3 b = nw.Centre + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r, dir = upward ? Vector3.back : Vector3.forward;
+            Color c = upward ? upCol : downCol;
+            Vector3 tip = b + dir * len;
+            LineRenderer l = ExpLine(g, $"arrow {deg}", .5f, Color.white, AttentionIntensity, new[] { b, tip });
+            OnTop(l, 20);
+            StartCoroutine(SettleRoutine(l, c, 1f));
+            Vector3 side = new Vector3(-Mathf.Sin(a), Mathf.Cos(a), 0f);
+            ExpLine(g, $"head {deg}", .5f, c, AttentionIntensity, new[] { tip - dir * 2f + side * 1.2f, tip, tip - dir * 2f - side * 1.2f });
+            TextBox t = ExpLabelWide(g, upward ? "up" : "down", tip + dir * 2.2f, labelSize, c);
+            Outline(t.TextField);
+            Flare(b, 3f, 1f, 1);
         }
     }
 

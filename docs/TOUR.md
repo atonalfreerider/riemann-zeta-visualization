@@ -132,7 +132,11 @@ of eight arrows near spoke K, with their numbers and hours), `exp:tblift:K:SECON
 `exp:tbbars:X,Y,Z:SIZE`, `exp:tbbarsall[:measured]`, `exp:tbsweep:K0:K1:SECONDS`, `exp:tbsieve:N:SECONDS`. Charts that
 merge: `exp:twgroup:GROUP[/PART]:DX,DY,DZ:SCALE:SECONDS`, `exp:stripsmorph`, `exp:racemorph`, `exp:familymorph`,
 `exp:e8tower:SIZE:attach:GAP`, `exp:t5family:X,Y,Z:FX,FY,FZ:RIM` (the fold of S₃ placed where another picture stood).
-Round four adds `exp:home:TMAX:SECONDS` (the teaser), `exp:nwrows` / `exp:nwenter` / `exp:nwangle` / `exp:nwradius`
+Round five: any argument or shot value may be written `WIDE^TALL` for the two recording shapes; `nw.frame`, `nw.split`,
+`exp:nwquarters`, `exp:tboverlay:K:SECONDS`, `exp:wheelhome:SECONDS`, `exp:modpshow:P`, `exp:calllat`, `exp:callrace`,
+`exp:mute:GROUP/PART` (one named part of a group), `NAME$` in a group list (that group only, not every name it begins),
+`exp:reveal:GROUP:T1,T2,…:own` (a reveal on its own clock, so several can run in one line)
+(Tools/find_blank_frames.py checks a recording for empty stretches). Round four adds `exp:home:TMAX:SECONDS` (the teaser), `exp:nwrows` / `exp:nwenter` / `exp:nwangle` / `exp:nwradius`
 (the terms entering the master waves), `pw.logh` / `pw.ground` (the climb above the ground), `fw.stretch` (the horn
 stretched into the coil), `exp:calllat`, `exp:lacounts`, `exp:lwaves`, `exp:lratio`, `exp:t5terrain` with `lf.build`,
 `lf.h`, `lf.slice` (discovery four), `exp:hoursquares`, `exp:powerwalk`, `exp:modp`, `exp:modptest`, `exp:s3anim`

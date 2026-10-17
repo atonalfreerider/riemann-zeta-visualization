@@ -22,6 +22,26 @@ using UnityEngine;
 public partial class SacksSpiral
 {
     public const float ClassGroupOffset = 76000f;
+
+    // The chart of every mixture (LE) and everything plotted on its t axis (the strips' morph, the sweep, the two waves):
+    // 190 wide and 12 per unit of λ in a 16:9 frame; narrower and taller in a 9:16 one (SacksSpiral.Tall).
+    static float ChartX0 => Tall ? -80f : -140f;
+    static float ChartW => Tall ? 116f : 190f;
+    static float ChartSy => Tall ? 17f : 12f;
+    static float ChartBx => Tall ? 46f : 72f;
+    static float ChartSx => Tall ? 2.3f : 3.2f;
+
+    // the four strips of zeros (LC): side by side, 50 wide and 64 apart; in a tall frame 30 wide and 38 apart
+    static float StripW => Tall ? 30f : 50f;
+    static float StripGap => Tall ? 38f : 64f;
+
+    /// <summary>The bottom centre of strip k (t = 0, Re s = ½), from the strips' origin.</summary>
+    static Vector3 StripBase(int k) => new((k - 1.5f) * StripGap, -50f * 1.9f * .5f - 6f, 0f);
+
+    /// <summary>The centre of lattice k, from the lattices' origin: in a row, or in a 9:16 frame a triangle (the principal
+    /// family above, the mirror pair side by side below).</summary>
+    static Vector3 LatticeCentre(int k) => Tall ? k switch { 0 => new Vector3(0f, 62f, 0f), 1 => new Vector3(-48f, -38f, 0f), _ => new Vector3(48f, -38f, 0f) }
+        : new Vector3(-98f + 98f * k, 0f, 0f);
     static readonly (int a, int b, int c)[] Forms23 = { (1, 1, 6), (2, 1, 3), (2, -1, 3) };
     static readonly Color[] FormColors = { new(1f, .8f, .32f), new(.35f, .85f, 1f), new(1f, .45f, .8f) };
 
@@ -66,7 +86,7 @@ public partial class SacksSpiral
         for (int k = 0; k < 3; k++)
         {
             var f = Forms23[k];
-            Vector3 c = o + new Vector3(-98f + 98f * k, 0f, 0f);
+            Vector3 c = o + LatticeCentre(k);
             // each family in its own part, so it can move on its own (exp:twgroup:LA lattices/family K:…)
             Transform group = g;
             Transform fam = new GameObject($"family {k}").transform;
@@ -83,7 +103,7 @@ public partial class SacksSpiral
                     Vector2 p = FormPoint(f, x, y);
                     pts.Add(c + new Vector3(p.x, p.y, 0f) * s);
                     pc.Add(new Color(.45f, .48f, .62f));
-                    ps.Add(.55f);
+                    ps.Add(Tall ? .8f : .55f);   // seen from further off in a 9:16 frame (the three lattices stacked)
                 }
 
             pts.Add(c);
@@ -128,7 +148,7 @@ public partial class SacksSpiral
             "<color=#73FF8C>13, the green ring:</color>  none on x² + xy + 6y², 2 + 2 on the other two:  one representation, a prime",
             "<color=#FF6659>6 = 2·3, the red ring:</color>  4 points on x² + xy + 6y² and 2 + 2 on the other two:  two representations",
         };
-        for (int r = 0; r < rows.Length; r++)
+        for (int r = 0; r < rows.Length && !Tall; r++)
             ExpLabelWide(g, rows[r], o + new Vector3(-140f, -50f - 6.2f * r, 0f), labelSize * .19f, new Color(.82f, .85f, .94f), TextAlignmentOptions.Left)
                 .gameObject.name = $"row {r}";
     }
@@ -196,7 +216,8 @@ public partial class SacksSpiral
     public void ExpClassZeros(Vector3 o, float labelSize)
     {
         Transform g = ExpGroup("LC zeros").transform;
-        const float w = 50f, sy = 1.9f, tMax = 50f, s0 = -.4f, s1 = 1.4f;
+        float w = StripW;
+        const float sy = 1.9f, tMax = 50f, s0 = -.4f, s1 = 1.4f;
         (string name, string formula, double[] on, double[] offRe, double[] offIm, Color col)[] F =
         {
             ("x² + xy + 6y²", "its Epstein zeta", ClassGroupData.OnM23e, ClassGroupData.OffReM23e, ClassGroupData.OffImM23e, FormColors[0]),
@@ -207,7 +228,7 @@ public partial class SacksSpiral
         for (int k = 0; k < F.Length; k++)
         {
             var (name, formula, on, offRe, offIm, col) = F[k];
-            Vector3 c = o + new Vector3((k - 1.5f) * (w + 14f), -tMax * sy * .5f - 6f, 0f);
+            Vector3 c = o + StripBase(k);
             Vector3 P(double sigma, double t) => c + new Vector3((float)((sigma - (s0 + s1) * .5f) / (s1 - s0)) * w, (float)t * sy, 0f);
             Segments(g, $"frame {k}", new List<(Vector3, Vector3)>
             {
@@ -226,16 +247,18 @@ public partial class SacksSpiral
             }
 
             ExpPointCloud(g, $"zeros {k}", pts, pc, ps, Factory.GlowIntensity);
-            ExpLabelWide(g, name, P(.5, tMax) + Vector3.up * 9f, labelSize * .21f, col);
-            ExpLabelWide(g, formula, P(.5, tMax) + Vector3.up * 4.4f, labelSize * .15f, new Color(.8f, .84f, .95f));
-            ExpLabelWide(g, $"{on.Length} on the line,  {2 * offRe.Length} off it", P(.5, 0) + Vector3.down * 4.2f, labelSize * .16f,
-                offRe.Length > 0 ? new Color(1f, .5f, .45f) : PrimeGold).gameObject.name = $"count {k}";
+            float ls = Tall ? .62f : 1f;
+            ExpLabelWide(g, name, P(.5, tMax) + Vector3.up * 9f, labelSize * .21f * ls, col);
+            ExpLabelWide(g, formula, P(.5, tMax) + Vector3.up * 4.4f, labelSize * .15f * ls, new Color(.8f, .84f, .95f));
+            ExpLabelWide(g, Tall ? $"{on.Length} on\n{2 * offRe.Length} off" : $"{on.Length} on the line,  {2 * offRe.Length} off it", P(.5, 0) + Vector3.down * (Tall ? 6f : 4.2f),
+                labelSize * .16f * (Tall ? .8f : 1f), offRe.Length > 0 ? new Color(1f, .5f, .45f) : PrimeGold).gameObject.name = $"count {k}";
             foreach ((double sg, string txt) in new[] { (0d, "0"), (.5d, "½"), (1d, "1") })
                 ExpLabelWide(g, txt, P(sg, 0) + Vector3.down * 8.6f, labelSize * .12f, new Color(.6f, .64f, .8f)).gameObject.name = $"tick {k}";
         }
 
-        ExpLabelWide(g, "the two families", o + new Vector3(-(w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f)).gameObject.name = "section 0";
-        ExpLabelWide(g, "the class group's L-functions", o + new Vector3((w + 14f), 60f, 0f), labelSize * .18f, new Color(.85f, .88f, .96f)).gameObject.name = "section 1";
+        ExpLabelWide(g, "the two families", o + new Vector3(-StripGap, 60f, 0f), labelSize * .18f * (Tall ? .7f : 1f), new Color(.85f, .88f, .96f)).gameObject.name = "section 0";
+        ExpLabelWide(g, Tall ? "the L-functions" : "the class group's L-functions", o + new Vector3(StripGap, 60f, 0f), labelSize * .18f * (Tall ? .7f : 1f),
+            new Color(.85f, .88f, .96f)).gameObject.name = "section 1";
     }
 
     // ================================================================================================
@@ -317,7 +340,8 @@ public partial class SacksSpiral
     public void ExpClassMixtures(Vector3 o, float labelSize)
     {
         Transform g = ExpGroup("LE mixtures").transform;
-        const float w = 190f, sy = 12f, lo = -3f, hi = 4f, x0 = -140f, bx = 72f, sx = 3.2f;
+        float w = ChartW, sy = ChartSy, x0 = ChartX0, bx = ChartBx, sx = ChartSx;
+        const float lo = -3f, hi = 4f;
         Color axisCol = new(.7f, .74f, .88f), blue = FormColors[1];
         Vector3 P(double t, double lam) => o + new Vector3(x0 + (float)(t / 50d) * w, (float)lam * sy, 0f);
         double[] R = ClassGroupData.MixR;
@@ -430,7 +454,8 @@ public partial class SacksSpiral
 
     System.Collections.IEnumerator MixtureSweep(Vector3 o, float lam0, float lam1, float seconds, float labelSize)
     {
-        const float w = 190f, sy = 12f, lo = -3f, x0 = -140f, bx = 72f, sx = 3.2f;
+        float w = ChartW, sy = ChartSy, x0 = ChartX0, bx = ChartBx, sx = ChartSx;
+        const float lo = -3f;
         Vector3 P(double t, double lam) => o + new Vector3(x0 + (float)(t / 50d) * w, (float)lam * sy, -.4f);
         Vector3 Q(double lam, double count) => o + new Vector3(bx + (float)count * sx, (float)lam * sy, -.4f);
         double[] R = ClassGroupData.MixR;

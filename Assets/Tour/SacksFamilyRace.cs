@@ -162,14 +162,15 @@ public partial class SacksSpiral
 
         foreach (var kv in arcs) Segments(g, $"arcs {kv.Key}", kv.Value, .06f, FrobColors[kv.Key] * .55f, Factory.SoftGlowIntensity);
         ExpPointCloud(g, "primes and squares", dots, cols, sizes, Factory.GlowIntensity);
-        string[] names = { "identity:  x² + xy + 6y²", "rotations:  2x² ± xy + 3y²", "reflections:  neither family" };
+        // (in a 9:16 frame the rotations' name, at the right of the fold, takes two lines so it stays in the picture)
+        string[] names = { "identity:  x² + xy + 6y²", Tall ? "rotations:\n2x² ± xy + 3y²" : "rotations:  2x² ± xy + 3y²", "reflections:  neither family" };
         string[] subs = { "x³ − x − 1 has 3 roots mod p:  1/6 of the primes", "no root:  1/3", "1 root:  1/2" };
         Vector3[] at = { Polar(90f, rim + 19f), Polar(-30f, rim + 5f), Polar(250f, rim + 7f) };
         TextAlignmentOptions[] al = { TextAlignmentOptions.Center, TextAlignmentOptions.Left, TextAlignmentOptions.Center };
         for (int k = 0; k < 3; k++)
         {
             ExpLabelWide(g, names[k], at[k], labelSize * .19f, FrobColors[k], al[k]);
-            ExpLabelWide(g, subs[k], at[k] + Vector3.down * 4.6f, labelSize * .14f, new Color(.8f, .83f, .93f), al[k]);
+            ExpLabelWide(g, subs[k], at[k] + Vector3.down * (Tall && k == 1 ? 9.6f : 4.6f), labelSize * .14f, new Color(.8f, .83f, .93f), al[k]);
         }
 
         ExpLabelWide(g, $"{landed[0]} of the {landed[0] + landed[1]} prime squares land here", at[0] + Vector3.down * 9.2f, labelSize * .14f, FrobColors[0]);

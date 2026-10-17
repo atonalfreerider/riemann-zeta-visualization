@@ -53,7 +53,8 @@ public partial class SacksSpiral
         }
 
         // the two extremes, then the circles they sweep round the centre
-        foreach (var (r, name, ang) in new[] { (1f + r2, "1 + 1/√2 = 1.71", -35f), (1f - r2, "1 − 1/√2 = 0.29", -60f) })
+        // (in a 9:16 frame the outer label goes up and nearer the middle: at −35° it would run off the right edge)
+        foreach (var (r, name, ang) in new[] { (1f + r2, "1 + 1/√2 = 1.71", Tall ? 70f : -35f), (1f - r2, "1 − 1/√2 = 0.29", -60f) })
         {
             Vector3[] ring = new Vector3[121];
             for (int i = 0; i <= 120; i++)

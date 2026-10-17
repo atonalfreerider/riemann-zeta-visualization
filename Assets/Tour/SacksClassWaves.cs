@@ -25,7 +25,7 @@ public partial class SacksSpiral
     public Vector3 LatticePoint(int k, int x, int y)
     {
         k = Mathf.Clamp(k, 0, 2);
-        Vector3 c = laLatticeOrigin + new Vector3(-98f + 98f * k, 0f, 0f);
+        Vector3 c = laLatticeOrigin + LatticeCentre(k);
         Vector2 p = FormPoint(Forms23[k], x, y);
         return c + new Vector3(p.x, p.y, -.3f) * laLatticeScale;
     }
@@ -36,7 +36,7 @@ public partial class SacksSpiral
     public void ExpClassCountTable(Vector3 o, float labelSize)
     {
         Transform g = ExpGroup("LA counts").transform;
-        float[] col = { 0f, 34f, 78f, 126f };
+        float[] col = Tall ? new[] { 0f, 30f, 70f, 108f } : new[] { 0f, 34f, 78f, 126f };
         float row = labelSize * .03f;
         Color head = new(.82f, .85f, .95f);
         Transform Part(string name)
@@ -71,19 +71,21 @@ public partial class SacksSpiral
         }
 
         Transform k0 = Part("check 0");
-        TextBox t0 = ExpLabelWide(k0, "the first family:  2 → 0,  3 → 0,  but 6 → 4:   not built from 2 and 3", o + new Vector3(col[1] + 20f, -row * 5.3f, 0f),
-            labelSize * .17f, new Color(1f, .5f, .45f));
+        TextBox t0 = ExpLabelWide(k0, Tall ? "the first family:  2 → 0,  3 → 0,  but 6 → 4:\nnot built from 2 and 3" : "the first family:  2 → 0,  3 → 0,  but 6 → 4:   not built from 2 and 3",
+            o + new Vector3(col[1] + 20f, -row * (Tall ? 5.6f : 5.3f), 0f), labelSize * .17f, new Color(1f, .5f, .45f));
         Outline(t0.TextField);
         Transform k1 = Part("check 1");
-        TextBox t1 = ExpLabelWide(k1, "(first − second)/2:  (−1) × (−1) = +1:   6 is built from 2 and 3", o + new Vector3(col[1] + 20f, -row * 6.5f, 0f),
-            labelSize * .17f, PrimeGold);
+        TextBox t1 = ExpLabelWide(k1, Tall ? "(first − second)/2:  (−1) × (−1) = +1:\n6 is built from 2 and 3" : "(first − second)/2:  (−1) × (−1) = +1:   6 is built from 2 and 3",
+            o + new Vector3(col[1] + 20f, -row * (Tall ? 8.2f : 6.5f), 0f), labelSize * .17f, PrimeGold);
         Outline(t1.TextField);
         foreach (Transform t in g) t.gameObject.SetActive(false);
     }
 
     // ---- the two waves and the ratio ---------------------------------------------------------------------------------
 
-    const float CwX0 = -140f, CwW = 190f, CwSy = 12f;
+    static float CwX0 => ChartX0;
+    static float CwW => ChartW;
+    static float CwSy => ChartSy;
     Vector3 cwOrigin;
     float cwAmp = 2f;
 

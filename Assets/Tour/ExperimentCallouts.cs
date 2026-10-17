@@ -122,7 +122,9 @@ public partial class SacksSpiral
     }
 
     // the safe part of the picture: in from the sides, below the board, above the captions
-    const float SafeLeft = .03f, SafeRight = .97f, SafeBottom = .25f, SafeTop = .8f;
+    // (a 9:16 frame's captions take a little more of its height)
+    const float SafeLeft = .03f, SafeRight = .97f, SafeTop = .8f;
+    static float SafeBottom => Tall ? .29f : .25f;
 
     static float OutsideArea(Rect r)
     {
@@ -196,28 +198,55 @@ public partial class SacksSpiral
         // the given direction first, then turned by more and more, until the label covers no other callout and stays in the picture
         calloutLabels.RemoveAll(x => x == null);
         Vector2 best = dir;
+        float bestReach = 1f;
+        // the scene's own labels count too (the numbers along an axis, a family's name, an hour on a clock), so a callout does
+        // not sit on them
+        List<Rect> sceneLabels = new();
+        if (cam != null)
+            foreach (TMP_Text o in ExpRoot().GetComponentsInChildren<TMP_Text>())
+            {
+                if (o == t || calloutLabels.Contains(o) || string.IsNullOrEmpty(o.text) || o.color.a * o.alpha < .3f) continue;
+                Renderer rr = o.GetComponent<Renderer>();
+                if (rr == null || !rr.enabled || cam.WorldToViewportPoint(rr.bounds.center).z <= 0f) continue;
+                Rect rect = ViewRect(cam, rr.bounds);
+                if (rect.xMax > 0f && rect.xMin < 1f && rect.yMax > 0f && rect.yMin < 1f) sceneLabels.Add(rect);
+            }
+
+        float bestFrac = frac;
         if (cam != null)
         {
             float bestScore = float.MaxValue;
-            foreach (float turn in new[] { 0f, 25f, -25f, 50f, -50f, 75f, -75f, 105f, -105f, 135f, -135f, 165f, -165f })
+            // as asked first; then, if every direction covers something, a little further out
+            foreach (float reach in new[] { 1f, 1.6f })
             {
-                float a = turn * Mathf.Deg2Rad;
-                Vector2 c = new(dir.x * Mathf.Cos(a) - dir.y * Mathf.Sin(a), dir.x * Mathf.Sin(a) + dir.y * Mathf.Cos(a));
-                Place(c);
-                Rect r = ViewRect(cam, t.GetComponent<Renderer>().bounds);
-                float score = OutsideArea(r) * 4f;
-                foreach (TMP_Text o in calloutLabels) score += OverlapArea(r, ViewRect(cam, o.GetComponent<Renderer>().bounds));
-                score += Mathf.Abs(turn) * 1e-6f; // ties go to the direction asked for
-                if (score < bestScore)
+                frac = bestFrac * reach;
+                foreach (float turn in new[] { 0f, 25f, -25f, 50f, -50f, 75f, -75f, 105f, -105f, 135f, -135f, 165f, -165f })
                 {
-                    bestScore = score;
-                    best = c;
+                    float a = turn * Mathf.Deg2Rad;
+                    Vector2 c = new(dir.x * Mathf.Cos(a) - dir.y * Mathf.Sin(a), dir.x * Mathf.Sin(a) + dir.y * Mathf.Cos(a));
+                    Place(c);
+                    Rect r = ViewRect(cam, t.GetComponent<Renderer>().bounds);
+                    float score = OutsideArea(r) * 4f;
+                    // covering another callout garbles both, so it counts three times as much as covering the scene's own labels
+                    foreach (TMP_Text o in calloutLabels) score += 3f * OverlapArea(r, ViewRect(cam, o.GetComponent<Renderer>().bounds));
+                    foreach (Rect o in sceneLabels) score += OverlapArea(r, o);
+                    score += Mathf.Abs(turn) * 1e-6f + (reach - 1f) * 2e-4f; // ties go to the direction and distance asked for
+                    if (score < bestScore)
+                    {
+                        bestScore = score;
+                        best = c;
+                        bestReach = reach;
+                    }
+
+                    if (score < 1e-4f) break;
                 }
 
-                if (score < 1e-4f) break;
+                frac = bestFrac;
+                if (bestScore < 2e-4f) break;
             }
         }
 
+        frac = bestFrac * bestReach;
         Place(best);
         // whatever still sticks out of the picture slides back in
         if (cam != null)
@@ -332,7 +361,16 @@ public partial class SacksSpiral
     static bool GroupMatches(string name, string[] keep)
     {
         foreach (string k in keep)
-            if (k.Length > 0 && (name == k || name.StartsWith(k))) return true;
+        {
+            if (k.Length == 0) continue;
+            // "NAME$": that group only, not every group whose name starts with NAME ("S3 mod 5$" leaves "S3 mod 59" alone)
+            if (k[^1] == '$')
+            {
+                if (name == k.Substring(0, k.Length - 1)) return true;
+            }
+            else if (name == k || name.StartsWith(k)) return true;
+        }
+
         return false;
     }
 

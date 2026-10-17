@@ -111,7 +111,7 @@ public partial class SacksSpiral
 
     IEnumerator StripsMorphRoutine(Vector3 so, Vector3 co, float seconds)
     {
-        const float w = 50f, sy = 1.9f, tMax = 50f;
+        const float sy = 1.9f;
         // where the strips put the zeros on the line, and where the chart puts them
         double[][] on = { ClassGroupData.OnM23e, ClassGroupData.OnM23c, ClassGroupData.OnM23L0, ClassGroupData.OnM23L1 };
         float[] lam = { 0f, 4.25f, 2f, -1f };
@@ -122,11 +122,11 @@ public partial class SacksSpiral
         List<float> delay = new();
         for (int k = 0; k < 4; k++)
         {
-            Vector3 c = so + new Vector3((k - 1.5f) * (w + 14f), -tMax * sy * .5f - 6f, 0f);
+            Vector3 c = so + StripBase(k);
             foreach (double t in on[k])
             {
                 from.Add(c + new Vector3(0f, (float)t * sy, -.3f));
-                to.Add(co + new Vector3(-140f + (float)(t / 50d) * 190f, lam[k] * 12f, -.5f));
+                to.Add(co + new Vector3(ChartX0 + (float)(t / 50d) * ChartW, lam[k] * ChartSy, -.5f));
                 pc.Add(cols[k]);
                 ps.Add(1f);
                 delay.Add(k * .12f + (float)(t / 50d) * .1f);
@@ -161,8 +161,8 @@ public partial class SacksSpiral
         List<(Vector3, Vector3)> poles = new();
         foreach (double t in ClassGroupData.OnM23c)
         {
-            float x = -140f + (float)(t / 50d) * 190f;
-            for (float y = -3f; y < 4f; y += .5f) poles.Add((co + new Vector3(x, y * 12f, -.2f), co + new Vector3(x, (y + .25f) * 12f, -.2f)));
+            float x = ChartX0 + (float)(t / 50d) * ChartW;
+            for (float y = -3f; y < 4f; y += .5f) poles.Add((co + new Vector3(x, y * ChartSy, -.2f), co + new Vector3(x, (y + .25f) * ChartSy, -.2f)));
         }
 
         Segments(g, "poles", poles, .1f, FormColors[1] * .6f, Factory.NoGlow);

@@ -338,7 +338,13 @@ public partial class SacksSpiral
 
         LineRenderer sum = ExpLine(g, "sum", .4f, Color.white, AttentionIntensity, new[] { c, c + FwDir(acc) * FwCoilR });
         OnTop(sum, 22);
-        TextBox st = ExpLabelWide(g, $"γ·log {n} = {gm * hn / (2 * Math.PI):0.00} turns", c + FwDir(acc) * (FwCoilR + 3.4f), 13f, Color.white);
+        // beyond the rim, or in a 9:16 frame (where the coil fills the width) inside it, just above the hand's end, reading
+        // inwards along the hand
+        Vector3 sd = FwDir(acc);
+        TextBox st = Tall
+            ? ExpLabelWide(g, $"γ·log {n} =\n{gm * hn / (2 * Math.PI):0.00} turns", c + sd * (FwCoilR * .97f) + Vector3.up * 2.4f, 13f, Color.white,
+                sd.x > .3f ? TextAlignmentOptions.Right : sd.x < -.3f ? TextAlignmentOptions.Left : TextAlignmentOptions.Center)
+            : ExpLabelWide(g, $"γ·log {n} = {gm * hn / (2 * Math.PI):0.00} turns", c + sd * (FwCoilR + 3.4f), 13f, Color.white);
         Outline(st.TextField);
     }
 }

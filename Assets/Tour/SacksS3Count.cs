@@ -75,7 +75,10 @@ public partial class SacksSpiral
             arc.SetPositions(pts);
             StartCoroutine(SettleRoutine(arc, col, .8f));
             Flare(pts[32], 4f, .9f, 1);
-            TextBox tag = ExpLabelWide(g, $"{h}² = {h * h}", o + FoldDir(h) * (rim + 10f) + Vector3.back * .6f, labelSize * .14f, col);
+            // beyond the hour's own label, reading away from the clock (so 1² and 29², twelve degrees apart, do not meet)
+            Vector3 hd = FoldDir(h);
+            TextBox tag = ExpLabelWide(g, $"{h}² = {h * h}", o + hd * (rim + 8f) + Vector3.back * .6f, labelSize * .14f, col,
+                hd.x > .15f ? TextAlignmentOptions.Left : hd.x < -.15f ? TextAlignmentOptions.Right : TextAlignmentOptions.Center);
             Outline(tag.TextField);
             yield return new WaitForSeconds(per * .3f);
         }
@@ -165,6 +168,16 @@ public partial class SacksSpiral
         Outline(title.TextField);
         title.gameObject.name = "title";
         g.gameObject.SetActive(false);
+    }
+
+    /// <summary>Show the p dots and their numbers (no test yet), so the circle is there while the narration introduces it.</summary>
+    public void ExpRootsShow(int p)
+    {
+        Transform g = ExpRoot().Find($"S3 mod {p}");
+        if (g == null) return;
+        g.gameObject.SetActive(true);
+        foreach (Transform d in g)
+            if (d.name.StartsWith("x ")) Flare(d.position + Vector3.back * .3f, d.localScale.x * 2f, .8f, 1);
     }
 
     /// <summary>Show the dots, then put each x into x³ − x − 1 in turn: its value mod p appears, and the roots turn gold.</summary>

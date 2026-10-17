@@ -905,6 +905,12 @@ public partial class SacksSpiral : MonoBehaviour
     /// <summary>Callout labels are sized by the camera's distance, so in a tall frame they shrink back by this (and LabelBoost).</summary>
     public static float CalloutScale = 1f;
 
+    /// <summary>
+    /// True while a long-form segment plays in a tall (9:16) frame: its layouts stack side-by-side pictures vertically, and
+    /// an action argument written "WIDE^TALL" takes its tall side (ExperimentTour.Pick).
+    /// </summary>
+    public static bool Tall;
+
     TextBox TextBoxLabel(string text, float size, Color color)
     {
         TextBox label = TextBox.Create(text, size * LabelBoost);

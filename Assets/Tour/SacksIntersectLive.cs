@@ -90,7 +90,7 @@ public partial class SacksSpiral
     }
 
     /// <summary>Show the items of a group at the given times, in seconds from now (exp:reveal:GROUP:T1,T2,…); items past the last time stay hidden.</summary>
-    public void ExpRevealAt(string groupName, float[] times)
+    public void ExpRevealAt(string groupName, float[] times, bool own = false)
     {
         Transform g = FindExpGroup(groupName);
         if (g == null)
@@ -103,10 +103,11 @@ public partial class SacksSpiral
         List<GameObject> list = new();
         foreach (Transform t in items) list.Add(t.gameObject);
         foreach (GameObject o in list) o.SetActive(false);
-        StartLive(RevealAtLive(list, times));
+        if (own) StartCoroutine(RevealAtLive(list, times, false));
+        else StartLive(RevealAtLive(list, times));
     }
 
-    IEnumerator RevealAtLive(List<GameObject> items, float[] times)
+    IEnumerator RevealAtLive(List<GameObject> items, float[] times, bool live = true)
     {
         float clock = 0f;
         int n = Mathf.Min(items.Count, times.Length);
@@ -123,7 +124,7 @@ public partial class SacksSpiral
             ShowRevealItem(items[i], Mathf.Clamp((next - times[i]) * .85f, .15f, 1.2f));
         }
 
-        liveRoutine = null;
+        if (live) liveRoutine = null;
     }
 
     /// <summary>One reveal item appearing: its long lines drawing in over <paramref name="draw"/> seconds, its note on the board, its flares.</summary>

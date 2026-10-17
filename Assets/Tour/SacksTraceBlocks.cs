@@ -36,7 +36,9 @@ public partial class SacksSpiral
 
     readonly Dictionary<int, TbBlock> tbBlocks = new();
     Vector3 tbBarsOrigin;
-    float tbBarDx = 1.25f, tbBarUnit = 1.1f;
+    // (wider bars in a 9:16 frame, where the chart stands under the clock and has the frame's width to itself)
+    float tbBarDx => Tall ? 1.6f : 1.25f;
+    const float tbBarUnit = 1.1f;
     bool tbBarsReady;
     readonly Dictionary<int, LineRenderer> tbBars = new();
 
@@ -87,8 +89,9 @@ public partial class SacksSpiral
             ArrowHead(marks, $"head {b.N[i]}", b.A[i], b.B[i], width * .32f, col, width * .07f);
             ExpDot(marks, $"joint {b.N[i]}", b.A[i] + Vector3.back * .08f, width * .09f, Color.white, Factory.GlowIntensity);
             float sgn = i % 2 == 0 ? 1f : -1f;
+            // (not enlarged in a 9:16 frame: the labels on one side are only two arrows apart, and the camera comes closer)
             TextBox tag = ExpLabelWide(marks, $"{b.N[i]}\n<size=70%>hour {b.N[i] % 30}</size>", (b.A[i] + b.B[i]) * .5f + side * (sgn * width * 1.45f) + Vector3.back * .1f,
-                width * 7f, col);
+                width * 7f / LabelBoost, col);
             Outline(tag.TextField);
         }
 
@@ -193,6 +196,169 @@ public partial class SacksSpiral
         LineRenderer sumArrow = ExpLine(g, "sum arrow", unit * .16f, Color.white, AttentionIntensity, new[] { c, q[8] });
         OnTop(sumArrow, 22);
         StartCoroutine(SettleRoutine(sumArrow, tr < 0 ? new Color(.35f, .8f, 1f) : PrimeGold, 1f));
+    }
+
+    // ---- E8's wheel brought onto a block: the clock turns to the path, so no arrow has to turn -----------------------
+
+    static readonly string[] WheelGroups = { "E8 rings", "E8 walk", "TB scale" };
+    readonly Dictionary<LineRenderer, float> wheelWidths = new();
+    Vector3 wheelPos;           // where the wheel's centre is now
+    Quaternion wheelRot = Quaternion.identity;
+    float wheelScale = 1f;
+    bool wheelPosed;
+
+    /// <summary>Lines of the wheel's groups switched to local space (their points kept where they are) so they move with it.</summary>
+    void WheelLines()
+    {
+        foreach (Transform g in ExpRoot())
+        {
+            if (Array.IndexOf(WheelGroups, g.name) < 0) continue;
+            foreach (LineRenderer l in g.GetComponentsInChildren<LineRenderer>(true))
+            {
+                if (!l.useWorldSpace) continue;
+                Vector3[] pts = new Vector3[l.positionCount];
+                l.GetPositions(pts);
+                for (int i = 0; i < pts.Length; i++) pts[i] = l.transform.InverseTransformPoint(pts[i]);
+                l.useWorldSpace = false;
+                l.SetPositions(pts);
+                wheelWidths[l] = l.widthMultiplier / Mathf.Max(.001f, wheelScale);
+            }
+        }
+    }
+
+    /// <summary>Pose the wheel: its centre at <paramref name="pos"/>, turned by <paramref name="rot"/>, scaled by <paramref name="scale"/>.</summary>
+    void WheelPose(Vector3 pos, Quaternion rot, float scale)
+    {
+        WheelLines();
+        foreach (Transform g in ExpRoot())
+        {
+            if (Array.IndexOf(WheelGroups, g.name) < 0) continue;
+            g.localScale = Vector3.one * scale;
+            g.rotation = rot;
+            g.position = pos - rot * (e8WheelCenter * scale);
+        }
+
+        foreach (var kv in wheelWidths) if (kv.Key != null) kv.Key.widthMultiplier = kv.Value * scale;
+        wheelPos = pos;
+        wheelRot = rot;
+        wheelScale = scale;
+        wheelPosed = true;
+    }
+
+    /// <summary>Where a point of the wheel (as drawn at home) is now.</summary>
+    Vector3 WheelPoint(Vector3 home) => wheelPosed ? wheelPos + wheelRot * ((home - e8WheelCenter) * wheelScale) : home;
+
+    IEnumerator WheelMoveRoutine(Vector3 pos, Quaternion rot, float scale, float seconds)
+    {
+        if (!wheelPosed) { wheelPos = e8WheelCenter; wheelRot = Quaternion.identity; wheelScale = 1f; }
+        Vector3 p0 = wheelPos;
+        Quaternion r0 = wheelRot;
+        float s0 = wheelScale, time = 0f;
+        // the scale eases geometrically, so the shrinking wheel never seems to rush
+        while (time < seconds)
+        {
+            float u = Mathf.SmoothStep(0f, 1f, time / seconds);
+            WheelPose(Vector3.Lerp(p0, pos, u), Quaternion.Slerp(r0, rot, u), s0 * Mathf.Pow(scale / s0, u));
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        WheelPose(pos, rot, scale);
+    }
+
+    /// <summary>
+    /// Lift the lit block of spoke k onto E8's wheel without turning a single arrow: a copy of the block flies to the wheel
+    /// and grows (each arrow keeps the direction it has on the path), while the wheel turns until its hour 0 points the
+    /// way the arrow of n = c would point (−t·log c). Seen on the turned clock, the arrow of n = c + h points at hour k·h,
+    /// so the chain of eight ends on the wheel's 0–15 diameter at tr Cᵏ.
+    /// </summary>
+    public void ExpTraceOverlay(int k, float seconds)
+    {
+        if (!tbBlocks.TryGetValue(k, out TbBlock b) || !e8WheelReady) return;
+        if (ExpRoot().Find("TB scale") == null) ExpTraceScale(e8WheelLabel * .2f);
+        StartCoroutine(TraceOverlayRoutine(b, seconds));
+    }
+
+    IEnumerator TraceOverlayRoutine(TbBlock b, float seconds)
+    {
+        Transform old = ExpRoot().Find($"TB chain {b.K}");
+        if (old != null) Destroy(old.gameObject);
+        Transform g = ExpGroup($"TB chain {b.K}").transform;
+        double phi0 = -b.T * Math.Log(b.C);
+        Quaternion rot = Quaternion.AngleAxis((float)(phi0 * Mathf.Rad2Deg) - 90f, Vector3.forward);
+        if (Quaternion.Dot(rot, wheelPosed ? wheelRot : Quaternion.identity) < 0f) rot = new Quaternion(-rot.x, -rot.y, -rot.z, -rot.w);
+        // the chain on the wheel: the block's own directions, each arrow an eighth of the wheel's radius
+        Vector3 c = e8WheelCenter + Vector3.back * .6f;
+        float unit = e8HourRadius / 8f;
+        Vector3[] q = new Vector3[9];
+        q[0] = c;
+        for (int i = 0; i < 8; i++) q[i + 1] = q[i] + new Vector3((float)Math.Cos(b.Dir[i]), (float)Math.Sin(b.Dir[i]), 0f) * unit;
+        LineRenderer[] flying = new LineRenderer[8];
+        float w0 = b.Lines[0] != null ? b.Lines[0].widthMultiplier : .1f, w1 = unit * .3f;
+        for (int i = 0; i < 8; i++)
+        {
+            flying[i] = ExpLine(g, $"arrow {b.N[i]}", w0, ZsHourColor((int)(b.N[i] % 30)), Factory.GlowIntensity, new[] { b.A[i], b.B[i] });
+            OnTop(flying[i], 21);
+        }
+
+        // the wheel turns while the copy flies
+        float t1 = seconds * .7f;
+        StartCoroutine(WheelMoveRoutine(e8WheelCenter, rot, 1f, t1));
+        float time = 0f;
+        while (time < t1)
+        {
+            if (g == null) yield break;
+            for (int i = 0; i < 8; i++)
+            {
+                if (flying[i] == null) yield break;
+                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((time / t1 - i * .04f) / .7f));
+                flying[i].SetPositions(new[] { Vector3.Lerp(b.A[i], q[i], u), Vector3.Lerp(b.B[i], q[i + 1], u) });
+                flying[i].widthMultiplier = Mathf.Lerp(w0, w1, u);
+            }
+
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            if (flying[i] == null) continue;
+            flying[i].SetPositions(new[] { q[i], q[i + 1] });
+            flying[i].widthMultiplier = w1;
+            Color col = ZsHourColor((int)(b.N[i] % 30));
+            ArrowHead(g, $"head {b.N[i]}", q[i], q[i + 1], unit * .34f, col, unit * .1f);
+            if (i > 0) ExpDot(g, $"joint {i}", q[i] + Vector3.back * .15f, unit * .2f, Color.white, Factory.GlowIntensity);
+        }
+
+        // the hours the arrows point at on the turned clock, each ringed with its arm
+        HashSet<int> marked = new();
+        foreach (int h in ZeroSums.Gold) marked.Add((int)(((long)b.K * h) % 30));
+        foreach (int hour in marked)
+        {
+            Vector3 rim = WheelPoint(E8Hour(hour, e8HourRadius * 1.08f)) + Vector3.back * .6f;
+            RingAround(g, $"hour {hour}", rim, Vector3.back, unit * .35f, Color.white * .9f, unit * .05f, AttentionIntensity);
+            LineRenderer arm = ExpLine(g, $"arm {hour}", unit * .14f, new Color(1f, 1f, 1f, .75f), Factory.SoftGlowIntensity,
+                new[] { c + Vector3.back * .05f, rim });
+            OnTop(arm, 19);
+            if (marked.Count > 2) continue;
+            TextBox tag = ExpLabelWide(g, $"hour {hour}", WheelPoint(E8Hour(hour, e8HourRadius * 1.08f + unit * 1.4f)) + Vector3.back * .7f, unit * 16f, Color.white);
+            Outline(tag.TextField);
+        }
+
+        // the sum, from the centre along the turned 0–15 diameter
+        int tr = Trace30(b.K);
+        ExpDot(g, "sum", q[8] + Vector3.back * .2f, unit * .45f, Color.white, AttentionIntensity);
+        Flare(q[8] + Vector3.back * .3f, unit * 1.4f, 1.2f, 2);
+        LineRenderer sumArrow = ExpLine(g, "sum arrow", unit * .16f, Color.white, AttentionIntensity, new[] { c, q[8] });
+        OnTop(sumArrow, 22);
+        StartCoroutine(SettleRoutine(sumArrow, tr < 0 ? new Color(.35f, .8f, 1f) : PrimeGold, 1f));
+    }
+
+    /// <summary>E8's wheel back to its own place, turned back and full size.</summary>
+    public void ExpWheelHome(float seconds)
+    {
+        if (!wheelPosed) return;
+        StartCoroutine(WheelMoveRoutine(e8WheelCenter, Quaternion.identity, 1f, seconds));
     }
 
     /// <summary>The trace scale on the clock's vertical diameter (−8 at hour 15, +8 at hour 0), with ticks and numbers.</summary>

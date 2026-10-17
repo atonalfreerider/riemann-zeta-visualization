@@ -127,9 +127,13 @@ public partial class SacksSpiral
         }
     }
 
+    /// <summary>For callouts: the point (log₁₀ x, E) of the counted race, wherever it is drawn (exp:callrace:LG,E).</summary>
+    public Vector3 RacePoint(float lg, float e) => raceCountedP != null ? raceCountedP(lg, e) + Vector3.back * .4f : Center;
+
     public void ExpSpokeRace(Vector3 o, float labelSize)
     {
-        const float w = 280f, sy = 4f, gap = 70f;
+        // a 9:16 frame stacks the race over the fold, so the race is narrower there
+        float w = Tall ? 150f : 280f, sy = Tall ? 4.4f : 4f, gap = Tall ? 76f : 70f;
         raceCountedP = RacePanel(ExpGroup("MA counted").transform, o + Vector3.up * (gap * .5f), w, sy, RaceData.Race, 1,
             "counted:  the primes up to 10<sup>7</sup>", false, labelSize, new[] { -3f, 1f });
         RacePanel(ExpGroup("MA rebuilt").transform, o + Vector3.down * (gap * .5f), w, sy, RaceData.Rebuild, RaceData.RebuildStride,
@@ -206,7 +210,7 @@ public partial class SacksSpiral
             TextAlignmentOptions al = !landed.ContainsKey(h) ? TextAlignmentOptions.Center : d.x < 0f ? TextAlignmentOptions.Right : TextAlignmentOptions.Left;
             Vector3 at = o + d * (rim + 6.5f);
             if (landed.ContainsKey(h)) at += new Vector3(d.x < 0f ? 2.6f : -2.6f, 0f, 0f);
-            ExpLabelWide(g, text, at, labelSize * .2f, ZsHourColor(h), al);
+            ExpLabelWide(g, text, at, labelSize * .2f, ZsHourColor(h), al).gameObject.name = $"hour label {h}";
         }
     }
 

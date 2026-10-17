@@ -20,6 +20,11 @@ using UnityEngine;
 ///   nw.h (height), nw.wave (0 … 1), nw.count (numbers shown), nw.labels, nw.label (their size), nw.dot, nw.rays
 ///   (the squares and pronic rays), nw.ribbon (the wave's sign painted on the line), nw.counter (the wave count, in a
 ///   fixed corner of the screen), nw.vis.
+///   nw.frame   the camera (on=nwboxp) frames only the numbers up to this one: while the line curls, it follows the inner
+///              turns as they form instead of the whole line (whose mid-curl arc is hundreds of units tall).
+///   nw.split   0: one wave, the blend of the two by nw.mix; 1: both at once, the zeros' wave standing above the line (the
+///              saddle) and Voronoi's divisor wave hanging below it, reflected.
+/// The line, the crest and the numbers never get thinner on the screen than a few pixels, wherever the camera is.
 /// </summary>
 public partial class SacksSpiral
 {
@@ -41,8 +46,8 @@ public partial class SacksSpiral
         public readonly float[] ShownP = new float[NwSamples + 1], ShownD = new float[NwSamples + 1], Shown = new float[NwSamples + 1];
         public readonly Vector3[] P = new Vector3[NwSamples + 1], Up = new Vector3[NwSamples + 1], Left = new Vector3[NwSamples + 1];
         public LineRenderer Curve, Crest, RaySquares, RayPronic;
-        public Mesh Curtain, Ribbon, Dots;
-        public MeshRenderer CurtainR, RibbonR, DotsR;
+        public Mesh Curtain, Ribbon, Dots, Under;
+        public MeshRenderer CurtainR, RibbonR, DotsR, UnderR;
         public TextBox[] Labels;
         public string LayoutSig = "", DrawSig = "", MixSig = "";
         public bool WavesChanged = true;
@@ -114,12 +119,14 @@ public partial class SacksSpiral
         NwLane L = new() { Centre = NumberWorldOrigin, Root = ExpGroup("NW line").transform };
         L.AccP = new double[NwSamples + 1];
         L.AccD = new double[NwSamples + 1];
-        L.Curve = ExpLine(L.Root, "number line", .12f, new Color(.62f, .66f, .85f), Factory.NoGlow, new[] { L.Centre, L.Centre });
+        L.Curve = ExpLine(L.Root, "number line", .12f, new Color(.74f, .8f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
         L.Crest = ExpLine(L.Root, "wave", .22f, Factory.Palette.Cosine, Factory.GlowIntensity, new[] { L.Centre, L.Centre });
         L.RaySquares = ExpLine(L.Root, "squares ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
         L.RayPronic = ExpLine(L.Root, "pronic ray", .14f, new Color(.45f, .75f, 1f), Factory.SoftGlowIntensity, new[] { L.Centre, L.Centre });
         L.Curtain = NwMesh(L.Root, "curtain", out L.CurtainR);
         Factory.SetIntensity(L.CurtainR, .82f);
+        L.Under = NwMesh(L.Root, "divisor wave below", out L.UnderR);
+        Factory.SetIntensity(L.UnderR, .82f);
         L.Ribbon = NwMesh(L.Root, "ribbon", out L.RibbonR);
         Factory.SetIntensity(L.RibbonR, 1.1f);
         L.Dots = NwMesh(L.Root, "numbers", out L.DotsR);
@@ -175,11 +182,22 @@ public partial class SacksSpiral
             NwLayout(L, roll, bend);
         }
 
-        string draw = $"{h:F3}|{stand:F4}|{count:F2}|{labels:F3}|{dot:F3}|{lab:F3}|{rays:F3}|{vis:F3}|{ribbon:F3}";
+        float frameH = NwFrameHeight(L);
+        int fq = Mathf.RoundToInt(Mathf.Log(Mathf.Max(1f, frameH)) * 20f);
+        string draw = $"{h:F3}|{stand:F4}|{count:F2}|{labels:F3}|{dot:F3}|{lab:F3}|{rays:F3}|{vis:F3}|{ribbon:F3}|{fq}|{Tw("nw.frame", 1e6f):F2}|{Tw("nw.split", 0f):F3}";
         if (!moved && !L.WavesChanged && draw == L.DrawSig) return;
         L.DrawSig = draw;
         L.WavesChanged = false;
         NwDraw(L, roll, stand, h, count, labels, dot, lab, rays, vis, ribbon);
+    }
+
+    /// <summary>The height of the camera's frame at the line (world units), for widths that stay visible on the screen.</summary>
+    static float NwFrameHeight(NwLane L)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return 60f;
+        float d = Vector3.Distance(cam.transform.position, L.Box.size.sqrMagnitude > 0f ? L.Box.center : L.Centre);
+        return 2f * d * Mathf.Tan(cam.fieldOfView * .5f * Mathf.Deg2Rad);
     }
 
     /// <summary>Bring the two sums to the wanted numbers of terms (adding or removing waves) and refresh their display values.</summary>
@@ -355,17 +373,18 @@ public partial class SacksSpiral
 
     void NwDraw(NwLane L, float roll, float stand, float h, float count, float labels, float dot, float lab, float rays, float vis, float ribbon)
     {
-        float mix = Tw("nw.mix", 0f);
+        float mix = Tw("nw.mix", 0f), split = Tw("nw.split", 0f), frameLimit = Tw("nw.frame", 1e6f);
+        float frameH = NwFrameHeight(L);
         Color col = Color.Lerp(Factory.Palette.Cosine, DivisorWaveColor, mix);
         int cols = nwCols.Length - 1;
         int i0 = (int)Math.Ceiling(Math.Sqrt(NwXMin) / nwDw);
         bool smooth = L.BetaP <= 0f && (mix < .5f ? L.TermsP <= 3 : L.TermsD <= 3);
-        // the line (the spiral)
+        // the line (the spiral): never thinner than about four pixels
         List<Vector3> curve = new(cols + 1);
         for (int c = 0; c <= cols; c++) curve.Add(L.P[nwCols[c]]);
         L.Curve.positionCount = curve.Count;
         L.Curve.SetPositions(curve.ToArray());
-        L.Curve.widthMultiplier = Mathf.Lerp(.32f, .1f, roll);
+        L.Curve.widthMultiplier = Mathf.Max(Mathf.Lerp(.36f, .2f, roll), .0036f * frameH);
         // the wave: a filled band from the line to the wave (a column per ~.12 units of arc), its crest when it is smooth
         bool waveOn = h > .005f;
         L.CurtainR.gameObject.SetActive(waveOn);
@@ -377,7 +396,9 @@ public partial class SacksSpiral
             List<Color> vc = new(cols * 2);
             List<int> tris = new(cols * 12);
             List<Vector3> crest = new(cols);
-            Color foot = new(col.r, col.g, col.b, .12f), head = smooth ? new Color(col.r, col.g, col.b, .5f) : col;
+            Color colTop = split > .001f ? Factory.Palette.Cosine : col;
+            Color foot = new(colTop.r, colTop.g, colTop.b, .22f), head = smooth ? new Color(colTop.r, colTop.g, colTop.b, .8f) : colTop;
+            float[] shownTop = split > .001f ? L.ShownP : L.Shown;
             for (int c = 0; c < cols; c++)
             {
                 int a = Mathf.Max(nwCols[c], i0), b = nwCols[c + 1];
@@ -385,8 +406,9 @@ public partial class SacksSpiral
                 float lo = 0f, hi = 0f;
                 for (int i = a; i <= b; i++)
                 {
-                    lo = Mathf.Min(lo, L.Shown[i]);
-                    hi = Mathf.Max(hi, L.Shown[i]);
+                    float sv = Mathf.Lerp(L.Shown[i], shownTop[i], split);
+                    lo = Mathf.Min(lo, sv);
+                    hi = Mathf.Max(hi, sv);
                 }
 
                 int j = (a + b) / 2;
@@ -397,8 +419,8 @@ public partial class SacksSpiral
                 vc.Add(foot);
                 vc.Add(head);
                 if (v >= 2) tris.AddRange(new[] { v - 2, v - 1, v + 1, v - 2, v + 1, v, v - 2, v + 1, v - 1, v - 2, v, v + 1 });
-                if (smooth) crest.Add(p + d * (L.Shown[j] * h + .05f) + L.Up[j] * .04f);
-                if ((c & 7) == 0)
+                if (smooth) crest.Add(p + d * (Mathf.Lerp(L.Shown[j], shownTop[j], split) * h + .05f) + L.Up[j] * .04f);
+                if ((c & 7) == 0 && nwW[j] * nwW[j] <= frameLimit)
                 {
                     box.Encapsulate(p);
                     box.Encapsulate(p + d * (hi * h));
@@ -415,9 +437,48 @@ public partial class SacksSpiral
             {
                 L.Crest.positionCount = crest.Count;
                 L.Crest.SetPositions(crest.ToArray());
-                L.Crest.startColor = L.Crest.endColor = col;
-                L.Crest.widthMultiplier = Mathf.Lerp(.3f, .16f, roll);
+                L.Crest.startColor = L.Crest.endColor = colTop;
+                L.Crest.widthMultiplier = Mathf.Max(Mathf.Lerp(.34f, .2f, roll), .003f * frameH);
             }
+        }
+
+        // with split: Voronoi's divisor wave hangs below the line, reflected (its spikes point down, into the saddle)
+        bool underOn = waveOn && split > .001f;
+        L.UnderR.gameObject.SetActive(underOn);
+        if (underOn)
+        {
+            List<Vector3> uv = new(cols * 2);
+            List<Color> uc = new(cols * 2);
+            List<int> ut = new(cols * 12);
+            Color dc = DivisorWaveColor;
+            Color ufoot = new(dc.r, dc.g, dc.b, .22f * split), uhead = new(dc.r, dc.g, dc.b, split);
+            for (int c = 0; c < cols; c++)
+            {
+                int a = Mathf.Max(nwCols[c], i0), b = nwCols[c + 1];
+                if (b <= a) continue;
+                float lo = 0f, hi = 0f;
+                for (int i = a; i <= b; i++)
+                {
+                    lo = Mathf.Min(lo, L.ShownD[i]);
+                    hi = Mathf.Max(hi, L.ShownD[i]);
+                }
+
+                int j = (a + b) / 2;
+                Vector3 p = L.P[j], d = -NwDir(L.Up[j], L.Left[j], stand);
+                int v = uv.Count;
+                uv.Add(p + d * (lo * h));
+                uv.Add(p + d * (hi * h + .04f));
+                uc.Add(ufoot);
+                uc.Add(uhead);
+                if (v >= 2) ut.AddRange(new[] { v - 2, v - 1, v + 1, v - 2, v + 1, v, v - 2, v + 1, v - 1, v - 2, v, v + 1 });
+                if ((c & 7) == 0 && nwW[j] * nwW[j] <= frameLimit) box.Encapsulate(p + d * (hi * h));
+            }
+
+            L.Under.Clear();
+            L.Under.SetVertices(uv);
+            L.Under.SetColors(uc);
+            L.Under.SetTriangles(ut, 0);
+            L.Under.RecalculateBounds();
         }
 
         // the ribbon: the wave's sign painted along the line (bright up, deep blue down), for reading a pattern from above
@@ -463,10 +524,10 @@ public partial class SacksSpiral
             bool isPrime = n > 1 && !expNotPrime[n];
             int rt2 = Mathf.RoundToInt(Mathf.Sqrt(n));
             bool square = rt2 * rt2 == n;
-            Color cc = isPrime ? PrimeBead : square ? new Color(.45f, .75f, 1f) : new Color(.55f, .58f, .7f);
-            float s = dot * (isPrime || square ? .5f : .34f);
+            Color cc = isPrime ? PrimeBead : square ? new Color(.45f, .75f, 1f) : new Color(.62f, .65f, .78f);
+            float s = Mathf.Max(dot * (isPrime || square ? .5f : .34f), (isPrime || square ? .0065f : .0045f) * frameH);
             OctaPoint(dv, dcl, dt, p + up * (s * .6f), s, cc);
-            box.Encapsulate(p);
+            if (n <= frameLimit) box.Encapsulate(p);
         }
 
         L.Dots.Clear();
@@ -516,7 +577,7 @@ public partial class SacksSpiral
         }
 
         L.Box = box;
-        foreach (Renderer r in new Renderer[] { L.Curve, L.Crest, L.RaySquares, L.RayPronic, L.CurtainR, L.DotsR, L.RibbonR })
+        foreach (Renderer r in new Renderer[] { L.Curve, L.Crest, L.RaySquares, L.RayPronic, L.CurtainR, L.DotsR, L.RibbonR, L.UnderR })
             Factory.SetColor(r, new Color(1f, 1f, 1f, vis));
     }
 

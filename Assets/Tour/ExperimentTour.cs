@@ -75,6 +75,7 @@ public partial class TourDirector
         PlayingExperiment = false;
         SacksSpiral.LabelBoost = 1f;
         SacksSpiral.CalloutScale = 1f;
+        SacksSpiral.Tall = false;
         if (mainScript != null) script = mainScript;
         if (sweepRoutine != null)
         {
@@ -177,11 +178,19 @@ public partial class TourDirector
         return new Vector3(At(0), At(1), At(2));
     }
 
+    /// <summary>An argument written "WIDE^TALL": the side for the frame the segment plays in (SacksSpiral.Tall).</summary>
+    static string Pick(string s)
+    {
+        int k = s.IndexOf('^');
+        if (k < 0) return s;
+        return SacksSpiral.Tall ? s.Substring(k + 1) : s.Substring(0, k);
+    }
+
     void ApplyExperimentAction(string[] p)
     {
         SacksSpiral sacks = Annotations.Sacks;
         string verb = p.Length > 1 ? p[1].Trim().ToLowerInvariant() : "";
-        string A(int i) => p.Length > i ? p[i].Trim() : "";
+        string A(int i) => p.Length > i ? Pick(p[i].Trim()) : "";
         float F(int i, float d) => float.TryParse(A(i), NumberStyles.Float, CultureInfo.InvariantCulture, out float v) ? v : d;
         int I(int i, int d) => int.TryParse(A(i), NumberStyles.Integer, CultureInfo.InvariantCulture, out int v) ? v : d;
         float LastNumber(int from, float d)
@@ -432,11 +441,12 @@ public partial class TourDirector
             case "reveal":
                 if (A(3).Contains(","))
                 {
-                    // explicit times, one per item: exp:reveal:GROUP:T1,T2,…
+                    // explicit times, one per item: exp:reveal:GROUP:T1,T2,…[:own] (own: on a clock of its own, so several
+                    // reveals can run at once; without it a new reveal stops the one before)
                     List<float> times = new();
                     foreach (string t in A(3).Split(','))
                         if (float.TryParse(t, NumberStyles.Float, CultureInfo.InvariantCulture, out float v)) times.Add(v);
-                    sacks.ExpRevealAt(A(2), times.ToArray());
+                    sacks.ExpRevealAt(A(2), times.ToArray(), Has("own"));
                 }
                 else sacks.ExpRevealLive(A(2), Seconds(A(3), 6f));
                 break;
@@ -580,6 +590,7 @@ public partial class TourDirector
             case "callhand":
             case "calltooth":
             case "calllat":
+            case "callrace":
             case "callpath":
             case "callpathzeta":
             case "callnw":
@@ -612,6 +623,7 @@ public partial class TourDirector
                     "callpath" => sacks.PathVertex((int)num),
                     "callhand" => sacks.FwHandTip((long)num),
                     "calltooth" => sacks.FwToothTip((long)num),
+                    "callrace" => sacks.RacePoint(ParseVector(A(2)).x, ParseVector(A(2)).y),
                     "calllat" => sacks.LatticePoint(Mathf.RoundToInt(ParseVector(A(2)).x), Mathf.RoundToInt(ParseVector(A(2)).y), Mathf.RoundToInt(ParseVector(A(2)).z)),
                     "callblock" => sacks.TraceBlockAt((int)num),
                     "callpathzeta" => sacks.PathZeta(),
@@ -644,12 +656,16 @@ public partial class TourDirector
             // discovery five, step by step (SacksS3Count.cs): exp:hoursquares:SECONDS · exp:powerwalk:P:MAXPOW:SECONDS ·
             // exp:modp:P:X,Y,Z:RADIUS · exp:modptest:P:SECONDS · exp:s3anim:NAME:SECONDS (NAME identity|rotation|reflection|square)
             case "hoursquares": sacks.ExpHourSquares(Seconds(A(2), 6f), 220f); break;
+            // E8's wheel onto a block of the gold path (no arrow turns) and back: exp:tboverlay:K:SECONDS · exp:wheelhome:SECONDS
+            case "tboverlay": sacks.ExpTraceOverlay(I(2, 15), Seconds(A(3), 4f)); break;
+            case "wheelhome": sacks.ExpWheelHome(Seconds(A(2), 3f)); break;
             // exp:e8links:MAXN:GAP — the divisor links beside E8's tower · exp:eyelimits:SECONDS — why the eyes thin out at 1.71
             case "e8links": sacks.ExpE8Links(I(2, 7), F(3, 16f), 220f); break;
             case "eyelimits": sacks.ExpEyeLimits(Seconds(A(2), 8f), 220f); break;
             case "powerwalk": sacks.ExpPowerWalk(I(2, 7), I(3, 4), Seconds(A(4), 6f), 220f); break;
             case "modp": sacks.ExpRootsModP(c + ParseVector(A(3)), I(2, 5), F(4, 20f), 220f); break;
             case "modptest": sacks.ExpRootsTest(I(2, 5), Seconds(A(3), 4f), 220f); break;
+            case "modpshow": sacks.ExpRootsShow(I(2, 5)); break;
             case "s3anim": sacks.ExpS3Animate("S3 " + A(2).ToLowerInvariant(), Seconds(A(3), 3f)); break;
             case "lwaves": sacks.ExpClassWaves(c + ParseVector(A(2)), 220f); break;
             case "lratio": sacks.ExpClassRatioLive(Seconds(A(2), 10f), 220f); break;
@@ -662,6 +678,7 @@ public partial class TourDirector
             case "nwenter": sacks.ExpNwEnter(I(2, 1), Seconds(A(3), 3f)); break;
             case "nwrowsclear": sacks.ExpNwRowsClear(); break;
             case "nwangle": sacks.ExpNwAngle(A(2).ToLowerInvariant() != "off", F(3, 4f)); break;
+            case "nwquarters": sacks.ExpNwQuarters(A(2).ToLowerInvariant() != "off", F(3, 30f)); break;
             case "nwradius": sacks.ExpNwRadius(F(2, 100f), string.Join(":", p, 4, Mathf.Max(0, p.Length - 4)), F(3, 4f)); break;
             case "nwflare":
             {
@@ -786,7 +803,8 @@ public partial class TourDirector
             case "t5lattice3": sacks.ExpClassLattices(c + Where(new Vector3(SacksSpiral.ClassGroupOffset, 0f, 0f)), 220f); break;
             case "say":
             {
-                string[] parts = string.Join(":", p, 2, p.Length - 2).Split('|');
+                // split at the first bar only: a subtitle may hold bars of its own (|1 + 2^-1/2|)
+                string[] parts = string.Join(":", p, 2, p.Length - 2).Split(new[] { '|' }, 2);
                 SacksSpiral.ExpSay(parts[0], parts.Length > 1 ? parts[1] : null);
                 break;
             }

@@ -4,7 +4,7 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
 
 ## xs1: The saddle is a wave
 
-*discovery 1 of 5:  two master waves on the Sacks spiral*  ·  23 lines, 1076 words
+*discovery 1 of 5:  two master waves on the Sacks spiral*  ·  24 lines, 1143 words
 
 1. Claude, an AI math research assistant, and I set out to find the geometry hidden in the counting numbers. This is where it leads: the Sacks spiral on its saddle, carrying the master wave of zeta's zeros, which spikes at every prime, and the curve of zeta rising out of the saddle's centre, touching its axis at every zero. Here is how it is built.
    *Board:* **where this leads** — ζ's master wave on the Sacks spiral  ·  ζ's curve rising from the saddle's centre
@@ -50,21 +50,23 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
    *Callouts:* 12 = 2²·3:  3·2 = 6; 30 = 2·3·5:  2·2·2 = 8; 36 = 2²·3²:  3·3 = 9
 18. Take his sum back down to its first wave, and curl the line up into the spiral once more.
    *Board:* **curling Voronoi's first wave** — the same Sacks spiral
-19. On the spiral his first wave stands still: two crests on every turn, at the same two angles turn after turn, 22.5° before the ray of the squares, just short of 64, and before the ray of the pronic numbers, just short of 72.
+19. On the spiral the angle is two pi times the square root of n, so his first wave, sin(4π√n), is a sine of twice the angle: it rises and falls twice on every turn. Stand it up and look from the side: it stands up in two opposite quarters, the brown ones, and hangs down in the other two, the blue ones.
+   *Board:* **Voronoi's first wave on the spiral** — the angle θ = 2π√n, so sin(4π√n) = sin 2θ:  up twice and down twice on every turn
+20. Its crests sit at the same two angles turn after turn, 22.5° before the ray of the squares, just short of 64, and before the ray of the pronic numbers, just short of 72.
    *Board:* **Voronoi's first wave on the spiral** — two crests per turn, 22.5° before the squares and the pronic numbers
    *Callouts:* 64 = 8²; 72 = 8·9
-20. Turn it into a zero's wave on the same spiral, and its crests start to drift into arms, because the zeros tick on the logarithm. Turn it back: Voronoi's waves tick on the square root, the spiral's own clock, so each one stands still.
+21. Turn it into a zero's wave on the same spiral, and its crests start to drift into arms, because the zeros tick on the logarithm. Turn it back: Voronoi's waves tick on the square root, the spiral's own clock, so each one stands still.
    *Board:* **two clocks** — ζ's zeros tick on log n  ·  Voronoi's waves tick on √n
-21. Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, its valleys along the rays of the squares and the pronic numbers, where primes are scarcest. Voronoi's first wave has the same shape, turned over and turned by 22.5°: the −π/4 in his formula moves every crest by a sixteenth of a turn.
+22. Bend the plane into the saddle that the Sacks spiral is drawn on. It falls twice and rises twice on every turn, its valleys along the rays of the squares and the pronic numbers, where primes are scarcest. Voronoi's first wave has the same shape, turned over and turned by 22.5°: the −π/4 in his formula moves every crest by a sixteenth of a turn.
    *Board:* **the saddle** — down twice and up twice on every turn:  valleys on the squares and pronic numbers
-22. Now build both master waves on the saddle, on this one spiral. The zeros' waves light the primes; turn them into the whole numbers' own waves, and every number lights up by its count of divisors.
-   *Board:* **two master waves on one saddle** — ζ's zeros light the primes  ·  the whole numbers count divisors
-23. Voronoi's formula is from 1904, and the explicit formula for the primes from Riemann and von Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first wave, turned a sixteenth of a turn, and both master waves ride the same spiral.
+23. Now build both master waves on this one saddle. The zeros' waves stand above it and spike at the primes; Voronoi's waves hang below it, reflected, and every number reaches down as far as its count of divisors.
+   *Board:* **two master waves on one saddle** — above:  ζ's zeros light the primes   ·   below:  every number by its count of divisors
+24. Voronoi's formula is from 1904, and the explicit formula for the primes from Riemann and von Mangoldt. What Claude and I add is the picture: the saddle under the Sacks spiral is the divisor count's first wave, turned a sixteenth of a turn, and both master waves ride the same spiral, the primes above and the divisors below.
    *Board:* **what is new** — the saddle is Voronoi's first wave, turned 22.5°;  both master waves ride one spiral
 
 ## xs2: E8 sets the vortices
 
-*discovery 2 of 5:  E8's clock inside zeta's path of partial sums*  ·  14 lines, 613 words
+*discovery 2 of 5:  E8's clock inside zeta's path of partial sums*  ·  14 lines, 640 words
 
 1. Discovery two. Claude and I drew zeta's series as a path of partial sums: one arrow for every counting number n, 1/√n long, each turning from the last by t · log(n/(n − 1)).
    *Board:* **the path of partial sums** — one arrow n^−½ − it for every counting number, laid end to end
@@ -82,9 +84,9 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
    *Board:* **one run, close up** — the arrows of 1577, 1579, 1583, 1589, 1591, 1597, 1601, 1603:  one per gold hour
 7. Why here? 30 numbers on, each arrow has turned by about 30t/n. Near n = 30t/(2π · 15), about 1590, that is 15 whole turns, so every 30 numbers the pattern repeats exactly: the run is block after block of the same eight arrows.
    *Board:* **the turn over thirty numbers** — t · log((n + 30)/n) ≈ 30t/n = 2π · 15  at  n ≈ 30t / 30π ≈ 1590
-8. Lift one block onto E8's clock. Seen from the block, each arrow points at 15 times its own hour, and every gold hour times 15 is hour 15: all eight line up, and the block adds to −8.
-   *Board:* **the block on E8's clock** — arrow n points at hour 15·n:  all eight at hour 15, the sum −8
-9. Near n = 4770, each arrow points at five times its hour: four land on hour 5 and four on hour 25, and the block adds to four.
+8. Lift one block onto E8's clock without turning a single arrow. The clock turns instead, until its hour zero points the way the arrow of 1590 would. Now each arrow points at 15 times its own hour, and every gold hour times 15 is hour 15: all eight line up, and the block adds to −8.
+   *Board:* **the clock turns, not the arrows** — hour 0 along the arrow of 1590:  arrow n then points at hour 15·n
+9. Near n = 4770, the clock turns again to meet that block. Each arrow points at five times its hour: four land on hour 5 and four on hour 25, and the block adds to four.
    *Board:* **near n = 4770:  k = 5** — arrow n points at hour 5·n:  hours 5 and 25, the sum 4
    *Callouts:* n ≈ 4770
 10. And at the very end, near n = 23,880, each arrow points at its own hour, and the eight nearly cancel: −1. Their prime factors play no part. 23,881 is 11 times 13 times 167, but on the clock it is simply hour 1.

@@ -76,12 +76,37 @@ public partial class SacksSpiral
     {
         List<Renderer> rs = new();
         List<TMP_Text> ts = new();
-        foreach (Transform g in ExpRoot())
+        void Take(Transform g)
         {
-            if (!GroupMatches(g.name, groups)) continue;
             foreach (Renderer r in g.GetComponentsInChildren<Renderer>(true))
                 if (r.GetComponent<TMP_Text>() == null) rs.Add(r);
             foreach (TMP_Text t in g.GetComponentsInChildren<TMP_Text>(true)) ts.Add(t);
+        }
+
+        // "GROUP/PART": only the part of the group of that name (at any depth), e.g. one floor of a tower
+        List<string> whole = new();
+        List<(string group, string part)> parts = new();
+        foreach (string k in groups)
+        {
+            int slash = k.IndexOf('/');
+            if (slash > 0) parts.Add((k.Substring(0, slash), k.Substring(slash + 1)));
+            else whole.Add(k);
+        }
+
+        foreach (Transform g in ExpRoot())
+        {
+            if (GroupMatches(g.name, whole.ToArray()))
+            {
+                Take(g);
+                continue;
+            }
+
+            foreach (var (group, part) in parts)
+            {
+                if (g.name != group) continue;
+                foreach (Transform t in g.GetComponentsInChildren<Transform>(true))
+                    if (t.name == part) Take(t);
+            }
         }
 
         StartCoroutine(MuteRoutine(rs, ts, on, seconds, depth));

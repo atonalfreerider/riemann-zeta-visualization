@@ -137,7 +137,10 @@ public partial class SacksSpiral
             (PathOrigin + new Vector3(0f, -2f, 0f) * PwScale, PathOrigin + new Vector3(0f, 1.5f, 0f) * PwScale),
         }, .16f, new Color(.6f, .65f, .85f) * .8f, Factory.NoGlow);
         ExpDot(pw.Ground, "origin", PathOrigin + Vector3.back * .1f, .9f, Color.white, Factory.SoftGlowIntensity);
-        TextBox ground = ExpLabelWide(pw.Ground, "the ground:  t = 0", PathOrigin + new Vector3(2.6f, -.15f, -.1f) * PwScale, 22f, new Color(.72f, .76f, .9f), TextAlignmentOptions.Left);
+        // beside the grid's right edge, or under its near edge in a 9:16 frame (too narrow for the side)
+        TextBox ground = Tall
+            ? ExpLabelWide(pw.Ground, "the ground:  t = 0", PathOrigin + new Vector3(.5f, -1.75f, -.1f) * PwScale, 22f, new Color(.72f, .76f, .9f))
+            : ExpLabelWide(pw.Ground, "the ground:  t = 0", PathOrigin + new Vector3(2.6f, -.15f, -.1f) * PwScale, 22f, new Color(.72f, .76f, .9f), TextAlignmentOptions.Left);
         Outline(ground.TextField);
         pw.Ground.gameObject.SetActive(false);
         pw.Ticks = new GameObject("t ticks").transform;
