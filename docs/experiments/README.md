@@ -3761,6 +3761,47 @@ master wave and ζ's trail rising from the centre) and build every formula on sc
   of 2 and 3 (and of 5, 6 and 7) stopped each other and the cubes came a line late; `exp:reveal:GROUP:T1,T2,…:own` runs
   a reveal on its own clock, from the start of the line.
 
+*Round six (October 2026).*
+
+* **"Wind" as in winding a clock.** The voice read the verb as the wind that blows. It is now respelled for the voice only
+  (the captions keep the word): wind → wined, winds → wines, winding → wine-ding, unwind → un-wined, wound → wownd
+  ([`Tools/generate_narration.py`](../../Tools/generate_narration.py) `PRONOUNCE`), and the seventeen lines that use it are
+  re-narrated. "wine-dz" for "winds" was read "windees" in context, so "winds" is "wines": the d of "winds" is swallowed
+  in speech anyway.
+* **The vortices on the number line** (xz2, [`SacksVortexLine.cs`](../../Assets/Tour/SacksVortexLine.cs)). At height t,
+  arrow n of the path belongs to vortex k when it lies between spokes k + 1 and k, from n = t/2π(k + 1) to t/2πk; its eye
+  is where the arrows fold back, n ≈ t/2π(k + ½). At the 159th zero (t/2π = 53.1) vortex 1 covers arrows 27 to 53,
+  vortex 2 covers 18 to 27, vortex 3 covers 13 to 18: each stretch is t/2πk(k + 1) long, and below √(t/2π) = 7.3 the
+  stretches are shorter than one arrow (the tangle at the start of the path). The scene unwinds the path onto a number line
+  (`vl.unwind`), lays the mirror n ↦ t/2πn beside it (`vl.fold`; on the mirror's side vortex k fills the unit stretch from
+  k to k + 1, its eye at k + ½: the same mirror that puts each eye at −χ·conj(S<sub>k</sub>)), slides the two lines
+  together (`vl.merge`; the colours then read the same both ways from the fold) and curls the line into the Sacks spiral
+  (`vl.curl`, the tangent turned by the curl times the spiral's own tangent angle 2πw + atan 2πw, w = √n, so the arc
+  length is kept). On the spiral the fold n = √(t/2π) is a circle of radius (t/2π)<sup>¼</sup>: the counting numbers
+  1 … 7 inside, the vortices outside as bands of 2.1, 0.95, 0.56, 0.38 … turns. The structure that emerges is that
+  inversion and nothing more: the spokes' angles 2π√(t/2πk) fall at no common rays. The camera follows the scene's bounds
+  (`on=vlbox`), and lines and labels keep their size on the screen through the tenfold zoom.
+* **Verticals posted one by one.** A watcher muxes each vertical segment as soon as its raw video is written and makes a
+  720p copy for review (ffmpeg needs `-nostdin` there: it read the watcher's input and swallowed the next segment's line).
+
+*E8's finite shells and a number's infinitely many products.* Shell n of E8 holds 240 σ<sub>3</sub>(n) points, and pairing
+each divisor d with n/d gives σ<sub>3</sub>(n)/n³ = Σ<sub>d | n</sub> 1/d³: every divisor d of n adds exactly 1/d³ of n³ to
+the shell. So 7, which divides 14, 21, 28, … without end, adds the same 1/343 of each one's cube: infinitely many products,
+one finite share in each. The shares shrink so fast that their sum over every possible divisor converges, Σ 1/d³ = ζ(3) ≈
+1.202, so every shell lies between 240 n³ and 288.5 n³ points: a prime sits on the floor (1 + 1/p³), and numbers with many
+small factors climb toward ζ(3) (6: 1.167, 12: 1.183, 60: 1.192, 5040: 1.1997). E8 does not bound how many products 7
+has; it bounds, for each n, how many ways n is built. The infinite part is the stack of shells. Shells multiply as their
+numbers do (σ<sub>3</sub> is multiplicative: shell 14 = 9 × 344 × 240), and a prime's own shell governs all its powers:
+σ<sub>3</sub>(7n) = 344 σ<sub>3</sub>(n) − 343 σ<sub>3</sub>(n/7), 344 = 1 + 7³ (the Hecke operator T<sub>7</sub>, of which
+E8's theta series E<sub>4</sub> is an eigenform). The Coxeter element turns every shell into itself with no point fixed by any
+partial turn (its eigenvalues are primitive 30th roots of unity), so shell n is 8 σ<sub>3</sub>(n) rings of 30: each
+divisor d contributes 8 d³ rings. All of it is forced by E8's shape: an even unimodular lattice in 8 dimensions has a weight-4
+modular form for its theta series, and there is only one, E<sub>4</sub> = 1 + 240 Σ σ<sub>3</sub>(n) q<sup>n</sup>; summed
+over the shells, Σ 240 σ<sub>3</sub>(n) n<sup>−s</sup> = 240 ζ(s) ζ(s − 3), every multiple (ζ(s)) times every divisor weighted
+by its cube (ζ(s − 3)). And Ramanujan's expansion σ<sub>3</sub>(n) = n³ ζ(4) Σ<sub>q</sub> c<sub>q</sub>(n)/q⁴ builds the shells
+from the same Ramanujan sums c<sub>q</sub> that set the vortex charges (c<sub>30</sub>(k) = tr C<sup>k</sup>). What the shells
+are not is a fast way to factor: counting a shell's points is no easier than finding the divisors.
+
 *Framing.* Every shot keeps its subject between the caption board and the captions. In the spec, `TOP(box)` turns a box
 of world coordinates into an overhead shot whose fit and raise put the box in the safe band (.25 … .82 of the frame's
 height, .03 … .97 of its width), and two boxes ease from one to the other; `az_to` turns the camera at the steady rate

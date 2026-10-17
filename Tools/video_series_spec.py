@@ -713,8 +713,8 @@ XS4 = dict(
         dict(text="Now the curves of the chart, built step by step. On the critical line each family's completed zeta function is "
                   "a real wave: gold for the first family, blue for the second. Their zeros are where the waves cross the axis.",
              camera=TOP(WAVES_W, tall=[WAVES_T]),
-             actions=["exp:uncall", "exp:mute:LC zeros,LA lattices:2.5:1.95", "exp:showchild:LW waves:t axis",
-                      at("critical", "exp:showchild:LW waves:first"), at("critical", "exp:drawon:LW waves/first:3"),
+             actions=["exp:uncall", "exp:mute:LC zeros,LA lattices:2.5:1.6", "exp:showchild:LW waves:t axis",
+                      at("curves", "exp:showchild:LW waves:first"), at("curves", "exp:drawon:LW waves/first:{curves~gold}"),
                       at("gold", "exp:showchild:LW waves:name first"), at("blue", "exp:showchild:LW waves:second"),
                       at("blue", "exp:drawon:LW waves/second:2"), at("blue", "exp:showchild:LW waves:name second"),
                       at("zeros", "exp:showchild:LW waves:zeros"), at("zeros", "exp:showchild:LW waves:t label"),
@@ -795,7 +795,7 @@ HOURCLOCK, HOURCLOCK_T = (80222, 80298, -44, 28), (79954, 80046, -119, -51)  # a
 POWERS, POWERS_T = (80222, 80300, -42, 30), (79960, 80040, -120, -48)        # the powers of 7 on the fold's logarithmic clock
 MOD5, MOD5_T = (80228, 80292, -36, 34), (79968, 80032, -106, -40)
 MODS, MODS_T = (80185, 80372, -40, 38), (79962, 80038, -180, -6)             # 2, 5 and 59 dots
-MOD25_T, MOD59_T = (79966, 80034, -100, -3), (79962, 80038, -180, -108)      # 9:16: 2 and 5, then 59 alone
+MOD25_T, MOD59_T = (79966, 80034, -100, 1), (79962, 80038, -180, -108)       # 9:16: 2 and 5 (with 2's title), then 59 alone
 S3, S3_T = (80215, 80305, -30, 28), (79968, 80032, -107, -47)               # the triangle of roots, where the fold was
 FAMILY_T = (79910, 80085, -148, 38)                                          # 9:16: the family race over the fold of S3
 XS5 = dict(
@@ -965,6 +965,7 @@ XZ1 = dict(
 # the zeros inside E8, 2: how the vortices develop as the plane climbs
 # ---------------------------------------------------------------------------------------------------------------
 
+VLBOX = C(on="vlbox", at="0,0,0", fit="50,30", el=89.5, az=-90, spin=0, rise=RISE, follow=1)   # follows the vortices' line
 XZ2 = dict(
     id="xz2", title="How the vortices develop", subtitle="the zeros inside E8, part 2:  the path of partial sums high up",
     setup=["exp:stage", "exp:backdrop:off", "exp:vortexprep", "exp:pwinit", tw("pw.t", 50, 0), tw("pw.n", 1000, 0), tw("pw.tail", 1, 0),
@@ -992,10 +993,35 @@ XZ2 = dict(
              camera=PC(at="4,-4,0", fit="52,32", el=78, az="+", spin=1, tall=dict(at="4,-5,0", fit="40,71")),
              actions=["exp:uncall", at("crosses", tw("pw.mirrors", 1, 1.2)),
                       say("every eye is a mirror", "eye of vortex k = the path's k-th vertex, reflected through ζ's phase")]),
+        # the vortices on the number line: the path unwound, the mirror n ↦ t/2πn, and the same line wound into the Sacks spiral
+        dict(text="Now unwind the path onto the number line. Every arrow drops onto its own counting number, in the colour of "
+                  "its vortex. Vortex one lands between twenty-seven and fifty-three, vortex two between eighteen and "
+                  "twenty-seven, vortex three between thirteen and eighteen. Each stretch is shorter than the last, and below "
+                  "seven the vortices are smaller than one arrow: a tangle.",
+             camera=VLBOX,
+             actions=["exp:vlinit", "exp:mute:PW path:1.2:2", tw("pw.mirrors", 0, 1), tw("pw.eyes", 0, 1), tw("pw.axis", 0, 1),
+                      at("unwind", tw("vl.unwind", 1, "{unwind~colour}")), at("colour", tw("vl.marks", 1, 1.5)),
+                      say("the vortices on the number line", "the 159th zero:  vortex k on the arrows from t/2π(k + 1) to t/2πk")]),
+        dict(text="Now the mirror that puts each eye in place: arrow n goes to {t/2πn,|t over two pi n,} here {53/n.|fifty-three over n.} On the "
+                  "mirror's side, vortex one fills the stretch from one to two, vortex two from two to three: lined up on one "
+                  "axis, the vortices are evenly spaced, one for every counting number. The two sides meet at {√53 = 7.3.|the square root "
+                  "of fifty-three, seven point three.}",
+             camera=VLBOX,
+             actions=[at("goes", tw("vl.fold", 1, "{goes~lined}")),
+                      say("the mirror:  n → t/2πn", "vortex k fills the stretch from k to k + 1:  one vortex for every counting number"),
+                      at("meet", say("the fold:  √(t/2π) = 7.3", "the arrows before it make the tangle;  the arrows after it make the vortices"))]),
+        dict(text="Slide the mirror's side onto the line, and the colours read the same both ways from seven point three: one "
+                  "counting number for each vortex on one side, its long stretch of arrows on the other. Wind the line into the "
+                  "Sacks spiral, and the fold becomes a circle: inside it the first seven counting numbers, outside it the "
+                  "vortices, bands of the spiral that widen toward the rim.",
+             camera=VLBOX,
+             actions=[at("slide", tw("vl.merge", 1, 2.5)), at("wind", tw("vl.curl", 1, "{wind~inside}")),
+                      say("the vortices on the Sacks spiral", "the fold is a circle:  counting numbers inside, vortices outside, the same colours")]),
         dict(text="Now let the plane climb on, and at every zero keep each eye where it was. The eyes build a tower; vortex one, in "
                   "cyan, always sits on a circle of radius one.",
              camera=PC(at="0,0,10", fit="60,40>90,70", el="70>26", az="+", spin=6, span=10, tall=dict(fit="45,80>70,124")),
-             actions=[tw("pw.mirrors", 0, 1), tw("pw.trails", 1, 0), tw("pw.t", 420, "{climb~end}", "linear"),
+             actions=[tw("vl.vis", 0, 1), "exp:unmute:PW path:1.5", tw("pw.eyes", 1, 1), tw("pw.axis", 1, 1.5),
+                      tw("pw.mirrors", 0, 1), tw("pw.trails", 1, 0), tw("pw.t", 420, "{climb~end}", "linear"),
                       say("the eyes through the zeros", "kept at every zero:  vortex 1 on a circle of radius 1")]),
         dict(text="Look straight down the axis. The eyes of ten thousand zeros, stacked: the unit circle of vortex one, and rings "
                   "for all the others.",
