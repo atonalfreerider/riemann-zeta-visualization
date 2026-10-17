@@ -97,6 +97,13 @@ PRONOUNCE = [
     (re.compile(r"\b([Pp])ronic"), r"\1ro-nick"),  # "PRO-nick"
     (re.compile(r"\bFermat"), "Fair-mah"),         # Pierre de Fermat: "fair-MAH", the t silent
     (re.compile(r"\bi t\b"), "eye tee"),           # ζ(½ + it): the letters, never the word "it"
+    # the verb "to wind" (a path winds up, a coil is wound): "wined", never the wind that blows; respelled on "wine" and
+    # "wow" so the vowel cannot go the other way ("winds" as "wines": "wine-dz" was read "windees" in context, and the d
+    # of "winds" is swallowed in speech anyway)
+    (re.compile(r"\b([Ww])inding\b"), r"\1ine-ding"),
+    (re.compile(r"\b([Ww])inds\b"), r"\1ines"),
+    (re.compile(r"\b([Ww])ind\b"), r"\1ined"),
+    (re.compile(r"\b([Ww])ound\b"), r"\1ownd"),
 ]
 
 

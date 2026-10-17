@@ -2821,10 +2821,10 @@
           "camera": "orbit:on=centre;at=100000,0,-1;fit=106,59.6^39.7,70.6;el=40>86;az=-90;spin=0;raise=0.035^0.045;span=5",
           "actions": [
             "exp:uncall",
-            "exp:tw:nw.terms.p:1:3.94:geo",
-            "delay:3.94:exp:tw:nw.first.p:100:0",
-            "delay:3.94:exp:tw:nw.h:1:1.5",
-            "delay:3.94:exp:tw:nw.ribbon:1:1.5",
+            "exp:tw:nw.terms.p:1:4.56:geo",
+            "delay:4.56:exp:tw:nw.first.p:100:0",
+            "delay:4.56:exp:tw:nw.h:1:1.5",
+            "delay:4.56:exp:tw:nw.ribbon:1:1.5",
             "exp:say:one zero's wave on the spiral|the 100th zero:  −cos(236.5 · log n)"
           ],
           "pause": 0.8,
@@ -3081,14 +3081,14 @@
             "exp:tw:pw.marks:0:0.8",
             "exp:tw:pw.n:1000000:1.5",
             "delay:0.00:exp:tw:pw.ground:1:1.5",
-            "delay:0.00:exp:tw:pw.rise:1:5.47",
+            "delay:0.00:exp:tw:pw.rise:1:5.48",
             "delay:0.00:exp:tw:pw.axis:1:1.5",
-            "delay:0.00:exp:tw:pw.t:14.134725:11.59:geo",
-            "delay:11.59:exp:tw:pw.tail:1:1.5",
-            "delay:12.16:exp:callpathzeta:0:0,0,0.12,ffd973:ζ = 0",
-            "delay:12.68:exp:uncall",
-            "delay:12.68:exp:tw:pw.t:333.645:5.16:geo",
-            "delay:17.83:exp:tw:pw.eyes:1:1.5",
+            "delay:0.00:exp:tw:pw.t:14.134725:11.88:geo",
+            "delay:11.88:exp:tw:pw.tail:1:1.5",
+            "delay:12.63:exp:callpathzeta:0:0,0,0.12,ffd973:ζ = 0",
+            "delay:13.18:exp:uncall",
+            "delay:13.18:exp:tw:pw.t:333.645:5.81:geo",
+            "delay:18.98:exp:tw:pw.eyes:1:1.5",
             "exp:say:climbing the t axis|the first zero, t = 14.13;  the 159th, t = 333.6;  the ground is t = 0"
           ],
           "pause": 0.8,
@@ -3308,12 +3308,12 @@
         {
           "id": "xs3_03",
           "text": "Now bring in the path of partial sums from discovery two, at the first zero, t equal to fourteen point one three, and lay it on the funnel's floor, starting at the axis. Its arrows wind round and its tail brings it back to the axis.",
-          "camera": "orbit:on=centre;at=68004,0,-6>68006.8,0.2,0^68003,0,-6>68006.5,0,0;fit=36,28>40,22.5^30,53>25,44.5;el=22>84;az=-38.99;spin=-3.716;raise=0.035^0.045;span=4",
+          "camera": "orbit:on=centre;at=68004,0,-6>68006.8,0.2,0^68003,0,-6>68006.5,0,0;fit=36,28>40,22.5^30,53>25,44.5;el=22>84;az=-38.99;spin=-3.594;raise=0.035^0.045;span=4",
           "actions": [
             "exp:fwunhl",
             "exp:mute:GB factor columns:1.5:1.85",
-            "delay:0.06:exp:tw:fw.n:15:10.43:linear",
-            "delay:10.48:exp:tw:fw.tail:1:1.5",
+            "delay:0.08:exp:tw:fw.n:15:10.68:linear",
+            "delay:10.76:exp:tw:fw.tail:1:1.5",
             "exp:say:the path at the first zero, on the floor|t = 14.13:  its arrows n<sup>−½ − it</sup> close on the axis"
           ],
           "pause": 0.8,
@@ -3340,7 +3340,7 @@
         {
           "id": "xs3_05",
           "text": "Now stretch each arrow by the square root of its number: the distance of n from the centre on the Sacks spiral, and on this funnel's floor. One over root n, times root n, is one. On the critical line the length and the radius cancel, every arrow becomes one unit long, and all that is left is its direction.",
-          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-12^68003.1,-2.4,-9>68000,0,-18;fit=56,40>70,52^33.8,60>53.3,94.7;el=22;az=-55.41;spin=1.5;raise=0.04^0.045;span=6",
+          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-12^68003.1,-2.4,-9>68000,0,-18;fit=56,40>70,52^33.8,60>53.3,94.7;el=22;az=-55.4;spin=1.5;raise=0.04^0.045;span=6",
           "actions": [
             "exp:fwunhl",
             "delay:0.07:exp:tw:fw.stretch:1:11.13",
@@ -3354,11 +3354,11 @@
         {
           "id": "xs3_06",
           "text": "Stacked, the arrows are the hands of a clock that turns by gamma for every unit of height, and a coil runs through their tips, one turn every point four four. That coil is the zero, wound up E eight's funnel.",
-          "camera": "orbit:on=centre;at=68000,0,-14^68000,0,-18;fit=76,74^53.3,94.7;el=22;az=-22.35;spin=-5.1;raise=0.04^0.045",
+          "camera": "orbit:on=centre;at=68000,0,-14^68000,0,-18;fit=76,74^53.3,94.7;el=22;az=-22.34;spin=-4.767;raise=0.04^0.045",
           "actions": [
             "exp:fwunhl",
             "exp:tw:fw.coil:0:0",
-            "delay:4.85:exp:tw:fw.coil:1:7.41",
+            "delay:5.14:exp:tw:fw.coil:1:8.05",
             "exp:say:a zero is a coil|one turn every 2π/γ = 0.44 of height"
           ],
           "pause": 0.8,
@@ -4023,8 +4023,8 @@
           "actions": [
             "exp:tw:pw.marks:0:0.8",
             "delay:0.08:exp:tw:pw.n:1000:2",
-            "delay:0.08:exp:tw:pw.t:10:9.89:geo",
-            "delay:9.97:exp:tw:pw.tail:1:1.6",
+            "delay:0.08:exp:tw:pw.t:10:9.46:geo",
+            "delay:9.54:exp:tw:pw.tail:1:1.6",
             "exp:say:raising t|every angle is t × a logarithm;  the tail adds all the arrows beyond"
           ],
           "pause": 0.8,
@@ -4293,16 +4293,16 @@
         {
           "id": "xz3_05",
           "text": "Stretch each arrow by the square root of its number, its distance from the centre on the Sacks spiral and on this floor. One over root n times root n is one: every arrow becomes one unit long, and only its direction is left. Through their tips runs a coil that turns by gamma for every unit of height: the zero, wound up E eight's funnel.",
-          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-14^68003.1,-2.4,-9>68000,0,-18;fit=56,40>76,74^33.8,60>53.3,94.7;el=22;az=-60.98;spin=-1.448;raise=0.04^0.045;span=6",
+          "camera": "orbit:on=centre;at=68002,0,-8>68000,0,-14^68003.1,-2.4,-9>68000,0,-18;fit=56,40>76,74^33.8,60>53.3,94.7;el=22;az=-60.98;spin=-1.393;raise=0.04^0.045;span=6",
           "actions": [
             "exp:fwunhl",
-            "delay:0.00:exp:tw:fw.stretch:1:12.21",
+            "delay:0.00:exp:tw:fw.stretch:1:12.48",
             "delay:0.00:exp:fwhl:2",
-            "delay:12.71:exp:fwunhl",
-            "delay:12.71:exp:tw:fw.coil:0:0",
-            "delay:12.71:exp:tw:fw.coil:1:6.33",
+            "delay:12.98:exp:fwunhl",
+            "delay:12.98:exp:tw:fw.coil:0:0",
+            "delay:12.98:exp:tw:fw.coil:1:6.85",
             "exp:say:stretch arrow n by √n|1/√n × √n = 1:  every arrow one unit long, only its direction left",
-            "delay:12.71:exp:say:the coil:  the hands at every height|turning 14.13 per unit of height, one turn every 0.44"
+            "delay:12.98:exp:say:the coil:  the hands at every height|turning 14.13 per unit of height, one turn every 0.44"
           ],
           "pause": 0.8,
           "caption": "Stretch each arrow by the square root of its number, its distance from the centre on the Sacks spiral and on this floor. {1/√n × √n = 1:|One over root n times root n is one:} every arrow becomes one unit long, and only its direction is left. Through their tips runs a coil that turns by {γ|gamma} for every unit of height: the zero, wound up {E8's|E eight's} funnel."
@@ -4334,8 +4334,8 @@
             "exp:clearchild:FW angles",
             "exp:tw:fw.dim:0:1.5",
             "exp:tw:fw.coil:1:2.5",
-            "delay:2.46:exp:tw:fw.gamma:21.02204:2.2",
-            "delay:6.59:exp:tw:fw.gamma:25.010858:2.2",
+            "delay:2.42:exp:tw:fw.gamma:21.02204:2.2",
+            "delay:6.89:exp:tw:fw.gamma:25.010858:2.2",
             "exp:say:other zeros, other coils|γ = 21.02,  25.01"
           ],
           "pause": 0.8,
@@ -4395,7 +4395,7 @@
           "camera": "orbit:on=centre;at=68000,0,-18;fit=62,92^40.8,72.5;el=12;az=-96;spin=3;raise=0.04^0.045",
           "actions": [
             "exp:say:every zero, a coil|γ = 14.13,  21.02,  25.01",
-            "exp:reveal:JM coils:3.81,4.98,6.57",
+            "exp:reveal:JM coils:3.56,5.53,7.37",
             "exp:snap"
           ],
           "pause": 0.8,
