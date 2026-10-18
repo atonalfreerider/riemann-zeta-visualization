@@ -3712,6 +3712,168 @@ line, x → ∞ here and x → 1 in OC2, need the zeros' infinite end.
 The pictures OB2 and OD3 are drawn by `ExperimentsRenderTest` with key `^` (`SacksZeroHorizon.cs`; data from
 `python3 Tools/zero_horizon_data.py`, seconds). The others are plots from the zeros in `Assets/Resources/zetazeros.txt`.
 
+## PA–PC. The prime squares, the critical line in more dimensions, and primality as space
+
+Exploration, October 2026 (τ = 2π). The questions:
+* If the Euler product is what keeps ζ's zeros on the critical line, what does it look like on each side of the line?
+* Are the prime squares special there?
+* Does the square's symmetry (the factor 2) have a counterpart in 3 and 4 dimensions, in hypercubes and in E8, and does
+  that widen the critical line's problem?
+
+### PA. The prime squares are the critical line's own layer of the Euler product
+
+The logarithm of the Euler product sorts the prime powers into layers:
+
+log ζ(s) = Σ<sub>p</sub> p<sup>−s</sup> + ½ Σ<sub>p</sub> p<sup>−2s</sup> + ⅓ Σ<sub>p</sub> p<sup>−3s</sup> + …
+
+Layer k, the prime k-th powers, converges absolutely exactly when σ > 1/k. The primes' edge is at σ = 1, the pole of ζ.
+The prime squares' edge is at σ = ½, the critical line. The cubes' edge is at ⅓, and so on. The prime squares' sum is also
+the sum of the squared sizes of the primes' own terms, |p<sup>−s</sup>|² = p<sup>−2σ</sup>:
+
+![PA1](PA1-the-prime-squares-edge.jpg)
+
+With the primes up to 10⁸, Σ p<sup>−2σ</sup> settles for σ > ½: 0.85 at σ = 0.75 and 2.05 at σ = 0.55. At σ = ½ it is
+Euler's Σ 1/p, which keeps growing like log log X: 3.175 against log log 10⁸ + 0.2615 = 3.175 (Mertens). Below ½ it runs
+away: 6.2 at σ = 0.45, and 16.7 and still climbing fast at σ = 0.4.
+
+**Each side of the line.** That sum is the size of the primes' randomness. Give every prime an independent random phase in
+the Euler product, Π<sub>p≤X</sub> (1 − e<sup>iθ<sub>p</sub></sup> p<sup>−σ</sup>)<sup>−1</sup>, and log |product| has variance
+½ Σ<sub>p≤X</sub> Σ<sub>k</sub> p<sup>−2kσ</sup>/k², about half the prime squares' sum. Right of the line this stays finite as X
+grows, so log ζ has a limiting distribution there (Bohr and Jessen). On the line it grows without end (Selberg: like
+½ log log t):
+
+![PA2](PA2-each-side-of-the-line.jpg)
+
+Over t from 5 000 to 13 000:
+
+| σ | variance of log \|ζ\| | random primes to 10² | random primes to 10⁴ |
+|---|---|---|---|
+| 1 | 0.23 | 0.24 | 0.24 |
+| 0.75 | 0.44 | 0.43 | 0.46 |
+| 0.6 | 0.76 | 0.68 | 0.78 |
+| ½ | 1.60 | 0.97 | 1.30 |
+
+At σ = 1 and 0.75 ζ behaves like the primes with random phases, and adding primes no longer changes the picture. At σ = ½ the
+model keeps widening, and the data is wider still, with a long tail where the zeros are. So the critical line is the edge
+where the Euler product's randomness stops adding up to a finite total, and that total is the prime squares' sum. The zeros
+live exactly on that edge.
+
+**The prime squares in the count of the primes.** ψ(x) counts every prime power with weight log p, while θ(x) counts the
+primes alone. Their difference is θ(√x) + θ(∛x) + … ≈ √x:
+
+![PA3](PA3-the-prime-squares-in-the-count.jpg)
+
+Up to 10⁷, (ψ(x) − x)/√x wanders about 0 (mean −0.004), and (θ(x) − x)/√x wanders about −1 (mean −1.16). The prime squares
+shift the primes' count by one unit of √x. That is the same scale as the waves of the zeros on the critical line, and it is
+why π(x) < li(x) almost always (Chebyshev's bias). It is also the fold ν that set the races on E8's spokes and between −47's
+families (sections MA–ND).
+
+**On the Sacks spiral.** The squares ray holds k² at radius k, a copy of the number line, and Λ(k²) = Λ(k): the prime squares
+are the primes, heard an octave up (log p² = 2 log p).
+
+### PB. Squares, cubes, hypercubes: where the critical line goes in more dimensions
+
+In the cube lattice Z<sup>d</sup>, a counting number n is a sphere of radius √n, holding r<sub>d</sub>(n) lattice points:
+n written as a sum of d squares. Its zeta function Z<sub>d</sub>(s) = Σ r<sub>d</sub>(n) n<sup>−s</sup> has the same kind of
+mirror in every dimension:
+
+π<sup>−s</sup> Γ(s) Z<sub>d</sub>(s) = π<sup>−(d/2−s)</sup> Γ(d/2 − s) Z<sub>d</sub>(d/2 − s), centred on Re s = d/4.
+
+So the square's symmetry has a counterpart in 3, 4 and 8 dimensions. The Euler product does not. The sphere counts are
+multiplicative, r<sub>d</sub>(mn) r<sub>d</sub>(1) = r<sub>d</sub>(m) r<sub>d</sub>(n) for coprime m and n, in exactly four
+dimensions. Checked for d = 1 … 12 on all 805 coprime pairs with mn ≤ 600:
+
+| d | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 – 12 |
+|---|---|---|---|---|---|---|---|---|---|
+| failing pairs | 0 | 0 | 622 | 0 | 751 | 378 | 725 | 0 | all 805 |
+
+1, 2, 4 and 8 are the dimensions of the four number systems in which lengths multiply: the reals, the complex numbers, the
+quaternions and the octonions (Hurwitz, 1898). E8 is the integral octonions. Where the zeros lie, up to t = 60:
+
+![PB1](PB1-where-the-zeros-lie-dimension-by-dimension.jpg)
+
+* **d = 1:** 2 ζ(2s); every zero is on the centre line ¼.
+* **d = 2:** 4 ζ(s) L(s, χ₋₄); every zero is on ½: ζ's 13 and the 25 of L(s, χ₋₄).
+* **d = 3: no Euler product.** 38 zeros, 16 on the centre line ¾ (at t = 5.22, 9.64, 15.64, 18.31, …) and 22 off it, in 11
+  mirror pairs between Re s = −0.07 and 1.57. Each was checked: |Z₃| is about 10⁻¹⁴ at the zero and 0.2 to 0.9 at 0.05 away.
+  One pair, 1.5671 + 32.4587i and its mirror −0.0671 + 32.4587i, reaches beyond Re s = 3/2, where the cube lattice's series
+  converges absolutely. A function with an Euler product can never vanish where its product converges absolutely; this one
+  does.
+* **d = 4:** 8(1 − 4<sup>1−s</sup>) ζ(s) ζ(s − 1). ζ's zeros are on ½ and their mirror images on 3/2. The centre line 1 holds
+  only the zeros of the factor at 2, s = 1 + iπk/log 2, evenly spaced 4.53 apart.
+* **d = 8:** 16(1 − 2<sup>1−s</sup> + 2<sup>4−2s</sup>) ζ(s) ζ(s − 3). The zeros are on ½ and 7/2; the centre line 2 again holds
+  only the factor at 2's zeros.
+* **E8:** 240 ζ(s) ζ(s − 3). The zeros are on ½ and 7/2, and the centre line 2 is empty.
+
+The off-line zeros of Z₃ right of its centre line (each with its mirror at 3/2 − σ):
+
+| σ | t | σ | t |
+|---|---|---|---|
+| 1.4444 | 13.5139 | 1.4255 | 41.1363 |
+| 0.9515 | 22.2500 | 0.9642 | 43.6873 |
+| 1.1321 | 25.2040 | 0.9581 | 48.8962 |
+| 1.4363 | 30.1629 | 1.1133 | 52.9450 |
+| 1.5671 | 32.4587 | 1.0754 | 56.5493 |
+| | | 1.4721 | 58.6887 |
+
+So the symmetry is there in every dimension, but it holds the zeros only in dimensions 1 and 2. In 4 and 8 the Euler
+product puts the zeros on ζ's own line ½ and on its mirror image d/2 − ½, at the same distance either side of the centre. In
+3, without an Euler product, the zeros leave the line, as the mixtures of −47's families did (section NC). Going up in
+dimension does not open a new critical line. The only line that holds zeros is ζ's ½ and its mirror images.
+
+### PC. Primality as space: the emptiest sphere
+
+Jacobi's four-square theorem: the sphere of radius √n in Z⁴ holds r₄(n) = 8 σ(n) points for odd n. Since σ(n) ≥ n + 1, with
+equality exactly when n is prime, an odd n is prime exactly when its sphere is the emptiest one possible, 8(n + 1) points.
+E8 says the same with 240 σ₃(n) ≥ 240 (1 + n³) (section NA). Neither the plane nor three dimensions can do this:
+
+![PC1](PC1-primes-as-the-emptiest-spheres.jpg)
+
+For the odd n ≤ 1 000:
+* **4D and E8:** all 167 primes sit on the floor, and no composite does.
+* **The plane:** only 80 of the 167 primes have the floor's 8 points (those that are 1 mod 4; the others have none), and 18
+  composites have 8 too (45, 117, 153, …).
+* **3D:** a prime's sphere is as full or as empty as anyone's.
+
+In 4 and 8 dimensions the sphere's count is a divisor sum with positive weights. In the plane, the character χ₋₄ cancels
+some divisors. In three dimensions there is no multiplication at all.
+
+In the Hurwitz quaternions (the 4D lattice with 24 units, the 24-cell) the sphere of norm n holds 24 σ(n) points. The units
+sort them, by left multiplication, into σ(n) rotated copies of the 24-cell, so a prime p's sphere is exactly p + 1 copies:
+
+![PC2](PC2-a-numbers-sphere-in-four-dimensions.jpg)
+
+The 3-sphere is projected stereographically from its deepest hole. Every point is drawn in the colour of its copy, and one
+copy in each sphere is drawn with its edges: 13 has 14 copies, 15 = 3 × 5 has 24 = (3 + 1)(5 + 1), and 17 has 18.
+
+Cut by the hyperplanes a = const, the 3-sphere comes apart into ordinary spheres of radius √(n − a²):
+
+![PC3](PC3-the-3-sphere-of-13-in-cross-sections.jpg)
+
+For 13 the slices a = 0, ½, …, 7/2 hold 24, 48, 8, 24, 30, 32, 6 and 8 points. With their mirror images at −a that is
+336 = 24 × 14 in all.
+
+### What PA–PC give
+
+* **The Euler product on each side of the line.** The critical line is the edge of the prime squares. Right of it, the
+  primes' randomness adds up to a finite total and ζ is distributed like a product of independent primes. On it the total
+  diverges and the zeros appear. In the count of the primes, the prime squares contribute √x, the same size as the zeros'
+  waves.
+* **The square's symmetry in more dimensions.** Every cube lattice Z<sup>d</sup> has a mirror about Re s = d/4. Only in
+  dimensions 1, 2, 4 and 8, the dimensions where lengths multiply (ending with E8's octonions), does it come with an Euler
+  product. There the zeros sit on ζ's line ½ and its mirror image; in three dimensions, without one, they leave the line. The
+  critical line does not widen with the dimension: it is always ζ's ½, mirrored.
+* **Primality as space.** In four and eight dimensions a prime is the number with the emptiest sphere: p + 1 copies of the
+  24-cell, or 1 + p³ times E8's 240 roots. In two and three dimensions space cannot tell. Reading the sphere still means
+  counting its points, which is as hard as finding the divisors. Space holds the answer; it does not hand it over faster.
+* **What the conjecture says.** None of this proves that the zeros stay on the line. The pattern is the one the grand
+  Riemann hypothesis expects of every L-function, a mirror symmetry together with an Euler product. A mirror alone (Z₃,
+  −47's mixtures) lets the zeros wander, and two Euler products multiplied (Z⁴, E8) put them on two lines.
+
+PA1–PA3, PB1 and PC1 are plots computed in Python (mpmath for ζ); `python3 Tools/cube_lattice_zeta.py` recounts and relocates
+the zeros of Z₃ (about 10 minutes on 8 cores). PC2 and PC3 are drawn by `ExperimentsRenderTest` with key `~`
+(`SacksHurwitzShell.cs`, computed at run time).
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -4186,7 +4348,7 @@ every clip it writes.
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections OB and OD use the key `^` (`ZETA_EXP_ONLY='^' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/zero_horizon_data.py` (seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Section PC uses the key `~` (`ZETA_EXP_ONLY='~' ZETA_EXP_WIDE=1`); it computes its shells at run time. Sections OB and OD use the key `^` (`ZETA_EXP_ONLY='^' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/zero_horizon_data.py` (seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`

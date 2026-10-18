@@ -1994,6 +1994,40 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('~')) {
+        // PC. A number's sphere in four dimensions: copies of the 24-cell; cross-sections (SacksHurwitzShell.cs)
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 OnScreen3(Vector3 cam, Vector3 look, float fov, float sx, float sy)
+        {
+            Vector3 f = (look - cam).normalized, r = Vector3.Cross(Vector3.up, f).normalized, u = Vector3.Cross(f, r);
+            float h = (look - cam).magnitude * Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
+            return look + r * (sx * h * 16f / 9f) + u * (sy * h);
+        }
+
+        Vector3 pc = c + new Vector3(SacksSpiral.HurwitzShellOffset, 0f, 0f);
+        const float pcLabel = 220f, pcScale = 14f;
+        sacks.ExpHurwitzShell(pc + new Vector3(-118f, 0f, 0f), 13, pcScale, pcLabel, "13, a prime:  14 copies = 13 + 1");
+        sacks.ExpHurwitzShell(pc, 15, pcScale, pcLabel, "15 = 3 × 5:  24 copies = (3 + 1)(5 + 1)");
+        sacks.ExpHurwitzShell(pc + new Vector3(118f, 0f, 0f), 17, pcScale, pcLabel, "17, a prime:  18 copies = 17 + 1");
+        Vector3 pcLook = pc + new Vector3(0f, 4f, 0f), pcCam = pcLook + new Vector3(0f, .18f, -1f).normalized * 232f;
+        sacks.ExpCaption(OnScreen3(pcCam, pcLook, 55f, -.95f, .93f), Vector3.down * 8f,
+            "A number's sphere in four dimensions:  the Hurwitz quaternions of norm n, on the 3-sphere, projected stereographically|" +
+            "the 24 units sort them into rotated copies of the 24-cell (24 points, 96 edges), one colour each:  σ(n) copies, 24 σ(n) points (Jacobi)|" +
+            "a prime p has p + 1 copies, the fewest any number of its size can have;  a composite has more.  One copy in each is drawn bright", 60f);
+        yield return Shot("PC2-a-numbers-sphere-in-four-dimensions", pcCam, pcLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 ps = pc + new Vector3(700f, 0f, 0f);
+        sacks.ExpHurwitzSlices(ps, 13, 3.7f, 31f, pcLabel);
+        Vector3 psLook = ps + new Vector3(0f, -4f, 0f), psCam = psLook + new Vector3(0f, .2f, -1f).normalized * 158f;
+        sacks.ExpCaption(OnScreen3(psCam, psLook, 55f, -.95f, .93f), Vector3.down * 5.2f,
+            "The 3-sphere of 13 in cross-sections:  cut by the hyperplanes a = 0, 1/2, … 7/2, each slice an ordinary sphere of radius √(13 − a²)|" +
+            "its points coloured by their copy of the 24-cell, as in the projection.  The slices at −a mirror those at a;  all of them hold 336 = 24 × 14 points", 44f);
+        yield return Shot("PC3-the-3-sphere-of-13-in-cross-sections", psCam, psLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
