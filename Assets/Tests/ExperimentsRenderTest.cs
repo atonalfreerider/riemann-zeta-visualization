@@ -1958,6 +1958,42 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('^')) {
+        // OB, OD. The chain's horn at a zero and between zeros; how far the zeros see (SacksZeroHorizon.cs)
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 OnScreen2(Vector3 cam, Vector3 look, float fov, float sx, float sy)
+        {
+            Vector3 f = (look - cam).normalized, r = Vector3.Cross(Vector3.up, f).normalized, u = Vector3.Cross(f, r);
+            float h = (look - cam).magnitude * Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
+            return look + r * (sx * h * 16f / 9f) + u * (sy * h);
+        }
+
+        Vector3 ob = c + new Vector3(SacksSpiral.ZeroHorizonOffset, 0f, 0f);
+        const float obLabel = 220f, obL = 3.4f, obH = 72f;
+        Vector3 hornA = ob + new Vector3(-52f, 0f, 0f), hornB = ob + new Vector3(52f, 0f, 0f);
+        sacks.ExpChainHorn(hornA, 14.134725141734693, obL, obH, obLabel);
+        sacks.ExpChainHorn(hornB, 17.84, obL, obH, obLabel);
+        Vector3 obLook = ob + new Vector3(0f, 38f, 0f), obCam = obLook + new Vector3(0f, .42f, -1f).normalized * 140f;
+        sacks.ExpCaption(OnScreen2(obCam, obLook, 55f, -.95f, .93f), Vector3.down * 4.8f,
+            "The chain as a horn:  link n at the height log n.  Left, the first zero (t = 14.13);  right, t = 17.84, between the first two zeros|" +
+            "the links (gold spokes at the foot) shrink as 1/√n;  their running sum climbs a horn of radius √n/t round ζ(s), both turning by t per unit of log n|" +
+            "at every height the two radii are the sides of one rectangle of area 1/t.  At a zero the horn stands on the chain's own start;  between zeros, ζ(s) away", 41f);
+        yield return Shot("OB2-the-chain-as-a-horn", obCam, obLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 od = ob + new Vector3(600f, 0f, 0f);
+        const float odDx = .2f, odDz = 4f, odHz = 2.4f;
+        sacks.ExpCertaintyLandscape(od, odDx, odDz, odHz, obLabel);
+        Vector3 odLook = od + new Vector3(96f, 0f, 30f), odCam = odLook + new Vector3(-.1f, 1.05f, -.8f).normalized * 185f;
+        sacks.ExpCaption(OnScreen2(odCam, odLook, 55f, -.95f, .93f), Vector3.down * 6.6f,
+            "How far the zeros see:  Λ(n) rebuilt from the first K zeros of ζ, front row K = 10 000, back row K = 10|" +
+            "gold:  a prime power's tooth rebuilt exactly, inside the horizon;  white:  exact but past it;  red:  wrong|" +
+            "the horizon (cyan) moves out in proportion to the height t of the zeros used:  every n up to about 0.6 · t/τ comes out exact", 58f);
+        yield return Shot("OD3-how-far-the-zeros-see", odCam, odLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();
