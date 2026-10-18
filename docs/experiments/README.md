@@ -3549,6 +3549,169 @@ for the race between the pairs (was 0.94).
   zeros of the valleys. The principal family is last because the fold puts the point opposite its wedge, and the zeros'
   swings are too small to carry it across.
 
+## OA–OD. The square at the fold, the bend as an angle, the loop back, and how far the zeros see
+
+Exploration, October 2026 (τ = 2π). Four ideas to test:
+* a square root is a square: two sides of length √n holding the area n, and the chain's link 1/√n is the unit over that side;
+* the chain's bend is a logarithm, and should be seen as an angle;
+* the trivial zeros are where the curve loops back, so the start of the chain and its end are the same zero;
+* more zeros give more certainty about the primes, and with finitely many zeros the number line is only known so far.
+
+### OA. The square at the fold
+
+On the critical line the n-th link is 1/√n long: the unit over the side of the square whose area is n. √n is the geometric
+mean of 1 and n, halfway between them in logarithm. The functional equation pairs each term n<sup>−s</sup> with a mirror term
+n<sup>s−1</sup>. Their lengths, n<sup>−σ</sup> and n<sup>σ−1</sup>, are the reciprocal sides of a rectangle of area n,
+n<sup>σ</sup> × n<sup>1−σ</sup>, which is a square exactly when σ = ½.
+
+The chain folds where that square is. At height t the Riemann–Siegel formula writes ζ(½ + it) as the first N = ⌊√(t/τ)⌋ links,
+the same links mirrored, and a small hinge:
+
+ζ(s) = Σ<sub>n≤N</sub> n<sup>−s</sup> + χ(s) Σ<sub>n≤N</sub> n<sup>s−1</sup> + R
+
+√(t/τ) is the side of a square of area t/τ, and t/τ is where section E's last vortex sits. Section I showed that the far end
+of the chain is the near end seen in a mirror, vortex by vortex. On the critical line |χ| = 1 and χ = e<sup>−2iθ(t)</sup>, so
+the second half is the first half reflected across a line through the start, at the angle −θ(t). The hinge is what is left
+of the square's side: √(t/τ) = N + p falls between two whole numbers, and the leftover fraction p gives the first
+Riemann–Siegel term, (−1)<sup>N−1</sup> (t/τ)<sup>−1/4</sup> C<sub>0</sub>(p), laid along the mirror line.
+
+So at a zero the folded chain is a closed loop, symmetric across the axis through the start:
+
+![OA1](OA1-the-folded-chain-at-three-zeros.jpg)
+
+The loop closes to 0.002 at the first zero, 0.0004 at zero 300 and 0.00003 at zero 10 000; the small gap is the next
+Riemann–Siegel term. At the first zero there is a single link each way, so the chain is an isosceles triangle: two unit
+sides (the square of 1 and its mirror image) and a hinge of 0.312.
+
+Off the line the mirror is no longer a reflection. |χ(σ + it)| = (t/τ)<sup>½−σ</sup> (checked to four digits at t = 236.5 and
+1419.4), so the mirror half is that much larger or smaller than the forward half, and the two halves cannot be mirror images:
+
+![OA2](OA2-the-same-height-off-the-line.jpg)
+
+At t = 541.85 (zero 300) the loop closes for σ = ½. It stays open by |ζ(s)| = 0.96 at σ = 0.35 and by 0.49 at σ = 0.65.
+
+What this shows, and what it does not. The critical line is the one line on which every chain folds into two congruent
+halves, so a zero there is the natural shape: a symmetric loop. The symmetry alone does not put the zeros there. The
+families of −47 (section NC) all share one mirror of this kind (one χ for every mixture of them and for their L-functions),
+and their mixtures have zeros off the line: Λ₁ alone has 24 of its 118 off the line up to t = 100. What sets ζ and the
+L-functions apart is the Euler product: the primes.
+
+### OB. The bend as a logarithm, seen as an angle
+
+The link n<sup>−s</sup> = e<sup>−s log n</sup> is one curve sampled at the logarithms of the counting numbers. The curve is the
+logarithmic spiral z(u) = e<sup>−su</sup>, of radius e<sup>−σu</sup> and angle −tu, taken at u = log 1, log 2, log 3, …; these
+points crowd together, 1/n apart. Section E read the turn per link, t/n, as Kepler's area law. The same logarithm is an area
+in another way: log n is the area under the hyperbola xy = 1 from 1 to n. The hyperbola xy = n holds every rectangle of area
+n, with the square at its vertex:
+
+![OB1](OB1-n-as-the-hyperbola-xy-n.jpg)
+
+So the complex exponent does two things to each n, both in proportion to log n.
+- **A squeeze.** σ − ½ turns the square of area n into the rectangle n<sup>σ</sup> × n<sup>1−σ</sup>, sliding it along its
+  hyperbola by the hyperbolic angle (σ − ½) log n.
+- **A turn.** t turns it by the circular angle t log n.
+
+On the critical line nothing is squeezed: every term is a square, only turned. The real part acts on the numbers like a
+boost, the imaginary part like a rotation, and the critical line is the frame in which every number is at rest.
+
+In three dimensions, with link n at the height log n:
+
+![OB2](OB2-the-chain-as-a-horn.jpg)
+
+- **The two spirals.** The links (gold spokes round the axis) narrow as 1/√n. Past the last vortex, their running sum climbs
+  the outward horn ζ(s) + n<sup>1−s</sup>/(1 − s), of radius √n/|1 − s| (9.999 against 9.999 at n = 20 000, at the first
+  zero). Both turn by t per unit of height.
+- **One rectangle at every height.** The two radii multiply to 1/|1 − s|: they are the sides of one rectangle again.
+- **The axis.** At a zero the horn's axis stands on the chain's own start: run backwards from infinity, down the horn, the
+  chain winds onto its beginning. Between zeros (right, t = 17.84) the axis stands ζ(s) = 2.34 away.
+
+### OC. The loop back: where the trivial zeros are
+
+At s = −m the chain does not turn (t = 0): it is a straight ray of links n<sup>m</sup> out to infinity. Its partial sums
+S<sub>m</sub>(N) = 1<sup>m</sup> + … + N<sup>m</sup> form a polynomial in N, and the polynomial runs on backwards past the
+start: S<sub>m</sub>(0) = S<sub>m</sub>(−1) = 0. ζ(−m) is the area under it over the unit just before the start,
+−1 ≤ N ≤ 0 (Ramanujan's constant of the series):
+
+![OC1](OC1-the-unit-before-the-start.jpg)
+
+For odd m the area is −1/12, 1/120 and −1/252. For even m the curve on that unit is an upside-down copy of itself:
+S<sub>m</sub>(−1 − N) = −S<sub>m</sub>(N), a point symmetry about N = −½. The two lobes cancel and ζ(−m) = 0. The trivial
+zeros are where the ray, run back from infinity through its start, comes home with nothing left over.
+
+The same zeros sit in the mirror. ζ(s) = χ(s) ζ(1 − s), with χ(s) = 2<sup>s</sup> π<sup>s−1</sup> sin(τs/4) Γ(1 − s). The
+factor sin(τs/4) turns a quarter of a turn per unit of s and vanishes at s = −2, −4, …. There the chain it mirrors, at
+1 + 2k, converges to a number just above 1, so at a trivial zero the mirror itself is zero.
+
+And they sit at the start of the number line. Before the first prime ψ(x) = 0, so the explicit formula is an identity for
+1 < x < 2:
+
+Σ<sub>ρ</sub> x<sup>ρ</sup>/ρ = x − log τ − ½ log(1 − 1/x²)
+
+The last term is the trivial zeros'. As x → 1 it rises like ½ log(1/log x), and the sum over the nontrivial zeros must
+climb with it:
+
+![OC2](OC2-before-the-first-prime.jpg)
+
+The first K zeros climb with it, wobbling about it, and meet it for the last time at log x ≈ 1.8/t<sub>K</sub>, where
+t<sub>K</sub> is the height of the K-th zero; then they fall back. That last meeting is at log x = 0.031 for 10 zeros,
+0.0072 for 100, 0.0013 for 1 000 and 0.00019 for 10 000. Only the infinite end of the nontrivial zeros reaches the trivial
+zeros at x = 1: run the zeros out to infinity and they come back to the start.
+
+### OD. How far the zeros see
+
+Section JB rebuilt Λ(n) from 10 500 zeros for n ≤ 720. Here it is done systematically: the first K zeros (up to the height
+t = γ<sub>K</sub>) with a Gaussian taper of width t/4. Every integer up to a horizon x* comes out exact, to within 0.3
+(log 2 = 0.69 separates a prime power's tooth from no tooth):
+
+![OD1](OD1-the-horizon-at-three-heights.jpg)
+
+| zeros | height t | every n ≤ x* exact | x* / (t/τ) |
+|---|---|---|---|
+| 10 | 50 | 5 | 0.63 |
+| 100 | 237 | 27 | 0.72 |
+| 1 000 | 1 419 | 137 | 0.61 |
+| 10 000 | 9 878 | 989 | 0.63 |
+
+![OD2](OD2-the-horizon-grows-with-the-height.jpg)
+
+The horizon grows in proportion to the height, x* ≈ 0.62 · t/τ, over more than two decades of t.
+
+**Why: an uncertainty principle between t and log x.** The zero at height t is the wave cos(t log x), whose wavelength in
+log x is τ/t. Neighbouring integers near x are 1/x apart in log x. The zeros up to t separate them while τ/t is below about
+1/x. The same condition marks the chain's last vortex at height t, x = t/τ (section E): below it consecutive links differ
+by more than a full turn, and past it the chain blurs into its smooth horn. So the zeros up to t see the integers about as
+far as the area of the square at their own fold.
+
+**The price.** There are about (t/τ) log(t/τe) zeros up to t, so each integer of horizon costs about 1.5 · log x zeros
+(10 near x = 1 000), and each prime about 1.5 · (log x)² (70 near x = 1 000).
+
+![OD3](OD3-how-far-the-zeros-see.jpg)
+
+In the landscape each row is one value of K, from 10 000 zeros at the front to 10 at the back, drawn a little past its own
+horizon (to 1.6 x* + 12). Gold teeth are exact inside the horizon, white ones exact past it, red ones wrong.
+
+So the zeros are building blocks, and each one pushes the horizon of certainty out by about 1/(1.5 · log x) of an integer.
+No finite set of zeros settles the whole line: past its horizon the integers blur into their average. Both ends of the
+line, x → ∞ here and x → 1 in OC2, need the zeros' infinite end.
+
+### What OA–OD give
+
+* **The critical line, as space.** It is the one line on which the chain folds at the square √(t/τ) into two congruent
+  halves, and a zero on it is a closed loop, symmetric about the start. That symmetry is the functional equation's. The
+  line is the natural place for zeros; whether it is the only place is the Riemann hypothesis, which nothing here proves.
+  Functions that share such a mirror but have no Euler product do have zeros off their line, so if anything keeps ζ's
+  zeros on it, it is the primes.
+* **The logarithm, as an angle.** σ − ½ squeezes each square along its hyperbola by (σ − ½) log n, and t turns it by
+  t log n. On the critical line nothing is squeezed.
+* **The loop back.** At every zero the chain's far end comes back to its start: at the nontrivial zeros the horn's axis
+  stands on the start, and at the trivial zeros the unit before the start cancels. In the explicit formula the nontrivial
+  zeros' infinite end meets the trivial zeros at x = 1.
+* **Certainty.** The zeros up to t settle the integers up to about 0.6 · t/τ, at a cost of a logarithm's worth of zeros per
+  integer. No finite set of zeros settles them all.
+
+The pictures OB2 and OD3 are drawn by `ExperimentsRenderTest` with key `^` (`SacksZeroHorizon.cs`; data from
+`python3 Tools/zero_horizon_data.py`, seconds). The others are plots from the zeros in `Assets/Resources/zetazeros.txt`.
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -4023,7 +4186,7 @@ every clip it writes.
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections OB and OD use the key `^` (`ZETA_EXP_ONLY='^' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/zero_horizon_data.py` (seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
