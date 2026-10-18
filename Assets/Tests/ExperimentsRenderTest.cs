@@ -2028,6 +2028,85 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('=')) {
+        // QA–QC. The twist on the twist: squares orbiting the links of the zeta chain, a coil on E8's coil, twisted squares on
+        // the Sacks spiral (SacksTwistChain.cs)
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        Vector3 OnScreen4(Vector3 cam, Vector3 look, float fov, float sx, float sy)
+        {
+            Vector3 f = (look - cam).normalized, r = Vector3.Cross(Vector3.up, f).normalized, u = Vector3.Cross(f, r);
+            float h = (look - cam).magnitude * Mathf.Tan(fov * .5f * Mathf.Deg2Rad);
+            return look + r * (sx * h * 16f / 9f) + u * (sy * h);
+        }
+
+        const float qLabel = 220f, qS = 30f;
+        const double t300 = 541.8474371212013;               // zero 300: the fold at √(t/τ) = 9.29, the last spoke at t/τ = 86.2
+        Vector3 qa = c + new Vector3(SacksSpiral.TwistOffset, 0f, 0f);
+        Vector3 qaLook = qa + new Vector3(-6f, 6f, 45f);
+
+        sacks.ExpTwistedChain(qa, t300, 0.0, 260, qS, qLabel, "");
+        Vector3 qaTop = qaLook + new Vector3(0f, 1f, -.15f).normalized * 128f;
+        sacks.ExpCaption(OnScreen4(qaTop, qaLook, 55f, -.95f, .93f), Vector3.back * 6f,
+            "The chain at zero 300 (t = 541.85), a square on every link|" +
+            "α = 0:  each square is its link and a perpendicular of the same length, lying flat;  the chain's spokes (n = t/τk) are marked", 52f);
+        yield return Shot("QA1-the-chain-with-its-squares-flat", qaTop, qaLook, Vector3.forward, 55f);
+        sacks.ClearExperiments();
+
+        foreach ((double af, string name, string cap) in new[] {
+            (1.0, "QA2-the-squares-orbiting-at-the-chains-own-rate", "α = t:  each fin's tilt is its own link's angle, so the fins line up wherever the links line up (the spokes)"),
+            (0.5, "QA3-the-squares-orbiting-at-half-the-rate", "α = t/2:  in spoke k each link turns its fin by k half-turns:  the fins flip in the odd spokes and line up in the even ones") })
+        {
+            sacks.ExpTwistedChain(qa, t300, af * t300, 260, qS, qLabel, "");
+            Vector3 qaCam = qaLook + new Vector3(.3f, .62f, -1f).normalized * 128f;
+            sacks.ExpCaption(OnScreen4(qaCam, qaLook, 55f, -.95f, .93f), Vector3.down * 5.6f,
+                "The twist on the twist:  every square turns about its link by α · log n while the chain turns by t · log n|" + cap + "|" +
+                "gold:  the fin points up;  cyan:  down;  white:  flat", 50f);
+            yield return Shot(name, qaCam, qaLook, Vector3.up, 55f);
+            sacks.ClearExperiments();
+        }
+
+        Vector3 qf = qa + new Vector3(500f, 0f, 0f);
+        sacks.ExpFinChainOctave(qf, t300, 400, 90f, qLabel);
+        Vector3 qfLook = qf + new Vector3(12f, 30f, 10f), qfCam = qfLook + new Vector3(.15f, .35f, -1f).normalized * 150f;
+        sacks.ExpCaption(OnScreen4(qfCam, qfLook, 55f, -.95f, .93f), Vector3.down * 4.6f,
+            "The fins added up (α = t):  half the chain at height 0, a straight road, plus half the chain an octave up, at 2t|" +
+            "with the road taken away, the octave is left (violet to white), lifted out of the plane by the chain's own imaginary part (drawn at 0.35)|" +
+            "its vortices sit on every spoke and every knot of the chain:  the twist on the twist turns the knots into spokes", 40f);
+        yield return Shot("QA4-the-fins-added-up", qfCam, qfLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 qb = qa + new Vector3(1000f, 0f, 0f);
+        sacks.ExpCoilOnCoil(qb + new Vector3(-24f, 0f, 0f), 14.134725141734693, 14.134725141734693, 60, 8f, 17f, 4f, qLabel, "α = γ");
+        sacks.ExpCoilOnCoil(qb + new Vector3(24f, 0f, 0f), 14.134725141734693, 2 * 14.134725141734693, 60, 8f, 17f, 4f, qLabel, "α = 2γ");
+        Vector3 qbLook = qb + new Vector3(0f, 33f, 0f), qbCam = qbLook + new Vector3(0f, .22f, -1f).normalized * 118f;
+        sacks.ExpCaption(OnScreen4(qbCam, qbLook, 55f, -.95f, .93f), Vector3.down * 4.6f,
+            "A coil on the coil:  E8's logarithmic axis at the first zero (γ = 14.13)|" +
+            "every n's hand stands at the height log n, turned γ · log n:  the gold coil runs through the hands' tips|" +
+            "at each tip a fin turns about its hand by α · log n:  the second coil runs through the fins' tips (gold up, cyan down)", 42f);
+        yield return Shot("QB1-a-coil-on-the-coil", qbCam, qbLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        Vector3 qc = qa + new Vector3(1500f, 0f, 0f);
+        sacks.ExpSacksTwistedSquares(qc, 14.134725141734693, 400, 2.4f, .24f, qLabel, "");
+        Vector3 qcLook = qc + new Vector3(0f, 0f, 3f), qcCam = qcLook + new Vector3(0f, 1.6f, -.55f).normalized * 112f;
+        sacks.ExpCaption(OnScreen4(qcCam, qcLook, 55f, -.95f, .93f), Vector3.down * 5f,
+            "The Sacks spiral, every number with its square:  the radius √n and a fin as long (drawn at a quarter)|" +
+            "each fin is tilted about its radius by the first zero's phase, so its height is −√n cos(γ log n):  gold up, cyan down|" +
+            "they point down in rings on the zero's crests, n = e^(τk/γ), and up between them.  Gold dots:  the primes", 42f);
+        yield return Shot("QC1-the-sacks-spiral-with-twisted-squares", qcCam, qcLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+
+        sacks.ExpSacksZeroNeedles(qc, 1000, 1.6f, 4.2f, qLabel, "");
+        Vector3 qnLook = qc + new Vector3(0f, 9f, 3f), qnCam = qnLook + new Vector3(0f, .5f, -1f).normalized * 108f;
+        sacks.ExpCaption(OnScreen4(qnCam, qnLook, 55f, -.95f, .93f), Vector3.down * 4.4f,
+            "The same squares added up over the first 10 000 zeros (Gaussian taper), the pole's share removed|" +
+            "the fin's length √n cancels Landau's 1/√n:  each prime power's fin stands at log p (gold primes, orange their powers)|" +
+            "every other number's fins cancel:  the twisted squares, summed over the zeros, find the primes", 40f);
+        yield return Shot("QC2-the-twisted-squares-summed-over-the-zeros", qnCam, qnLook, Vector3.up, 55f);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();

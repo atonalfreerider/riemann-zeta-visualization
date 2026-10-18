@@ -3874,6 +3874,100 @@ PA1–PA3, PB1 and PC1 are plots computed in Python (mpmath for ζ); `python3 To
 the zeros of Z₃ (about 10 minutes on 8 cores). PC2 and PC3 are drawn by `ExperimentsRenderTest` with key `~`
 (`SacksHurwitzShell.cs`, computed at run time).
 
+## QA–QC. The twist on the twist: squares that orbit their links
+
+Exploration, October 2026 (τ = 2π). Each link of the zeta chain is a square root, so it comes with a perpendicular of the
+same length, and link and perpendicular are two sides of one square. As the links turn clockwise by t · log n, let each
+perpendicular, its fin, also turn about its own link by α · log n, so that it orbits the joint: a second rotation on top of
+the chain's. What does that do to the vortices, to the coils of E8's logarithmic axis, and to the Sacks spiral?
+
+### QA. The chain with orbiting squares
+
+The chain at zero 300 (t = 541.85; the fold at √(t/τ) = 9.29, the spokes at n = t/τk), first with every square flat
+(α = 0), then with the fins orbiting:
+
+![QA1](QA1-the-chain-with-its-squares-flat.jpg)
+![QA2](QA2-the-squares-orbiting-at-the-chains-own-rate.jpg)
+![QA3](QA3-the-squares-orbiting-at-half-the-rate.jpg)
+
+**The fins add up to two chains.** As vectors, fin<sub>n</sub> = n<sup>−½</sup>(cos φ<sub>n</sub> · w(θ<sub>n</sub>) +
+sin φ<sub>n</sub> · ẑ), with θ<sub>n</sub> = −t log n, φ<sub>n</sub> = −α log n and w the in-plane perpendicular. Summed:
+
+* in the plane, (i/2)(S(t − α) + S(t + α));
+* out of it, Im S(α),
+
+where S(h) = Σ n<sup>−½−ih</sup> is the chain at height h. This was checked to every printed digit at zero 300 for α = 0,
+t/2, t and 2t. So the twist on the twist is a beat. The fins carry two zeta chains, at the difference and the sum of the two
+rates, and the fins' vortices are those of the chains at t ± α, at n = (t ± α)/τk.
+
+**α = t, the chain's own rate.** The difference chain is at height 0: Σ n<sup>−½</sup>/2, a straight road that never turns
+(after 400 links the fins' sum in the plane is −0.17 + 19.40i). The sum chain is the octave, 2t. Its vortices,
+n = 2t/τm, fall on the chain's vortices (m even, n = t/τk) and on its knots (m odd, n = t/(2k + 1)π). At zero 300 they are at
+172.5 (knot 0), 86.2 (spoke 1), 57.5 (knot 1), 43.1 (spoke 2), and so on. The twist on the twist turns the chain's knots into
+spokes:
+
+![QA4](QA4-the-fins-added-up.jpg)
+
+**How the fins line up in the vortices.** In spoke k a link turns the chain by k whole turns and its fin by (α/t) · k turns.
+Where that is a whole number the fins line up; where it is half a number they flip from link to link. The coherence
+|mean e<sup>iφ</sup>| of the fins over each spoke's links at zero 300:
+
+| α | spoke 1 (36 links) | spoke 2 (8) | spoke 3 (4) | spoke 4 (2) |
+|---|---|---|---|---|
+| t/2 | 0.03 | 0.94 | 0.05 | 1.00 |
+| t | 0.30 | 0.78 | 0.93 | 1.00 |
+| 3t/2 | 0.03 | 0.56 | 0.17 | 1.00 |
+| 2t | 0.18 | 0.36 | 0.72 | 1.00 |
+
+At α = t/2 and 3t/2 the odd spokes cancel and the even ones line up. At α = t a fin's tilt is its own link's angle, so the
+fins line up exactly as much as the links do, and the wide first spoke holds only 0.30.
+
+### QB. A coil on the coil
+
+E8's logarithmic axis (sections JA–JF): every n's hand stands at the height log n, one unit long, turned γ · log n, and the
+coil runs through the hands' tips. Now at each tip a fin perpendicular to the hand turns about it by α · log n. The curve
+through the fins' tips is a second coil wound on the first. Its distance from the axis, √(1 + ρ² cos² φ), breathes once per
+turn of the coil when α = γ and twice when α = 2γ:
+
+![QB1](QB1-a-coil-on-the-coil.jpg)
+
+### QC. The Sacks spiral with twisted squares
+
+On the Sacks spiral the radius is √n, the square root itself, so the radius and a perpendicular of the same length make the
+square of area n. Turn that fin about the radius by a zero's phase, γ log n minus a quarter turn, and its height is
+−√n cos(γ log n). For the first zero the fins point down in rings on the zero's crests, n = e<sup>τk/γ</sup> (section F), and
+up between them:
+
+![QC1](QC1-the-sacks-spiral-with-twisted-squares.jpg)
+
+**Summed over the zeros, the squares stand on the primes.** Landau: Σ<sub>γ≤T</sub> x<sup>iγ</sup> =
+−(T/τ) Λ(x)/√x + O(log T). The fin's length √n cancels the 1/√n exactly. Added up over the zeros, every prime power's fin
+stands at log p (times T/τ), and every other number's fins cancel. With a Gaussian taper on the first 10 000 zeros, and the
+pole's share removed, this is section OD's rebuilt Λ̂(n), exact for every n ≤ 989:
+
+![QC2](QC2-the-twisted-squares-summed-over-the-zeros.jpg)
+
+This is the explicit formula again, read as geometry: the side √n of each number's square is exactly the weight that makes
+the zeros' waves stand up straight on the prime powers.
+
+### What QA–QC give
+
+* **The twist on the twist is a beat.** Two rotations at rates t and α give zeta chains at t ± α. Nothing new is created and
+  ζ's zeros stay where they are: the fins re-sort the chain's vortices. At α = t the knots become spokes of the octave, and
+  in spoke k the fins line up exactly when (α/t) · k is a whole number.
+* **On E8's logarithmic axis** the fins wind a second coil on the coil, breathing once or twice per turn.
+* **On the Sacks spiral** the square's side √n is Landau's normalization. The twisted squares, summed over the zeros, stand
+  on the prime powers and nowhere else.
+
+**Checks by TypeSafe.** Every screenshot of this round was screened first by Jev, TypeSafe's System One model
+(`Tools/jev_check.py`), for clipped text, colliding labels, mostly empty frames, clarity, and whether it shows what it should.
+The flagged shots were then reviewed by eye and fixed. On known cases it caught a cropped caption (0.84) and a shrunken frame
+(0.99), and it missed one clipped caption that the review caught. The numeric claims above were checked against the scripts'
+printed evidence with `Tools/jev_claims.py` (the citation-check pattern). It accepted the correct ones, caught a planted false
+number and an unsupported claim, and sent three ambiguous wordings to review, all three correct.
+
+QA–QC's pictures are drawn by `ExperimentsRenderTest` with key `=` (`SacksTwistChain.cs`; QC2 uses `ZeroHorizonData.cs`).
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
@@ -4348,7 +4442,7 @@ every clip it writes.
     ZETA_OUT=/some/dir Unity -batchmode -projectPath . -runTests -testPlatform PlayMode \
         -testFilter ExperimentsRenderTest -testResults /some/dir/results.xml -logFile /some/dir/run.log
 
-The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Section PC uses the key `~` (`ZETA_EXP_ONLY='~' ZETA_EXP_WIDE=1`); it computes its shells at run time. Sections OB and OD use the key `^` (`ZETA_EXP_ONLY='^' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/zero_horizon_data.py` (seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
+The pictures of sections IA–ID use the key `#` (`ZETA_EXP_ONLY='#' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lie_guts_data.py`. Sections KA–KD use the key `%` (`ZETA_EXP_ONLY='%' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/lattice_zeta_data.py --cache DIR`. Sections LA–LE use the key `+`; their data comes from `python3 Tools/class_group_data.py --cache DIR` (about 25 minutes on 8 cores the first time, seconds after). Section LF uses the same key; its data comes from `python3 Tools/class_five_data.py --cache DIR` (about 5 minutes the first time). Sections MA–MC use the key `&`; their data comes from `python3 Tools/race_data.py` (20 seconds) and `python3 Tools/family_race_data.py` (15 seconds). Sections QA–QC use the key `=` (`ZETA_EXP_ONLY='=' ZETA_EXP_WIDE=1`); they compute their chains at run time, and QC2 reads `ZeroHorizonData.cs`. Section PC uses the key `~` (`ZETA_EXP_ONLY='~' ZETA_EXP_WIDE=1`); it computes its shells at run time. Sections OB and OD use the key `^` (`ZETA_EXP_ONLY='^' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/zero_horizon_data.py` (seconds). Sections NC–ND use the key `!` (`ZETA_EXP_ONLY='!' ZETA_EXP_WIDE=1`); their data comes from `python3 Tools/class_five_extend.py line X.json` (about 40 minutes on 8 cores), `python3 Tools/class_five_extend.py window 84.70 84.78 0.001 W.json` (a minute) and `python3 Tools/family_sphere_data.py X.json W.json` (a minute). Sections JA–JF use the key `@` (`ZETA_EXP_ONLY='@' ZETA_EXP_WIDE=1`); their zeros and statistics come from `python3 Tools/zero_stack_data.py --cache DIR` (about 20 minutes on 8 cores the first time; the zeros are kept in DIR). The model lab's pictures (HA–HC) are written by `ModelLabTest` (`ZETA_OUT=/path Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ModelLabTest`), which also checks the lab's arithmetic and drives every control.
 
 `ZETA_EXP_ONLY=AH` renders only the named sections; the lowercase letters `m`, `l`, `k` and `t` are Z1 to Z4, `a` to
 `e` are AA to AE, `f` to `i` are BA to BD, `n` to `r` are CA to CE, `j`, `s`, `u`, `v` are DA to DD, and the digits `1` to `5`
