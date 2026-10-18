@@ -1,6 +1,6 @@
 # Long-form segments: scripts
 
-The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … xs5) and the zeros inside E8 (xz1 … xz5). This file is written by `python3 Tools/video_series.py --doc` from [`Tools/video_series_spec.py`](../../Tools/video_series_spec.py), which also writes the chapters into [`experiments.json`](../../Assets/Resources/Narration/experiments.json). Narrate a segment with `Tools/generate_narration.py --script experiments --only xs1`, re-time its cues to the narration with `Tools/video_series.py`, and record it with `Tools/render_chapters.py --script experiments --chapters xs1 --shapes horizontal`.
+The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discoveries (xs1 … xs5), the zeros inside E8 (xz1 … xz5) and the twist on the twist (xorbit). This file is written by `python3 Tools/video_series.py --doc` from [`Tools/video_series_spec.py`](../../Tools/video_series_spec.py), which also writes the chapters into [`experiments.json`](../../Assets/Resources/Narration/experiments.json). Narrate a segment with `Tools/generate_narration.py --script experiments --only xs1`, re-time its cues to the narration with `Tools/video_series.py`, and record it with `Tools/render_chapters.py --script experiments --chapters xs1 --shapes horizontal`.
 
 ## xs1: The saddle is a wave
 
@@ -340,3 +340,41 @@ The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … 
    *Board:* **a prime's shell:  240 (1 + p³), the fewest** — 6:  the extra cubes 8 = 2³ and 27 = 3³ are its factors
 12. Counted over every shell at once, the points of E8 give its own zeta function: 240 ζ(s) ζ(s − 3). A finite symmetry, and infinitely many shells, one for every counting number.
    *Board:* **Σ 240 σ_3(n) n^−s = 240 ζ(s) ζ(s − 3)** — a finite symmetry, a shell for every counting number
+
+## xorbit: The twist on the twist
+
+*squares that orbit the links of zeta's chain*  ·  14 lines, 576 words
+
+1. Claude, an AI math research assistant, and I gave every link of zeta's chain a square. This is the chain at the 300th zero, t = 541.85: a link for every counting number.
+   *Board:* **the twist on the twist** — a square on every link of zeta's chain
+2. Link n is 1/√n long. Stand a fin of the same length at its start, perpendicular to it, and the link and its fin are two sides of a square, of area 1/n.
+   *Board:* **a square on every link** — link n and its fin:  a square of area 1/n
+   *Callouts:* link 1 and its fin:  area 1
+3. Now the twist on the twist. While each link turns clockwise by t · log n, let each fin turn about its own link by α · log n, so that it orbits its joint: gold where it points up out of the plane, cyan where it points down.
+   *Board:* **the twist on the twist** — each fin turns α · log n:  gold up, cyan down
+4. Stop at α = t/2, half the chain's rate. In spoke k, where each link turns k whole turns from the last, its fin turns k half-turns. So in the odd spokes the fins flip from link to link, and in the even spokes they line up.
+   *Board:* **α = t/2** — in spoke k a link turns its fin k half-turns
+   *Callouts:* spoke 1:  the fins flip; spoke 2:  they line up
+5. At α = t, the chain's own rate, each fin tilts by its own link's angle, so the fins line up wherever the links do.
+   *Board:* **α = t:  the chain's own rate** — each fin tilts by its own link's angle
+6. Now add the fins up, head to tail, seen from above. Half of every fin points the same way, straight up the plane, so the sum runs off along a straight road: the chain at height zero, which never turns.
+   *Board:* **the fins, head to tail** — half of each fin points up:  a road, Σ 1/(2√n)
+7. Take the road away, and what is left is half the chain an octave up, at 2t. So the twist on the twist is a beat: the fins carry two zeta chains, at t − α and t + α.
+   *Board:* **the road taken away** — left:  half the chain at 2t, an octave up
+8. This octave chain runs straight where the chain itself runs straight, in its spoke near n = 86. And it runs straight through the chain's knot near 172, where the chain curls up tight. The twist on the twist turns knots into spokes.
+   *Board:* **knots become spokes** — the octave runs straight at spokes and knots
+   *Callouts:* n ≈ 86:  spoke 1 of both; n ≈ 172:  straight here; the chain's knot 0
+9. Now the Sacks spiral, where every number n sits at radius √n. The radius is the square root itself, so a radius and a fin as long make a square of area n.
+   *Board:* **the Sacks spiral** — n at radius √n:  radius and fin, a square of area n
+   *Callouts:* n = 40:  radius √40, area 40
+10. Give every number its fin, drawn at a quarter of its length, and turn each fin about its radius by the first zero's phase, γ · log n. The fins point down in rings, on the zero's crests, and up between them.
+   *Board:* **each fin turned by the first zero** — φ = γ_1 log n − τ/4:  the fin's height −√n cos(γ_1 log n)
+11. Now add the fins turned by the second zero, the third, and on up to 10,000 zeros, each sum divided by T/τ. The fins shrink away, except on the prime powers, where they stand up straight.
+   *Board:* **summed over the zeros** — K zeros' fins added, ÷ T/τ  (T: the K-th zero)
+12. Landau proved why. Added up to height T, the zeros' waves give −(T/τ) · log p/√n at every power n of a prime p. The fin's length, √n, cancels the 1/√n, so each needle stands at log p.
+   *Board:* **Landau** — Σ_γ ≤ T n^iγ = −(T/τ) Λ(n)/√n + O(log T)
+13. 379 is a prime: its needle reaches 5.78, nearly log 379. 361, 19², reaches 2.8, nearly log 19. And 371, 7 · 53, stays at zero.
+   *Board:* **10 000 zeros:  the needles** — 379 → 5.78,  361 = 19² → 2.80,  371 = 7 · 53 → 0
+   *Callouts:* 379, a prime:  5.78 ≈ log 379; 361 = 19²:  2.80 ≈ log 19; 371 = 7 · 53:  −0.04
+14. So the twist on the twist creates nothing new: it rearranges the chain's vortices into a beat of two chains. And on the Sacks spiral, the side of each number's square is exactly the weight that stands the zeros' waves up on the primes.
+   *Board:* **what the twist shows** — two chains in a beat;  √n is Landau's weight

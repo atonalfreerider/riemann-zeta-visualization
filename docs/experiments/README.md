@@ -4205,7 +4205,8 @@ Its scenes are the landscape stills of those sections, so it is drawn for a hori
 `--shapes horizontal`. Its script, with the reasons for each choice, is in [`xtop5-script.md`](xtop5-script.md).
 
 **The long-form segments.** *Five discoveries* and *The zeros inside E8's stack* are also told at length, as ten
-horizontal segments (`xs1` … `xs5`, `xz1` … `xz5`; scripts in [`long-form-script.md`](long-form-script.md)), narrated
+segments (`xs1` … `xs5`, `xz1` … `xz5`), and sections QA–QC as an eleventh (`xorbit`; scripts in
+[`long-form-script.md`](long-form-script.md)), narrated
 as the work of the author and Claude, an AI math research assistant. Each is one continuous sequence: a picture is
 built step by step and then turned into the next one (a parameter of the scene is eased, `exp:tw`), rather than
 cleared and replaced. Two charts that compare the same thing are not set side by side for the camera to pan between:
@@ -4378,6 +4379,22 @@ master wave and ζ's trail rising from the centre) and build every formula on sc
   (`on=vlbox`), and lines and labels keep their size on the screen through the tenfold zoom.
 * **Verticals posted one by one.** A watcher muxes each vertical segment as soon as its raw video is written and makes a
   720p copy for review (ffmpeg needs `-nostdin` there: it read the watcher's input and swallowed the next segment's line).
+
+*Round seven (October 2026).*
+
+* **The twist on the twist** (xorbit, vertical; [`SacksPathFins.cs`](../../Assets/Tour/SacksPathFins.cs),
+  [`SacksSquareWorld.cs`](../../Assets/Tour/SacksSquareWorld.cs)). Sections QA–QC as one sequence. The chain at zero 300
+  is built link by link and every link grows its square (`pw.fins`). The fins orbit their links as α runs to t/2, where
+  the odd spokes' fins flip and the even spokes' line up, and on to t (`pw.alpha`). They slide head to tail into their
+  running sum (`pw.finsum`, the first fins first; seen from above, with `pw.lift` laying the sum flat), lose their
+  straight road (`pw.road`) and leave the octave chain, whose straight runs are called out on the chain's spoke 1
+  (n ≈ 86) and on its knot 0 (n ≈ 172). The Sacks spiral then grows where the chain stood: the square of 40 in full
+  (the radius √40 and a fin as long), then every number's fin at a quarter of its length, turned by the first zero's
+  phase (`sq.tilt`: down in rings on the crests). Last, the fins are summed over the first 1, 2, 3, 5, … 10 000 zeros,
+  each sum divided by T/τ (`sq.k`; all 10 000 zeros' fins are summed when the scene starts, four million terms). With
+  10 000 zeros and no taper, 379's fin stands at 5.78 (log 379 = 5.94), 361 = 19²'s at 2.80 (log 19 = 2.94) and
+  371 = 7 · 53's at −0.04. Up to n = 400, every prime power's fin is within 0.20 of log p and every other fin within
+  0.37 of 0.
 
 *E8's finite shells and a number's infinitely many products.* Shell n of E8 holds 240 σ<sub>3</sub>(n) points, and pairing
 each divisor d with n/d gives σ<sub>3</sub>(n)/n³ = Σ<sub>d | n</sub> 1/d³: every divisor d of n adds exactly 1/d³ of n³ to

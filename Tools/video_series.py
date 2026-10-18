@@ -184,8 +184,8 @@ def board_of(actions):
 def write_doc(chapters):
     """The scripts of all the segments, with each line's board and callouts, for reading and review."""
     out = ["# Long-form segments: scripts", "",
-           "The horizontal long-form segments (1920 × 1080): the five discoveries (xs1 … xs5) and the zeros inside E8 "
-           "(xz1 … xz5). This file is written by `python3 Tools/video_series.py --doc` from "
+           "The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discoveries (xs1 … xs5), the zeros inside "
+           "E8 (xz1 … xz5) and the twist on the twist (xorbit). This file is written by `python3 Tools/video_series.py --doc` from "
            "[`Tools/video_series_spec.py`](../../Tools/video_series_spec.py), which also writes the chapters into "
            "[`experiments.json`](../../Assets/Resources/Narration/experiments.json). Narrate a segment with "
            "`Tools/generate_narration.py --script experiments --only xs1`, re-time its cues to the narration with "
