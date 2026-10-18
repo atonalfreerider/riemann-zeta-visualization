@@ -1,6 +1,7 @@
 """
-The long-form horizontal segments (1920 × 1080): the five discoveries (xs1 … xs5) and the zeros inside E8 (xz1 … xz5),
-each a chapter of Assets/Resources/Narration/experiments.json built by Tools/video_series.py.
+The long-form segments (1920 × 1080 and 1080 × 1920): the five discoveries (xs1 … xs5), the zeros inside E8 (xz1 … xz5)
+and the twist on the twist (xorbit), each a chapter of Assets/Resources/Narration/experiments.json built by
+Tools/video_series.py.
 
 A line is {text, camera, actions, pause}. The camera is an orbit cue as a dict (see CameraRig.OrbitCue); az "+" continues
 the previous line's turn from where it stopped. An action "@word|exp:…" runs as the narrator says the word (its k-th
@@ -10,7 +11,9 @@ Callouts (ExperimentCallouts.cs): exp:callKIND:TARGET:DX,DY[,FRAC[,RRGGBB]]:TEXT
 (DX, DY) and grows an arrow from it to the target, which blooms white as it lands. Kinds: num (a number on the surface),
 wave (the top of a number's spike, TARGET N or N@prime|divisor), fun (a column top in the zeros funnel), clock and
 clocklink (the bridge's clocks), bar and wheel (section IA), vertex (the live chain), fold (section MB), e8 (the wheel's
-spiral), zeta (ζ(½ + it) on the curve), at (a point X,Y,Z from the centre).
+spiral), zeta (ζ(½ + it) on the curve), path (a vertex of the path of partial sums), fin (the head of a fin on the path, or
+in the fins' running sum), sq and sqsq (a fin's tip on the Sacks spiral of twisted squares, and the middle of a full
+square), at (a point X,Y,Z from the centre).
 """
 
 GOLD, RED, BLUE, GREEN, WHITE, CYAN = "ffd973", "ff6b5a", "66c4ff", "7dff8f", "ffffff", "59e8d9"
@@ -1315,4 +1318,145 @@ XZ5 = dict(
              pause=1.4),
     ])
 
-SERIES = [XS1, XS2, XS3, XS4, XS5, XZ1, XZ2, XZ3, XZ4, XZ5]
+# ---------------------------------------------------------------------------------------------------------------
+# the twist on the twist (README QA–QC): squares on the links of the chain at zero 300, their fins orbiting the links; the
+# fins summed (a road and the octave chain); the Sacks spiral's squares turned by the zeros, summed until they stand on the
+# prime powers
+# ---------------------------------------------------------------------------------------------------------------
+
+T300 = 541.8474371212013          # zero 300: the chain has t/π + 12 = 184 links; spokes at n = t/τk, knots at n = t/(2k + 1)π
+# boxes in the path's plane (world units from its origin, 12 a unit; x right, y up the plane): the whole chain with its
+# squares, spokes 1 and 2, the fins' road, and the octave chain left when the road is taken away
+OB_CHAIN, OB_SPOKES, OB_ROAD, OB_OCT = (-17, 19, -6, 30), (-17, 3, -5, 10), (-17, 19, -8, 160), (-6, 6, -4.5, 7.5)
+TILT_FINS = 56                     # the chain seen a little from the side, so the fins' ups and downs show
+
+
+def OBOX(*boxes, el=89.5, span=None, hold=None, **kw):
+    """A shot of the path's plane framing one box, or easing from the first to the second (both shapes fitted)."""
+    w = [BOX(*b) for b in boxes]
+    t = [BOX(*b, tall=True) for b in boxes]
+    extra = {}
+    if span is not None:
+        extra["span"] = span
+    if hold is not None:
+        extra["hold"] = hold
+    return PC(at=">".join(x["at"] for x in w), fit=">".join(x["fit"] for x in w), el=el, rise=RISE,
+              tall=dict(at=">".join(x["at"] for x in t), fit=">".join(x["fit"] for x in t)), **extra, **kw)
+
+
+# the Sacks spiral (n ≤ 400, radius 24) at PathOrigin: its middle close (the square of 40), the whole from 66° up (the rings),
+# and from 44° up (the needles)
+SQ_TOP = dict(at=BOX(-25, 25, -25, 25)["at"], fit=BOX(-25, 25, -25, 25)["fit"], tall=dict(fit=BOX(-25, 25, -25, 25, tall=True)["fit"]))
+SQ_RINGS = dict(at="0,0,-1", fit="106,59.6", tall=dict(fit="54,96"))
+SQ_NEEDLES = dict(at="0,1,-5", fit="106,59.6", tall=dict(fit="54,96"))
+
+
+def SQ(a, b=None, el=66, span=None, hold=None):
+    """A shot of the Sacks spiral (one framing, or easing from a to b)."""
+    b = b or a
+    kw = dict(at=a["at"] if a is b else f"{a['at']}>{b['at']}", fit=a["fit"] if a is b else f"{a['fit']}>{b['fit']}", el=el, rise=RISE,
+              tall=dict(fit=a["tall"]["fit"] if a is b else f"{a['tall']['fit']}>{b['tall']['fit']}"))
+    if span is not None:
+        kw["span"] = span
+    if hold is not None:
+        kw["hold"] = hold
+    return PC(**kw)
+
+
+XORBIT = dict(
+    id="xorbit", title="The twist on the twist", subtitle="squares that orbit the links of zeta's chain",
+    setup=["exp:stage", "exp:backdrop:off", "exp:vortexprep", "exp:pwinit", "exp:sqinit", tw("pw.t", T300, 0), tw("pw.n", 0, 0),
+           tw("pw.tail", 0, 0), tw("pw.marks", 0, 0), tw("pw.readout", 1, 0), tw("pw.rise", 0, 0), tw("pw.fins", 0, 0),
+           tw("pw.alpha", 0, 0), tw("pw.lift", 1, 0)],
+    lines=[
+        dict(text="Claude, an AI math research assistant, and I gave every link of zeta's chain a square. This is the chain at the "
+                  "three hundredth zero, t equal to five hundred forty-one point eight five: a link for every counting number.",
+             camera=OBOX(OB_CHAIN),
+             actions=["exp:snap", say("the twist on the twist", "a square on every link of zeta's chain"),
+                      at("gave", tw("pw.n", 1, .6)), at("gave+0.6", tw("pw.n", 184, "{gave~end}", "geo")),
+                      at("this", say("zeta's chain at zero 300", "t = 541.85:  link n is n<sup>−½</sup> long, turned t · log n"))]),
+        dict(text="Link n is one over root n long. Stand a fin of the same length at its start, perpendicular to it, and the link "
+                  "and its fin are two sides of a square, of area {1/n.|one over n.}",
+             camera=OBOX(OB_CHAIN),
+             actions=[at("stand", tw("pw.fins", 1, "{stand~two}")),
+                      at("square", call("fin", 1, -.6, .5, "link 1 and its fin:  area 1", tall=(-.3, .6))),
+                      say("a square on every link", "link n and its fin:  a square of area 1/n")]),
+        dict(text="Now the twist on the twist. While each link turns clockwise by {t · log n,|t times log n,} let each fin turn about its "
+                  "own link by {α · log n,|alpha times log n,} so that it orbits its joint: gold where it points up out of the plane, cyan "
+                  "where it points down.",
+             camera=OBOX(OB_CHAIN, el=f"89.5>{TILT_FINS}", span=4),
+             actions=["exp:uncall", at("let", tw("pw.alpha", .5, "{let~end}")),
+                      say("the twist on the twist", "each fin turns α · log n:  gold up, cyan down")]),
+        dict(text="Stop at {α = t/2,|alpha equal to t over two,} half the chain's rate. In spoke k, where each link turns k whole turns "
+                  "from the last, its fin turns k half-turns. So in the odd spokes the fins flip from link to link, and in the even "
+                  "spokes they line up.",
+             camera=OBOX(OB_CHAIN, OB_SPOKES, el=TILT_FINS, span=4),
+             actions=[say("α = t/2", "in spoke k a link turns its fin k half-turns"),
+                      at("odd", call("path", 86, .4, -1, "spoke 1:  the fins flip", tall=(.3, -1))),
+                      at("even", call("path", 43, -.5, 1, "spoke 2:  they line up", tall=(-.2, 1)))]),
+        dict(text="At {α = t,|alpha equal to t,} the chain's own rate, each fin tilts by its own link's angle, so the fins line up "
+                  "wherever the links do.",
+             camera=OBOX(OB_SPOKES, OB_CHAIN, el=TILT_FINS, span=4),
+             actions=["exp:uncall", at("at", tw("pw.alpha", 1, "{at~end}")),
+                      say("α = t:  the chain's own rate", "each fin tilts by its own link's angle")]),
+        dict(text="Now add the fins up, head to tail, seen from above. Half of every fin points the same way, straight up the "
+                  "plane, so the sum runs off along a straight road: the chain at height zero, which never turns.",
+             camera=OBOX(OB_CHAIN, OB_ROAD, el=f"{TILT_FINS}>89.5", span=7, hold="{add}"),
+             actions=[at("add", tw("pw.lift", 0, 4)), at("add", tw("pw.finsum", 1, "{add~road}")),
+                      say("the fins, head to tail", "half of each fin points up:  a road, Σ 1/(2√n)")]),
+        dict(text="Take the road away, and what is left is half the chain an octave up, at {2t.|two t.} So the twist on the twist is "
+                  "a beat: the fins carry two zeta chains, at {t − α|t minus alpha} and {t + α.|t plus alpha.}",
+             camera=OBOX(OB_ROAD, OB_OCT, span=4),
+             actions=[at("take", tw("pw.road", 1, "{take~left}")), at("take", "exp:mute:PW path:2:1"),
+                      say("the road taken away", "left:  half the chain at 2t, an octave up"),
+                      at("beat", say("a beat", "the fins in the plane:  (i/2)(S(t − α) + S(t + α))"))]),
+        dict(text="This octave chain runs straight where the chain itself runs straight, in its spoke near n equal to eighty-six. "
+                  "And it runs straight through the chain's knot near one hundred seventy-two, where the chain curls up tight. The "
+                  "twist on the twist turns knots into spokes.",
+             camera=OBOX(OB_OCT),
+             actions=[at("spoke", call("fin", 86, .5, .9, "n ≈ 86:  spoke 1 of both", tall=(.4, .9))),
+                      at("knot", call("fin", 172, -.6, .8, "n ≈ 172:  straight here", tall=(-.5, .8))),
+                      at("curls", call("path", 172, .3, -1, "the chain's knot 0", tall=(.3, -1))),
+                      say("knots become spokes", "the octave runs straight at spokes and knots")]),
+        dict(text="Now the Sacks spiral, where every number n sits at radius {√n.|root n.} The radius is the square root itself, so a "
+                  "radius and a fin as long make a square of area n.",
+             camera=PC(at=f"{BOX(*OB_OCT)['at']}>{SQ_TOP['at']}", fit=f"{BOX(*OB_OCT)['fit']}>{SQ_TOP['fit']}", span=4, rise=RISE,
+                       tall=dict(at=f"{BOX(*OB_OCT, tall=True)['at']}>{SQ_TOP['at']}",
+                                 fit=f"{BOX(*OB_OCT, tall=True)['fit']}>{SQ_TOP['tall']['fit']}")),
+             actions=["exp:uncall", "exp:mute:PW path,PW fins:1.5:2", tw("pw.readout", 0, 1), at("spiral", tw("sq.dots", 1, 2.5)),
+                      at("radius#2", "exp:hide:PW path"), at("radius#2", "exp:hide:PW fins"), at("square", tw("sq.demo", 1, 1.5)),
+                      at("square", call("sqsq", 40, .6, .8, "n = 40:  radius √40, area 40", tall=(.3, .9))),
+                      say("the Sacks spiral", "n at radius √n:  radius and fin, a square of area n")]),
+        dict(text="Give every number its fin, drawn at a quarter of its length, and turn each fin about its radius by the first "
+                  "zero's phase, {γ · log n.|gamma times log n.} The fins point down in rings, on the zero's crests, and up between them.",
+             camera=SQ(SQ_TOP, SQ_RINGS, el="89.5>45", span=6),
+             actions=["exp:uncall", tw("sq.demo", 0, 1.5), at("give", tw("sq.fins", 1, 2)), at("turn", tw("sq.tilt", 1, "{turn~point}")),
+                      say("each fin turned by the first zero", "φ = γ<sub>1</sub> log n − τ/4:  the fin's height −√n cos(γ<sub>1</sub> log n)")]),
+        dict(text="Now add the fins turned by the second zero, the third, and on up to ten thousand zeros, each sum divided by "
+                  "{T/τ.|T over tau.} The fins shrink away, except on the prime powers, where they stand up straight.",
+             camera=SQ(SQ_RINGS, SQ_NEEDLES, el="45>42", span=12),
+             actions=[at("add", tw("sq.hud", 1, 1)), at("add", tw("sq.k", 13, "{add~end}", "linear")),
+                      at("shrink", tw("sq.h", 2.2, "{shrink~end}")),
+                      say("summed over the zeros", "K zeros' fins added, ÷ T/τ  (T: the K-th zero)")]),
+        dict(text="Landau proved why. Added up to height T, the zeros' waves give {−(T/τ) · log p/√n|minus T over tau, times log p over "
+                  "root n,} at every power n of a prime p. The fin's length, {√n,|root n,} cancels the one over root n, so each needle "
+                  "stands at log p.",
+             camera=SQ(SQ_NEEDLES, el=42),
+             actions=[say("Landau", "Σ<sub>γ ≤ T</sub> n<sup>iγ</sup> = −(T/τ) Λ(n)/√n + O(log T)")]),
+        dict(text="Three hundred seventy-nine is a prime: its needle reaches five point seven eight, nearly {log 379.|log three seventy-nine.} "
+                  "Three hundred sixty-one, nineteen squared, reaches two point eight, nearly log nineteen. And three hundred "
+                  "seventy-one, {7 · 53,|seven times fifty-three,} stays at zero.",
+             camera=SQ(SQ_NEEDLES, el=42),
+             actions=[at("prime", call("sq", 379, .3, 1, "379, a prime:  5.78 ≈ log 379", tall=(.3, 1))),
+                      at("sixtyone", "exp:uncall"), at("sixtyone+0.1", call("sq", 361, -.3, 1, "361 = 19²:  2.80 ≈ log 19", tall=(-.3, 1))),
+                      at("seventyone", "exp:uncall"), at("seventyone+0.1", call("sq", 371, 0, 1, "371 = 7 · 53:  −0.04", tall=(0, 1))),
+                      say("10 000 zeros:  the needles", "379 → 5.78,  361 = 19² → 2.80,  371 = 7 · 53 → 0")]),
+        dict(text="So the twist on the twist creates nothing new: it rearranges the chain's vortices into a beat of two chains. And "
+                  "on the Sacks spiral, the side of each number's square is exactly the weight that stands the zeros' waves up on "
+                  "the primes.",
+             camera=SQ(SQ_NEEDLES, el="42>38", span=10),
+             actions=["exp:uncall", say("what the twist shows", "two chains in a beat;  √n is Landau's weight")],
+             pause=1.4),
+    ])
+
+SERIES = [XS1, XS2, XS3, XS4, XS5, XZ1, XZ2, XZ3, XZ4, XZ5, XORBIT]

@@ -28,7 +28,7 @@ public partial class SacksSpiral
     public const float PathWorldOffset = 104000f;
     const float PwRise = 1.1f, PwScale = 12f, PwLogH = 16f;
 
-    class PwScene
+    partial class PwScene
     {
         public Transform Root, Plane;
         public LineRenderer Path, Hot, Tail, Extension, TurnArc, DirArc, DirRef, Axis, Curve;
@@ -186,6 +186,8 @@ public partial class SacksSpiral
         s.Readout.gameObject.SetActive(false);
         Hud(0, readout > .01f ? $"t = {t:0.00}" : "", new Color(1f, 1f, 1f, readout));
 
+        // the squares on the links and their fins (SacksPathFins.cs), redrawn on their own signature
+        PwFins(s, t, shown);
         string sig = $"{t:F5}|{shown:F3}|{tail:F3}|{marks:F3}|{rise:F3}|{curveVis:F3}|{eyes:F3}|{trails:F3}|{gold:F3}|{axisVis:F3}|{Tw("pw.mirrors", 0f):F3}|{Tw("pw.alleyes", 0f):F3}|{Tw("pw.logh", 0f):F3}|{Tw("pw.ground", 0f):F3}";
         if (sig == s.Sig) return;
         s.Sig = sig;

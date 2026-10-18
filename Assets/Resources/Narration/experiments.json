@@ -4801,6 +4801,208 @@
           "caption": "Counted over every shell at once, the points of {E8|E eight} give its own zeta function: {240 ζ(s) ζ(s − 3).|two hundred and forty times zeta of s, times zeta of s minus three.} A finite symmetry, and infinitely many shells, one for every counting number."
         }
       ]
+    },
+    {
+      "id": "xorbit",
+      "title": "The twist on the twist",
+      "subtitle": "squares that orbit the links of zeta's chain",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off",
+        "exp:vortexprep",
+        "exp:pwinit",
+        "exp:sqinit",
+        "exp:tw:pw.t:541.8474371212013:0",
+        "exp:tw:pw.n:0:0",
+        "exp:tw:pw.tail:0:0",
+        "exp:tw:pw.marks:0:0",
+        "exp:tw:pw.readout:1:0",
+        "exp:tw:pw.rise:0:0",
+        "exp:tw:pw.fins:0:0",
+        "exp:tw:pw.alpha:0:0",
+        "exp:tw:pw.lift:1:0"
+      ],
+      "lines": [
+        {
+          "id": "xorbit_01",
+          "text": "Claude, an AI math research assistant, and I gave every link of zeta's chain a square. This is the chain at the three hundredth zero, t equal to five hundred forty-one point eight five: a link for every counting number.",
+          "camera": "orbit:on=pathplane;at=1.0,12.0,0;fit=105.9,59.6^37.5,66.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:snap",
+            "exp:say:the twist on the twist|a square on every link of zeta's chain",
+            "delay:2.48:exp:tw:pw.n:1:0.6",
+            "delay:3.08:exp:tw:pw.n:184:10.43:geo",
+            "delay:5.49:exp:say:zeta's chain at zero 300|t = 541.85:  link n is n<sup>−½</sup> long, turned t · log n"
+          ],
+          "pause": 0.8,
+          "caption": "Claude, an AI math research assistant, and I gave every link of zeta's chain a square. This is the chain at the {300th|three hundredth} zero, {t =|t equal to} {541.85|five hundred forty-one point eight five}: a link for every counting number."
+        },
+        {
+          "id": "xorbit_02",
+          "text": "Link n is one over root n long. Stand a fin of the same length at its start, perpendicular to it, and the link and its fin are two sides of a square, of area one over n.",
+          "camera": "orbit:on=pathplane;at=1.0,12.0,0;fit=105.9,59.6^37.5,66.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:2.24:exp:tw:pw.fins:1:5.39",
+            "delay:8.36:exp:callfin:1:-0.6,0.5^-0.3,0.6:link 1 and its fin:  area 1",
+            "exp:say:a square on every link|link n and its fin:  a square of area 1/n"
+          ],
+          "pause": 0.8,
+          "caption": "Link n is {1/√n|one over root n} long. Stand a fin of the same length at its start, perpendicular to it, and the link and its fin are two sides of a square, of area {1/n.|one over n.}"
+        },
+        {
+          "id": "xorbit_03",
+          "text": "Now the twist on the twist. While each link turns clockwise by t times log n, let each fin turn about its own link by alpha times log n, so that it orbits its joint: gold where it points up out of the plane, cyan where it points down.",
+          "camera": "orbit:on=pathplane;at=1.0,12.0,0;fit=105.9,59.6^37.5,66.6;el=89.5>56;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "exp:uncall",
+            "delay:5.82:exp:tw:pw.alpha:0.5:11.56",
+            "exp:say:the twist on the twist|each fin turns α · log n:  gold up, cyan down"
+          ],
+          "pause": 0.8,
+          "caption": "Now the twist on the twist. While each link turns clockwise by {t · log n,|t times log n,} let each fin turn about its own link by {α · log n,|alpha times log n,} so that it orbits its joint: gold where it points up out of the plane, cyan where it points down."
+        },
+        {
+          "id": "xorbit_04",
+          "text": "Stop at alpha equal to t over two, half the chain's rate. In spoke k, where each link turns k whole turns from the last, its fin turns k half-turns. So in the odd spokes the fins flip from link to link, and in the even spokes they line up.",
+          "camera": "orbit:on=pathplane;at=1.0,12.0,0>-7.0,2.5,0;fit=105.9,59.6>44.1,24.8^37.5,66.6>20.5,36.5;el=56;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "exp:say:α = t/2|in spoke k a link turns its fin k half-turns",
+            "delay:11.61:exp:callpath:86:0.4,-1^0.3,-1:spoke 1:  the fins flip",
+            "delay:15.23:exp:callpath:43:-0.5,1^-0.2,1:spoke 2:  they line up"
+          ],
+          "pause": 0.8,
+          "caption": "Stop at {α = t/2,|alpha equal to t over two,} half the chain's rate. In spoke k, where each link turns k whole turns from the last, its fin turns k half-turns. So in the odd spokes the fins flip from link to link, and in the even spokes they line up."
+        },
+        {
+          "id": "xorbit_05",
+          "text": "At alpha equal to t, the chain's own rate, each fin tilts by its own link's angle, so the fins line up wherever the links do.",
+          "camera": "orbit:on=pathplane;at=-7.0,2.5,0>1.0,12.0,0;fit=44.1,24.8>105.9,59.6^20.5,36.5>37.5,66.6;el=56;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "exp:uncall",
+            "delay:0.00:exp:tw:pw.alpha:1:8.92",
+            "exp:say:α = t:  the chain's own rate|each fin tilts by its own link's angle"
+          ],
+          "pause": 0.8,
+          "caption": "At {α = t,|alpha equal to t,} the chain's own rate, each fin tilts by its own link's angle, so the fins line up wherever the links do."
+        },
+        {
+          "id": "xorbit_06",
+          "text": "Now add the fins up, head to tail, seen from above. Half of every fin points the same way, straight up the plane, so the sum runs off along a straight road: the chain at height zero, which never turns.",
+          "camera": "orbit:on=pathplane;at=1.0,12.0,0>1.0,76.0,0;fit=105.9,59.6>494.3,278.1^37.5,66.6>174.8,310.8;el=56>89.5;az=-90;spin=0;raise=0.035^0.045;span=7;hold=0.13",
+          "actions": [
+            "delay:0.13:exp:tw:pw.lift:0:4",
+            "delay:0.13:exp:tw:pw.finsum:1:8.46",
+            "exp:say:the fins, head to tail|half of each fin points up:  a road, Σ 1/(2√n)"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "xorbit_07",
+          "text": "Take the road away, and what is left is half the chain an octave up, at two t. So the twist on the twist is a beat: the fins carry two zeta chains, at t minus alpha and t plus alpha.",
+          "camera": "orbit:on=pathplane;at=1.0,76.0,0>0.0,1.5,0;fit=494.3,278.1>35.3,19.9^174.8,310.8>12.5,22.2;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "delay:0.00:exp:tw:pw.road:1:1.23",
+            "delay:0.00:exp:mute:PW path:2:1",
+            "exp:say:the road taken away|left:  half the chain at 2t, an octave up",
+            "delay:6.58:exp:say:a beat|the fins in the plane:  (i/2)(S(t − α) + S(t + α))"
+          ],
+          "pause": 0.8,
+          "caption": "Take the road away, and what is left is half the chain an octave up, at {2t.|two t.} So the twist on the twist is a beat: the fins carry two zeta chains, at {t − α|t minus alpha} and {t + α.|t plus alpha.}"
+        },
+        {
+          "id": "xorbit_08",
+          "text": "This octave chain runs straight where the chain itself runs straight, in its spoke near n equal to eighty-six. And it runs straight through the chain's knot near one hundred seventy-two, where the chain curls up tight. The twist on the twist turns knots into spokes.",
+          "camera": "orbit:on=pathplane;at=0.0,1.5,0;fit=35.3,19.9^12.5,22.2;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:4.26:exp:callfin:86:0.5,0.9^0.4,0.9:n ≈ 86:  spoke 1 of both",
+            "delay:9.13:exp:callfin:172:-0.6,0.8^-0.5,0.8:n ≈ 172:  straight here",
+            "delay:11.71:exp:callpath:172:0.3,-1:the chain's knot 0",
+            "exp:say:knots become spokes|the octave runs straight at spokes and knots"
+          ],
+          "pause": 0.8,
+          "caption": "This octave chain runs straight where the chain itself runs straight, in its spoke near {n =|n equal to} {86|eighty-six}. And it runs straight through the chain's knot near {172|one hundred seventy-two}, where the chain curls up tight. The twist on the twist turns knots into spokes."
+        },
+        {
+          "id": "xorbit_09",
+          "text": "Now the Sacks spiral, where every number n sits at radius root n. The radius is the square root itself, so a radius and a fin as long make a square of area n.",
+          "camera": "orbit:on=pathplane;at=0.0,1.5,0>0.0,0.0,0;fit=35.3,19.9>147.1,82.8^12.5,22.2>52.0,92.5;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "exp:uncall",
+            "exp:mute:PW path,PW fins:1.5:2",
+            "exp:tw:pw.readout:0:1",
+            "delay:0.62:exp:tw:sq.dots:1:2.5",
+            "delay:3.83:exp:hide:PW path",
+            "delay:3.83:exp:hide:PW fins",
+            "delay:4.46:exp:tw:sq.demo:1:1.5",
+            "delay:4.46:exp:callsqsq:40:0.6,0.8^0.3,0.9:n = 40:  radius √40, area 40",
+            "exp:say:the Sacks spiral|n at radius √n:  radius and fin, a square of area n"
+          ],
+          "pause": 0.8,
+          "caption": "Now the Sacks spiral, where every number n sits at radius {√n.|root n.} The radius is the square root itself, so a radius and a fin as long make a square of area n."
+        },
+        {
+          "id": "xorbit_10",
+          "text": "Give every number its fin, drawn at a quarter of its length, and turn each fin about its radius by the first zero's phase, gamma times log n. The fins point down in rings, on the zero's crests, and up between them.",
+          "camera": "orbit:on=pathplane;at=0.0,0.0,0>0,0,-1;fit=147.1,82.8>106,59.6^52.0,92.5>54,96;el=89.5>45;az=-90;spin=0;raise=0.035^0.045;span=6",
+          "actions": [
+            "exp:uncall",
+            "exp:tw:sq.demo:0:1.5",
+            "delay:0.00:exp:tw:sq.fins:1:2",
+            "delay:3.24:exp:tw:sq.tilt:1:6.54",
+            "exp:say:each fin turned by the first zero|φ = γ<sub>1</sub> log n − τ/4:  the fin's height −√n cos(γ<sub>1</sub> log n)"
+          ],
+          "pause": 0.8,
+          "caption": "Give every number its fin, drawn at a quarter of its length, and turn each fin about its radius by the first zero's phase, {γ · log n.|gamma times log n.} The fins point down in rings, on the zero's crests, and up between them."
+        },
+        {
+          "id": "xorbit_11",
+          "text": "Now add the fins turned by the second zero, the third, and on up to ten thousand zeros, each sum divided by T over tau. The fins shrink away, except on the prime powers, where they stand up straight.",
+          "camera": "orbit:on=pathplane;at=0,0,-1>0,1,-5;fit=106,59.6>106,59.6^54,96>54,96;el=45>42;az=-90;spin=0;raise=0.035^0.045;span=12",
+          "actions": [
+            "delay:0.15:exp:tw:sq.hud:1:1",
+            "delay:0.15:exp:tw:sq.k:13:12.90:linear",
+            "delay:8.93:exp:tw:sq.h:2.2:4.12",
+            "exp:say:summed over the zeros|K zeros' fins added, ÷ T/τ  (T: the K-th zero)"
+          ],
+          "pause": 0.8,
+          "caption": "Now add the fins turned by the second zero, the third, and on up to {10,000|ten thousand} zeros, each sum divided by {T/τ.|T over tau.} The fins shrink away, except on the prime powers, where they stand up straight."
+        },
+        {
+          "id": "xorbit_12",
+          "text": "Landau proved why. Added up to height T, the zeros' waves give minus T over tau, times log p over root n, at every power n of a prime p. The fin's length, root n, cancels the one over root n, so each needle stands at log p.",
+          "camera": "orbit:on=pathplane;at=0,1,-5;fit=106,59.6^54,96;el=42;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:say:Landau|Σ<sub>γ ≤ T</sub> n<sup>iγ</sup> = −(T/τ) Λ(n)/√n + O(log T)"
+          ],
+          "pause": 0.8,
+          "caption": "Landau proved why. Added up to height T, the zeros' waves give {−(T/τ) · log p/√n|minus T over tau, times log p over root n,} at every power n of a prime p. The fin's length, {√n,|root n,} cancels the {1/√n|one over root n}, so each needle stands at log p."
+        },
+        {
+          "id": "xorbit_13",
+          "text": "Three hundred seventy-nine is a prime: its needle reaches five point seven eight, nearly log three seventy-nine. Three hundred sixty-one, nineteen squared, reaches two point eight, nearly log nineteen. And three hundred seventy-one, seven times fifty-three, stays at zero.",
+          "camera": "orbit:on=pathplane;at=0,1,-5;fit=106,59.6^54,96;el=42;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:1.44:exp:callsq:379:0.3,1:379, a prime:  5.78 ≈ log 379",
+            "delay:6.46:exp:uncall",
+            "delay:6.56:exp:callsq:361:-0.3,1:361 = 19²:  2.80 ≈ log 19",
+            "delay:12.03:exp:uncall",
+            "delay:12.13:exp:callsq:371:0,1:371 = 7 · 53:  −0.04",
+            "exp:say:10 000 zeros:  the needles|379 → 5.78,  361 = 19² → 2.80,  371 = 7 · 53 → 0"
+          ],
+          "pause": 0.8,
+          "caption": "{379|Three hundred seventy-nine} is a prime: its needle reaches {5.78|five point seven eight}, nearly {log 379.|log three seventy-nine.} {361|Three hundred sixty-one}, {19²|nineteen squared}, reaches {2.8|two point eight}, nearly {log 19|log nineteen}. And {371|three hundred seventy-one}, {7 · 53,|seven times fifty-three,} stays at zero."
+        },
+        {
+          "id": "xorbit_14",
+          "text": "So the twist on the twist creates nothing new: it rearranges the chain's vortices into a beat of two chains. And on the Sacks spiral, the side of each number's square is exactly the weight that stands the zeros' waves up on the primes.",
+          "camera": "orbit:on=pathplane;at=0,1,-5;fit=106,59.6^54,96;el=42>38;az=-90;spin=0;raise=0.035^0.045;span=10",
+          "actions": [
+            "exp:uncall",
+            "exp:say:what the twist shows|two chains in a beat;  √n is Landau's weight"
+          ],
+          "pause": 1.4
+        }
+      ]
     }
   ]
 }

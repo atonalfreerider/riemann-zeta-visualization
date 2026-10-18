@@ -593,6 +593,9 @@ public partial class TourDirector
             case "callrace":
             case "callpath":
             case "callpathzeta":
+            case "callfin":
+            case "callsq":
+            case "callsqsq":
             case "callnw":
             case "callclock":
             case "callclockend":
@@ -621,6 +624,9 @@ public partial class TourDirector
                     "callzeta" => sacks.ZetaCurvePoint(Gamma(nk[0])),
                     "callnw" => sacks.NwPoint(num, nk.Length > 1 ? nk[1] : "p"),
                     "callpath" => sacks.PathVertex((int)num),
+                    "callfin" => sacks.FinVertex((int)num),
+                    "callsq" => sacks.SqFinTip((int)num),
+                    "callsqsq" => sacks.SqSquareMiddle((int)num),
                     "callhand" => sacks.FwHandTip((long)num),
                     "calltooth" => sacks.FwToothTip((long)num),
                     "callrace" => sacks.RacePoint(ParseVector(A(2)).x, ParseVector(A(2)).y),
@@ -692,6 +698,8 @@ public partial class TourDirector
             }
             // the partial-sum path at a fixed scale (SacksPathWorld.cs); its parameters are eased with exp:tw
             case "pwinit": sacks.ExpPathWorld(); break;
+            // the Sacks spiral with every number's square, its fin turned by the zeros (SacksSquareWorld.cs); parameters sq.*
+            case "sqinit": sacks.ExpSquareWorld(); break;
             // the coil assembled from the path's arrows over the zeros module's funnel (SacksFunnelWorld.cs)
             case "fwinit": sacks.ExpFunnelWorld(); break;
             // chart transforms (ExperimentMorphs.cs): exp:twgroup:GROUP:DX,DY,DZ:SCALE:SECONDS · exp:racemorph:SECONDS ·
