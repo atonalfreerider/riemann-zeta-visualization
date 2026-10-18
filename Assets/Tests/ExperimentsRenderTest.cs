@@ -2107,6 +2107,59 @@ public class ExperimentsRenderTest
         sacks.ClearExperiments();
         }
 
+        if (Wanted('-')) {
+        // RA–RD. The digits of τ and the primes: τ from the primes (E8's 240), the primes from τ, the helix of one radian
+        // per number, and τ's digits as E8's hours (SacksTauDigits.cs)
+        sacks.ShowRoutes(false);
+        sacks.ShowBackdrop(false);
+        // a caption in the top-left corner of a straight-on shot of height F (16:9) centred on look
+        Vector3 TopLeft(Vector3 look, float F) => look + new Vector3(-F * 16f / 9f * .47f, F * .455f, 0f);
+        // straight on and orthographic: the charts keep their proportions and the helix is not stretched toward the edges
+        IEnumerator Flat(string name, Vector3 look, float F) => ShotOrtho(name, look + Vector3.back * (F * 2f), look, Vector3.up, F * .5f);
+        Vector3 ra = c + new Vector3(SacksSpiral.TauOffset, 0f, 0f);
+
+        float raF = 380f;
+        sacks.ExpTauTurns(ra, 100f, 820f);
+        Vector3 raLook = ra + new Vector3(0f, -12f, 0f);
+        sacks.ExpCaption(TopLeft(raLook, raF), Vector3.down * (raF * .036f),
+            "One turn from the primes|" +
+            "each ring is τ as the primes so far give it, drawn as an arc from 3 o'clock;  red:  what the primes still owe", raF * .38f);
+        yield return Flat("RA1-one-turn-from-the-primes", raLook, raF);
+        sacks.ClearExperiments();
+
+        Vector3 rb = ra + new Vector3(1000f, 0f, 0f);
+        float rbF = 118f;
+        sacks.ExpTauReadout(rb, 160f, 62f, 330f);
+        Vector3 rbLook = rb + new Vector3(-4f, 30f, 0f);
+        sacks.ExpCaption(TopLeft(rbLook, rbF), Vector3.down * (rbF * .036f),
+            "Reading the primes out of τ|" +
+            "ζ(2k) = (τ/2)<sup>2k</sup> × a whole number ÷ (2 (4<sup>k</sup> − 1)(2k − 1)!):  the primes come out one by one, each costing more digits|" +
+            "readouts run, every prime right:  50 digits read 2, 3, 5, 7;  400 the first 25;  3 200 the first 80, up to 409|" +
+            "gold bars:  p + 2 is prime too;  white:  the digits that read every prime up to p", rbF * .38f);
+        yield return Flat("RB1-reading-the-primes-out-of-tau", rbLook, rbF);
+        sacks.ClearExperiments();
+
+        Vector3 rc = rb + new Vector3(1000f, 0f, 0f);
+        float rcF = 330f;
+        sacks.ExpTauHelix(rc, 100f, 300, 12000, 2000000, 860f);
+        Vector3 rcLook = rc + new Vector3(30f, 14f, 0f);
+        sacks.ExpCaption(TopLeft(rcLook, rcF), Vector3.down * (rcF * .036f),
+            "The helix of one radian per number|" +
+            "its arms are τ's continued fraction [6; 3, 1, 1, 7, 2, 146, …]:  6, 44 and 710 numbers make almost whole turns", rcF * .38f);
+        yield return Flat("RC1-the-helix-of-one-radian-per-number", rcLook, rcF);
+        sacks.ClearExperiments();
+
+        Vector3 rd = rc + new Vector3(1000f, 0f, 0f);
+        float rdF = 330f;
+        sacks.ExpTauClock(rd, 100f, 3000, 800f);
+        Vector3 rdLook = rd + new Vector3(0f, 26f, 0f);
+        sacks.ExpCaption(TopLeft(rdLook, rdF), Vector3.down * (rdF * .036f),
+            "τ's digits as E8's hours|" +
+            "30 hours, 8 of them prime to 30:  the primes keep to those eight;  τ's digits fill all thirty alike", rdF * .38f);
+        yield return Flat("RD1-taus-digits-as-E8s-hours", rdLook, rdF);
+        sacks.ClearExperiments();
+        }
+
         UnityEngine.Rendering.AsyncGPUReadback.WaitAllRequests();
         yield return new WaitForSeconds(1f);
         director.Recorder.EndOffscreen();

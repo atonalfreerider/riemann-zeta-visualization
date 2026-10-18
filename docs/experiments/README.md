@@ -3968,6 +3968,127 @@ number and an unsupported claim, and sent three ambiguous wordings to review, al
 
 QA–QC's pictures are drawn by `ExperimentsRenderTest` with key `=` (`SacksTwistChain.cs`; QC2 uses `ZeroHorizonData.cs`).
 
+## RA–RD. The digits of τ and the primes
+
+Exploration, October 2026 (τ = 2π). Can the digits of τ be a source of truth for the distribution of the primes? Here τ
+is read in whatever base suits it: base 10, base 30 (the hours of E8's clock), base e (the natural base), and as its
+continued fraction (digits that need no base at all). It is also mapped onto a helix and spirals and set beside E8. The
+answer has two halves. τ is made of the primes as a whole: Euler's products build it, and the primes can be read back
+out of its digits. But no digit of τ, in any of these bases, carries a trace of any prime. The numbers below are printed
+by [`Tools/tau_primes.py`](../../Tools/tau_primes.py) (`products`, `readout`, `arms`, `digits`).
+
+### RA. One turn from the primes
+
+Every even zeta value is a rational multiple of a power of τ, and the rational factor is the constant of an Eisenstein
+series:
+
+τ² = 1! · 24 · ζ(2),  τ<sup>4</sup> = 3! · 240 · ζ(4),  τ<sup>6</sup> = 5! · 504 · ζ(6),  τ<sup>8</sup> = 7! · 480 · ζ(8),
+
+each ζ(2k) = Π<sub>p</sub> 1/(1 − p<sup>−2k</sup>). The 240 is E8's. E8's theta series is the Eisenstein series
+E<sub>4</sub> = 1 + 240 Σ σ<sub>3</sub>(n) q<sup>n</sup>, so the number of its roots is τ<sup>4</sup>/(3! ζ(4)). The
+480 is the number of roots of E8 ⊕ E8 and of D16⁺, whose theta series is E<sub>4</sub>². Counting E8's roots two ways
+ties its clock to the primes. As the q coefficient of E<sub>4</sub> they are 8/|B<sub>4</sub>| = 240; as a root system
+they are rank × Coxeter number = 8 · 30. So E8's 30 hours are the denominator of the Bernoulli number
+B<sub>4</sub> = −1/30. By von Staudt and Clausen that denominator is the product of the primes p with p − 1 dividing 4:
+2 · 3 · 5. The eight gold hours, the units mod 30, are what those three primes leave.
+
+![RA1](RA1-one-turn-from-the-primes.jpg)
+
+Each ring is one turn as the primes so far give it, τ<sub>N</sub> = (c Π<sub>p ≤ N</sub> 1/(1 − p<sup>−2k</sup>))<sup>1/2k</sup>.
+How far short of a full turn, or how many digits of τ:
+
+| primes used | τ² = 24 ζ(2) | τ<sup>4</sup> = 3! · 240 · ζ(4) (E8) | τ<sup>8</sup> = 7! · 480 · ζ(8) (E8 ⊕ E8) |
+|---|---|---|---|
+| none | 79.3° | 7.05° | 0.18° |
+| 2 | 35.9° | 1.31° | 0.0070° |
+| 2, 3 | 16.2° | 0.19° | 0.00012° |
+| 2, 3, 5 | 9.1° | 0.049° | 0.000008° |
+| up to 97 | 3.0 digits | 7.7 digits | 16.3 digits |
+| up to 997 | 4.2 digits | 10.9 digits | 23.6 digits |
+| up to 9973 | 5.3 digits | 14.1 digits | 30.7 digits |
+
+E8's product closes the turn to within 0.05° with E8's own primes 2, 3 and 5, and gives 10.9 digits of τ with the primes
+below 1000, where ζ(2)'s gives 4.2. The odd character mod 4 gives τ = 8 Π<sub>p odd</sub> p/(p − χ<sub>4</sub>(p)),
+Leibniz's series as a product. It converges only conditionally, and after 99.5% of the prime cutoffs between 100 and
+10<sup>7</sup> it is above τ. That is Chebyshev's bias (section MA), the primes 3 mod 4 running ahead, seen in τ itself.
+
+### RB. Reading the primes back out of τ
+
+The direction turns round. ζ(2k) = (τ/2)<sup>2k</sup> T<sub>k</sub> / (2 (4<sup>k</sup> − 1)(2k − 1)!), where
+T<sub>k</sub> are the tangent numbers (1, 2, 16, 272, 7936, …), whole numbers from a recurrence with no primes in it.
+So D digits of τ give log ζ(s) to D digits for every even s. Take away the primes already read, and what is left is
+p<sup>−s</sup>(1 + (p/p′)<sup>s</sup> + …) for the next prime p. Once s is large enough to drown the prime after it, p′,
+while p<sup>−s</sup> is still above the D-digit floor, left<sup>−1/s</sup> rounds to p. Run on τ's digits alone, every
+prime read was right:
+
+| digits of τ | 50 | 100 | 200 | 400 | 800 | 1600 | 3200 |
+|---|---|---|---|---|---|---|---|
+| primes read | 4 (to 7) | 9 (to 23) | 12 (to 37) | 25 (to 97) | 32 (to 131) | 51 (to 233) | 80 (to 409) |
+
+![RB1](RB1-reading-the-primes-out-of-tau.jpg)
+
+Each prime costs more digits than the last, s log<sub>10</sub> p with s growing as p/(p′ − p) does. The dearest are the
+lower twins: 881 needs 7589 digits because 883 is so close, and 419 (with 421) is where 3200 digits stop. So τ's digits
+do contain the primes, but only all together. Every digit depends on every prime, and no digit belongs to any one.
+
+### RC. The helix of one radian per number
+
+Put n at n radians, one turn every τ numbers. This is the exponential curve e<sup>iθ</sup> with θ as the height, a helix
+whose shadow is the circle. Six numbers make almost a whole turn, so its points fall into six slowly twisting columns,
+the classes 6k + r, and the primes run up two of them, 6k ± 1. Seen from above (radius √n), the near-turns are τ's
+continued fraction [6; 3, 1, 1, 7, 2, 146, 3, …], with convergents 6/1, 19/3, 25/4, 44/7, 333/53 and 710/113. 44 numbers
+are 7 turns and 0.0177 radians, so the primes up to 12 000 lie on spiral arms, 20 of 44. 710 numbers are 113 turns and
+0.00006 radians (the 146 makes 710/113 that good), so the primes up to two million lie on 280 of 710 almost straight
+rays:
+
+![RC1](RC1-the-helix-of-one-radian-per-number.jpg)
+
+The arms come from τ; which arms hold primes comes from the residues. The primes fill the arms coprime to 6,
+44 = 4 · 11 and 710 = 2 · 5 · 71, and fill them equally (Dirichlet). Up to 10<sup>7</sup>, each of the 20 arms of 44
+holds 33 165–33 313 primes and each of the 280 arms of 710 holds 2294–2440. E8's clock is the rational case, 30 exact
+arms with primes on 8. Each arm of 710 runs through three of E8's hours in turn (r, r + 20, r + 10 mod 30), and since 3
+does not divide 710, every third number on a prime arm is a multiple of 3.
+
+### RD. τ's digits as data
+
+![RD1](RD1-taus-digits-as-E8s-hours.jpg)
+
+| test (p-value) | τ | e | √2 | φ | random |
+|---|---|---|---|---|---|
+| base 10, 200 000 digits, uniform | 0.070 | 0.046 | 0.71 | 0.87 | 0.13 |
+| base 30, 135 390 digits, uniform | 0.56 | 0.085 | 0.15 | 0.83 | 0.93 |
+| base 10, the digits at prime positions like the rest | 0.76 | 0.035 | 0.73 | 0.66 | 0.70 |
+| base 30, the digits at prime positions like the rest | 0.10 | 0.58 | 0.83 | 0.93 | 0.47 |
+| base 30, share on the 8 gold hours is 8/30 | 0.95 | 0.65 | 0.18 | 0.51 | 0.61 |
+
+Each entry is the chance that a random sequence looks at least this uneven. τ's gold-hour share is 0.26675 against
+8/30 = 0.26667. Of the 25 tests on five sequences, two fall below 0.05, both for e, about what chance gives. In base e,
+τ = (20.2020112020000111210001121…)<sub>e</sub>, and its first 5000 digits 0, 1, 2 come at 0.407, 0.392 and 0.201, like
+random reals' (0.403, 0.393, 0.204; p = 0.84). Its continued fraction (19 999 partial quotients) fits Gauss and
+Kuzmin's law (p = 0.65): Khinchin's mean is 2.677 against 2.685, 36.8% of the quotients are prime against 36.6%
+expected, and 23 reach 1000 against 28.8 expected.
+
+### What RA–RD give
+
+* **τ is made of the primes, as a whole.** τ² = 24 ζ(2) and τ<sup>4</sup> = 3! · 240 · ζ(4) are Euler products, and with
+  the tangent numbers D digits of τ give the primes back: 3200 digits give the first 80. Every digit depends on all the
+  primes, and each new prime costs more digits, the twins most of all.
+* **E8 sits in this web exactly.** Its 240 roots are τ<sup>4</sup>/(3! ζ(4)), and its clock's 30 hours are the
+  denominator of B<sub>4</sub>, the product 2 · 3 · 5 of the primes p with p − 1 dividing 4.
+* **The helix of one radian per number shows τ's continued fraction.** Its arms are 6, 44 and 710, and the primes take
+  the arms coprime to them.
+* **The digits themselves carry nothing.** Read in base 10, in base 30 as E8's hours, in base e or as a continued
+  fraction, τ looks like a random number in every test, as e, √2 and φ do. The digits are not a local source of truth;
+  the truth is in the products.
+
+**Checks by TypeSafe.** Jev screened the four pictures (`Tools/jev_check.py`). It flagged RB1 for a label lying across
+the staircase, and the label was moved. It also checked 17 numeric claims against the output of `Tools/tau_primes.py`
+(`Tools/jev_claims.py`). It accepted the 16 true ones and sent a planted false count (95 primes from 3200 digits) to
+review as contradicted.
+
+RA–RD's pictures are drawn by `ExperimentsRenderTest` with key `-` (`SacksTauDigits.cs`; the base-30 digits and the
+readout costs come from [`Tools/tau_digits_data.py`](../../Tools/tau_digits_data.py)).
+
 ## What the sections give, as algorithms
 
 Everything that came out of the sections as an *algorithm* is classical. The saddle draws each one as geometry:
