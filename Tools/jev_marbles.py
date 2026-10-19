@@ -2,9 +2,11 @@
 """Can the marble fingerprints be read without symbols? A legibility study of the games' marble language
 (Assets/Games/MarbleFingerprint.cs) by TypeSafe's System One model Jev (https://docs.typesafe.ai).
 
-Each picture is one number's fingerprint with no digits at all: a badge marble, then gold containers left to right, each
-holding as many marbles as its prime, and over a container's top right a row of small pale marbles counting how many
-times that prime repeats (its exponent). For each picture Jev gets one Choice question: which product does it show? The
+Each picture is one number's fingerprint with no digits at all: a badge marble, then round gold containers left to
+right, each holding as many marbles as its prime in a symmetric spiral (a pair, a triangle, a pentagon, a centre and
+arms), and over a container's top right a pale figure, the shadow of a k-dimensional cube (a square, a cube, a
+tesseract …) with k small pale marbles evenly round it: how many times that prime repeats (its exponent).
+For each picture Jev gets one Choice question: which product does it show? The
 options are the true factorization and three near misses made in code (an exponent one off, a prime swapped for its
 neighbour, a factor dropped or added), shuffled. Code keeps the score: how often the top choice is right, and how sure.
 This is the "select instead of generate" pattern: the candidates are exact, the model only has to see which one fits.
@@ -82,11 +84,14 @@ def near_misses(f, rng):
 INSTRUCTIONS = [
     "`picture` shows one whole number written with marbles instead of digits. Read it left to right.",
     "The large marble at the far left is only a badge for the whole number; ignore it when counting.",
-    "Then come gold containers (open cups) along a thin string. Each container holds some gold marbles: count them. "
-    "That count is a prime factor.",
-    "Some containers have a short row of small pale marbles above their top right corner. That row is an exponent: the "
-    "number of small marbles says how many times that container's prime is multiplied in. A container with no small "
-    "marbles counts once.",
+    "Then come round gold containers (thin gold rings) along a thin string. Each ring holds gold marbles in a symmetric "
+    "pattern: a pair, a triangle, a ring, or one marble in the middle with equal arms spiralling out round it. Count every "
+    "gold marble inside the ring. That count is a prime factor.",
+    "Some containers have a small pale figure just above their top right, joined to the ring by a short line: an "
+    "exponent. It is the outline of a square, a cube, or a higher-dimensional cube, with small pale marbles evenly round "
+    "it. The number of small pale marbles says how many times that container's prime is multiplied in (two round a "
+    "square: squared; three round a cube: cubed; four round a tesseract: to the fourth; and so on). A container with no "
+    "figure counts once.",
     "Which product of prime powers does `picture` show?",
 ]
 
@@ -97,7 +102,7 @@ def main():
         raise SystemExit(__doc__)
     folder = args[0]
     numbers = [int(x) for x in args[1].split(",")] if len(args) > 1 else sorted(
-        int(f[3:-4]) for f in os.listdir(folder) if f.startswith("fp-") and f.endswith(".png"))
+        int(f[3:-4]) for f in os.listdir(folder) if f.startswith("fp-") and f.endswith(".png") and f[3:-4].isdigit())
     rng = random.Random(7)
     report, right = [], 0
     confident_right = confident = 0

@@ -18,7 +18,8 @@ public struct Pickable
 /// a game adds what a game needs:
 /// * pickables: the numbers (shells, vortices, prime containers …) the player can point at, by value and kind;
 /// * a marble fingerprint (MarbleFingerprint) of the number being looked at, facing the player, that unpacks into its
-///   full volume and packs back into its shorthand;
+///   full volume and packs back into its shorthand; flat (symmetric spirals) on the desktop, deep (spiral sphere packs)
+///   in VR, and the 3D toggle (F) switches;
 /// * points, a streak, rounds of examples, and feedback: a gold ripple for a find, a grey one for a miss;
 /// * the status: one head line and two small lines (the prompt and what the last pick showed), on the desktop board and
 ///   on the VR dock.
@@ -31,10 +32,14 @@ public abstract class GameModel : LabModel
     protected int Score, Streak, BestStreak, Finds, Misses;
     protected string Prompt = "", Note = "";
     protected bool DigitsOn = true;
+    /// <summary>The marbles deep (spiral sphere packs) or flat (symmetric spirals): deep in VR, flat on the desktop, until toggled.</summary>
+    protected bool DeepOn => deepChoice ?? VRMode.Enabled;
+    bool? deepChoice;
 
     MarbleFingerprint print;
     Vector3 printAt;
     float printScale = 1f;
+    bool printBeside;
 
     readonly List<(LineRenderer ring, Vector3 at, float size, float age, Color c)> ripples = new();
 
@@ -54,17 +59,21 @@ public abstract class GameModel : LabModel
     public long PrintNumber => print != null ? print.N : 0;
     public MarbleFingerprint Print => print;
 
-    /// <summary>Show n's fingerprint at a world point (its badge end), marbles `scale` across; the same n just moves.</summary>
-    protected void ShowPrint(long n, Vector3 at, float scale)
+    /// <summary>
+    /// Show n's fingerprint at a world point (its badge end), marbles `scale` across; the same n just moves. beside: it
+    /// unpacks to the right of its string (else above it).
+    /// </summary>
+    protected void ShowPrint(long n, Vector3 at, float scale, bool beside = false)
     {
         if (print == null || print.N != n || !Mathf.Approximately(printScale, scale))
         {
             HidePrint();
-            print = MarbleFingerprint.Create(Root, n, scale, DigitsOn);
+            print = MarbleFingerprint.Create(Root, n, scale, DigitsOn, DeepOn, beside);
         }
 
         printAt = at;
         printScale = scale;
+        printBeside = beside;
         FacePrint();
     }
 
@@ -176,10 +185,30 @@ public abstract class GameModel : LabModel
         ripples.Clear();
     }
 
-    /// <summary>The controls every game has: unpack the fingerprint, digits on or off, re-frame.</summary>
+    /// <summary>Flat ↔ deep: the fingerprint eases between its symmetric spirals and its spiral sphere packs.</summary>
+    protected void ToggleDeep()
+    {
+        deepChoice = !DeepOn;
+        if (print != null) print.Deep = DeepOn;
+        OnDeepChanged();
+    }
+
+    /// <summary>A game's own marbles follow the 3D toggle here.</summary>
+    protected virtual void OnDeepChanged() { }
+
+    public bool Deep => DeepOn;
+
+    /// <summary>For tests: flat or 3D.</summary>
+    public void SetDeep(bool on)
+    {
+        if (DeepOn != on) ToggleDeep();
+    }
+
+    /// <summary>The controls every game has: unpack the fingerprint, digits on or off, flat or 3D, re-frame.</summary>
     protected void AddCommonControls()
     {
         Controls.Add(LabControl.Button("Unpack", VRIcons.Id.Cube, TogglePrint, "U"));
+        Controls.Add(LabControl.Toggle("3D", VRIcons.Id.Torus, () => DeepOn, ToggleDeep, "F"));
         Controls.Add(LabControl.Toggle("Digits", VRIcons.Id.Captions, () => DigitsOn, () =>
         {
             DigitsOn = !DigitsOn;
@@ -187,16 +216,17 @@ public abstract class GameModel : LabModel
             {
                 long n = print.N;
                 HidePrint();
-                ShowPrint(n, printAt, printScale);
+                ShowPrint(n, printAt, printScale, printBeside);
             }
         }, "D"));
         Controls.Add(LabControl.Button("Reset view", VRIcons.Id.Target, () => Lab.ResetView(false), "Home"));
     }
 
-    /// <summary>The keys every game has (U unpack, D digits); a game's own keys first.</summary>
+    /// <summary>The keys every game has (U unpack, D digits, F flat or 3D); a game's own keys first.</summary>
     protected bool CommonKey(UnityEngine.InputSystem.Keyboard k)
     {
         if (k.uKey.wasPressedThisFrame) { TogglePrint(); return true; }
+        if (k.fKey.wasPressedThisFrame) { ToggleDeep(); return true; }
         if (k.dKey.wasPressedThisFrame) { Controls.Find(c => c.Label == "Digits")?.Clicked?.Invoke(); return true; }
         return false;
     }

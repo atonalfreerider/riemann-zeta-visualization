@@ -16,8 +16,9 @@ public class BuildingBlocksGame : GameModel
     static readonly long[] Examples = { 12, 49, 30, 91, 56, 360, 121, 105, 72, 143, 128, 210, 169, 90, 1001, 246, 221, 180, 77, 1024 };
     static readonly long[] Tray = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
-    const float M = 1.55f;                       // a marble, and the pitch of the volume
     readonly MarbleBatch marbles = new(1);
+    readonly LineBatch rings = new();
+    float depth = -1f, spin;
     readonly List<TextBox> trayLabels = new();
     int example = -1;
     long target, rest, found;
@@ -46,7 +47,7 @@ public class BuildingBlocksGame : GameModel
         List<Pickable> picks = new();
         for (int i = 0; i < Tray.Length; i++)
         {
-            Vector3 c = TrayAt(i) + Up * 3f;
+            Vector3 c = TrayCentre(i);
             picks.Add(new Pickable { Position = c, Value = Tray[i], Radius = 4f, Kind = "prime" });
             trayLabels.Add(LabDraw.Label(Root, Tray[i].ToString(), TrayAt(i) + Up * -2.6f, 40f, NumberKind.Gold));
         }
@@ -145,7 +146,7 @@ public class BuildingBlocksGame : GameModel
         splitT = 0f;
         rest /= q;
         found *= q;
-        ShowPrint(found, PrintAnchor, 2.1f);
+        ShowPrint(found, PrintAnchor, 2.1f, true);
         if (rest == 1)
         {
             Score += 10;
@@ -156,6 +157,9 @@ public class BuildingBlocksGame : GameModel
 
     protected override void OnTick(float dt)
     {
+        float want = DeepOn ? 1f : 0f;
+        depth = depth < 0f ? want : Mathf.MoveTowards(depth, want, dt / .9f);
+        spin = (spin + 14f * dt) % 360f;
         if (splitT >= 0f)
         {
             splitT += dt / 1.6f;
@@ -185,88 +189,170 @@ public class BuildingBlocksGame : GameModel
         Draw();
     }
 
-    /// <summary>A block of m marbles about its centre: rows of up to `cols`, stacked up, then deeper.</summary>
-    static Vector3 BlockAt(long i, long m, int cols)
+    // ---- the marbles: the tray's containers and what is left, flat (symmetric spirals) or deep (spiral sphere packs) --
+
+    /// <summary>A layout point on the wall: x right, y up, z into the wall.</summary>
+    Vector3 OnWall(Vector3 centre, Vector3 p, float s) => centre + new Vector3(p.x * s, p.z * s, 0f) + Up * (p.y * s);
+
+    float Ease01(float u) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u));
+
+    /// <summary>Turned about the upright axis as the deep packs spin.</summary>
+    Vector3 Turn(Vector3 p)
     {
-        int rows = Mathf.Max(1, Mathf.CeilToInt(Mathf.Sqrt(m / (float)cols)));
-        int perLayer = cols * rows;
-        long layer = i / perLayer, r = (i % perLayer) / cols, c = i % cols;
-        int layers = Mathf.Max(1, Mathf.CeilToInt(m / (float)perLayer));
-        int usedCols = (int)Mathf.Min(cols, m);
-        return new Vector3((c - (usedCols - 1) * .5f) * M, (layer - (layers - 1) * .5f) * M, 0f) + Up * ((r - (rows - 1) * .5f) * M);
+        float a = spin * Mathf.Deg2Rad, c = Mathf.Cos(a), sn = Mathf.Sin(a);
+        return new Vector3(c * p.x + sn * p.z, p.y, -sn * p.x + c * p.z);
     }
 
-    static int ColsFor(long m) => Mathf.Clamp(Mathf.CeilToInt(Mathf.Pow(m, 1f / 3f) * 1.6f), 1, 16);
+    Vector3 Blend(Vector2 flat, Vector3 deep) => Vector3.LerpUnclamped(flat, Turn(deep), Ease01(depth));
+
+    /// <summary>
+    /// A count's own shape: its flat spiral and its deep pack (m arms, a centre for odd counts); a composite's arms wide
+    /// apart, as an unpacked volume's are.
+    /// </summary>
+    static (Vector2[] flat, Vector3[] deep) Shape(long n)
+    {
+        (bool c, int m) = MarbleLayout.ShapeOf(n);
+        return (MarbleLayout.Flat((int)n, m, c, !NumberKind.IsPrime(n)), MarbleLayout.Deep((int)n, c ? 1 : m));
+    }
+
+    /// <summary>A tray marble's size (world units): the small primes larger.</summary>
+    static float TraySize(long p) => p > 13 ? .95f : p > 5 ? 1.1f : 1.3f;
+
+    float CupRadius(long p)
+    {
+        var (f, d) = Shape(p);
+        return Mathf.Max(MarbleLayout.Radius(f), MarbleLayout.Radius(d)) + .45f;
+    }
+
+    /// <summary>The centre of tray container i: its ring sits on the tray line.</summary>
+    Vector3 TrayCentre(int i) => TrayAt(i) + Up * (CupRadius(Tray[i]) * TraySize(Tray[i]));
+
+    /// <summary>What is left: marbles about the volume's centre, a world size each, kept within about 16 units.</summary>
+    static float VolumeSize(long n)
+    {
+        var (f, d) = Shape(System.Math.Max(1L, n));
+        return Mathf.Min(1.45f, 16f / Mathf.Max(MarbleLayout.Radius(f), MarbleLayout.Radius(d)));
+    }
 
     void Draw()
     {
         marbles.Clear();
-        // the tray: each prime's container, its marbles in rows of five
+        rings.Clear();
+        Color gold = NumberKind.Gold;
+        // the tray: each prime's container, its marbles in their spiral, a gold ring round them
         for (int t = 0; t < Tray.Length; t++)
         {
             long p = Tray[t];
-            // as in the fingerprints: up to 7 marbles in one row, larger primes in rows of five
-            int row = p <= 7 ? (int)p : 5;
-            float s = p > 13 ? 1f : p > 5 ? 1.1f : 1.3f;
-            for (int i = 0; i < p; i++)
-            {
-                int cols = Mathf.Min(row, (int)p);
-                Vector3 at = TrayAt(t) + new Vector3((i % row - (cols - 1) * .5f) * s * 1.1f, 0f, 0f) + Up * ((i / row) * s * 1.1f + .4f);
-                marbles.Add(at, s, NumberKind.Gold, 1.15f);
-            }
+            float s = TraySize(p);
+            var (f, d) = Shape(p);
+            Vector3 c = TrayCentre(t);
+            for (int i = 0; i < p; i++) marbles.Add(OnWall(c, Blend(f[i], d[i]), s), s, gold, 1.15f);
+            // in the wall's own plane (x right, y up), drawn through WallMatrix
+            rings.Circle(new Vector3(c.x - O.x, O.z - c.z, 0f), CupRadius(p) * s, .14f, new Color(gold.r, gold.g, gold.b, .85f));
         }
 
         Color own = NumberKind.ColorOf(target);
-        if (splitT >= 0f)
-        {
-            // rest marbles regroup into p groups side by side; then the other groups fly off to the string
-            long from = splitFrom, q = splitP, per = from / q;
-            float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(splitT * 2f));
-            float w = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(splitT * 2f - 1f));
-            int colsFrom = ColsFor(from), colsPer = ColsFor(System.Math.Max(1L, per));
-            float groupW = (Mathf.Min(colsPer, per) + 1.2f) * M;
-            for (long i = 0; i < from; i++)
-            {
-                Vector3 a = VolumeCentre + BlockAt(i, from, colsFrom);
-                long g = splitOk ? i % q : i % q, k = i / q;
-                bool leftover = !splitOk && i >= per * q;
-                Vector3 b = leftover
-                    ? VolumeCentre + new Vector3((q * .5f + 1f) * groupW, 0f, 0f) + BlockAt(i - per * q, System.Math.Max(1L, from - per * q), 3)
-                    : VolumeCentre + new Vector3((g - (q - 1) * .5f) * groupW, 0f, 0f) + BlockAt(k, System.Math.Max(1L, per), colsPer);
-                Vector3 pos = Vector3.Lerp(a, b, u);
-                Color c = leftover ? Color.Lerp(own, NumberKind.DeepRed, u) : own;
-                float size = 1f;
-                if (splitOk && g != 0)
-                {
-                    // the other groups go to the fingerprint and fade
-                    pos = Vector3.Lerp(pos, PrintAnchor + Up * 4f, w);
-                    size = 1f - w;
-                }
-                else if (splitOk) pos = Vector3.Lerp(pos, VolumeCentre + BlockAt(k, System.Math.Max(1L, per), ColsFor(System.Math.Max(1L, per))), w);
-                else if (splitT > .5f) pos = Vector3.Lerp(b, a, w);
-                marbles.Add(pos, size * M * .92f, c, 1.08f);
-            }
-        }
+        if (splitT >= 0f) DrawSplit(own);
         else if (rest > 1)
         {
-            int cols = ColsFor(rest);
-            for (long i = 0; i < rest; i++) marbles.Add(VolumeCentre + BlockAt(i, rest, cols), M * .92f, own, 1.08f);
+            var (f, d) = Shape(rest);
+            float s = VolumeSize(rest);
+            for (int i = 0; i < rest; i++) marbles.Add(OnWall(VolumeCentre, Blend(f[i], d[i]), s), s * .92f, own, 1.08f);
         }
 
         if (restLabel != null)
         {
             restLabel.TextField.text = rest > 1 && splitT < 0f ? $"{rest}" : "";
-            restLabel.transform.position = VolumeCentre + Up * (BlockHeight(rest) * .5f + 4f);
+            restLabel.transform.position = VolumeCentre + Up * (VolumeRadius(rest) + 4f);
         }
 
         marbles.Draw(Matrix4x4.identity);
+        rings.Draw(WallMatrix);
     }
 
-    float BlockHeight(long m)
+    /// <summary>The wall's plane: local x right, local y up (the lab's −z), local z into the wall (+y).</summary>
+    Matrix4x4 WallMatrix
     {
-        int cols = ColsFor(m);
-        int rows = Mathf.Max(1, Mathf.CeilToInt(Mathf.Sqrt(m / (float)cols)));
-        return rows * M;
+        get
+        {
+            Matrix4x4 m = Matrix4x4.identity;
+            m.SetColumn(0, new Vector4(1f, 0f, 0f, 0f));
+            m.SetColumn(1, new Vector4(Up.x, Up.y, Up.z, 0f));
+            m.SetColumn(2, new Vector4(0f, 1f, 0f, 0f));
+            m.SetColumn(3, new Vector4(O.x, O.y, O.z, 1f));
+            return m;
+        }
+    }
+
+    float VolumeRadius(long n)
+    {
+        if (n <= 1) return 0f;
+        var (f, d) = Shape(n);
+        return Mathf.Lerp(MarbleLayout.Radius(f), MarbleLayout.Radius(d), Ease01(depth)) * VolumeSize(n);
+    }
+
+    /// <summary>
+    /// The split: what is left parts into q equal groups round a ring (marble i to group i mod q, as q arms would unwind),
+    /// then one group stays and the others fly to the fingerprint. A failed split leaves the remainder in the middle,
+    /// shining red, and everything goes back.
+    /// </summary>
+    void DrawSplit(Color own)
+    {
+        long from = splitFrom, q = splitP, per = from / q, left = from - per * q;
+        var (ff, fd) = Shape(from);
+        var (pf, pd) = Shape(System.Math.Max(1L, per));
+        float sFrom = VolumeSize(from), sPer = VolumeSize(System.Math.Max(1L, per));
+        float perR = Mathf.Max(MarbleLayout.Radius(pf), MarbleLayout.Radius(pd)) * sPer;
+        float u = Ease01(splitT * 2.2f);                         // apart into groups
+        float w = Ease01(splitT * 2f - 1.05f);                   // one stays, the rest fly (or all go back)
+        float ring = q == 1 ? 0f : (perR + .8f) / Mathf.Sin(Mathf.PI / q);
+        // the groups' ring kept within about 17 units of the centre: past that, the groups' marbles draw smaller
+        float fit = Mathf.Min(1f, 17f / (ring + perR)), sPerFull = sPer;
+        ring *= fit;
+        sPer *= fit;
+        Vector3 Spot(long g)
+        {
+            float a = Mathf.PI / 2f + Mathf.PI * 2f * g / q;
+            return new Vector3(Mathf.Cos(a) * ring, 0f, 0f) + Up * (Mathf.Sin(a) * ring);
+        }
+
+        var (lf, ld) = Shape(System.Math.Max(1L, left));
+        for (long i = 0; i < from; i++)
+        {
+            Vector3 a = OnWall(VolumeCentre, Blend(ff[i], fd[i]), sFrom);
+            bool leftover = i >= per * q;
+            long g = i % q, k = i / q;
+            Vector3 b = leftover
+                ? OnWall(VolumeCentre, Blend(lf[i - per * q], ld[i - per * q]), sPer)
+                : VolumeCentre + Spot(g) + (OnWall(Vector3.zero, Blend(pf[k], pd[k]), sPer));
+            Vector3 pos = Vector3.Lerp(a, b, u);
+            float size = Mathf.Lerp(sFrom, sPer, u) * .92f;
+            Color c = leftover ? Color.Lerp(own, NumberKind.DeepRed, u) : own;
+            if (splitOk)
+            {
+                if (g != 0)
+                {
+                    // the other groups go to the fingerprint and fade
+                    pos = Vector3.Lerp(pos, PrintAnchor + Up * 4f, w);
+                    size *= 1f - w;
+                }
+                else
+                {
+                    // the group that stays settles in the middle at what is left's own size
+                    pos = Vector3.Lerp(pos, OnWall(VolumeCentre, Blend(pf[k], pd[k]), sPerFull), w);
+                    size = Mathf.Lerp(size, sPerFull * .92f, w);
+                }
+            }
+            else if (splitT > .5f)
+            {
+                // a failed split goes back together, the leftovers red until they are home
+                pos = Vector3.Lerp(b, a, w);
+                size = Mathf.Lerp(size, sFrom * .92f, w);
+                if (leftover) c = Color.Lerp(NumberKind.DeepRed, own, Ease01((w - .7f) / .3f));
+            }
+
+            if (size > .01f) marbles.Add(pos, size, c, 1.08f);
+        }
     }
 
     public override bool OnKey(Keyboard k)

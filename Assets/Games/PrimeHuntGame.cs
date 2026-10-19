@@ -70,8 +70,8 @@ public class PrimeHuntGame : GameModel
 
     /// <summary>The fingerprint's place: left of the candidates, across a fifth of the view, marbles sized to the view.</summary>
     // lower left of the view (−y is down the screen here), so the volume it unpacks into has the left half above it
-    Vector3 PrintSpot => roundView.Focus + Vector3.left * (roundView.Distance * .46f) + Vector3.down * (roundView.Distance * .2f) + Up * (roundView.Distance * .04f);
-    float PrintScale => roundView.Distance * .0125f;
+    Vector3 PrintSpot => roundView.Focus + Vector3.left * (roundView.Distance * .46f) + Vector3.down * (roundView.Distance * .215f) + Up * (roundView.Distance * .04f);
+    float PrintScale => roundView.Distance * .014f;
 
     public override void OnEnter() => UpdateStatus();
 
