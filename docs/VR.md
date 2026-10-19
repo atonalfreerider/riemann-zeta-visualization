@@ -101,6 +101,10 @@ experiment videos show, and they stand in front of you like a tour shot. There a
   * **Lamps** lights each column's top piece by the sum there.
   * **Zeros** lowers the number of zeros used, to show the teeth blur.
 
+The second row holds the games ([GAMES.md](GAMES.md)): **Primes**, **Blocks**, **E8 game** and **Vortices**. In every
+model and game you can also pick from afar: point at a number with your index finger, and a thin ray runs to the
+nearest point within 2.5° of the finger's line; hold it there for 0.9 s (the ray turns gold) to pick it.
+
 ![The Models tab with the factor funnel (desktop simulation)](vr/models-page.jpg)
 
 Picking needs the fingertip within about a centimetre of the point, and pushing in picks it once. At the default scale
@@ -108,7 +112,7 @@ the column tops are 1–2 cm apart, so spread two pinching hands to enlarge the 
 Pinch-to-move, two-handed scaling, **Follow** and the Space tab work as for the tour.
 
 Only the desktop simulation has been tried. `ModelLabTest.VRModelsPage` picks a column with a scripted fingertip and
-renders the page, but no person has used the Models page on a headset yet. `-vrmodel paths|e8|unified|zeros` opens a model
+renders the page, but no person has used the Models page on a headset yet. `-vrmodel paths|e8|unified|zeros|primehunt|blocks|e8spheres|vortex` opens a model
 from the command line (`adb shell am start … -e unity "-vrmodel e8"`).
 
 ### Comfort

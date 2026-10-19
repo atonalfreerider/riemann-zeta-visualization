@@ -361,9 +361,12 @@ public class ModelLabTest
         Vector3 toward = rig.Offset.InverseTransformDirection((cam.transform.position - world).normalized);
         app.Hands.ScriptedRight = true;
         app.Hands.ScriptedRightPinch = 0f;
+        int before = paths.Funnel.Selected;
         app.Hands.ScriptedRightTip = local + toward * .3f;
         yield return Seconds(.4f);
-        Assert.AreEqual(-1, lab.Hover, "a fingertip 30 cm away hovers nothing");
+        // pointing from 30 cm away, the finger's ray (ModelLab.FingerRay) hovers the point; picking needs a 0.9 s hold
+        Assert.AreEqual(95, lab.Hover, "the finger's ray, from 30 cm away, hovers 97's top");
+        Assert.AreEqual(before, paths.Funnel.Selected, "and does not pick it before the hold");
         app.Hands.ScriptedRightTip = local;
         yield return Seconds(.4f);
         Assert.AreEqual(95, lab.Hover, "a fingertip on 97's top hovers it (pick index n − 2)");

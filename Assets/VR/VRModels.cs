@@ -26,12 +26,13 @@ public partial class VRApp
             return;
         }
 
-        // one button per model, then Re-frame and Leave, sharing the row
-        int slots = lab.Models.Count + 2;
+        // the models, then Re-frame and Leave, share the first row; the games take a second row of their own
+        List<LabModel> models = lab.Models.FindAll(m => !m.IsGame), games = lab.Models.FindAll(m => m.IsGame);
+        int slots = models.Count + 2;
         float pitch = (DockWidth - 16f) / slots, bw = pitch - 6f;
-        for (int i = 0; i < lab.Models.Count; i++)
+        for (int i = 0; i < models.Count; i++)
         {
-            LabModel m = lab.Models[i];
+            LabModel m = models[i];
             Dock.AddButton(8 + i * pitch, 2, bw, 50, m.Short, m.Icon, () =>
             {
                 tour.LeaveExperiment();
@@ -39,17 +40,33 @@ public partial class VRApp
             }, true, () => lab.Active == m, 18f, p);
         }
 
-        Dock.AddButton(8 + lab.Models.Count * pitch, 2, bw, 50, "Re-frame", VRIcons.Id.Target, () => lab.ResetView(false), false, null, 18f, p);
-        Dock.AddButton(8 + (lab.Models.Count + 1) * pitch, 2, bw, 50, "Leave", VRIcons.Id.Close, () => lab.Exit(), false, null, 18f, p);
+        Dock.AddButton(8 + models.Count * pitch, 2, bw, 50, "Re-frame", VRIcons.Id.Target, () => lab.ResetView(false), false, null, 18f, p);
+        Dock.AddButton(8 + (models.Count + 1) * pitch, 2, bw, 50, "Leave", VRIcons.Id.Close, () => lab.Exit(), false, null, 18f, p);
+        float top = 56f;
+        if (games.Count > 0)
+        {
+            float gp = (DockWidth - 16f) / Mathf.Max(slots, games.Count);
+            for (int i = 0; i < games.Count; i++)
+            {
+                LabModel m = games[i];
+                Dock.AddButton(8 + i * gp, 56, gp - 6f, 50, m.Short, m.Icon, () =>
+                {
+                    tour.LeaveExperiment();
+                    lab.Enter(m.Id);
+                }, true, () => lab.Active == m, 18f, p);
+            }
 
-        labStatus = Dock.AddLabel(10, 56, 580, 70, "Touch a model to open it, then touch its points with a fingertip", 20f, VRStyle.Text, TextAlignmentOptions.TopLeft, FontStyles.Normal, p);
+            top = 110f;
+        }
+
+        labStatus = Dock.AddLabel(10, top, 580, 70, "Touch a model or a game to open it, then touch its points with a fingertip, or point at them and hold", 20f, VRStyle.Text, TextAlignmentOptions.TopLeft, FontStyles.Normal, p);
         labStatus.overflowMode = TextOverflowModes.Truncate;
         labStatus.lineSpacing = -8f;
 
         GameObject sg = new("Lab strip");
         sg.transform.SetParent(p, false);
         RectTransform stripRoot = sg.AddComponent<RectTransform>();
-        VRPanel.Place(stripRoot, 20, 128, 560, 58);
+        VRPanel.Place(stripRoot, 20, top + 72f, 560, 58);
         labStrip = new StripView(stripRoot, .25f, (parent, text, size) => VRStyle.Text_(parent, text, size, VRStyle.Text)) { ImageMaterial = VRStyle.UiMaterial };
 
         foreach (LabModel m in lab.Models)
@@ -57,7 +74,7 @@ public partial class VRApp
             GameObject go = new("Lab controls " + m.Id);
             go.transform.SetParent(p, false);
             RectTransform sub = go.AddComponent<RectTransform>();
-            VRPanel.Place(sub, 0, 188, DockWidth, 108);
+            VRPanel.Place(sub, 0, top + 132f, DockWidth, 108);
             int cell = 0;
             foreach (LabControl c in m.Controls)
             {
@@ -98,7 +115,7 @@ public partial class VRApp
         if (lab == null || labStatus == null) return;
         foreach (var kv in labControlPages) kv.Value.gameObject.SetActive(kv.Key == lab.Active);
         // the board's small lines (58 %) are too small on a panel half a metre away
-        labStatus.text = lab.Active == null ? "Touch a model to open it, then touch its points with a fingertip" : lab.Status.Replace("<size=58%>", "<size=76%>");
+        labStatus.text = lab.Active == null ? "Touch a model or a game to open it, then touch its points with a fingertip, or point at them and hold" : lab.Status.Replace("<size=58%>", "<size=76%>");
         if (lab.StripNumber != labStripN)
         {
             labStripN = lab.StripNumber;

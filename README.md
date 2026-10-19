@@ -56,6 +56,21 @@ scripting vocabulary, and [docs/narration-script.md](docs/narration-script.md) f
 | ![09-qrh](docs/gifs/09-qrh.gif) | ![09-qrh](docs/screenshots/09-qrh.png) | **9. 2026: A Wall at Seven Eighths.** OpenAI's AI-generated, Lean-checked claim that no collision strays past 7/8 (or below 1/8), its status, and the open gap where the hypothesis still lives. |
 | ![10-outro](docs/gifs/10-outro.gif) | ![10-outro](docs/screenshots/10-outro.png) | **10. Written Into the Universe.** Straight back to the Sacks spiral on its saddle; the zeta trail rises from the centre, each collision sends its wave along the spiral, and the waves settle onto the saddle as one master wave that spikes at every prime (a picture, not a result). It ends on the graph view, ready to explore. |
 
+## Games: point at the numbers
+
+Four games in the model lab, on the desktop and in VR (side menu **M** ▸ **GAMES**, or the VR dock's **Models** tab):
+**Prime hunt** on the Sacks spiral, **Building blocks** (split a number into its primes), **E8 spheres** (E8's lattice
+shells as spheres of 240 σ₃(n) points, 340 320 of them on the desktop, their divisor cubes, and the impostors on E8's
+clock) and **Vortex hunt** (the vortices of ζ's chain and the counting numbers they belong to). Gold is always prime,
+deep red a prime squared, blue a pronic number k(k + 1), grey any other composite. Every number unpacks as a marble
+fingerprint, its factors and exponents counted in marbles, into its full volume and back (**U**). In VR you point with
+your index finger and hold, or touch. See [docs/GAMES.md](docs/GAMES.md).
+
+| | |
+|---|---|
+| ![Prime hunt](docs/games/prime-hunt.jpg) | ![E8 spheres](docs/games/e8-spheres.jpg) |
+| ![Building blocks: 360's full volume](docs/games/blocks-volume.jpg) | ![Marble fingerprints](docs/games/fingerprints.jpg) |
+
 ## Meta Quest 2 (VR, hands only)
 
 The same visualization runs on a Quest 2 with hand tracking only: passthrough is the default backdrop, one touch

@@ -184,9 +184,12 @@ public class FunnelView
             }
             else
             {
+                // the games' colours: a prime's square deep red, pronic numbers blue, other composites a light grey
+                NumberClass k = NumberKind.Classify(n);
+                Color top = k == NumberClass.PrimeSquare ? NumberKind.DeepRed * 1.25f : k == NumberClass.Pronic ? NumberKind.Pronic : new Color(.8f, .82f, .92f);
                 ct.Add(Top(n));
-                cc.Add(new Color(.8f, .82f, .92f) * Mathf.Lerp(.45f, 1f, dim));
-                csz.Add(.32f);
+                cc.Add(top * Mathf.Lerp(.45f, 1f, dim));
+                csz.Add(k == NumberClass.Composite ? .32f : .42f);
             }
         }
 
