@@ -1575,30 +1575,27 @@ def lab(*args):
 
 
 TUT_PRIME = dict(
-    id="tutprime", title="Prime hunt", subtitle="a game tutorial",
-    setup=[lab("enter", "primehunt"), lab("round", 0)],
+    id="tutprime", title="The number spiral", subtitle="a game tutorial",
+    setup=[lab("enter", "primehunt"), lab("look", 0)],
     lines=[
-        dict(text="This is Prime hunt. The numbers up to four hundred lie on the Sacks spiral, in their colours: gold primes, "
-                  "deep red squares of primes, blue pronic numbers, and grey composites.",
+        dict(text="This is the number spiral: the numbers up to four hundred on the Sacks spiral, each in its colour. Gold for "
+                  "the primes, deep red for squares of primes, blue for pronic numbers, and grey for every other composite.",
              camera=LAB, actions=[]),
-        dict(text="Each round puts silver marbles on a few numbers. Point at the ones you think are prime.",
-             camera=LAB, actions=[at("silver", lab("point", 4)), at("prime", lab("unpoint"))]),
-        dict(text="Two turns gold: a prime. Three is gold too.",
-             camera=LAB, actions=[at("two", lab("pick", 2)), at("three", lab("pick", 3))]),
-        dict(text="Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. "
-                  "Three squared.",
-             camera=LAB, actions=[at("nine", lab("pick", 9))]),
-        dict(text="Five and seven make three finds in a row, and a streak earns bonus points.",
-             camera=LAB, actions=[at("five", lab("pick", 5)), at("seven", lab("pick", 7))]),
-        dict(text="Round four is primes or impostors. One hundred forty-three looks prime, but it is eleven times thirteen.",
-             camera=LAB, actions=[at("round", lab("round", 3)), at("looks", lab("pick", 143))]),
-        dict(text="Unpack it. Thirteen copies of its eleven-marble container wind into thirteen arms: one hundred forty-three "
-                  "marbles.",
-             camera=LAB, actions=[at("unpack", lab("unpack"))], pause=1.0),
-        dict(text="Press F for three dimensions, and the marbles pack into spheres.",
-             camera=LAB, actions=[at("press", lab("deep"))]),
-        dict(text="Find every prime in a round, and the next round begins.",
-             camera=LAB, actions=[at("next", lab("flat"))], pause=1.2),
+        dict(text="Touch any number to see what it is made of. Ninety-one looks prime, but its fingerprint says seven times "
+                  "thirteen.",
+             camera=LAB, actions=[at("ninetyone", lab("pick", 91))]),
+        dict(text="Pull the fingerprint apart, and the number rebuilds itself from its primes: thirteen copies of seven, wound "
+                  "into thirteen arms.",
+             camera=LAB, actions=[at("pull", lab("pull", 3, 3.2))], pause=.6),
+        dict(text="Push it back together, and it packs into its shorthand again.",
+             camera=LAB, actions=[at("push", lab("pull", 0, 1.6))]),
+        dict(text="Step to its neighbours: ninety-two is two squared times twenty-three, and ninety-seven is a prime.",
+             camera=LAB, actions=[at("ninetytwo", lab("pick", 92)), at("ninetyseven", lab("pick", 97))]),
+        dict(text="Look at one family at a time: the primes, the twin primes, and Euler's k squared plus k plus forty-one.",
+             camera=LAB, actions=[at("primes", lab("look", 1)), at("twin", lab("look", 2)), at("euler's", lab("look", 3))], pause=.6),
+        dict(text="Or the squares and the pronic numbers, each on a line of its own. Nothing is scored: there are only numbers "
+                  "to take apart.",
+             camera=LAB, actions=[at("squares", lab("look", 4)), at("nothing", lab("look", 0))], pause=1.2),
     ])
 
 TUT_BLOCKS = dict(
@@ -1626,46 +1623,47 @@ TUT_BLOCKS = dict(
     ])
 
 TUT_E8 = dict(
-    id="tute8", title="E8 spheres", subtitle="a game tutorial",
-    setup=[lab("enter", "e8spheres"), lab("round", 0)],
+    id="tute8", title="E8's clock", subtitle="a game tutorial",
+    setup=[lab("enter", "e8spheres"), lab("shells", "off")],
     lines=[
-        dict(text="E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of two hundred forty times sigma three "
-                  "of n points.",
+        dict(text="This is E8's clock. Every number up to six hundred stands at its hour on a clock of thirty hours, as a stack of its prime "
+                  "factors: one gold piece, as tall as log p, for each.",
              camera=LAB, actions=[]),
-        dict(text="Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, two "
-                  "squared.",
-             camera=LAB, actions=[at("two", lab("pick", 2, "shell")), at("three", lab("pick", 3, "shell")),
-                                  at("four", lab("pick", 4, "shell"))]),
-        dict(text="Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.",
-             camera=LAB, actions=[at("five", lab("pick", 5, "shell")), at("seven", lab("pick", 7, "shell"))]),
-        dict(text="Round two shows the building blocks of each shell. Shell six stands on its divisor cubes: one, eight, "
-                  "twenty-seven and two hundred sixteen marbles.",
-             camera=LAB, actions=[at("round", lab("round", 1)), at("six", lab("pick", 6, "shell"))], pause=.6),
-        dict(text="Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites "
-                  "hiding there: ninety-one, and one hundred twenty-one.",
-             camera=LAB, actions=[at("round", lab("round", 2)), at("ninetyone", lab("pick", 91, "number")),
-                                  at("twentyone", lab("pick", 121, "number"))], pause=1.2),
+        dict(text="Touch a column, and its path back steps down the staircase. Three hundred sixty drops by two, two, two, three, "
+                  "three and five, every landing named by the blocks it has left.",
+             camera=LAB, actions=[at("touch", lab("pick", 360, "number"))], pause=.8),
+        dict(text="Turn the model to look along the steps: drag it, or pinch it in VR.",
+             camera=LAB, actions=[at("turn", lab("view", 10, 22, 240))], pause=1.0),
+        dict(text="Three hundred forty-three is seven cubed: three equal drops, each of log seven.",
+             camera=LAB, actions=[at("three", lab("home")), at("seven", lab("pick", 343, "number"))], pause=1.2),
+        dict(text="Powers shows where the runs of each prime go: two, four, eight and on up the spiral of two to the k, each top "
+                  "named with its exponent.",
+             camera=LAB, actions=[at("powers", lab("powers", "on"))], pause=.6),
+        dict(text="And the shells: E8's lattice points, shell by shell. Touch shell six, and its divisors stand under it as cubes "
+                  "of marbles.",
+             camera=LAB, actions=[at("shells", lab("powers", "off")), at("shells+0.1", lab("shells", "on")),
+                                  at("six", lab("pick", 6, "shell"))], pause=1.2),
     ])
 
 TUT_VORTEX = dict(
-    id="tutvortex", title="Vortex hunt", subtitle="a game tutorial",
-    setup=[lab("enter", "vortex"), lab("round", 0)],
+    id="tutvortex", title="Zeta's chain", subtitle="a game tutorial",
+    setup=[lab("enter", "vortex"), lab("zero", 300, .1)],
     lines=[
-        dict(text="Vortex hunt is played on zeta's chain at its three hundredth zero. The chain curls into vortices, and vortex "
-                  "k belongs to the counting number k.",
+        dict(text="This is zeta's chain at its three hundredth zero: a link for every counting number, and its end at zeta of one "
+                  "half plus i t.",
              camera=LAB, actions=[]),
-        dict(text="Point at the vortices in order. One. Two. Three.",
-             camera=LAB, actions=[at("one", lab("pick", 1, "vortex")), at("two", lab("pick", 2, "vortex")),
-                                  at("three", lab("pick", 3, "vortex"))]),
-        dict(text="Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.",
-             camera=LAB, actions=[]),
-        dict(text="Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.",
-             camera=LAB, actions=[at("round", lab("round", 1)), at("vortex#2", lab("pick", 3, "vortex")),
-                                  at("vertex#2", lab("pick", 3, "vertex"))]),
-        dict(text="Round three: steer t until the chain's end lands on the zero.",
-             camera=LAB, actions=[at("round", lab("round", 2)), at("steer", lab("steer", 0, 4))], pause=1.5),
-        dict(text="Landed. Zeta is zero here, and the chain ends where it began.",
-             camera=LAB, actions=[], pause=1.2),
+        dict(text="Drag up or down, and t moves. The chain winds and unwinds as it goes.",
+             camera=LAB, actions=[at("drag", lab("steer", 1.1, 3.2))], pause=.4),
+        dict(text="On a touch screen it takes one finger. In VR, pinch the bead on the t rail, and lift it or lower it.",
+             camera=LAB, actions=[at("vr", lab("steer", -1.1, 3.2))], pause=.4),
+        dict(text="The rail's gold ticks are the zeros. At each one the chain's end lands on zero, and the chain curls into "
+                  "vortices.",
+             camera=LAB, actions=[at("ticks", lab("zero", 301, 2.4))], pause=.6),
+        dict(text="Vortex k belongs to the counting number k. Touch vortex three: its fingerprint, and the mirror line from the "
+                  "chain's third vertex to the eye.",
+             camera=LAB, actions=[at("touch", lab("pick", 3, "vortex"))], pause=.6),
+        dict(text="Then glide on to the next zero, and the next.",
+             camera=LAB, actions=[at("glide", lab("jump", 1)), at("next#2", lab("jump", 1))], pause=1.6),
     ])
 
 SERIES = [XS1, XS2, XS3, XS4, XS5, XZ1, XZ2, XZ3, XZ4, XZ5, XORBIT, MARBLES, TUT_PRIME, TUT_BLOCKS, TUT_E8, TUT_VORTEX]

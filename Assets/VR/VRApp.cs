@@ -60,6 +60,7 @@ public partial class VRApp : MonoBehaviour
         Hands = VRHands.Create(Rig);
         Poker = VRPoker.Create(Rig, Hands);
         Grab = VRWorldGrab.Create(Rig, Hands, Poker);
+        Grab.Claims = hand => ModelLab.Instance != null && ModelLab.Instance.ClaimsPinch(hand);
         Guide = VRGuide.Create(Rig);
         Visual = VRHandVisual.Create(Rig, Hands, Poker, Grab);
         Perf = VRPerf.Create(Rig);

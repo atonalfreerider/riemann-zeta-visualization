@@ -400,15 +400,13 @@ The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discove
 7. Times two again makes eight. Then three copies wind into three arms: 24. And 3 again: 72.
    *Board:* **8,  24,  72** — p copies, p arms
 8. Last, the five: five copies of 72 wind into five arms. 360 marbles, in their own colour, grey.
-   *Board:* **72 × 5 = 360** — the full volume, in the number's own colour
-   *Callouts:* 360:  five arms of 72
+   *Board:* **72 × 5 = 360** — five arms of 72:  the full volume, in the number's own colour
 9. In three dimensions, every group of marbles packs into a spiral sphere, and the rings turn in planes of their own.
    *Board:* **in 3D** — every group of marbles a spiral sphere pack
 10. And it packs back down into its shorthand.
    *Board:* **packed** — 360 = 2³ · 3² · 5
 11. A prime is one container and nothing more: 97, a marble in the middle and six arms of 16.
-   *Board:* **a prime** — one container, no rings
-   *Callouts:* 97:  1 + 6 × 16
+   *Board:* **a prime** — 97 = 1 + 6 × 16:  one container, no rings
 12. A prime power wears more rings: five to the fourth is a ring of five marbles inside three tilted rings.
    *Board:* **a prime power** — 5⁴:  four rings, one flat and three tilted
    *Callouts:* four rings:  5⁴
@@ -417,19 +415,17 @@ The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discove
 14. No digits needed: every number is written in its own building blocks.
    *Board:* **numbers in marbles** — every number, its own building blocks
 
-## tutprime: Prime hunt
+## tutprime: The number spiral
 
-*a game tutorial*  ·  9 lines, 148 words
+*a game tutorial*  ·  7 lines, 149 words
 
-1. This is Prime hunt. The numbers up to 400 lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites.
-2. Each round puts silver marbles on a few numbers. Point at the ones you think are prime.
-3. Two turns gold: a prime. Three is gold too.
-4. Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. Three squared.
-5. Five and seven make three finds in a row, and a streak earns bonus points.
-6. Round four is primes or impostors. 143 looks prime, but it is 11 times 13.
-7. Unpack it. 13 copies of its eleven-marble container wind into 13 arms: 143 marbles.
-8. Press F for three dimensions, and the marbles pack into spheres.
-9. Find every prime in a round, and the next round begins.
+1. This is the number spiral: the numbers up to 400 on the Sacks spiral, each in its colour. Gold for the primes, deep red for squares of primes, blue for pronic numbers, and grey for every other composite.
+2. Touch any number to see what it is made of. 91 looks prime, but its fingerprint says 7 times 13.
+3. Pull the fingerprint apart, and the number rebuilds itself from its primes: 13 copies of seven, wound into 13 arms.
+4. Push it back together, and it packs into its shorthand again.
+5. Step to its neighbours: 92 is 2² times 23, and 97 is a prime.
+6. Look at one family at a time: the primes, the twin primes, and Euler's k squared plus k plus 41.
+7. Or the squares and the pronic numbers, each on a line of its own. Nothing is scored: there are only numbers to take apart.
 
 ## tutblocks: Building blocks
 
@@ -442,23 +438,24 @@ The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discove
 5. Nothing is left, so the fingerprint is the whole number: 2³, 3², and five. Unpack it, and it builds the volume back, beside its string.
 6. When what is left is a prime past the tray, point at the block itself. 246 splits by two, then by three, and the 41 left over is prime.
 
-## tute8: E8 spheres
+## tute8: E8's clock
 
-*a game tutorial*  ·  5 lines, 112 words
+*a game tutorial*  ·  6 lines, 147 words
 
-1. E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of 240 times sigma three of n points.
-2. Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, 2².
-3. Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.
-4. Round two shows the building blocks of each shell. Shell 6 stands on its divisor cubes: 1, 8, 27 and 216 marbles.
-5. Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: 91, and 121.
+1. This is E8's clock. Every number up to 600 stands at its hour on a clock of 30 hours, as a stack of its prime factors: one gold piece, as tall as log p, for each.
+2. Touch a column, and its path back steps down the staircase. 360 drops by two, two, two, three, three and five, every landing named by the blocks it has left.
+3. Turn the model to look along the steps: drag it, or pinch it in VR.
+4. 343 is 7³: three equal drops, each of log 7.
+5. Powers shows where the runs of each prime go: two, four, eight and on up the spiral of two to the k, each top named with its exponent.
+6. And the shells: E8's lattice points, shell by shell. Touch shell 6, and its divisors stand under it as cubes of marbles.
 
-## tutvortex: Vortex hunt
+## tutvortex: Zeta's chain
 
-*a game tutorial*  ·  6 lines, 96 words
+*a game tutorial*  ·  6 lines, 121 words
 
-1. Vortex hunt is played on zeta's chain at its 300th zero. The chain curls into vortices, and vortex k belongs to the counting number k.
-2. Point at the vortices in order. One. Two. Three.
-3. Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.
-4. Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.
-5. Round three: steer t until the chain's end lands on the zero.
-6. Landed. Zeta is zero here, and the chain ends where it began.
+1. This is zeta's chain at its 300th zero: a link for every counting number, and its end at zeta of one half plus i t.
+2. Drag up or down, and t moves. The chain winds and unwinds as it goes.
+3. On a touch screen it takes one finger. In VR, pinch the bead on the t rail, and lift it or lower it.
+4. The rail's gold ticks are the zeros. At each one the chain's end lands on zero, and the chain curls into vortices.
+5. Vortex k belongs to the counting number k. Touch vortex three: its fingerprint, and the mirror line from the chain's third vertex to the eye.
+6. Then glide on to the next zero, and the next.

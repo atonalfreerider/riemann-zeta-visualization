@@ -15,10 +15,12 @@ public class TourSmokeTest
     public IEnumerator TourRunsThroughEveryLineWithoutErrors()
     {
         LogAssert.ignoreFailingMessages = false;
-        Time.captureFramerate = 30; // deterministic frame time (headless runs otherwise tick with ~0 deltaTime)
         SceneManager.LoadScene("zeta");
         yield return null;
         yield return null;
+        // deterministic frame time (headless runs otherwise tick with ~0 deltaTime), set once the scene has loaded: the
+        // last test's frame recorder, destroyed with its scene, hands back the frame rate it found
+        Time.captureFramerate = 30;
 
         Main main = Object.FindAnyObjectByType<Main>();
         Assert.IsNotNull(main, "Main not found in scene");
@@ -40,7 +42,7 @@ public class TourSmokeTest
         main.Speed = 30;
         main.Play();
         for (int i = 0; i < 90; i++) yield return null;
-        Assert.Greater(main.ZeroCount, 0, "no zeros passed while animating");
+        Assert.Greater(main.ZeroCount, 0, $"no zeros passed while animating (t = {main.CurrentT:0.00}, time scale {Time.timeScale}, Δt {Time.deltaTime:0.000}, capture {Time.captureFramerate} fps)");
         main.Pause();
 
         // the tour, skipping each line quickly

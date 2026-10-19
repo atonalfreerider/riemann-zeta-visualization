@@ -56,22 +56,25 @@ scripting vocabulary, and [docs/narration-script.md](docs/narration-script.md) f
 | ![09-qrh](docs/gifs/09-qrh.gif) | ![09-qrh](docs/screenshots/09-qrh.png) | **9. 2026: A Wall at Seven Eighths.** OpenAI's AI-generated, Lean-checked claim that no collision strays past 7/8 (or below 1/8), its status, and the open gap where the hypothesis still lives. |
 | ![10-outro](docs/gifs/10-outro.gif) | ![10-outro](docs/screenshots/10-outro.png) | **10. Written Into the Universe.** Straight back to the Sacks spiral on its saddle; the zeta trail rises from the centre, each collision sends its wave along the spiral, and the waves settle onto the saddle as one master wave that spikes at every prime (a picture, not a result). It ends on the graph view, ready to explore. |
 
-## Games: point at the numbers
+## Games: numbers to take apart
 
-Four games in the model lab, on the desktop and in VR (side menu **M** ▸ **GAMES**, or the VR dock's **Models** tab):
-**Prime hunt** on the Sacks spiral, **Building blocks** (split a number into its primes), **E8 spheres** (E8's lattice
-shells as spheres of 240 σ₃(n) points, 340 320 of them on the desktop, their divisor cubes, and the impostors on E8's
-clock) and **Vortex hunt** (the vortices of ζ's chain and the counting numbers they belong to). Gold is always prime,
-deep red a prime squared, blue a pronic number k(k + 1), grey any other composite. Every number unpacks as a marble
-fingerprint into its full volume and back (**U**): each prime factor a container of marbles in a symmetric spiral, each
-exponent more rings round the container, tilted into planes of their own (count the rings), the copies of each
-multiplication winding into spiral arms. In 3D (**F**, the default in VR) every group of marbles is a spiral sphere
-pack. In VR you point with your index finger and hold, or touch. A vertical video walks through the marble language,
-and each game has a narrated tutorial. See [docs/GAMES.md](docs/GAMES.md).
+Four games in the model lab, on the desktop, on a touch screen and in VR (side menu **M** ▸ **GAMES**, or the VR dock's
+**Models** tab). They are for exploring: nothing is scored, timed or locked. **The number spiral**: touch any number on
+the Sacks spiral and see what it is made of. **Building blocks**: split any number up to 1024 into its primes, one prime
+at a time. **E8's clock**: every number up to 600 stands on E8's wheel as a stack of its prime factors; touch one and
+its path back steps down the staircase to its primes, each landing named in exponent notation (360 = 2³ · 3² · 5,
+180 = 2² · 3² · 5, …). It also shows E8's lattice shells (340 320 points on the desktop) with their divisor cubes.
+**Zeta's chain**: drag t up and down (one finger on a touch screen, or pinch the t rail in VR) and watch ζ's chain wind
+into vortices at each zero. Gold is always prime, deep red a prime squared, blue a pronic number k(k + 1), grey any
+other composite. Every number unpacks as a marble fingerprint into its full volume and back (pull it apart by hand, or
+**U**): each prime factor a container of marbles in a symmetric spiral, each exponent more rings round the container,
+tilted into planes of their own (count the rings), the copies of each multiplication winding into spiral arms. In 3D
+(**F**, the default in VR) every group of marbles is a spiral sphere pack. A vertical video walks through the marble
+language, and each game has a narrated tutorial. See [docs/GAMES.md](docs/GAMES.md).
 
 | | |
 |---|---|
-| ![Prime hunt](docs/games/prime-hunt.jpg) | ![E8 spheres](docs/games/e8-spheres.jpg) |
+| ![The number spiral: 91 pulled apart](docs/games/spiral-91-pulled-apart.jpg) | ![E8's clock: 360 down the staircase](docs/games/e8-clock-360.jpg) |
 | ![Building blocks: 360's full volume](docs/games/blocks-volume.jpg) | ![Marble fingerprints](docs/games/fingerprints.jpg) |
 
 ## Meta Quest 2 (VR, hands only)

@@ -26,6 +26,17 @@ public static class LabDraw
         for (int i = 0; i < pts.Count; i++) line.SetPosition(i, pts[i]);
     }
 
+    /// <summary>Move a ring made by Ring (a closed loop of `steps` points) to a new centre and radius.</summary>
+    public static void SetRing(LineRenderer line, Vector3 center, float radius, int steps = 96)
+    {
+        line.positionCount = steps;
+        for (int i = 0; i < steps; i++)
+        {
+            float a = i / (float)steps * Mathf.PI * 2f;
+            line.SetPosition(i, center + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * radius);
+        }
+    }
+
     public static LineRenderer Ring(Transform parent, string name, Vector3 center, float radius, float width, Color color, float glow, int steps = 96)
     {
         Vector3[] pts = new Vector3[steps];
@@ -56,6 +67,35 @@ public static class LabDraw
         l.TextField.textWrappingMode = TextWrappingModes.NoWrap;
         l.gameObject.AddComponent<Billboard>();
         l.transform.position = pos;
+        return l;
+    }
+
+    static Material haloed;
+
+    /// <summary>
+    /// The label with a soft dark halo round every letter, so that it reads over a busy picture (the gold columns of a
+    /// funnel). The halo is the font's underlay, drawn behind the letters, so they keep their full weight; the keywords are
+    /// those of TextMesh Pro's "Drop Shadow" material, whose shader variant is in every build. Every haloed label shares one
+    /// material.
+    /// </summary>
+    public static TextBox Haloed(TextBox l)
+    {
+        if (haloed == null)
+        {
+            haloed = new Material(l.TextField.fontSharedMaterial) { name = "label, haloed" };
+            haloed.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            haloed.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+            haloed.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
+            haloed.SetFloat(ShaderUtilities.ID_FaceDilate, .1f);
+            haloed.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, .92f));
+            haloed.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
+            haloed.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
+            haloed.SetFloat(ShaderUtilities.ID_UnderlayDilate, 1f);
+            haloed.SetFloat(ShaderUtilities.ID_UnderlaySoftness, .4f);
+            ShaderUtilities.UpdateShaderRatios(haloed);
+        }
+
+        l.TextField.fontSharedMaterial = haloed;
         return l;
     }
 
