@@ -70,8 +70,19 @@ public partial class SacksSpiral : MonoBehaviour
 
     static float FadedSize(float size, float fade) => size * Mathf.Lerp(1f, .22f, fade);
 
-    /// <summary>Resting colour of number n's dot: primes gold, squares red, the rest grey, fading toward the edge.</summary>
-    static Color RestColor(int n) => Faded(IsPrime(n) ? Factory.Palette.Zero : IsSquare(n) ? SquareColor : new Color(.3f, .3f, .38f), EdgeFade(n));
+    /// <summary>
+    /// Resting colour of number n's dot, in the games' colour language (NumberKind): primes gold, a prime's square deep red,
+    /// pronic numbers k(k + 1) the blue of their route, every other composite grey; fading toward the edge.
+    /// </summary>
+    static Color RestColor(int n) => Faded(KindColor(n), EdgeFade(n));
+
+    static Color KindColor(int n) => NumberKind.Classify(n) switch
+    {
+        NumberClass.Prime => Factory.Palette.Zero,
+        NumberClass.PrimeSquare => NumberKind.DeepRed,
+        NumberClass.Pronic => PronicColor,
+        _ => new Color(.3f, .3f, .38f),
+    };
 
     /// <summary>Resting size of number n's dot on the full spiral.</summary>
     static float RestSize(int n) => n <= GridCount ? (IsPrime(n) ? .42f : IsSquare(n) ? .34f : .26f) : FadedSize(IsPrime(n) ? .42f : .22f, EdgeFade(n));
@@ -138,7 +149,7 @@ public partial class SacksSpiral : MonoBehaviour
         {
             bool prime = IsPrime(n), square = IsSquare(n);
             float fade = EdgeFade(n);
-            Color c = Faded(prime ? Factory.Palette.Zero : square ? SquareColor : new Color(.3f, .3f, .38f), fade);
+            Color c = Faded(KindColor(n), fade);
             GameObject dot = Factory.NewSphere("n " + n, FadedSize(prime ? .42f : .22f, fade), c, prime ? Mathf.Lerp(Factory.GlowIntensity, Factory.NoGlow, fade) : Factory.NoGlow);
             dot.transform.SetParent(transform, false);
             dot.SetActive(n <= GridCount);

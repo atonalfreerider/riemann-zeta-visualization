@@ -97,11 +97,16 @@ public class LabPanel : MonoBehaviour
         if (shown == null) return;
 
         Label("MODEL LAB", 18, FontStyles.Bold, DimText, 26);
-        RectTransform models = Row(48);
-        foreach (LabModel m in lab.Models)
+        // the models in one row, the games in the next
+        foreach (bool games in new[] { false, true })
         {
-            LabModel model = m;
-            modelButtons.Add((Button(models, m.Short, () => lab.Enter(model.Id), VRIcons.Get(m.Icon)), m));
+            RectTransform models = Row(48);
+            foreach (LabModel m in lab.Models)
+            {
+                if (m.IsGame != games) continue;
+                LabModel model = m;
+                modelButtons.Add((Button(models, m.Short, () => lab.Enter(model.Id), VRIcons.Get(m.Icon)), m));
+            }
         }
 
         Label(shown.Title, 28, FontStyles.Bold, TextColor, 40);

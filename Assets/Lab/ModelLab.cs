@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.XR.Hands;
 
 /// <summary>One control of a lab model: a button, a toggle or a slider, shown on the desktop panel and on the VR Models page.</summary>
 public class LabControl
@@ -98,6 +99,8 @@ public abstract class LabModel
     public virtual string PickLabel(int i) => "";
     public virtual void OnPick(int i) { }
     public virtual bool OnKey(Keyboard k) => false;
+    /// <summary>A game (Assets/Games): listed with the games, apart from the models.</summary>
+    public virtual bool IsGame => false;
 }
 
 /// <summary>
@@ -139,6 +142,13 @@ public class ModelLab : MonoBehaviour
     int hoverLabelFor = -2;
     readonly bool[] fingerArmed = { true, true };
     readonly int[] fingerOn = { -1, -1 };
+    // VR pointing from afar: the index finger's ray, held on a point, picks it
+    readonly int[] rayOn = { -1, -1 };
+    readonly float[] rayHeld = { 0f, 0f };
+    readonly bool[] rayArmed = { true, true };
+    readonly LineRenderer[] rays = new LineRenderer[2];
+    const float RayDwell = .9f, RayAngle = 2.5f;
+    static readonly int IndexProximalId = XRHandJointID.IndexProximal.ToIndex();
 
     public bool IsActive => Active != null;
 
@@ -154,6 +164,11 @@ public class ModelLab : MonoBehaviour
         lab.Models.Add(new E8Model());
         lab.Models.Add(new UnifiedModel());
         lab.Models.Add(new ZerosModel());
+        // the games (Assets/Games): point at numbers, find the primes and the building blocks
+        lab.Models.Add(new PrimeHuntGame());
+        lab.Models.Add(new BuildingBlocksGame());
+        lab.Models.Add(new E8SpheresGame());
+        lab.Models.Add(new VortexGame());
         Instance = lab;
         if (!VRMode.Enabled) LabPanel.Create(lab);
         return lab;
@@ -425,6 +440,7 @@ public class ModelLab : MonoBehaviour
             {
                 fingerArmed[h] = true;
                 fingerOn[h] = -1;
+                HideRay(h);
                 continue;
             }
 
@@ -442,6 +458,17 @@ public class ModelLab : MonoBehaviour
             }
 
             float metres = Mathf.Sqrt(bestD) / scale;
+            // nothing within reach of the fingertip: point at it from afar along the index finger
+            if (metres > .035f)
+            {
+                fingerArmed[h] = true;
+                fingerOn[h] = -1;
+                int far = FingerRay(h, hand, app, tip, scale);
+                if (far >= 0 && hover < 0) hover = far;
+                continue;
+            }
+
+            HideRay(h);
             if (best != fingerOn[h] || metres > .025f) fingerArmed[h] = true;
             fingerOn[h] = metres < .035f ? best : -1;
             if (metres < .035f && metres < hoverD)
@@ -459,6 +486,74 @@ public class ModelLab : MonoBehaviour
         }
 
         SetHover(hover);
+    }
+
+    /// <summary>
+    /// The index finger's ray (from its first knuckle through its tip): the pick point nearest the ray, within 2.5°, is
+    /// hovered, and held there for 0.9 s it is picked (once, until the ray leaves it). A thin line shows the ray, turning
+    /// gold as the hold fills.
+    /// </summary>
+    int FingerRay(int h, VRHand hand, VRApp app, Vector3 tip, float scale)
+    {
+        Vector3 dir = app.Rig.Offset.TransformDirection(hand.IndexTip - hand.Joints[IndexProximalId]);
+        if (dir.sqrMagnitude < 1e-10f) return -1;
+        dir.Normalize();
+        int best = -1;
+        float bestCos = Mathf.Cos(RayAngle * Mathf.Deg2Rad);
+        for (int i = 0; i < Active.PickCount; i++)
+        {
+            Vector3 v = Active.PickPoint(i) - tip;
+            float len = v.magnitude;
+            if (len < 1e-5f) continue;
+            float c = Vector3.Dot(v / len, dir);
+            if (c > bestCos)
+            {
+                bestCos = c;
+                best = i;
+            }
+        }
+
+        if (best != rayOn[h])
+        {
+            rayOn[h] = best;
+            rayHeld[h] = 0f;
+            rayArmed[h] = true;
+        }
+        else if (best >= 0) rayHeld[h] += Time.deltaTime;
+
+        float u = Mathf.Clamp01(rayHeld[h] / RayDwell);
+        if (best >= 0 && u >= 1f && rayArmed[h])
+        {
+            rayArmed[h] = false;
+            Active.OnPick(best);
+            VRAudio.Click();
+        }
+
+        // the ray: to the hovered point, or a metre and a half along the finger
+        if (rays[h] == null)
+        {
+            rays[h] = Factory.NewLine($"finger ray {h}", 1f, Color.white, Factory.SoftGlowIntensity);
+            rays[h].transform.SetParent(root, false);
+            rays[h].positionCount = 2;
+        }
+
+        LineRenderer ray = rays[h];
+        ray.gameObject.SetActive(true);
+        Vector3 end = best >= 0 ? Active.PickPoint(best) : tip + dir * (1.5f * scale);
+        ray.SetPositions(new[] { tip, end });
+        ray.widthMultiplier = .0025f * scale;
+        Color c0 = new(.85f, .9f, 1f, .5f), c1 = Color.Lerp(new Color(.85f, .9f, 1f, .7f), NumberKind.Gold, u);
+        ray.startColor = c0;
+        ray.endColor = best >= 0 ? c1 : new Color(.85f, .9f, 1f, 0f);
+        return best;
+    }
+
+    void HideRay(int h)
+    {
+        rayOn[h] = -1;
+        rayHeld[h] = 0f;
+        rayArmed[h] = true;
+        if (rays[h] != null) rays[h].gameObject.SetActive(false);
     }
 
     void SetHover(int i)

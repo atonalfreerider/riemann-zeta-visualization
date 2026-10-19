@@ -213,6 +213,7 @@ public class SideMenu : MonoBehaviour
             RectTransform modelRow = Row(content);
             foreach (LabModel m in ModelLab.Instance.Models)
             {
+                if (m.IsGame) continue;
                 string id = m.Id;
                 Button(modelRow, m.Short, () =>
                 {
@@ -222,6 +223,21 @@ public class SideMenu : MonoBehaviour
             }
 
             Label(content, "Paths: the factor funnel of \"The paths back\".  E8: the roots, the Coxeter element, reflections, Frobenius.  Unified: E8's wheel, ζ split into its 30 hour sums, the Sacks spiral.", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 74).textWrappingMode = TextWrappingModes.Normal;
+
+            Header(content, "GAMES   point at numbers, also in VR");
+            RectTransform gameRow = Row(content);
+            foreach (LabModel m in ModelLab.Instance.Models)
+            {
+                if (!m.IsGame) continue;
+                string id = m.Id;
+                Button(gameRow, m.Short, () =>
+                {
+                    ModelLab.Instance.Enter(id);
+                    open = false;
+                }, 1f, TextAlignmentOptions.Left, Icon(m.Icon));
+            }
+
+            Label(content, "Gold is always prime, deep red a prime squared, blue pronic k(k + 1), grey composite.  Primes: hunt them on the Sacks spiral.  Blocks: split a number into its prime building blocks.  E8 game: E8's lattice shells as spheres, their divisor cubes, the impostors on E8's clock.  Vortices: the vortices of ζ's chain and the counting numbers they belong to.  Every number unpacks as marbles (U).", 19, FontStyles.Normal, new Color(.45f, .45f, .52f), 100).textWrappingMode = TextWrappingModes.Normal;
         }
 
         Header(content, "RECORD");
