@@ -175,7 +175,7 @@ public class VortexGame : GameModel
                 ShowVortex(k, p.Position);
                 ask = NextAsk();
                 Prompt = ask > 0 ? $"Round 1 of 3:  zero {zeroIndex}.  Find vortex {ask}" : $"Round 1 of 3:  every vortex found";
-                if (ask < 0) nextAt = Time.time + 3.5f;
+                if (ask < 0 && AutoAdvance) nextAt = Time.time + 3.5f;
             }
             else if (!found.Contains(k))
             {
@@ -202,7 +202,7 @@ public class VortexGame : GameModel
                     linkLines.Add(l);
                     ShowVortex(k, eye);
                     Note = $"vertex {k} ↔ vortex {k}:  the eye is ζ − e<sup>−2iθ</sup> conj(S<sub>{k}</sub>).  " + NumberKind.Describe(k);
-                    if (found.Count >= vortices.Count) nextAt = Time.time + 3.5f;
+                    if (found.Count >= vortices.Count && AutoAdvance) nextAt = Time.time + 3.5f;
                 }
                 else
                 {
@@ -248,14 +248,47 @@ public class VortexGame : GameModel
             landed = true;
             Found(Plane(zeta), 25, 3f);
             Note = $"Landed on zero {zeroIndex}:  t = {t:0.0000}, |ζ| = {d:0.0000}";
-            nextAt = Time.time + 4f;
+            if (AutoAdvance) nextAt = Time.time + 4f;
         }
 
         UpdateStatus();
     }
 
+    // a narrated chapter steering t (exp:lab:steer): from steerFrom to steerTo over steerSeconds
+    double steerFrom, steerTo;
+    float steerStart = -1f, steerSeconds = 1f;
+
+    public override bool StoryCommand(string verb, string[] a)
+    {
+        switch (verb)
+        {
+            case "round":
+                if (a.Length > 0 && int.TryParse(a[0], out int r)) StartRound(r);
+                return true;
+            case "steer":
+            {
+                // steer:DT[:SECONDS]: ease t to the round's zero + DT
+                double dt = a.Length > 0 && double.TryParse(a[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double d) ? d : 0;
+                steerFrom = t;
+                steerTo = ZeroT(zeroIndex) + dt;
+                steerSeconds = a.Length > 1 && float.TryParse(a[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float sec) ? Mathf.Max(.1f, sec) : 3f;
+                steerStart = Time.time;
+                return true;
+            }
+        }
+
+        return base.StoryCommand(verb, a);
+    }
+
     protected override void OnTick(float dt)
     {
+        if (steerStart >= 0f)
+        {
+            float u = Mathf.Clamp01((Time.time - steerStart) / steerSeconds);
+            SetT(steerFrom + (steerTo - steerFrom) * Mathf.SmoothStep(0f, 1f, u));
+            if (u >= 1f) steerStart = -1f;
+        }
+
         if (nextAt > 0f && Time.time >= nextAt)
         {
             nextAt = -1f;

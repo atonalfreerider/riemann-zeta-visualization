@@ -230,6 +230,7 @@ public partial class TourDirector : MonoBehaviour
         audioSource.Stop();
         Captions.Clear();
         Rig.Release();
+        if (ModelLab.Instance != null && ModelLab.Instance.StoryMode) ModelLab.Instance.Close();
         if (Recorder.IsRecording) StopRecording();
         EndExperiment();
         CurrentChapterId = "";
@@ -429,7 +430,7 @@ public partial class TourDirector : MonoBehaviour
         {
             foreach (TourLine line in chapter.lines)
             {
-                if (!string.IsNullOrEmpty(line.camera) && !Rig.HasCue(line.camera))
+                if (!string.IsNullOrEmpty(line.camera) && line.camera != "lab" && !Rig.HasCue(line.camera))
                 {
                     Debug.LogWarning($"Tour: line {line.id} uses unknown camera cue '{line.camera}'");
                 }
@@ -667,7 +668,13 @@ public partial class TourDirector : MonoBehaviour
         {
             EndSeek();
         }
-        Rig.SetCue(line.camera, PlayingExperiment ? 4f : 2.5f);
+        if (line.camera == "lab")
+        {
+            // a game tutorial: the lab's own view has the camera
+            Rig.Release();
+            if (ModelLab.Instance != null) ModelLab.Instance.HoldCamera();
+        }
+        else Rig.SetCue(line.camera, PlayingExperiment ? 4f : 2.5f);
 
         LineTiming timing = TourScriptLoader.LoadTiming(line.id);
         AudioClip clip = TourScriptLoader.LoadAudio(line.id);

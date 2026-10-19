@@ -8,14 +8,19 @@ using UnityEngine;
 /// * a badge marble in the number's own colour (gold prime, deep red p², blue pronic, grey composite);
 /// * one round gold container per prime factor p, holding p marbles in a symmetric spiral (MarbleLayout): a pair, a
 ///   triangle, a pentagon, a centre and six round it, a centre and m arms …;
-/// * the exponent k at the container's top right, as a shape of k dimensions: the shadow of a k-dimensional cube (a square
-///   for p², a cube for p³, a tesseract for p⁴, …) with k pale marbles evenly round it, one per dimension.
-/// Unpack plays the multiplication: each exponent opens into k copies of its container; then the first container pours
+/// * the exponent k in the container itself, not beside it: k − 1 more rings round the container's centre, each in a plane
+///   of its own, tilted out of the picture (one more dimension each), their tilts fanned by half a turn, like the rings
+///   of an armillary sphere. Flat, each is an ellipse through the container, its front half bright and its back half
+///   faint behind the marbles; the rings precess slowly, and from the fourth ring on they rock as if turning through a
+///   further dimension. Count the rings, the container's own flat one included: that many times the prime is multiplied
+///   in.
+/// Unpack plays the multiplication: each container's rings slide out along the string, close into whole rings and fill
+/// with marbles: k copies of the container; then the first container pours
 /// its marbles into the volume, and every next container j sends one marble to each of p copies of the volume so far,
 /// round a ring, and the p copies wind together into p spiral arms: copy c becomes arm c. The volume ends with all n
 /// marbles in the number's own colour, its last factor's arms still shaded. Pack plays it back down to the shorthand.
 /// Flat, the marbles are symmetric spirals; Deep, every group of marbles is a spiral sphere pack (the volume wound with
-/// one coil per copy), turning slowly, and the exponent's cube turns in depth.
+/// one coil per copy), turning slowly, and the exponent's rings stand out of the plane.
 /// </summary>
 public class MarbleFingerprint : MonoBehaviour
 {
@@ -55,9 +60,9 @@ public class MarbleFingerprint : MonoBehaviour
     // the string
     Vector3 badge;
     readonly List<float> shortX = new(), longX = new();  // container centres along the string (y = 0)
-    readonly List<Vector3> glyphAt = new();              // each group's exponent: the corner its cube stands on
-    readonly List<float> glyphL = new();
     float shortEnd, longEnd;
+    /// <summary>Between a container's ring and its first exponent ring, and between exponent rings (marbles).</summary>
+    public const float RingGap = .5f;
 
     // the volume: D_j holds the first j factors' product, D_1 the first container itself
     Vector3 volumeAt;
@@ -73,8 +78,10 @@ public class MarbleFingerprint : MonoBehaviour
     readonly List<Vector3[]> copyFlat = new(), copyDeep = new(); // for level j ≥ 1: where D_j's p_j copies sit
     bool volumeTooBig;
 
-    /// <summary>A fingerprint of n under parent, marbles `scale` world units across, facing the parent's −z.</summary>
-    /// <summary>beside: the volume unpacks to the right of the string (else above it).</summary>
+    /// <summary>
+    /// A fingerprint of n under parent, marbles `scale` world units across, facing the parent's −z; beside: the volume
+    /// unpacks to the right of the string (else above it).
+    /// </summary>
     public static MarbleFingerprint Create(Transform parent, long n, float scale, bool digits = true, bool deep = false, bool beside = false)
     {
         GameObject go = new($"fingerprint {n}");
@@ -95,6 +102,70 @@ public class MarbleFingerprint : MonoBehaviour
     /// <summary>Flat or deep at once (no easing), for pictures.</summary>
     public void JumpDepth(bool deep) { depthTarget = Depth = deep ? 1f : 0f; Render(); }
     public bool Moving => !Mathf.Approximately(Phase, target) || !Mathf.Approximately(Depth, depthTarget);
+
+    /// <summary>
+    /// 0 … 1: the shorthand building itself, for the videos: the badge, then each container in turn (its ring, its marbles
+    /// one by one, its exponent rings one by one). 1 (the default) shows it whole.
+    /// </summary>
+    public float Reveal = 1f;
+    /// <summary>0 … 1: the whole fingerprint fades (marbles shrink, lines and digits fade).</summary>
+    public float Fade = 1f;
+
+    /// <summary>Set the phase and the depth from outside (a video's eased parameters), with no easing of its own.</summary>
+    public void Drive(float phase, float depth)
+    {
+        Phase = target = Mathf.Clamp(phase, 0f, Steps);
+        Depth = depthTarget = Mathf.Clamp01(depth);
+        Render();
+    }
+
+    // ---- where its parts are, for callouts (world space) ----------------------------------------------------------
+
+    public int GroupCount => groups.Count;
+    public (long p, int k) Group(int g) => groups[Mathf.Clamp(g, 0, groups.Count - 1)];
+    public Vector3 BadgeWorld => transform.TransformPoint(badge);
+
+    /// <summary>Container g of the shorthand (or, once opened, its first copy on the long string): its top.</summary>
+    public Vector3 CupTopWorld(int g)
+    {
+        g = Mathf.Clamp(g, 0, groups.Count - 1);
+        float x = shortX[g];
+        if (Phase >= 1f)
+        {
+            int fi = 0;
+            for (int i = 0; i < g; i++) fi += groups[i].k;
+            x = longX[fi];
+        }
+
+        return transform.TransformPoint(new Vector3(x, CupNow(groups[g].p) + .1f, 0f));
+    }
+
+    /// <summary>The top of container g's outermost exponent ring (its own ring when it has none).</summary>
+    public Vector3 RingTopWorld(int g)
+    {
+        g = Mathf.Clamp(g, 0, groups.Count - 1);
+        (long p, int k) = groups[g];
+        return transform.TransformPoint(new Vector3(shortX[g], OuterRadius(p, k) - CupRadius(p) + CupNow(p) + .1f, 0f));
+    }
+
+    /// <summary>Container j of the opened string (one per factor): its top.</summary>
+    public Vector3 LongTopWorld(int j)
+    {
+        j = Mathf.Clamp(j, 0, Mathf.Max(0, factors.Count - 1));
+        return factors.Count == 0 ? BadgeWorld : transform.TransformPoint(new Vector3(longX[j], CupNow(factors[j]) + .1f, 0f));
+    }
+
+    /// <summary>The volume's centre, and the top of its rim as drawn now.</summary>
+    public Vector3 VolumeWorld => transform.TransformPoint(volumeAt);
+    public Vector3 VolumeTopWorld
+    {
+        get
+        {
+            int m = factors.Count;
+            float r = m == 0 || volumeTooBig ? 1f : Mathf.Lerp(MarbleLayout.Radius(flatOf[m]), MarbleLayout.Radius(deepOf[m]), D) * VolumeScale;
+            return transform.TransformPoint(volumeAt + new Vector3(0f, r + .2f, 0f));
+        }
+    }
 
     void Awake()
     {
@@ -118,11 +189,11 @@ public class MarbleFingerprint : MonoBehaviour
     /// <summary>A container's ring as drawn: round the flat spiral, closing in on the deep pack.</summary>
     float CupNow(long p) => Mathf.Lerp(MarbleLayout.Radius(ContainerFlat(p)), MarbleLayout.Radius(ContainerDeep(p)), D) + Rim;
 
-    /// <summary>The exponent's edge length: its k marbles (alternate corners of the 2k-gon) clear of each other.</summary>
-    static float GlyphEdge(int k) => k <= 2 ? 1f : k == 3 ? .85f : k == 4 ? .72f : .6f;
+    /// <summary>Exponent ring i (1 … k − 1) of a container of p: one ring gap further out per ring.</summary>
+    static float RingRadius(long p, int i) => CupRadius(p) + i * RingGap;
 
-    /// <summary>The 2k-gon's circumradius (its centre sits that far above the corner it stands on).</summary>
-    static float GlyphRadius(int k) => GlyphEdge(k) / (2f * Mathf.Sin(Mathf.PI / (2f * k)));
+    /// <summary>A container with its exponent's rings: how far its outermost ring reaches.</summary>
+    static float OuterRadius(long p, int k) => RingRadius(p, k - 1);
 
     void Build(long n)
     {
@@ -138,33 +209,15 @@ public class MarbleFingerprint : MonoBehaviour
         }
 
         badge = new Vector3(-.2f, 0f, 0f);
-        // the shorthand: one container per distinct prime, its exponent's cube at its top right
+        // the shorthand: one container per distinct prime, wearing its exponent's rings
         float x = badge.x + .8f + .5f, tallest = 1.6f;
         foreach ((long p, int k) in groups)
         {
-            float r = CupRadius(p);
+            float r = OuterRadius(p, k);
             float cx = x + r;
             shortX.Add(cx);
-            x = cx + r;
+            x = cx + r + (k > 1 && Digits ? .7f : 0f);
             tallest = Mathf.Max(tallest, 2f * r);
-            if (k > 1)
-            {
-                float gr = GlyphRadius(k);
-                // its centre out along 55° from the container's centre, just clear of the ring, so it sits over its own
-                // container's top right (not between two containers); it stands on its bottom corner
-                Vector3 centre = new Vector3(cx, 0f, 0f) + new Vector3(Mathf.Cos(.96f), Mathf.Sin(.96f), 0f) * (r + gr + .25f);
-                glyphAt.Add(centre - new Vector3(0f, gr, 0f));
-                glyphL.Add(GlyphEdge(k));
-                // and the next container keeps its distance
-                x = Mathf.Max(x, centre.x + gr + (Digits ? .9f : .2f)) + .5f;
-                tallest = Mathf.Max(tallest, r + centre.y + gr + .4f);
-            }
-            else
-            {
-                glyphAt.Add(Vector3.zero);
-                glyphL.Add(0f);
-            }
-
             x += StringGap;
         }
 
@@ -325,6 +378,7 @@ public class MarbleFingerprint : MonoBehaviour
 
     void Put(Vector3 p, float d, Color c, float glow = 1.12f)
     {
+        d *= Fade;
         if (d <= .01f) return;
         marbles.Add(p, d, c, glow);
         Mark(p, d);
@@ -349,12 +403,14 @@ public class MarbleFingerprint : MonoBehaviour
         if (marbles == null) return;
         marbles.Clear();
         lines.Clear();
+        lines.Alpha = Fade;
         lo = Vector3.one * 1e9f;
         hi = -lo;
         Color gold = NumberKind.Gold, own = NumberKind.ColorOf(N);
         float ph = Phase;
         int m = factors.Count;
-        Put(badge, 1.6f, own, 1.15f);
+        float rv = ph < 1f ? Mathf.Clamp01(Reveal) : 1f;
+        Put(badge, 1.6f * Ease(rv / .08f), own, 1.15f);
         if (N <= 1)
         {
             LocalBounds = new Bounds((lo + hi) * .5f, hi - lo);
@@ -369,38 +425,48 @@ public class MarbleFingerprint : MonoBehaviour
             float open = Ease(ph);
             int fi = 0;
             endX = Mathf.Lerp(shortEnd, longEnd, open);
+            int groupCount = groups.Count;
+            float stringTo = badge.x + .8f;
             for (int g = 0; g < groups.Count; g++)
             {
                 (long p, int k) = groups[g];
                 Vector2[] cf = ContainerFlat(p);
                 Vector3[] cd = ContainerDeep(p);
-                float r = CupRadius(p), rNow = CupNow(p);
+                float rNow = CupNow(p);
                 Vector3 from = new(shortX[g], 0f, 0f);
-                Vector3[] tips = k > 1 ? GlyphTips(g) : null;
+                // the build-up: this container's share of the reveal, its ring first, then its marbles, then its rings
+                float v = Mathf.Clamp01((rv - .08f - .92f * g / groupCount) / (.92f / groupCount));
+                float cupIn = Ease(v / .25f);
+                if (cupIn > 0f) stringTo = Mathf.Max(stringTo, Mathf.Lerp(from.x - rNow, from.x + OuterRadius(p, k) - CupRadius(p) + rNow, cupIn));
                 for (int c = 0; c < k; c++)
                 {
                     Vector3 to = new(longX[fi + c], 0f, 0f);
-                    // copy 0 slides along the string; copy c (≥ 1) grows out of the exponent's marble c
-                    Vector3 o = c == 0 ? Vector3.Lerp(from, to, open) : Vector3.Lerp(tips[c], to, open);
+                    // copy 0 is the container itself; copy c (≥ 1) is its c-th ring, which slides out along the string,
+                    // closes, shrinks onto the container's size and fills with p marbles
+                    Vector3 o = Vector3.Lerp(from, to, open);
                     float grow = c == 0 ? 1f : open;
-                    for (int i = 0; i < p; i++) Put(o + Blend(cf[i], cd[i]) * grow, grow, gold);
-                    Cup(o, rNow * grow, grow);
-                    if (c == 0) SetLabel(label, $"{p}", o + new Vector3(0f, -rNow - .75f, 0f), 1f);
+                    for (int i = 0; i < p; i++)
+                    {
+                        float pop = c == 0 ? Ease((v - .25f - .5f * i / p) / Mathf.Max(.04f, .5f / p)) : 1f;
+                        Put(o + Blend(cf[i], cd[i]) * grow, grow * pop, gold);
+                    }
+
+                    if (c == 0) Cup(o, rNow * (.6f + .4f * cupIn), cupIn);
+                    else
+                    {
+                        float ringIn = Ease((v - .75f - .25f * (c - 1) / Mathf.Max(1, k - 1)) / Mathf.Max(.06f, .25f / Mathf.Max(1, k - 1)));
+                        ExponentRing(o, Mathf.Lerp(RingRadius(p, c) - CupRadius(p) + rNow, rNow, open) * (.7f + .3f * ringIn), c, k, open, ringIn);
+                    }
+
+                    if (c == 0) SetLabel(label, $"{p}", o + new Vector3(0f, -rNow - .75f, 0f), cupIn);
                 }
 
                 label++;
                 if (k > 1)
                 {
-                    // the exponent: its marbles fly into the copies they open, its cube fades
-                    for (int c = 0; c < k; c++)
-                    {
-                        Vector3 into = new(longX[fi + c], 0f, 0f);
-                        Put(Vector3.Lerp(tips[c], into, open), .5f * (1f - open), ExponentColor, 1.15f);
-                    }
-
-                    DrawGlyph(g, 1f - open);
-                    float gr = GlyphRadius(k);
-                    SetLabel(label, $"{k}", glyphAt[g] + new Vector3(gr + .75f, gr, 0f), 1f - open);
+                    // the exponent's digit, by its outermost ring
+                    float ro = OuterRadius(p, k) - CupRadius(p) + rNow;
+                    SetLabel(label, $"{k}", from + new Vector3(Mathf.Cos(.6f), Mathf.Sin(.6f), 0f) * (ro + .7f), (1f - open) * Ease((v - .9f) / .1f));
                 }
                 else SetLabel(label, "", Vector3.zero, 0f);
 
@@ -409,6 +475,7 @@ public class MarbleFingerprint : MonoBehaviour
             }
 
             if (volumeLabel != null) volumeLabel.TextField.alpha = 0f;
+            if (rv < 1f) endX = Mathf.Min(endX, stringTo - .3f);
         }
         else
         {
@@ -451,11 +518,11 @@ public class MarbleFingerprint : MonoBehaviour
             if (!volumeTooBig) RenderVolume(lv, gold, own);
             if (volumeLabel != null)
             {
-                float rv = Mathf.Lerp(MarbleLayout.Radius(flatOf[m]), MarbleLayout.Radius(deepOf[m]), D);
+                float vr = Mathf.Lerp(MarbleLayout.Radius(flatOf[m]), MarbleLayout.Radius(deepOf[m]), D);
                 volumeLabel.transform.localPosition = beside
-                    ? volumeAt + new Vector3(0f, rv * VolumeScale + 1.3f, 0f)
-                    : volumeAt + new Vector3(-rv * VolumeScale - .9f - .5f * N.ToString().Length, 0f, 0f);
-                volumeLabel.TextField.alpha = Ease((lv - (m - 1) - .5f) * 2f);
+                    ? volumeAt + new Vector3(0f, vr * VolumeScale + 1.3f, 0f)
+                    : volumeAt + new Vector3(-vr * VolumeScale - .9f - .5f * N.ToString().Length, 0f, 0f);
+                volumeLabel.TextField.alpha = Ease((lv - (m - 1) - .5f) * 2f) * Fade;
             }
         }
 
@@ -551,59 +618,48 @@ public class MarbleFingerprint : MonoBehaviour
         }
     }
 
-    // ---- the exponent: a k-dimensional cube's shadow ------------------------------------------------------------
+    // ---- the exponent: tilted rings round the container, one more dimension each -----------------------------------
 
-    /// <summary>The cube's vertex (mask b), relative to the corner it stands on, by the depth and the spin.</summary>
-    Vector3 GlyphVertex(int g, int k, int b)
+    /// <summary>
+    /// Exponent ring i (1 … k − 1) of a container at o, radius r: a circle about the container's centre in a plane of its
+    /// own, tilted out of the picture, the tilt axes fanned by half a turn over the rings, like the rings of an armillary
+    /// sphere. Seen flat it is an ellipse through the container, its front half bright and its back half faint (behind
+    /// the marbles). The rings precess slowly; from ring 3 on the tilt also rocks, as a ring turning through a further
+    /// dimension would look from here. close (0 … 1) is the unpacking: the ring settles flat into the picture, a whole
+    /// container ring.
+    /// </summary>
+    void ExponentRing(Vector3 o, float r, int i, int k, float close, float fade = 1f)
     {
-        float L = glyphL[g], gr = GlyphRadius(k);
-        Vector3 v = Vector3.zero;
-        for (int j = 0; j < k; j++)
-            if ((b >> j & 1) == 1) v += MarbleLayout.CubeEdge(k, j, L, 1f);
-        // flat: the shadow (x, y); deep: the cube itself, turning about the shadow's centre (gr above the corner)
-        Vector3 rel = v - new Vector3(0f, gr, 0f);
-        return new Vector3(0f, gr, 0f) + Vector3.LerpUnclamped(new Vector3(rel.x, rel.y, 0f), Turn(rel), D);
-    }
-
-    /// <summary>The exponent's k marbles: alternate corners of its 2k-gon (one per dimension, evenly round it).</summary>
-    Vector3[] GlyphTips(int g)
-    {
-        int k = groups[g].k;
-        int[] ring = MarbleLayout.CubeOutline(k);
-        Vector3[] tips = new Vector3[k];
-        for (int c = 0; c < k; c++) tips[c] = glyphAt[g] + GlyphVertex(g, k, ring[2 * c + 1]) + new Vector3(0f, 0f, -.05f);
-        return tips;
-    }
-
-    void DrawGlyph(int g, float alpha)
-    {
-        int k = groups[g].k;
-        if (alpha <= .01f || k < 2) return;
-        Vector3 o = glyphAt[g];
-        Color e = ExponentColor;
-        // its edges: all of them up to six dimensions (fainter the more there are); past that the ones at the bottom
-        // corner and the top one, enough to show the shape
-        float inner = k <= 3 ? .85f : k == 4 ? .6f : k <= 6 ? .38f : .3f;
-        int all = (1 << k) - 1;
-        for (int b = 0; b <= all; b++)
-            for (int j = 0; j < k; j++)
+        if (fade <= .01f) return;
+        float open = 1f - close;
+        float tilt = 62f;
+        if (i >= 3) tilt += 16f * Mathf.Sin(SpinAngle * Mathf.Deg2Rad * 1.6f + i * 1.7f);
+        tilt *= open;
+        float axis = 90f + 180f * (i - 1) / Mathf.Max(1, k - 1) + SpinAngle * (i % 2 == 0 ? .5f : -.5f);
+        Quaternion q = Quaternion.AngleAxis(axis, Vector3.forward) * Quaternion.AngleAxis(tilt, Vector3.right);
+        Color g = NumberKind.Gold;
+        const int segs = 72;
+        Vector3 prev = Vector3.zero;
+        float prevZ = 0f;
+        for (int s = 0; s <= segs; s++)
+        {
+            float a = Mathf.PI * 2f * s / segs;
+            Vector3 rel = q * new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f);
+            Vector3 pt = o + rel;
+            if (s > 0)
             {
-                if ((b >> j & 1) == 1) continue;
-                int b2 = b | 1 << j;
-                if (k > 6 && b != 0 && b2 != all) continue;
-                lines.Add(o + GlyphVertex(g, k, b), o + GlyphVertex(g, k, b2), .05f, new Color(e.r, e.g, e.b, alpha * inner));
+                // the near half (toward the viewer, −z) bright, the far half faint; settled flat, all of it bright
+                float near = Mathf.Clamp01(.5f - (rel.z + prevZ) * .5f / Mathf.Max(.01f, r * .2f));
+                float alpha = Mathf.Lerp(Mathf.Lerp(.28f, .95f, near), 1f, close) * fade;
+                float width = Mathf.Lerp(Mathf.Lerp(.05f, .085f, near), .09f, close);
+                lines.Add(prev, pt, width, new Color(g.r, g.g, g.b, alpha));
             }
 
-        int[] ring = MarbleLayout.CubeOutline(k);
-        List<Vector3> path = new();
-        foreach (int b in ring) path.Add(o + GlyphVertex(g, k, b));
-        lines.Path(path, .075f, new Color(e.r, e.g, e.b, alpha * .95f), true);
-        foreach (Vector3 v in path) Mark(v, .2f);
-        // a short stem from the container's ring to the corner the cube stands on
-        float r = CupNow(groups[g].p);
-        Vector3 cup = new(shortX[g], 0f, 0f);
-        Vector3 toCorner = (o - cup).normalized;
-        lines.Add(cup + toCorner * (r + .05f), o, .06f, new Color(e.r, e.g, e.b, alpha * .8f));
+            prev = pt;
+            prevZ = rel.z;
+        }
+
+        Mark(o, 2f * r);
     }
 
     void SetLabel(int i, string text, Vector3 at, float alpha)
@@ -613,6 +669,6 @@ public class MarbleFingerprint : MonoBehaviour
         if (t.TextField == null) return;
         t.TextField.text = text;
         t.transform.localPosition = at;
-        t.TextField.alpha = alpha;
+        t.TextField.alpha = alpha * Fade;
     }
 }

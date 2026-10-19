@@ -446,29 +446,4 @@ public static class MarbleLayout
             return true;
         }
     }
-
-    // ---- the exponent: the shadow of a k-dimensional cube ---------------------------------------------------------
-
-    /// <summary>
-    /// The k-cube's shadow standing on a corner: its k edge directions fanned evenly over the upper half-plane, so the
-    /// outline is a regular 2k-gon (a square, a hexagon for the cube, an octagon for the tesseract …). Vertex b (a k-bit
-    /// mask) is the sum of the edges in b; z lifts alternate edges toward and away from the viewer, so turned in depth
-    /// it is a k-cube seen from its long diagonal (for k = 3 exactly the cube). Edge length L.
-    /// </summary>
-    public static Vector3 CubeEdge(int k, int j, float L, float depth)
-    {
-        float a = Mathf.PI / (2f * k) + Mathf.PI * j / k;
-        float lift = k == 2 ? 0f : (j % 2 == 0 ? 1f : -1f) * depth * .7f;
-        return new Vector3(L * Mathf.Cos(a), L * Mathf.Sin(a), lift * L);
-    }
-
-    /// <summary>The 2k-gon round the shadow, as vertex masks: 0, e0, e0 + e1, …, all, …, e(k − 1).</summary>
-    public static int[] CubeOutline(int k)
-    {
-        List<int> path = new() { 0 };
-        int b = 0;
-        for (int j = 0; j < k; j++) { b |= 1 << j; path.Add(b); }
-        for (int j = 0; j < k - 1; j++) { b &= ~(1 << j); path.Add(b); }
-        return path.ToArray();
-    }
 }

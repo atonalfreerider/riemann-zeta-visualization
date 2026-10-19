@@ -166,7 +166,7 @@ public class E8SpheresGame : GameModel
                 if (FoundPrimes() == PrimeShells())
                 {
                     Note += "\nEvery prime shell found.  Next:  their building blocks";
-                    nextAt = Time.time + 3.5f;
+                    if (AutoAdvance) nextAt = Time.time + 3.5f;
                 }
             }
             else
@@ -293,6 +293,12 @@ public class E8SpheresGame : GameModel
 
     // for tests
     public void GoToRound(int r) => StartRound(r);
+
+    public override bool StoryCommand(string verb, string[] a)
+    {
+        if (verb == "round" && a.Length > 0 && int.TryParse(a[0], out int r)) { StartRound(r); return true; }
+        return base.StoryCommand(verb, a);
+    }
     public int Shells => field != null ? field.Shells : 0;
 
     public bool PickValue(long n, string kind)

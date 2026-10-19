@@ -198,6 +198,59 @@ public abstract class GameModel : LabModel
 
     public bool Deep => DeepOn;
 
+    /// <summary>
+    /// A narrated chapter plays the game (a tutorial), with exp:lab:VERB[:ARGS]: point VALUE[:KIND] (hover it, its dot and
+    /// label), pick VALUE[:KIND] (and pick it), unpoint, unpack, pack, deep, flat, digits on|off, home (its own view).
+    /// A game adds its own verbs (round, example, steer …).
+    /// </summary>
+    public virtual bool StoryCommand(string verb, string[] a)
+    {
+        switch (verb)
+        {
+            case "point":
+            {
+                int i = FindPick(a);
+                if (i >= 0) Lab.PointAt(i);
+                return true;
+            }
+            case "pick":
+            {
+                int i = FindPick(a);
+                if (i < 0) return true;
+                Lab.PointAt(i);
+                OnPick(i);
+                return true;
+            }
+            case "unpoint": Lab.PointAt(-1); return true;
+            case "unpack":
+                // unpack[:SECONDS] — seconds per step, for a narrated line that has less time than a player
+                if (print != null && a.Length > 0 && float.TryParse(a[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float step))
+                    print.StepSeconds = step;
+                print?.Unpack();
+                return true;
+            case "pack": print?.Pack(); return true;
+            case "deep": SetDeep(true); return true;
+            case "flat": SetDeep(false); return true;
+            case "home": Lab.ResetView(false); return true;
+            case "digits":
+                if ((a.Length == 0 || a[0] != "off") != DigitsOn) Controls.Find(c => c.Label == "Digits")?.Clicked?.Invoke();
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>The pick with this value (and kind, if given), or −1.</summary>
+    protected int FindPick(string[] a)
+    {
+        if (a.Length == 0 || !long.TryParse(a[0], out long v)) return -1;
+        string kind = a.Length > 1 && a[1].Length > 0 ? a[1] : null;
+        return Picks.FindIndex(p => p.Value == v && (kind == null || p.Kind == kind));
+    }
+
+    /// <summary>A round that is done moves on by itself, except while a narrated chapter plays the game (it says when).</summary>
+    protected bool AutoAdvance => Lab == null || !Lab.StoryMode;
+
     /// <summary>For tests: flat or 3D.</summary>
     public void SetDeep(bool on)
     {

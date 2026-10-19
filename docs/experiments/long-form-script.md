@@ -378,3 +378,87 @@ The long-form segments, recorded 1920 × 1080 and 1080 × 1920: the five discove
    *Callouts:* 379, a prime:  5.78 ≈ log 379; 361 = 19²:  2.80 ≈ log 19; 371 = 7 · 53:  −0.04
 14. So the twist on the twist creates nothing new: it rearranges the chain's vortices into a beat of two chains. And on the Sacks spiral, the side of each number's square is exactly the weight that stands the zeros' waves up on the primes.
    *Board:* **what the twist shows** — two chains in a beat;  √n is Landau's weight
+
+## marbles: Numbers in marbles
+
+*the games' counting language, unpacked*  ·  14 lines, 277 words
+
+1. Claude, an AI math research assistant, and I wrote numbers without digits, in marbles. This is 360.
+   *Board:* **numbers in marbles** — no digits:  a number written as its own count
+2. The grey marble says it is a composite. Each gold ring is a container, holding a prime number of marbles in a symmetric spiral: two, three and five.
+   *Board:* **prime containers** — each gold ring holds a prime number of marbles
+   *Callouts:* grey:  a composite; 2; 3; 5
+3. The tilted rings are the exponents, one more dimension each. Two wears two of them, so it counts three times: 2³. Three wears one: 3².
+   *Board:* **exponents as tilted rings** — a container's rings, its own included:  how often its prime counts
+   *Callouts:* 2 · 2 · 2 = 2³; 3 · 3 = 3²
+4. Now unpack it. The rings slide out along the string, and each one closes into a copy of its container: two, two, two, three, three, five.
+   *Board:* **unpacking 360** — each ring becomes a copy of its container
+5. The first container pours its two marbles into the middle.
+   *Board:* **2** — the first container, poured out
+6. The next sends one marble to each of two spots. A copy of the pair blooms at each, and the two copies wind together into two spiral arms: four.
+   *Board:* **2 × 2 = 4** — two copies wind into two arms
+7. Times two again makes eight. Then three copies wind into three arms: 24. And 3 again: 72.
+   *Board:* **8,  24,  72** — p copies, p arms
+8. Last, the five: five copies of 72 wind into five arms. 360 marbles, in their own colour, grey.
+   *Board:* **72 × 5 = 360** — the full volume, in the number's own colour
+   *Callouts:* 360:  five arms of 72
+9. In three dimensions, every group of marbles packs into a spiral sphere, and the rings turn in planes of their own.
+   *Board:* **in 3D** — every group of marbles a spiral sphere pack
+10. And it packs back down into its shorthand.
+   *Board:* **packed** — 360 = 2³ · 3² · 5
+11. A prime is one container and nothing more: 97, a marble in the middle and six arms of 16.
+   *Board:* **a prime** — one container, no rings
+   *Callouts:* 97:  1 + 6 × 16
+12. A prime power wears more rings: five to the fourth is a ring of five marbles inside three tilted rings.
+   *Board:* **a prime power** — 5⁴:  four rings, one flat and three tilted
+   *Callouts:* four rings:  5⁴
+13. It unpacks into 625 marbles: five copies, of five copies, of five copies of five, wound into five arms.
+   *Board:* **5 × 5 × 5 × 5 = 625** — four fives, wound into five arms
+14. No digits needed: every number is written in its own building blocks.
+   *Board:* **numbers in marbles** — every number, its own building blocks
+
+## tutprime: Prime hunt
+
+*a game tutorial*  ·  9 lines, 148 words
+
+1. This is Prime hunt. The numbers up to 400 lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites.
+2. Each round puts silver marbles on a few numbers. Point at the ones you think are prime.
+3. Two turns gold: a prime. Three is gold too.
+4. Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. Three squared.
+5. Five and seven make three finds in a row, and a streak earns bonus points.
+6. Round four is primes or impostors. 143 looks prime, but it is 11 times 13.
+7. Unpack it. 13 copies of its eleven-marble container wind into 13 arms: 143 marbles.
+8. Press F for three dimensions, and the marbles pack into spheres.
+9. Find every prime in a round, and the next round begins.
+
+## tutblocks: Building blocks
+
+*a game tutorial*  ·  6 lines, 141 words
+
+1. This is Building blocks. A number stands as its raw volume: 360 grey marbles in a symmetric spiral. Below it is a tray of prime containers.
+2. Point at seven. Seven does not divide 360: seven equal groups leave three marbles over, shining red.
+3. Point at two. Two equal groups: one stays, and the other flies to the fingerprint on the left.
+4. Keep splitting: by two, then by two again, then by three, by three again, and finally by five.
+5. Nothing is left, so the fingerprint is the whole number: 2³, 3², and five. Unpack it, and it builds the volume back, beside its string.
+6. When what is left is a prime past the tray, point at the block itself. 246 splits by two, then by three, and the 41 left over is prime.
+
+## tute8: E8 spheres
+
+*a game tutorial*  ·  5 lines, 112 words
+
+1. E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of 240 times sigma three of n points.
+2. Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, 2².
+3. Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.
+4. Round two shows the building blocks of each shell. Shell 6 stands on its divisor cubes: 1, 8, 27 and 216 marbles.
+5. Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: 91, and 121.
+
+## tutvortex: Vortex hunt
+
+*a game tutorial*  ·  6 lines, 96 words
+
+1. Vortex hunt is played on zeta's chain at its 300th zero. The chain curls into vortices, and vortex k belongs to the counting number k.
+2. Point at the vortices in order. One. Two. Three.
+3. Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.
+4. Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.
+5. Round three: steer t until the chain's end lands on the zero.
+6. Landed. Zeta is zero here, and the chain ends where it began.

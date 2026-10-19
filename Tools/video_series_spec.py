@@ -1459,4 +1459,213 @@ XORBIT = dict(
              pause=1.4),
     ])
 
-SERIES = [XS1, XS2, XS3, XS4, XS5, XZ1, XZ2, XZ3, XZ4, XZ5, XORBIT]
+# ---------------------------------------------------------------------------------------------------------------
+# the marble language (marbles): the games' fingerprints, without digits, unpacked into their volumes
+# ---------------------------------------------------------------------------------------------------------------
+
+MW = 128000           # the marble world's origin (SacksMarbleWorld.cs); a fingerprint is 1 world unit per marble here
+
+
+def MWB(x0, x1, y0, y1):
+    """A box in the marble world (world units from its origin)."""
+    return (MW + x0, MW + x1, y0, y1)
+
+
+# 360's fingerprint at the origin: its shorthand (the badge to the 5), the opened string (six containers), and the opened
+# string with the volume above it (the copies' rings reach a little past the volume's own rim)
+MW_SHORT, MW_LONG, MW_ALL = MWB(-1.5, 17, -4.2, 4.2), MWB(-1.5, 27, -4.2, 4.2), MWB(-1.5, 27, -4.5, 24.5)
+# close on the volume (centre 12.7, 12.45) while it is small: 2, 4, 8; then 24 and 72 with their copies
+MW_V1 = MWB(8.2, 17.2, 8, 17)
+# one container with its rings (97's, with room above for a callout; 625's), and 625 opened with its volume
+MW_ONE, MW_625 = MWB(-1.5, 15, -8.5, 12), MWB(-1.5, 19, -4.5, 22)
+
+
+def mwshow(slot, n, x=0, y=0, digits=True):
+    return f"exp:mwshow:{slot}:{n}:{x},{y},0:1" + ("" if digits else ":nodigits")
+
+
+MARBLES = dict(
+    id="marbles", title="Numbers in marbles", subtitle="the games' counting language, unpacked",
+    setup=["exp:stage", "exp:backdrop:off", "exp:mwinit", mwshow("a", 360), tw("mw.a.reveal", 0, 0), tw("mw.a.phase", 0, 0),
+           tw("mw.a.depth", 0, 0)],
+    lines=[
+        dict(text="Claude, an AI math research assistant, and I wrote numbers without digits, in marbles. This is three "
+                  "hundred sixty.",
+             camera=TOP(MW_SHORT),
+             actions=["exp:snap", say("numbers in marbles", "no digits:  a number written as its own count"),
+                      at("wrote", tw("mw.a.reveal", 1, "{wrote~end}"))]),
+        dict(text="The grey marble says it is a composite. Each gold ring is a container, holding a prime number of marbles in "
+                  "a symmetric spiral: two, three and five.",
+             camera=TOP(MW_SHORT),
+             actions=[at("grey", call("mw", "a/badge", -.2, 1, "grey:  a composite", tall=(.2, 1))),
+                      at("two", "exp:uncall"), at("two+0.1", call("mw", "a/cup/0", 0, 1, "2", tall=(0, 1))),
+                      at("three", call("mw", "a/cup/1", 0, 1, "3", tall=(0, 1))),
+                      at("five", call("mw", "a/cup/2", 0, 1, "5", tall=(0, 1))),
+                      say("prime containers", "each gold ring holds a prime number of marbles")]),
+        dict(text="The tilted rings are the exponents, one more dimension each. Two wears two of them, so it counts three times: "
+                  "two cubed. Three wears one: three squared.",
+             camera=TOP(MW_SHORT),
+             actions=["exp:uncall", at("two#2", call("mw", "a/ring/0", -.3, 1, "2 · 2 · 2 = 2³", tall=(-.45, 1))),
+                      at("three#2", call("mw", "a/ring/1", .6, .9, "3 · 3 = 3²", tall=(.75, .9))),
+                      say("exponents as tilted rings", "a container's rings, its own included:  how often its prime counts")]),
+        dict(text="Now unpack it. The rings slide out along the string, and each one closes into a copy of its container: two, "
+                  "two, two, three, three, five.",
+             camera=TOP(MW_SHORT, MW_LONG, span=4),
+             actions=["exp:uncall", at("slide", tw("mw.a.phase", 1, "{slide~two}")),
+                      say("unpacking 360", "each ring becomes a copy of its container")]),
+        dict(text="The first container pours its two marbles into the middle.",
+             camera=TOP(MW_LONG, MW_V1, span=1.6, hold="{pours}"),
+             actions=[at("pours", tw("mw.a.phase", 2, "{pours~end}")), say("2", "the first container, poured out")]),
+        dict(text="The next sends one marble to each of two spots. A copy of the pair blooms at each, and the two copies wind "
+                  "together into two spiral arms: four.",
+             camera=TOP(MW_V1),
+             actions=[at("sends", tw("mw.a.phase", 3, "{sends~four}")), say("2 × 2 = 4", "two copies wind into two arms")]),
+        dict(text="Times two again makes eight. Then three copies wind into three arms: twenty-four. And three again: "
+                  "seventy-two.",
+             camera=TOP(MW_V1, MW_ALL, span=2.2, hold="{twentyfour}"),
+             actions=[at("times", tw("mw.a.phase", 4, "{times~eight}")), at("three", tw("mw.a.phase", 5, "{three~twentyfour}")),
+                      at("again#2", tw("mw.a.phase", 6, "{again#2~end}")), say("8,  24,  72", "p copies, p arms")]),
+        dict(text="Last, the five: five copies of seventy-two wind into five arms. Three hundred sixty marbles, in their own "
+                  "colour, grey.",
+             camera=TOP(MW_ALL),
+             actions=[at("five#2", tw("mw.a.phase", 7, "{five#2~arms}")),
+                      say("72 × 5 = 360", "five arms of 72:  the full volume, in the number's own colour")]),
+        dict(text="In three dimensions, every group of marbles packs into a spiral sphere, and the rings turn in planes of "
+                  "their own.",
+             camera=TOP(MW_ALL),
+             actions=["exp:uncall", at("three", tw("mw.a.depth", 1, "{three~sphere}")),
+                      say("in 3D", "every group of marbles a spiral sphere pack")]),
+        dict(text="And it packs back down into its shorthand.",
+             camera=TOP(MW_ALL, MW_SHORT, span=2, hold=3.6),
+             actions=[at("packs", tw("mw.a.phase", 0, 5)), at("packs", tw("mw.a.depth", 0, 5)),
+                      say("packed", "360 = 2³ · 3² · 5")],
+             pause=.8),
+        dict(text="A prime is one container and nothing more: ninety-seven, a marble in the middle and six arms of sixteen.",
+             camera=TOP(MW_SHORT, MW_ONE, span=3),
+             actions=[tw("mw.a.fade", 0, 1), at("prime+0.6", mwshow("b", 97)), at("prime+0.6", tw("mw.b.reveal", 0, 0)),
+                      at("prime+0.7", tw("mw.b.reveal", 1, "{prime~ninetyseven}")),
+                      say("a prime", "97 = 1 + 6 × 16:  one container, no rings")]),
+        dict(text="A prime power wears more rings: five to the fourth is a ring of five marbles inside three tilted rings.",
+             camera=TOP(MW_ONE),
+             actions=["exp:uncall", tw("mw.b.fade", 0, 1), at("power", mwshow("c", 625)), at("power", tw("mw.c.reveal", 0, 0)),
+                      at("power+0.1", tw("mw.c.reveal", 1, "{power~fourth}")),
+                      at("three", call("mw", "c/ring/0", .4, 1, "four rings:  5⁴", tall=(.3, 1))),
+                      say("a prime power", "5⁴:  four rings, one flat and three tilted")]),
+        dict(text="It unpacks into six hundred twenty-five marbles: five copies, of five copies, of five copies of five, wound "
+                  "into five arms.",
+             camera=TOP(MW_ONE, MW_625, span=3),
+             actions=["exp:uncall", at("unpacks", tw("mw.c.phase", 5, "{unpacks~end}")),
+                      say("5 × 5 × 5 × 5 = 625", "four fives, wound into five arms")]),
+        dict(text="No digits needed: every number is written in its own building blocks.",
+             camera=TOP(MW_625),
+             actions=[at("needed", tw("mw.c.depth", 1, 3)), say("numbers in marbles", "every number, its own building blocks")],
+             pause=1.4),
+    ])
+
+# ---------------------------------------------------------------------------------------------------------------
+# the game tutorials: each chapter opens a game in the model lab and plays it (exp:lab:…, GameModel.StoryCommand); its
+# lines' camera "lab" leaves the camera to the game's own views. Recorded 16:9, as the games are played on the desktop.
+# ---------------------------------------------------------------------------------------------------------------
+
+LAB = "lab"
+
+
+def lab(*args):
+    return "exp:lab:" + ":".join(str(a) for a in args)
+
+
+TUT_PRIME = dict(
+    id="tutprime", title="Prime hunt", subtitle="a game tutorial",
+    setup=[lab("enter", "primehunt"), lab("round", 0)],
+    lines=[
+        dict(text="This is Prime hunt. The numbers up to four hundred lie on the Sacks spiral, in their colours: gold primes, "
+                  "deep red squares of primes, blue pronic numbers, and grey composites.",
+             camera=LAB, actions=[]),
+        dict(text="Each round puts silver marbles on a few numbers. Point at the ones you think are prime.",
+             camera=LAB, actions=[at("silver", lab("point", 4)), at("prime", lab("unpoint"))]),
+        dict(text="Two turns gold: a prime. Three is gold too.",
+             camera=LAB, actions=[at("two", lab("pick", 2)), at("three", lab("pick", 3))]),
+        dict(text="Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. "
+                  "Three squared.",
+             camera=LAB, actions=[at("nine", lab("pick", 9))]),
+        dict(text="Five and seven make three finds in a row, and a streak earns bonus points.",
+             camera=LAB, actions=[at("five", lab("pick", 5)), at("seven", lab("pick", 7))]),
+        dict(text="Round four is primes or impostors. One hundred forty-three looks prime, but it is eleven times thirteen.",
+             camera=LAB, actions=[at("round", lab("round", 3)), at("looks", lab("pick", 143))]),
+        dict(text="Unpack it. Thirteen copies of its eleven-marble container wind into thirteen arms: one hundred forty-three "
+                  "marbles.",
+             camera=LAB, actions=[at("unpack", lab("unpack"))], pause=1.0),
+        dict(text="Press F for three dimensions, and the marbles pack into spheres.",
+             camera=LAB, actions=[at("press", lab("deep"))]),
+        dict(text="Find every prime in a round, and the next round begins.",
+             camera=LAB, actions=[at("next", lab("flat"))], pause=1.2),
+    ])
+
+TUT_BLOCKS = dict(
+    id="tutblocks", title="Building blocks", subtitle="a game tutorial",
+    setup=[lab("enter", "blocks"), lab("autoplay", "off"), lab("splitspeed", 1.05), lab("example", 5)],
+    lines=[
+        dict(text="This is Building blocks. A number stands as its raw volume: three hundred sixty grey marbles in a symmetric "
+                  "spiral. Below it is a tray of prime containers.",
+             camera=LAB, actions=[at("tray", lab("point", 7, "prime"))]),
+        dict(text="Point at seven. Seven does not divide three hundred sixty: seven equal groups leave three marbles over, "
+                  "shining red.",
+             camera=LAB, actions=[at("point", lab("prime", 7))]),
+        dict(text="Point at two. Two equal groups: one stays, and the other flies to the fingerprint on the left.",
+             camera=LAB, actions=[at("point", lab("finish")), at("point+0.1", lab("prime", 2))]),
+        dict(text="Keep splitting: by two, then by two again, then by three, by three again, and finally by five.",
+             camera=LAB, actions=[at("two", lab("prime", 2)), at("two#2", lab("prime", 2)), at("three", lab("prime", 3)),
+                                  at("three#2", lab("prime", 3)), at("five", lab("prime", 5))]),
+        dict(text="Nothing is left, so the fingerprint is the whole number: two cubed, three squared, and five. Unpack it, and "
+                  "it builds the volume back, beside its string.",
+             camera=LAB, actions=[at("unpack", lab("unpack", .7))], pause=6),
+        dict(text="When what is left is a prime past the tray, point at the block itself. Two hundred forty-six splits by two, "
+                  "then by three, and the forty-one left over is prime.",
+             camera=LAB, actions=[at("when", lab("example", 15)), at("splits", lab("prime", 2)), at("three", lab("prime", 3)),
+                                  at("prime#2", lab("rest"))], pause=1.2),
+    ])
+
+TUT_E8 = dict(
+    id="tute8", title="E8 spheres", subtitle="a game tutorial",
+    setup=[lab("enter", "e8spheres"), lab("round", 0)],
+    lines=[
+        dict(text="E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of two hundred forty times sigma three "
+                  "of n points.",
+             camera=LAB, actions=[]),
+        dict(text="Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, two "
+                  "squared.",
+             camera=LAB, actions=[at("two", lab("pick", 2, "shell")), at("three", lab("pick", 3, "shell")),
+                                  at("four", lab("pick", 4, "shell"))]),
+        dict(text="Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.",
+             camera=LAB, actions=[at("five", lab("pick", 5, "shell")), at("seven", lab("pick", 7, "shell"))]),
+        dict(text="Round two shows the building blocks of each shell. Shell six stands on its divisor cubes: one, eight, "
+                  "twenty-seven and two hundred sixteen marbles.",
+             camera=LAB, actions=[at("round", lab("round", 1)), at("six", lab("pick", 6, "shell"))], pause=.6),
+        dict(text="Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites "
+                  "hiding there: ninety-one, and one hundred twenty-one.",
+             camera=LAB, actions=[at("round", lab("round", 2)), at("ninetyone", lab("pick", 91, "number")),
+                                  at("twentyone", lab("pick", 121, "number"))], pause=1.2),
+    ])
+
+TUT_VORTEX = dict(
+    id="tutvortex", title="Vortex hunt", subtitle="a game tutorial",
+    setup=[lab("enter", "vortex"), lab("round", 0)],
+    lines=[
+        dict(text="Vortex hunt is played on zeta's chain at its three hundredth zero. The chain curls into vortices, and vortex "
+                  "k belongs to the counting number k.",
+             camera=LAB, actions=[]),
+        dict(text="Point at the vortices in order. One. Two. Three.",
+             camera=LAB, actions=[at("one", lab("pick", 1, "vortex")), at("two", lab("pick", 2, "vortex")),
+                                  at("three", lab("pick", 3, "vortex"))]),
+        dict(text="Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.",
+             camera=LAB, actions=[]),
+        dict(text="Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.",
+             camera=LAB, actions=[at("round", lab("round", 1)), at("vortex#2", lab("pick", 3, "vortex")),
+                                  at("vertex#2", lab("pick", 3, "vertex"))]),
+        dict(text="Round three: steer t until the chain's end lands on the zero.",
+             camera=LAB, actions=[at("round", lab("round", 2)), at("steer", lab("steer", 0, 4))], pause=1.5),
+        dict(text="Landed. Zeta is zero here, and the chain ends where it began.",
+             camera=LAB, actions=[], pause=1.2),
+    ])
+
+SERIES = [XS1, XS2, XS3, XS4, XS5, XZ1, XZ2, XZ3, XZ4, XZ5, XORBIT, MARBLES, TUT_PRIME, TUT_BLOCKS, TUT_E8, TUT_VORTEX]

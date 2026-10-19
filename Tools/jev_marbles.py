@@ -4,8 +4,9 @@
 
 Each picture is one number's fingerprint with no digits at all: a badge marble, then round gold containers left to
 right, each holding as many marbles as its prime in a symmetric spiral (a pair, a triangle, a pentagon, a centre and
-arms), and over a container's top right a pale figure, the shadow of a k-dimensional cube (a square, a cube, a
-tesseract …) with k small pale marbles evenly round it: how many times that prime repeats (its exponent).
+arms), and round a container that repeats, more gold rings tilted out of the picture (ellipses through it, like an
+armillary sphere): the container's own ring and its tilted rings together count how many times that prime repeats (its
+exponent).
 For each picture Jev gets one Choice question: which product does it show? The
 options are the true factorization and three near misses made in code (an exponent one off, a prime swapped for its
 neighbour, a factor dropped or added), shuffled. Code keeps the score: how often the top choice is right, and how sure.
@@ -87,11 +88,10 @@ INSTRUCTIONS = [
     "Then come round gold containers (thin gold rings) along a thin string. Each ring holds gold marbles in a symmetric "
     "pattern: a pair, a triangle, a ring, or one marble in the middle with equal arms spiralling out round it. Count every "
     "gold marble inside the ring. That count is a prime factor.",
-    "Some containers have a small pale figure just above their top right, joined to the ring by a short line: an "
-    "exponent. It is the outline of a square, a cube, or a higher-dimensional cube, with small pale marbles evenly round "
-    "it. The number of small pale marbles says how many times that container's prime is multiplied in (two round a "
-    "square: squared; three round a cube: cubed; four round a tesseract: to the fourth; and so on). A container with no "
-    "figure counts once.",
+    "Some containers have extra gold rings round them, tilted out of the picture so that they look like ellipses through "
+    "the container (like the rings of an armillary sphere or a gyroscope; the far half of each is fainter). Count all of a "
+    "container's rings: its own round ring plus every tilted ring. That count says how many times that container's prime "
+    "is multiplied in (just its own ring: once; one tilted ring as well: squared; two tilted rings: cubed; and so on).",
     "Which product of prime powers does `picture` show?",
 ]
 
