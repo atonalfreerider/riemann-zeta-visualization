@@ -106,7 +106,8 @@ experiment videos show, and they stand in front of you like a tour shot. There a
 
 The second row holds the games ([GAMES.md](GAMES.md)): **Primes**, **Blocks**, **E8 game** and **Vortices**. In every
 model and game you can also pick from afar: point at a number with your index finger, and a thin ray runs to the
-nearest point within 2.5° of the finger's line; hold it there for 0.9 s (the ray turns gold) to pick it.
+nearest point within 2.5° of the finger's line; hold it there for 0.9 s (the ray turns gold) to pick it. In VR the
+games' marble fingerprints start in 3D, as spiral sphere packs; the controls' **3D** button lays them flat.
 
 ![The Models tab with the factor funnel (desktop simulation)](vr/models-page.jpg)
 

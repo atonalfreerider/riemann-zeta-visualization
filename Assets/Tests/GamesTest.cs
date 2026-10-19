@@ -132,6 +132,11 @@ public class GamesTest
         yield return Seconds(hunt.Print.Steps * hunt.Print.StepSeconds + .6f);
         Assert.AreEqual(hunt.Print.Steps, hunt.Print.Phase, .01f, "unpacked");
         yield return Shot("GA4-143-unpacked-into-its-volume");
+        hunt.SetDeep(true);
+        Assert.IsTrue(hunt.Deep);
+        yield return Seconds(1.2f);
+        yield return Shot("GA5-143-in-3d");
+        hunt.SetDeep(false);
 
         // ---- Building blocks ----
         lab.Enter("blocks");
@@ -142,7 +147,7 @@ public class GamesTest
         yield return Shot("GB1-blocks-360-as-a-volume");
         Assert.IsTrue(blocks.PickPrime(7));
         Assert.AreEqual(360, blocks.Rest, "7 does not divide 360");
-        yield return Seconds(.9f);
+        yield return Seconds(.3f);
         yield return Shot("GB2-blocks-7-leaves-a-remainder");
         blocks.FinishSplit();
         Assert.IsTrue(blocks.PickPrime(2));
@@ -159,11 +164,15 @@ public class GamesTest
         StringAssert.Contains("2³ · 3² · 5", lab.Status);
         blocks.FinishSplit();
         yield return Shot("GB4-blocks-360-found");
-        blocks.Print.Jump(3.4f);
-        lab.SetView(new LabView { Focus = blocks.Print.transform.position + LabView.Up * 12f + Vector3.right * 14f, Distance = 80f, Yaw = -72f, Pitch = 16f, Fov = 50f }, true);
+        // as the player sees it: the volume unpacks where the block stood
+        blocks.Print.Jump(6.4f);
         yield return Shot("GB5-blocks-360-multiplying");
         blocks.Print.Jump(blocks.Print.Steps);
         yield return Shot("GB6-blocks-360-full-volume");
+        blocks.SetDeep(true);
+        yield return Seconds(1.2f);
+        yield return Shot("GB7-blocks-360-in-3d");
+        blocks.SetDeep(false);
         lab.ResetView(true);
         blocks.GoToExample(15);
         Assert.AreEqual(246, blocks.Rest);
@@ -373,28 +382,58 @@ public class GamesTest
             yield return null;
         }
 
-        // one number's whole multiplication, with digits, framed on the unpacked volume: the shorthand, the exponents
-        // opened, the block growing, the full volume
-        long un = numbers.Contains(360) ? 360 : numbers[0];
-        MarbleFingerprint u = MarbleFingerprint.Create(root.transform, un, 1f, true);
-        u.Jump(u.Steps);
-        yield return null;
-        Bounds full = u.LocalBounds;
-        u.Jump(0f);
-        yield return null;
-        Bounds b0 = u.LocalBounds;
-        full.Encapsulate(b0);
-        cam.orthographic = true;
-        cam.orthographicSize = Mathf.Max(full.size.y * .5f * 1.15f, full.size.x * .5f * 1.12f / (1280f / 720f));
-        cam.transform.SetPositionAndRotation(root.transform.TransformPoint(full.center) + new Vector3(-8f, 10f, -60f), Quaternion.identity);
-        cam.transform.LookAt(root.transform.TransformPoint(full.center), Vector3.up);
-        cam.transform.position = root.transform.TransformPoint(full.center) - cam.transform.forward * 60f;
-        foreach (float ph in new[] { 0f, 1f, 2f, 3f, 4f, (float)u.Steps })
+        // a few in 3D: the same marbles as spiral sphere packs, turned a little
+        foreach (long n in new long[] { 360, 49, 128, 1001 })
         {
-            u.Jump(Mathf.Min(ph, u.Steps));
+            if (!numbers.Contains(n) && n != 1001) continue;
+            MarbleFingerprint f = MarbleFingerprint.Create(root.transform, n, 1f, false, true);
+            f.SpinDegreesPerSecond = 0f;
+            f.SpinAngle = 30f;
+            f.JumpDepth(true);
+            yield return null;
+            Bounds b = f.LocalBounds;
+            cam.orthographic = true;
+            cam.orthographicSize = Mathf.Max(b.size.y * .5f * 1.35f, b.size.x * .5f * 1.18f / (1280f / 720f));
+            cam.transform.SetPositionAndRotation(root.transform.TransformPoint(b.center) + Vector3.back * 60f, Quaternion.identity);
             yield return null;
             yield return null;
-            director.Recorder.Snapshot($"unpack-{un}-{ph:0.0}.png");
+            director.Recorder.Snapshot($"fp-{n}-3d.png");
+            yield return null;
+            UnityEngine.Object.Destroy(f.gameObject);
+            yield return null;
+        }
+
+        // one number's whole multiplication, with digits, framed on every stage of it: the shorthand, the exponents
+        // opened, the first container poured in, each next one's copies blooming round a ring and winding into arms
+        long un = numbers.Contains(360) ? 360 : numbers[0];
+        foreach (bool deep in new[] { false, true })
+        {
+            MarbleFingerprint u = MarbleFingerprint.Create(root.transform, un, 1f, true, deep);
+            u.SpinDegreesPerSecond = 0f;
+            u.SpinAngle = 30f;
+            u.JumpDepth(deep);
+            Bounds full = new();
+            for (float ph = 0f; ph <= u.Steps + .001f; ph += .125f)
+            {
+                u.Jump(ph);
+                if (ph == 0f) full = u.LocalBounds;
+                else full.Encapsulate(u.LocalBounds);
+            }
+
+            cam.orthographic = true;
+            cam.orthographicSize = Mathf.Max(full.size.y * .5f * 1.08f, full.size.x * .5f * 1.06f / (1280f / 720f));
+            cam.transform.SetPositionAndRotation(root.transform.TransformPoint(full.center) + Vector3.back * 60f, Quaternion.identity);
+            float[] phases = deep ? new[] { 0f, 3f, 6.4f, (float)u.Steps } : new[] { 0f, .5f, 1f, 1.5f, 2f, 2.3f, 2.6f, 2.8f, 3f, 4f, 5f, 6f, 6.35f, 6.7f, (float)u.Steps };
+            foreach (float ph in phases)
+            {
+                u.Jump(Mathf.Min(ph, u.Steps));
+                yield return null;
+                yield return null;
+                director.Recorder.Snapshot($"unpack-{un}{(deep ? "-3d" : "")}-{ph:0.00}.png");
+                yield return null;
+            }
+
+            UnityEngine.Object.Destroy(u.gameObject);
             yield return null;
         }
 

@@ -3,7 +3,9 @@
 Four games in the model lab ([`Assets/Games`](../Assets/Games)), on the desktop and in VR. You point at numbers to find
 the primes, split composites into their prime building blocks, sort E8's lattice shells, and hunt the vortices of ζ's
 chain. Every number can be shown as a **marble fingerprint**: its factors and exponents written in marbles instead of
-digits. The fingerprint unpacks into the number's full volume and packs back into its shorthand.
+digits. The fingerprint unpacks into the number's full volume and packs back into its shorthand. The marble language is
+symmetric: flat, every group of marbles is a symmetric spiral; in 3D, a spiral sphere pack. Each exponent is a shape
+with that many dimensions (a square, a cube, a tesseract …).
 
 Open them from the desktop side menu (**M**, row **GAMES**) or the lab panel's second row. In VR they are on the dock's
 **Models** tab, second row (**Primes**, **Blocks**, **E8 game**, **Vortices**).
@@ -36,47 +38,77 @@ each piece of the strip.
   within 2.5° of the finger's line, and turns gold as you hold it. After 0.9 s it picks the number (once, until the ray
   leaves it). This works in every lab model, not only the games.
 
-Keys (desktop): **N** next round or number, **Backspace** restart, **U** unpack or pack the fingerprint, **D** digits
-on the fingerprint on or off, **Home** re-frame; in Vortex hunt's last round, **← →** steer t (**Shift** for fine steps).
+Keys (desktop): **N** next round or number, **Backspace** restart, **U** unpack or pack the fingerprint, **F** flat or
+3D, **D** digits on the fingerprint on or off, **Home** re-frame; in Vortex hunt's last round, **← →** steer t
+(**Shift** for fine steps).
 
 ## Marble fingerprints
 
-![Fingerprints of 360, 49, 1001, 91, 128 and 90](games/fingerprints.jpg)
+![Fingerprints of 360, 49, 1001; 125, 625, 243; 128, 1024, 90](games/fingerprints.jpg)
 
 A fingerprint reads left to right along a thin string, like a written number:
 
 * a **badge** marble in the number's own colour (here grey 360, deep red 49, …);
-* one **gold container per prime factor**, holding as many marbles as the prime: up to 7 in one row, larger primes in
-  rows of five (so 13 is 5 + 5 + 3);
-* the **exponent** as a short string of small pale marbles at the container's top right, where a written exponent sits,
-  joined to the container by its raised wall: 360 = 2³ · 3² · 5 has three small marbles over the 2 and two over the 3.
+* one round **gold container per prime factor**, holding as many marbles as the prime in a **symmetric spiral**. Up to
+  six marbles make a ring: a pair, a triangle, a pentagon. Past that, an odd count has one marble in the middle and
+  equal arms winding out round it: 7 is one and six round it, 11 one and five arms of two, 13 one and six arms of two,
+  97 one and six arms of sixteen.
+* the **exponent** at the container's top right, as a shape with that many **dimensions**: the shadow of a
+  k-dimensional cube, standing on a corner. A square for p², a cube (the hexagon with its three inner edges) for p³, a
+  tesseract (an octagon) for p⁴, a decagon for p⁵, on to a 20-sided shadow for 2¹⁰. Its outline is a regular 2k-gon,
+  and k small pale marbles sit evenly round it, one per dimension. A short stem joins it to its container. 360 = 2³ · 3²
+  · 5 has a cube over the 2 and a square over the 3.
 
-**Unpack (U)** plays the multiplication. Each exponent opens into that many copies of its container. Then the
-containers multiply a block one at a time, each in a new direction (right, up, deep, then right again a level larger),
-until the block holds all n marbles: the number's full volume, in its own colour. **Pack** plays it back.
+**Flat or 3D (F).** Flat, every group of marbles is a symmetric spiral. In 3D, every group is a **spiral sphere pack**:
+shells round a centre, filled from the outside in so the outside is always a full round shell. A container's marbles
+lie on a Fibonacci spiral round each shell (2 to 6 marbles as a pair, a triangle, a tetrahedron, a bipyramid, an
+octahedron); the unpacked volume is wound with one coil per copy, pole to pole. The packs turn slowly, and so does
+the exponent's cube, which is a real cube seen down its long diagonal. The desktop starts flat, VR in 3D.
 
-![360 unpacking: the shorthand, the exponents opened, the block growing, the full volume](games/unpack-360.jpg)
+![360, 49, 128 and 1001 in 3D](games/fingerprints-3d.jpg)
 
-[`MarbleFingerprint.cs`](../Assets/Games/MarbleFingerprint.cs) draws it. The marbles are GPU-instanced spheres with a
-small lit shader of their own ([`Marble.shader`](../Assets/Resources/Shaders/Marble.shader), single-pass stereo for VR),
-drawn by [`MarbleBatch.cs`](../Assets/Games/MarbleBatch.cs).
+**Unpack (U)** plays the multiplication:
+
+1. each exponent's shape opens into that many copies of its container, each copy growing out of one of its pale marbles;
+2. the first container pours its marbles into the volume;
+3. every next container, a prime p, sends one marble to each of p spots round a ring, and a copy of the volume so far
+   blooms at each spot (so a container's marbles really do count the copies);
+4. the p copies swirl together into p spiral arms, the way the arms wind: copy c becomes arm c (in 3D, coil c). Past
+   13 copies, the copies come in on the prime's own spiral and the volume takes arms of its own.
+
+The volume ends with all n marbles in the number's own colour; alternate arms are a shade darker, so the last factor's
+arms show (360's five). A volume wider than nine string marbles is drawn with smaller marbles. **Pack** plays it back.
+
+![360 multiplying by its last factor: 72 as three arms, five copies of it, the copies swirling, 360 as five arms](games/unpack-360.jpg)
+![The same in 3D: copies of the ball round the ring, and 360 wound with five coils](games/unpack-360-3d.jpg)
+
+[`MarbleLayout.cs`](../Assets/Games/MarbleLayout.cs) lays the marbles out (flat: an m-start spiral, centre first, ring t
+holding marble t of every arm, so p copies merging into p arms is just index t·p + c; deep: the shells and coils, cached
+by count). [`MarbleFingerprint.cs`](../Assets/Games/MarbleFingerprint.cs) draws the fingerprint and plays the
+multiplication. The marbles are GPU-instanced spheres with a small lit shader of their own
+([`Marble.shader`](../Assets/Resources/Shaders/Marble.shader), single-pass stereo for VR), drawn by
+[`MarbleBatch.cs`](../Assets/Games/MarbleBatch.cs); the rings, the string and the cubes are one mesh of thin quads
+([`LineBatch.cs`](../Assets/Games/LineBatch.cs)).
 
 ### Can the marbles be read without digits? (TypeSafe)
 
 [`Tools/jev_marbles.py`](../Tools/jev_marbles.py) asks TypeSafe's System One model Jev to read fingerprints that carry
 no digits at all. For each picture Jev gets one Choice question: which product does it show? The options are the true
 factorization and three near misses made in code (an exponent one off, a prime swapped for its neighbour, a factor
-dropped or added), shuffled. Code keeps the score. The study ran three times while the design changed:
+dropped or added), shuffled. Code keeps the score. Rounds 1–3 read the first design (containers as cups, marbles in
+rows, each exponent a short row of small marbles); rounds 4–5 read the symmetric one:
 
 | round | change | read right | confident reads (≥ 0.6) that were right |
 |---|---|---|---|
 | 1 (20 numbers) | first design | 16 (80%) | 14 of 14 |
 | 2 (32 numbers) | the string stops at the last container (it overran and suggested a missing factor) | 27 (84%) | 26 of 27 |
 | 3 (32 numbers) | primes up to 7 in one row (7 had been read as 5 + 2), exponents joined to their container | 29 (91%) | 26 of 28 |
+| 4 (the same 32) | symmetric spirals in round containers; exponents as k-cube shadows with k pale marbles | 30 (94%) | 27 of 27 |
+| 5 (the same 32) | each exponent moved over its own container's top right, the next container further off | 29 (91%) | 27 of 27 |
 
-The misses left are a lone squared container read with a phantom extra factor (49 as 5 · 7², 121 as 7 · 11²), and
-two adjacent exponent strings confused (360's 3² read as 3³). Two of the three (49 and 360) were read with confidence
-just over 0.6, so confidence alone would not have flagged them. Run it with
+In the symmetric language every miss came with low confidence (0.28 to 0.53), so confidence alone flags them. Most of
+the misses left are exponents on neighbouring containers: 100 = 2² · 5² read as 2 · 5², and 360's square read as a
+cube, in both rounds. Round 5 also read 3⁵ as 3⁴ (five pale marbles round a decagon). Run it with
 `TYPESAFE_API_KEY=… python3 Tools/jev_marbles.py DIR` on the pictures `GamesTest.Fingerprints` writes.
 
 ## Prime hunt
@@ -95,22 +127,29 @@ candidates:
 5. twin primes near 300;
 6. the squares and pronic numbers around 121 = 11² and 110, 132.
 
-![143 = 11 · 13 unpacked into its volume](games/prime-hunt-143-unpacked.jpg)
+![143 = 11 · 13 unpacked into its volume: thirteen arms of eleven](games/prime-hunt-143-unpacked.jpg)
+![143 in 3D](games/prime-hunt-143-3d.jpg)
 
 ## Building blocks
 
 ![360 as a volume of marbles over the tray of prime containers](games/blocks-360.jpg)
 
-A number stands as its raw volume, one marble per unit, in its own colour; below it, a tray of gold prime containers
-(2 … 37). Point at a prime: if it divides what is left, the marbles regroup into that many equal groups, one stays, and
-the prime joins the fingerprint string. If it does not, the marbles try to split and the leftover ones shine red. When
+A number stands as its raw volume, one marble per unit, in its own colour, as a symmetric spiral (in 3D a spiral sphere
+pack); below it, a tray of gold prime containers (2 … 37), each its prime's spiral in a ring. Point at a prime: if it
+divides what is left, the marbles part into that many equal groups round a ring, one stays, and the others fly to the
+fingerprint string. If it does not, the groups form round the ring with the leftover marbles in the middle, shining
+red, and everything goes back together. When
 what is left is itself a prime past 37 (246 = 2 · 3 · 41), point at the block to say so. When nothing is left, the
-fingerprint is the whole number; it unpacks into the full volume and packs back, and the next number comes up. Twenty
+fingerprint is the whole number; it unpacks into the full volume beside its string, where the block stood, and packs
+back, and the next number comes up. Twenty
 numbers: squares of primes (49, 121, 169), pronic numbers (12, 30, 56, 72, 90, 210), products of three primes (105, 1001),
 powers of 2 (128, 1024), 360 and more.
 
+![7 does not divide 360: seven groups of 51 round a ring, 3 left over](games/blocks-remainder.jpg)
 ![360 split by 2](games/blocks-split.jpg)
-![360's full volume, built from 2³ · 3² · 5](games/blocks-volume.jpg)
+![360 unpacking: five copies of 72 round a ring](games/blocks-multiplying.jpg)
+![360's full volume, built from 2³ · 3² · 5: five arms](games/blocks-volume.jpg)
+![The same in 3D](games/blocks-3d.jpg)
 
 ## E8 spheres
 
@@ -167,4 +206,5 @@ headset yet.
 * `DesktopGames` plays every game through scripted picks and asserts the scores, splits and readouts; with `ZETA_OUT` it
   writes the pictures above;
 * `VRGames` picks by the finger's ray and by a touch in the headset simulation;
-* `Fingerprints` (with `ZETA_FP_OUT`) draws the fingerprints alone for the legibility study, and one number's unpacking.
+* `Fingerprints` (with `ZETA_FP_OUT`) draws the fingerprints alone for the legibility study (`fp-N.png`), four of them in
+  3D (`fp-N-3d.png`), and 360's whole unpacking, flat and in 3D (`unpack-360-…png`).
