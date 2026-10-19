@@ -3,13 +3,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Building blocks: a number stands as its raw volume, one marble per unit, in its own colour (grey composite, deep red
-/// p², blue pronic). Below it, a tray of gold prime containers (2 … 37). Point at a prime: if it divides what is left, the
-/// marbles split into that many equal groups and one group stays (the prime joins the fingerprint string on the left); if
-/// it does not, the marbles try to split and the leftover ones shine red. When the rest is itself prime (even past 37),
-/// point at the block to say so. When nothing is left the fingerprint is the whole number: it unpacks into the full
-/// volume and packs back into its shorthand. A variety of examples: squares of primes, pronic numbers, products of three
-/// primes, powers of 2, 360 and 1001.
+/// Building blocks: a number stands as its raw volume, one marble per unit, in its own colour (grey composite, deep red p²,
+/// blue pronic) as a symmetric spiral; below it, a tray of gold prime containers (2 … 37). Point at a prime: if it divides
+/// what is left, the marbles part into that many equal groups round a ring, one stays and the others join the
+/// fingerprint string on the left; if it does not, the groups form with the leftover marbles in the middle, shining red,
+/// and everything goes back together, nothing lost. When what is left is itself prime (even past 37), point at the block.
+/// Once nothing is left the fingerprint is the whole number, and it unpacks into the full volume beside its string. Any
+/// number from 2 to 1024: step with n ± 1, or take the next of a set of examples (squares of primes, pronic numbers,
+/// products of three primes, powers of 2, 360 and 1001). Nothing is scored.
 /// </summary>
 public class BuildingBlocksGame : GameModel
 {
@@ -26,7 +27,8 @@ public class BuildingBlocksGame : GameModel
     long splitFrom, splitP;
     bool splitOk;
     float splitT = -1f;
-    float nextAt = -1f, unpackAt = -1f, packAt = -1f;
+    float unpackAt = -1f;
+    const long MaxN = 1024;
     TextBox restLabel;
 
     public override string Id => "blocks";
@@ -56,36 +58,38 @@ public class BuildingBlocksGame : GameModel
 
         Picks.AddRange(picks);
         restLabel = LabDraw.Label(Root, "", VolumeCentre, 48f, Color.white);
-        Controls.Add(LabControl.Button("Next number", VRIcons.Id.NextLine, () => StartExample(example + 1), "N"));
-        Controls.Add(LabControl.Button("Restart", VRIcons.Id.Replay, Restart, "Backspace"));
+        Controls.Add(LabControl.Button("n − 1", VRIcons.Id.PrevLine, () => StartNumber(target - 1), "←"));
+        Controls.Add(LabControl.Button("n + 1", VRIcons.Id.NextLine, () => StartNumber(target + 1), "→"));
+        Controls.Add(LabControl.Button("Example", VRIcons.Id.NextChapter, () => StartExample(example + 1), "N"));
         AddCommonControls();
-        Restart();
+        StartExample(5);
     }
 
     // a little from the right and above, so the volume shows its depth
-    public override LabView Home => new() { Focus = Wall(-4f, 19f), Distance = 94f, Yaw = -76f, Pitch = 16f, Fov = 50f };
+    public override LabView Home => StoryFramed(new LabView { Focus = Wall(-4f, 19f), Distance = 94f, Yaw = -76f, Pitch = 16f, Fov = 50f }, 1.12f, .02f);
 
     public override void OnEnter() => UpdateStatus();
-
-    void Restart()
-    {
-        Score = Streak = BestStreak = Finds = Misses = 0;
-        StartExample(0);
-    }
 
     void StartExample(int e)
     {
         example = ((e % Examples.Length) + Examples.Length) % Examples.Length;
-        target = rest = Examples[example];
+        StartNumber(Examples[example]);
+    }
+
+    /// <summary>Any number from 2 to 1024 as its raw volume, ready to split.</summary>
+    void StartNumber(long n)
+    {
+        n = System.Math.Clamp(n, 2L, MaxN);
+        target = rest = n;
         found = 1;
         splitT = -1f;
-        nextAt = unpackAt = packAt = -1f;
+        unpackAt = -1f;
         HidePrint();
         // the block itself is pickable too: "what is left is prime"
         Picks.RemoveAll(p => p.Kind == "rest");
         Picks.Add(new Pickable { Position = VolumeCentre, Value = 0, Radius = 9f, Kind = "rest" });
-        Prompt = $"Number {example + 1} of {Examples.Length}:  split {target} into its prime building blocks" +
-                 (LargestFactor(target) > 37 ? ";  the block, once the rest is prime" : "");
+        Prompt = $"Split {target} into its prime building blocks:  point at a prime in the tray" +
+                 (LargestFactor(target) > 37 ? ";  at the block itself once what is left is prime" : "");
         Note = $"{target} marbles, {NumberKind.NameOf(NumberKind.Classify(target))}";
         UpdateStatus();
     }
@@ -106,14 +110,14 @@ public class BuildingBlocksGame : GameModel
         {
             if (NumberKind.IsPrime(rest))
             {
-                Found(VolumeCentre, 8, 9f);
+                Light(VolumeCentre, rest, 9f);
                 Note = $"{rest} is prime:  it is its own building block";
                 Divide(rest, true);
             }
             else
             {
-                Missed(VolumeCentre, 2, 9f);
-                Note = $"{rest} is not prime:  {NumberKind.Shorthand(rest)}.  Keep splitting";
+                Light(VolumeCentre, rest, 9f);
+                Note = $"{rest} still splits:  {rest} = {NumberKind.Shorthand(rest)}";
             }
 
             UpdateStatus();
@@ -123,18 +127,18 @@ public class BuildingBlocksGame : GameModel
         long q = p.Value;
         if (rest % q == 0)
         {
-            Found(p.Position, 5, 3.4f);
+            Light(p.Position, q, 3.4f);
             Note = $"{rest} ÷ {q} = {rest / q}:  {q} equal groups, one stays";
             Divide(q, true);
         }
         else
         {
-            Missed(p.Position, 2, 3.4f);
+            Ripple(p.Position, NumberKind.DeepRed, 3.4f);
             splitFrom = rest;
             splitP = q;
             splitOk = false;
             splitT = 0f;
-            Note = $"{q} does not divide {rest}:  {q} groups leave {rest % q} over";
+            Note = $"{q} groups of {rest / q} leave {rest % q} over:  {q} is not one of {rest}'s blocks";
         }
 
         UpdateStatus();
@@ -151,9 +155,8 @@ public class BuildingBlocksGame : GameModel
         ShowPrint(found, PrintAnchor, 2.1f, true);
         if (rest == 1)
         {
-            Score += 10;
-            Note = $"{target} = {NumberKind.Shorthand(target)}:  every building block found.  Unpack it (U)";
-            if (AutoPlay) unpackAt = Time.time + 2.2f;
+            Note = $"{target} = {NumberKind.Shorthand(target)}:  every building block.  Pull the fingerprint apart, or Unpack (U)";
+            if (AutoPlay) unpackAt = Time.time + 1.6f;
         }
     }
 
@@ -168,24 +171,11 @@ public class BuildingBlocksGame : GameModel
             if (splitT >= 1f) splitT = -1f;
         }
 
+        // once every block is found, it rebuilds itself (and stays: the next number is the player's to choose)
         if (unpackAt > 0f && Time.time >= unpackAt)
         {
             unpackAt = -1f;
             Print?.Unpack();
-            packAt = Time.time + (Print != null ? Print.Steps * Print.StepSeconds + 2.5f : 3f);
-        }
-
-        if (packAt > 0f && Time.time >= packAt)
-        {
-            packAt = -1f;
-            Print?.Pack();
-            nextAt = Time.time + (Print != null ? Print.Steps * Print.StepSeconds + 1.5f : 2f);
-        }
-
-        if (nextAt > 0f && Time.time >= nextAt)
-        {
-            nextAt = -1f;
-            StartExample(example + 1);
         }
 
         Draw();
@@ -361,12 +351,15 @@ public class BuildingBlocksGame : GameModel
     public override bool OnKey(Keyboard k)
     {
         if (k.nKey.wasPressedThisFrame) { StartExample(example + 1); return true; }
-        if (k.backspaceKey.wasPressedThisFrame) { Restart(); return true; }
+        if (k.leftArrowKey.wasPressedThisFrame) { StartNumber(target - 1); return true; }
+        if (k.rightArrowKey.wasPressedThisFrame) { StartNumber(target + 1); return true; }
         return CommonKey(k);
     }
 
     // for tests
     public void GoToExample(int e) => StartExample(e);
+    public void GoToNumber(long n) => StartNumber(n);
+    public long Target => target;
     public long Rest => rest;
 
     public bool PickPrime(long p)
@@ -391,6 +384,9 @@ public class BuildingBlocksGame : GameModel
         {
             case "example":
                 if (a.Length > 0 && int.TryParse(a[0], out int e)) StartExample(e);
+                return true;
+            case "number":
+                if (a.Length > 0 && long.TryParse(a[0], out long nn)) StartNumber(nn);
                 return true;
             case "prime":
             {

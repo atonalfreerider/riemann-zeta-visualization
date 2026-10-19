@@ -5189,96 +5189,80 @@
     },
     {
       "id": "tutprime",
-      "title": "Prime hunt",
+      "title": "The number spiral",
       "subtitle": "a game tutorial",
       "setup": [
         "exp:lab:enter:primehunt",
-        "exp:lab:round:0"
+        "exp:lab:look:0"
       ],
       "lines": [
         {
           "id": "tutprime_01",
-          "text": "This is Prime hunt. The numbers up to four hundred lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites.",
+          "text": "This is the number spiral: the numbers up to four hundred on the Sacks spiral, each in its colour. Gold for the primes, deep red for squares of primes, blue for pronic numbers, and grey for every other composite.",
           "camera": "lab",
           "actions": [],
           "pause": 0.8,
-          "caption": "This is Prime hunt. The numbers up to {400|four hundred} lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites."
+          "caption": "This is the number spiral: the numbers up to {400|four hundred} on the Sacks spiral, each in its colour. Gold for the primes, deep red for squares of primes, blue for pronic numbers, and grey for every other composite."
         },
         {
           "id": "tutprime_02",
-          "text": "Each round puts silver marbles on a few numbers. Point at the ones you think are prime.",
+          "text": "Touch any number to see what it is made of. Ninety-one looks prime, but its fingerprint says seven times thirteen.",
           "camera": "lab",
           "actions": [
-            "delay:0.64:exp:lab:point:4",
-            "delay:3.45:exp:lab:unpoint"
+            "delay:2.04:exp:lab:pick:91"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Touch any number to see what it is made of. {91|Ninety-one} looks prime, but its fingerprint says {7|seven} times {13|thirteen}."
         },
         {
           "id": "tutprime_03",
-          "text": "Two turns gold: a prime. Three is gold too.",
+          "text": "Pull the fingerprint apart, and the number rebuilds itself from its primes: thirteen copies of seven, wound into thirteen arms.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:pick:2",
-            "delay:1.60:exp:lab:pick:3"
+            "delay:0.00:exp:lab:pull:3:3.2"
           ],
-          "pause": 0.8
+          "pause": 0.6,
+          "caption": "Pull the fingerprint apart, and the number rebuilds itself from its primes: {13|thirteen} copies of seven, wound into {13|thirteen} arms."
         },
         {
           "id": "tutprime_04",
-          "text": "Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. Three squared.",
+          "text": "Push it back together, and it packs into its shorthand again.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:pick:9"
+            "delay:0.00:exp:lab:pull:0:1.6"
           ],
           "pause": 0.8
         },
         {
           "id": "tutprime_05",
-          "text": "Five and seven make three finds in a row, and a streak earns bonus points.",
+          "text": "Step to its neighbours: ninety-two is two squared times twenty-three, and ninety-seven is a prime.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:pick:5",
-            "delay:0.34:exp:lab:pick:7"
+            "delay:1.38:exp:lab:pick:92",
+            "delay:4.56:exp:lab:pick:97"
           ],
-          "pause": 0.8
+          "pause": 0.8,
+          "caption": "Step to its neighbours: {92|ninety-two} is {2²|two squared} times {23|twenty-three}, and {97|ninety-seven} is a prime."
         },
         {
           "id": "tutprime_06",
-          "text": "Round four is primes or impostors. One hundred forty-three looks prime, but it is eleven times thirteen.",
+          "text": "Look at one family at a time: the primes, the twin primes, and Euler's k squared plus k plus forty-one.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:round:3",
-            "delay:4.32:exp:lab:pick:143"
+            "delay:1.70:exp:lab:look:1",
+            "delay:2.81:exp:lab:look:2",
+            "delay:4.13:exp:lab:look:3"
           ],
-          "pause": 0.8,
-          "caption": "Round four is primes or impostors. {143|One hundred forty-three} looks prime, but it is {11|eleven} times {13|thirteen}."
+          "pause": 0.6,
+          "caption": "Look at one family at a time: the primes, the twin primes, and Euler's k squared plus k plus {41|forty-one}."
         },
         {
           "id": "tutprime_07",
-          "text": "Unpack it. Thirteen copies of its eleven-marble container wind into thirteen arms: one hundred forty-three marbles.",
+          "text": "Or the squares and the pronic numbers, each on a line of its own. Nothing is scored: there are only numbers to take apart.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:unpack"
-          ],
-          "pause": 1.0,
-          "caption": "Unpack it. {13|Thirteen} copies of its eleven-marble container wind into {13|thirteen} arms: {143|one hundred forty-three} marbles."
-        },
-        {
-          "id": "tutprime_08",
-          "text": "Press F for three dimensions, and the marbles pack into spheres.",
-          "camera": "lab",
-          "actions": [
-            "delay:0.00:exp:lab:deep"
-          ],
-          "pause": 0.8
-        },
-        {
-          "id": "tutprime_09",
-          "text": "Find every prime in a round, and the next round begins.",
-          "camera": "lab",
-          "actions": [
-            "delay:1.81:exp:lab:flat"
+            "delay:0.14:exp:lab:look:4",
+            "delay:4.24:exp:lab:look:0"
           ],
           "pause": 1.2
         }
@@ -5365,130 +5349,136 @@
     },
     {
       "id": "tute8",
-      "title": "E8 spheres",
+      "title": "E8's clock",
       "subtitle": "a game tutorial",
       "setup": [
         "exp:lab:enter:e8spheres",
-        "exp:lab:round:0"
+        "exp:lab:shells:off"
       ],
       "lines": [
         {
           "id": "tute8_01",
-          "text": "E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of two hundred forty times sigma three of n points.",
+          "text": "This is E8's clock. Every number up to six hundred stands at its hour on a clock of thirty hours, as a stack of its prime factors: one gold piece, as tall as log p, for each.",
           "camera": "lab",
           "actions": [],
           "pause": 0.8,
-          "caption": "E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of {240|two hundred forty} times sigma three of n points."
+          "caption": "This is E8's clock. Every number up to {600|six hundred} stands at its hour on a clock of {30|thirty} hours, as a stack of its prime factors: one gold piece, as tall as log p, for each."
         },
         {
           "id": "tute8_02",
-          "text": "Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, two squared.",
+          "text": "Touch a column, and its path back steps down the staircase. Three hundred sixty drops by two, two, two, three, three and five, every landing named by the blocks it has left.",
           "camera": "lab",
           "actions": [
-            "delay:2.81:exp:lab:pick:2:shell",
-            "delay:3.11:exp:lab:pick:3:shell",
-            "delay:5.24:exp:lab:pick:4:shell"
+            "delay:0.00:exp:lab:pick:360:number"
           ],
           "pause": 0.8,
-          "caption": "Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, {2²|two squared}."
+          "caption": "Touch a column, and its path back steps down the staircase. {360|Three hundred sixty} drops by two, two, two, three, three and five, every landing named by the blocks it has left."
         },
         {
           "id": "tute8_03",
-          "text": "Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.",
+          "text": "Turn the model to look along the steps: drag it, or pinch it in VR.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:pick:5:shell",
-            "delay:0.27:exp:lab:pick:7:shell"
+            "delay:0.00:exp:lab:view:10:22:240"
           ],
-          "pause": 0.8
+          "pause": 1.0
         },
         {
           "id": "tute8_04",
-          "text": "Round two shows the building blocks of each shell. Shell six stands on its divisor cubes: one, eight, twenty-seven and two hundred sixteen marbles.",
+          "text": "Three hundred forty-three is seven cubed: three equal drops, each of log seven.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:round:1",
-            "delay:2.93:exp:lab:pick:6:shell"
+            "delay:0.00:exp:lab:home",
+            "delay:1.64:exp:lab:pick:343:number"
           ],
-          "pause": 0.6,
-          "caption": "Round two shows the building blocks of each shell. Shell {6|six} stands on its divisor cubes: {1|one}, {8|eight}, {27|twenty-seven} and {216|two hundred sixteen} marbles."
+          "pause": 1.2,
+          "caption": "{343|Three hundred forty-three} is {7³|seven cubed}: three equal drops, each of {log 7|log seven}."
         },
         {
           "id": "tute8_05",
-          "text": "Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: ninety-one, and one hundred twenty-one.",
+          "text": "Powers shows where the runs of each prime go: two, four, eight and on up the spiral of two to the k, each top named with its exponent.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:round:2",
-            "delay:8.13:exp:lab:pick:91:number",
-            "delay:9.47:exp:lab:pick:121:number"
+            "delay:0.00:exp:lab:powers:on"
+          ],
+          "pause": 0.6
+        },
+        {
+          "id": "tute8_06",
+          "text": "And the shells: E8's lattice points, shell by shell. Touch shell six, and its divisors stand under it as cubes of marbles.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.18:exp:lab:powers:off",
+            "delay:0.28:exp:lab:shells:on",
+            "delay:3.67:exp:lab:pick:6:shell"
           ],
           "pause": 1.2,
-          "caption": "Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: {91|ninety-one}, and {121|one hundred twenty-one}."
+          "caption": "And the shells: E8's lattice points, shell by shell. Touch shell {6|six}, and its divisors stand under it as cubes of marbles."
         }
       ]
     },
     {
       "id": "tutvortex",
-      "title": "Vortex hunt",
+      "title": "Zeta's chain",
       "subtitle": "a game tutorial",
       "setup": [
         "exp:lab:enter:vortex",
-        "exp:lab:round:0"
+        "exp:lab:zero:300:0.1"
       ],
       "lines": [
         {
           "id": "tutvortex_01",
-          "text": "Vortex hunt is played on zeta's chain at its three hundredth zero. The chain curls into vortices, and vortex k belongs to the counting number k.",
+          "text": "This is zeta's chain at its three hundredth zero: a link for every counting number, and its end at zeta of one half plus i t.",
           "camera": "lab",
           "actions": [],
           "pause": 0.8,
-          "caption": "Vortex hunt is played on zeta's chain at its {300th|three hundredth} zero. The chain curls into vortices, and vortex k belongs to the counting number k."
+          "caption": "This is zeta's chain at its {300th|three hundredth} zero: a link for every counting number, and its end at zeta of one half plus i t."
         },
         {
           "id": "tutvortex_02",
-          "text": "Point at the vortices in order. One. Two. Three.",
+          "text": "Drag up or down, and t moves. The chain winds and unwinds as it goes.",
           "camera": "lab",
           "actions": [
-            "delay:1.73:exp:lab:pick:1:vortex",
-            "delay:2.16:exp:lab:pick:2:vortex",
-            "delay:2.72:exp:lab:pick:3:vortex"
+            "delay:0.00:exp:lab:steer:1.1:3.2"
           ],
-          "pause": 0.8
+          "pause": 0.4
         },
         {
           "id": "tutvortex_03",
-          "text": "Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.",
+          "text": "On a touch screen it takes one finger. In VR, pinch the bead on the t rail, and lift it or lower it.",
           "camera": "lab",
-          "actions": [],
-          "pause": 0.8
+          "actions": [
+            "delay:2.14:exp:lab:steer:-1.1:3.2"
+          ],
+          "pause": 0.4
         },
         {
           "id": "tutvortex_04",
-          "text": "Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.",
+          "text": "The rail's gold ticks are the zeros. At each one the chain's end lands on zero, and the chain curls into vortices.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:round:1",
-            "delay:3.95:exp:lab:pick:3:vortex",
-            "delay:5.41:exp:lab:pick:3:vertex"
+            "delay:0.60:exp:lab:zero:301:2.4"
           ],
-          "pause": 0.8
+          "pause": 0.6
         },
         {
           "id": "tutvortex_05",
-          "text": "Round three: steer t until the chain's end lands on the zero.",
+          "text": "Vortex k belongs to the counting number k. Touch vortex three: its fingerprint, and the mirror line from the chain's third vertex to the eye.",
           "camera": "lab",
           "actions": [
-            "delay:0.00:exp:lab:round:2",
-            "delay:1.06:exp:lab:steer:0:4"
+            "delay:2.67:exp:lab:pick:3:vortex"
           ],
-          "pause": 1.5
+          "pause": 0.6
         },
         {
           "id": "tutvortex_06",
-          "text": "Landed. Zeta is zero here, and the chain ends where it began.",
+          "text": "Then glide on to the next zero, and the next.",
           "camera": "lab",
-          "actions": [],
-          "pause": 1.2
+          "actions": [
+            "delay:0.12:exp:lab:jump:1",
+            "delay:1.73:exp:lab:jump:1"
+          ],
+          "pause": 1.6
         }
       ]
     }

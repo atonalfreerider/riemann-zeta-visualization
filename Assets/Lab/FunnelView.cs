@@ -321,7 +321,7 @@ public class FunnelView
                 if (m > 1) Arc(segs, n, m, Mathf.Log(m), c, .4f, 12);
             }
 
-            powerLabels.Add(LabDraw.Label(root, $"{p}{LabMath.Superscript(k)}", Top(top) + Up(.25f), 34f, c));
+            powerLabels.Add(LabDraw.Haloed(LabDraw.Label(root, $"{p}{LabMath.Superscript(k)}", Top(top) + Up(.25f), 34f, c)));
         }
 
         powers.Set(segs);
@@ -409,6 +409,9 @@ public class FunnelView
         pathSteps.Clear();
         pathRoot = new GameObject($"path {n0}").transform;
         pathRoot.SetParent(root, false);
+        // the path's labels: where they bunch up (small numbers stand close together near the middle), they stack down
+        // the screen in the path's order; the ÷ labels give way
+        LabelStack stack = pathRoot.gameObject.AddComponent<LabelStack>();
 
         // step 0: the column itself, bright, with a ring and its number, and a white band at each joint between two pieces
         GameObject s0 = new("start");
@@ -427,7 +430,7 @@ public class FunnelView
 
         new SegmentMesh(s0.transform, "column", Factory.GlowIntensity).Set(col);
         LabDraw.Ring(s0.transform, "ring", Top(n0) + Up(.05f), 1.6f, .18f, Color.white, Factory.GlowIntensity, 40);
-        LabDraw.Label(s0.transform, n0.ToString(), Top(n0) + Up(1.3f), 52f, LabMath.IsPrime(n0) ? LabMath.Gold : Color.white);
+        stack.Add(LabDraw.Haloed(LabDraw.Label(s0.transform, Named(n0), Top(n0) + Up(1.3f), 52f, LabMath.IsPrime(n0) ? LabMath.Gold : Color.white)), Top(n0) + Up(1.3f), Vector2.zero);
         pathSteps.Add(s0);
 
         int n = n0;
@@ -443,14 +446,11 @@ public class FunnelView
             new SegmentMesh(st.transform, "step", 2.2f).Set(segs);
             Vector3 land = m > 1 ? Top(m) : Base(1);
             if (m == 1) LabDraw.Dot(st.transform, "one", Base(1), .9f, Color.white);
-            TextBox l = LabDraw.Label(st.transform, m.ToString(), land + Up(.6f), 34f, m == 1 ? Color.white : new Color(.85f, .87f, .96f), TextAlignmentOptions.Center);
-            ScreenNudge nudge = l.gameObject.AddComponent<ScreenNudge>();
-            nudge.Anchor = land + Up(.6f);
-            nudge.Offset = new Vector2(.052f * 34f * m.ToString().Length * .5f + 1f, .6f);
+            string name = Named(m);
+            TextBox l = LabDraw.Haloed(LabDraw.Label(st.transform, name, land + Up(.6f), 34f, m == 1 ? Color.white : LabMath.IsPrime(m) ? LabMath.Gold : new Color(.85f, .87f, .96f), TextAlignmentOptions.Center));
+            stack.Add(l, land + Up(.6f), new Vector2(.052f * 34f * VisibleLength(name) * .5f + 1f, .6f));
             Vector3 mid = Base(n) + Up((h + h1) * .5f);
-            ScreenNudge dn = LabDraw.Label(st.transform, $"÷{p}", mid, 30f, NumberKind.Gold).gameObject.AddComponent<ScreenNudge>();
-            dn.Anchor = mid;
-            dn.Offset = new Vector2(-2.4f, 0f);
+            stack.Add(LabDraw.Haloed(LabDraw.Label(st.transform, $"÷{p}", mid, 30f, NumberKind.Gold)), mid, new Vector2(-2.4f, 0f), true);
             pathSteps.Add(st);
             n = m;
             h = h1;
@@ -459,6 +459,15 @@ public class FunnelView
         StepsShown = Mathf.Clamp(shown, 0, pathSteps.Count - 1);
         for (int i = 0; i < pathSteps.Count; i++) pathSteps[i].SetActive(i <= StepsShown);
     }
+
+    /// <summary>
+    /// A number as the staircase names it: a composite in exponent notation (360 = 2³ · 3² · 5), so each landing shows the
+    /// blocks still to drop; a prime, or 1, as itself.
+    /// </summary>
+    static string Named(int n) => n < 4 || LabMath.IsPrime(n) ? n.ToString() : $"{n} = {NumberKind.Shorthand(n)}";
+
+    /// <summary>The characters a label shows (rich-text tags left out), for placing it beside its anchor.</summary>
+    static int VisibleLength(string s) => System.Text.RegularExpressions.Regex.Replace(s, "<[^>]+>", "").Length;
 
     public void Tick(float dt)
     {

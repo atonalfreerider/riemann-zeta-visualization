@@ -3,201 +3,161 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// E8's spheres. E8's lattice points, shell by shell: shell n is a sphere of 240 σ₃(n) points (E8SphereField), as many
-/// shells as the platform draws (about 340 000 points, shells 1–8, on the desktop; 57 000, shells 1–5, in VR). Three
-/// rounds:
-/// 1. Which shells are prime? The spheres start silver; point at the shells whose n is prime. A prime shell holds just
-///    two cubes' worth, 240 (1 + p³), the fewest a shell its size can.
-/// 2. Building blocks: point at a shell and its divisors stand beside it as cubes of marbles, d × d × d for each divisor d,
-///    adding up to σ₃(n): every prime factor of n shows up as an extra cube. Its fingerprint shows the factors.
-/// 3. Prime or impostor on E8's clock: the numbers up to 360 at their hours (n mod 30), the primes' eight gold hours
-///    lit. Point at the impostors: the composites that sit on a gold hour (49, 77, 91, 119, 121, …).
+/// E8's clock, to explore. Two views of the numbers, switched with "Shells":
+/// * The clock (the default): every n ≤ 600 on E8's wheel (hour n mod 30, radius s√n), standing as a stack of its prime
+///   factors, one gold piece as tall as log p each (FunnelView): the logarithmic stacks. Touch any column and its path back
+///   plays down the staircase: down its top piece (÷ its smallest prime), across at that height to the column of what is
+///   left, and so on down to 1. Every landing is named in exponent notation where that says more (360 = 2³ · 3² · 5, then
+///   180 = 2² · 3² · 5 …), the pieces are tallied in the strip, and the number's fingerprint floats above the stacks. The
+///   eight gold spokes are the hours of E8's exponents (1, 7, 11, 13, 17, 19, 23, 29): every prime past 5 stands on one.
+///   Powers lays out where the runs of one prime go (2, 4, 8 … up the spiral of 2^k, each labelled with its exponent).
+/// * The shells: E8's lattice points shell by shell, shell n a sphere of 240 σ₃(n) points; touch a shell and its divisors
+///   stand under it as cubes of marbles, d × d × d, adding up to σ₃(n).
+/// Turn the model with a drag (one finger on a touch screen), zoom with the wheel or a pinch; in VR pinch it to move and
+/// turn it. Nothing is scored: every column and every shell can be touched at any time.
 /// </summary>
 public class E8SpheresGame : GameModel
 {
+    const int Count = 600;
     const float Unit = 4.2f;
-    const int ClockN = 360;
+    FunnelView funnel;
     E8SphereField field;
-    readonly MarbleBatch cubes = new(1), clock = new(1);
-    readonly HashSet<long> found = new();
-    readonly List<TextBox> labels = new();
-    readonly List<TextBox> hourLabels = new();
-    int round, opened = -1;
-    float nextAt = -1f;
-    Vector3 clockC;
+    readonly MarbleBatch cubes = new(1);
+    readonly List<TextBox> shellLabels = new();
+    bool shells;
+    int opened = -1;
 
     public override string Id => "e8spheres";
-    public override string Title => "E8 spheres";
-    public override string Short => "E8 game";
-    public override VRIcons.Id Icon => VRIcons.Id.Lattice;
-
-    static readonly string[] RoundTitles = { "Which shells are prime?", "The building blocks of each shell", "Prime or impostor on E8's clock" };
+    public override string Title => "E8's clock";
+    public override string Short => "E8 clock";
+    public override VRIcons.Id Icon => VRIcons.Id.Clock;
 
     protected override void OnBuild()
     {
+        funnel = new FunnelView(Root, O, Count, 2.2f, 5f);
+        funnel.Stepped += lit =>
+        {
+            if (!shells) Lab.SetStrip(funnel.Selected, lit);
+        };
         long budget = VRMode.Enabled ? 60000 : 400000;
-        field = E8SphereField.Create(Root, O + new Vector3(-100f, 30f, 0f) + Up * 26f, Unit, budget, 12);
-        field.ColourOf = n => round == 0 && !found.Contains(n) ? new Color(.78f, .8f, .88f) : NumberKind.ColorOf(n);
+        field = E8SphereField.Create(Root, O + new Vector3(0f, 260f, 0f) + Up * 26f, Unit, budget, 12);
         for (int n = 1; n <= field.Shells; n++)
-        {
-            TextBox l = LabDraw.Label(Root, n.ToString(), field.Centre(n) + Up * (field.Radius(n) + 4f), 40f, Color.white);
-            labels.Add(l);
-        }
+            shellLabels.Add(LabDraw.Label(Root, n.ToString(), field.Centre(n) + Up * (field.Radius(n) + 4f), 40f, Color.white));
 
-        clockC = O + new Vector3(0f, -10f, 0f);
-        for (int h = 0; h < 30; h++)
-        {
-            float a = h / 30f * Mathf.PI * 2f;
-            Vector3 at = clockC + new Vector3(Mathf.Sin(a), Mathf.Cos(a), 0f) * 55f;
-            hourLabels.Add(LabDraw.Label(Root, h.ToString(), at, 26f, GoldHour(h) ? NumberKind.Gold : new Color(.6f, .62f, .72f)));
-        }
-
-        Controls.Add(LabControl.Button("Next round", VRIcons.Id.NextLine, () => StartRound(round + 1), "N"));
-        Controls.Add(LabControl.Button("Restart", VRIcons.Id.Replay, Restart, "Backspace"));
+        Controls.Add(LabControl.Button("n − 1", VRIcons.Id.PrevLine, () => Go(funnel.Selected - 1), "←"));
+        Controls.Add(LabControl.Button("n + 1", VRIcons.Id.NextLine, () => Go(funnel.Selected + 1), "→"));
+        Controls.Add(LabControl.Button("n − 30", VRIcons.Id.Down, () => Go(funnel.Selected - 30), "↓"));
+        Controls.Add(LabControl.Button("n + 30", VRIcons.Id.Up, () => Go(funnel.Selected + 30), "↑"));
+        Controls.Add(LabControl.Button("Replay", VRIcons.Id.Replay, () => funnel.Replay(), "Space"));
+        Controls.Add(LabControl.Toggle("Powers", VRIcons.Id.Curves, () => funnel.PowersOn, () => funnel.SetPowers(!funnel.PowersOn), "K"));
+        Controls.Add(LabControl.Toggle("Shells", VRIcons.Id.Lattice, () => shells, () => SetShells(!shells), "V"));
         AddCommonControls();
-        Restart();
+        SetShells(false);
     }
 
-    static bool GoldHour(long h) => h % 2 != 0 && h % 3 != 0 && h % 5 != 0;
+    public override LabView Home => shells
+        ? new LabView { Focus = (field.Centre(1) + field.Centre(field.Shells)) * .5f + Up * 6f, Distance = 196f, Yaw = -90f, Pitch = 18f, Fov = 50f }
+        : StoryFramed(new LabView { Focus = O + funnel.Up(Mathf.Log(Count) * .62f), Distance = 196f, Yaw = -62f, Pitch = 40f, Fov = 50f }, 1.15f, .03f);
 
-    public override LabView Home => round < 2
-        ? new LabView { Focus = field != null ? (field.Centre(1) + field.Centre(field.Shells)) * .5f + Up * 6f : O, Distance = 196f, Yaw = -90f, Pitch = 18f, Fov = 50f }
-        : new LabView { Focus = clockC + new Vector3(0f, 9f, 0f) + Up * 2f, Distance = 165f, Yaw = -90f, Pitch = 74f, Fov = 50f };
-
-    public override void OnEnter() => UpdateStatus();
-
-    void Restart()
+    public override void OnEnter()
     {
-        Score = Streak = BestStreak = Finds = Misses = 0;
-        StartRound(0);
+        if (!shells && funnel.Selected < 2) Go(360);
+        UpdateStatus();
     }
 
-    Vector3 ClockPos(long n)
+    void SetShells(bool on)
     {
-        long h = n % 30;
-        float a = h / 30f * Mathf.PI * 2f, r = 10f + 3.2f * (n / 30f);
-        return clockC + new Vector3(Mathf.Sin(a), Mathf.Cos(a), 0f) * r;
-    }
-
-    void StartRound(int r)
-    {
-        round = ((r % 3) + 3) % 3;
-        found.Clear();
-        opened = -1;
-        nextAt = -1f;
+        shells = on;
         HidePrint();
         Picks.Clear();
-        field.gameObject.SetActive(round < 2);
-        foreach (TextBox l in labels) l.gameObject.SetActive(round < 2);
-        foreach (TextBox l in hourLabels) l.gameObject.SetActive(round == 2);
-        if (round < 2)
+        opened = -1;
+        field.gameObject.SetActive(on);
+        foreach (TextBox l in shellLabels) l.gameObject.SetActive(on);
+        if (on)
         {
             for (int n = 1; n <= field.Shells; n++)
                 Picks.Add(new Pickable { Position = field.Centre(n), Value = n, Radius = field.Radius(n), Kind = "shell" });
             field.Highlight(-1);
+            Lab.SetStrip(0, 0);
+            Prompt = "Touch a shell:  its divisors stand under it as cubes, adding up to its points";
+            Note = $"{field.Points:#,0} points in {field.Shells} shells:  shell n holds 240 σ<sub>3</sub>(n)".Replace(",", " ");
         }
         else
         {
-            for (long n = 31; n <= ClockN; n++)
-                if (GoldHour(n % 30)) Picks.Add(new Pickable { Position = ClockPos(n) + Up * .3f, Value = n, Radius = 1.6f, Kind = "number" });
+            for (int n = 2; n <= Count; n++)
+                Picks.Add(new Pickable { Position = funnel.Top(n) + Up * .3f, Value = n, Radius = 1.6f, Kind = "number" });
+            Prompt = "Touch any column:  its path back steps down the staircase to its primes";
+            Note = Legend;
+            if (funnel.Selected >= 2) Go(funnel.Selected);
         }
 
-        field.Refresh();
-        Prompt = round switch
-        {
-            0 => $"Round 1 of 3:  which shells are prime?  {PrimeShells()} of the {field.Shells} are",
-            1 => $"Round 2 of 3:  point at a shell to see its divisors as cubes, d × d × d",
-            _ => $"Round 3 of 3:  the gold hours hold every prime past 5.  Find the {Impostors()} impostors",
-        };
-        Note = round == 0
-            ? $"{field.Points:#,0} points in {field.Shells} shells.  A prime shell holds 240 (1 + p³):  two cubes".Replace(",", " ")
-            : Legend;
-        Lab.ResetView(false);
+        if (Lab != null) Lab.ResetView(false);
         UpdateStatus();
     }
 
-    int PrimeShells()
-    {
-        int c = 0;
-        for (int n = 1; n <= field.Shells; n++) if (NumberKind.IsPrime(n)) c++;
-        return c;
-    }
-
-    static int Impostors()
-    {
-        int c = 0;
-        for (long n = 31; n <= ClockN; n++) if (GoldHour(n % 30) && !NumberKind.IsPrime(n)) c++;
-        return c;
-    }
-
-    protected override string LabelFor(Pickable p)
-    {
-        if (p.Kind == "shell")
-        {
-            string count = $"{E8Shells.Count((int)p.Value):#,0}".Replace(",", " ");
-            return round == 0 && !found.Contains(p.Value) ? $"shell {p.Value}:  {count} points" : $"shell {NumberKind.Describe(p.Value)}:  {count} points";
-        }
-
-        return found.Contains(p.Value) ? NumberKind.Describe(p.Value) : $"{p.Value}  (hour {p.Value % 30})";
-    }
+    // the column whose path is showing is named by the path itself
+    protected override string LabelFor(Pickable p) => p.Kind == "shell"
+        ? $"shell {p.Value}:  {Group(E8Shells.Count((int)p.Value))} points"
+        : p.Value == funnel.Selected ? "" : $"{NumberKind.Describe(p.Value)}   (hour {p.Value % 30})";
 
     public override void OnPick(int i)
     {
         Pickable p = Picks[i];
-        long n = p.Value;
-        if (p.Kind == "shell") PickShell((int)n, p);
-        else PickClock(n, p);
+        if (p.Kind == "shell") OpenShell((int)p.Value, p);
+        else
+        {
+            Light(p.Position, p.Value, 2.2f);
+            Go((int)p.Value);
+        }
+    }
+
+    /// <summary>n's column: its path back plays, its fingerprint shows, the board names its blocks and its hour.</summary>
+    void Go(int n)
+    {
+        if (shells) return;
+        n = Mathf.Clamp(n, 2, Count);
+        funnel.Select(n, true);
+        ShowPrint(n, PrintPlace(n), 2f);
+        List<(long p, int k)> f = NumberKind.Factor(n);
+        int drops = 0;
+        foreach ((long _, int k) in f) drops += k;
+        string path = NumberKind.IsPrime(n)
+            ? "one drop of log " + n + " to 1"
+            : $"{drops} drops down the staircase:  " + string.Join(", ", Drops(n));
+        Note = $"{NumberKind.Describe(n)}  (hour {n % 30}{(GoldHour(n % 30) ? ", a gold hour" : "")}).  {path}";
         UpdateStatus();
     }
 
-    void PickShell(int n, Pickable p)
+    /// <summary>The primes n drops by on its way back, smallest first, as the staircase takes them.</summary>
+    static IEnumerable<string> Drops(int n)
     {
-        ShowPrint(n, p.Position + Up * (field.Radius(n) + 20f) + Vector3.left * 12f, 3.2f);
-        string sigma = SigmaText(n);
-        if (round == 0)
+        while (n > 1)
         {
-            if (found.Contains(n)) { Note = sigma; return; }
-            found.Add(n);
-            field.Refresh();
-            if (NumberKind.IsPrime(n))
-            {
-                Found(p.Position, 10, field.Radius(n));
-                Note = $"shell {n} is prime:  {sigma}";
-                if (FoundPrimes() == PrimeShells())
-                {
-                    Note += "\nEvery prime shell found.  Next:  their building blocks";
-                    if (AutoAdvance) nextAt = Time.time + 3.5f;
-                }
-            }
-            else
-            {
-                Missed(p.Position, 3, field.Radius(n));
-                Note = $"{NumberKind.Describe(n)}.  {sigma}";
-            }
-
-            return;
+            int p = LabMath.Spf(n);
+            yield return $"÷{p}";
+            n /= p;
         }
-
-        // round 2: open the shell's divisor cubes
-        if (opened != n)
-        {
-            opened = n;
-            field.Highlight(n, .6f);
-            if (!found.Contains(n))
-            {
-                found.Add(n);
-                Found(p.Position, NumberKind.Divisors(n).Count, field.Radius(n));
-            }
-        }
-
-        Note = $"{NumberKind.Describe(n)}:  {sigma}";
     }
 
-    int FoundPrimes()
+    static bool GoldHour(long h) => h % 2 != 0 && h % 3 != 0 && h % 5 != 0;
+
+    /// <summary>Above the stacks, its string centred across the view, so it reads from wherever the model is turned.</summary>
+    Vector3 PrintPlace(int n)
     {
-        int c = 0;
-        foreach (long n in found) if (NumberKind.IsPrime(n)) c++;
-        return c;
+        Camera cam = Camera.main;
+        Vector3 right = cam != null ? cam.transform.right : Vector3.right;
+        float half = Print != null ? Print.ShorthandSize.x * 2f * .5f : 10f;
+        return O + funnel.Up(Mathf.Log(Count) + 7.5f) - right * half;
+    }
+
+    void OpenShell(int n, Pickable p)
+    {
+        opened = n;
+        field.Highlight(n, .6f);
+        Light(p.Position, n, field.Radius(n));
+        ShowPrint(n, p.Position + Up * (field.Radius(n) + 20f) + Vector3.left * 12f, 3.2f);
+        Note = $"shell {NumberKind.Describe(n)}:  {SigmaText(n)}";
+        UpdateStatus();
     }
 
     static string SigmaText(int n)
@@ -205,48 +165,23 @@ public class E8SpheresGame : GameModel
         List<long> d = NumberKind.Divisors(n);
         List<string> parts = new();
         foreach (long x in d) parts.Add(x == 1 ? "1" : $"{x}³");
-        string total = $"{E8Shells.Count(n):#,0}".Replace(",", " ");
-        return $"σ<sub>3</sub>({n}) = {string.Join(" + ", parts)} = {NumberKind.Sigma3(n)}:  {total} points";
+        return $"σ<sub>3</sub>({n}) = {string.Join(" + ", parts)} = {NumberKind.Sigma3(n)}:  {Group(E8Shells.Count(n))} points";
     }
 
-    void PickClock(long n, Pickable p)
-    {
-        ShowPrint(n, clockC + new Vector3(-104f, 30f, 0f) + Up * 4f, 2.2f);
-        if (found.Contains(n)) { Note = NumberKind.Describe(n); return; }
-        found.Add(n);
-        if (!NumberKind.IsPrime(n))
-        {
-            Found(p.Position, 10, 1.8f);
-            int left = Impostors() - FoundImpostors();
-            Note = $"{NumberKind.Describe(n)}:  an impostor on hour {n % 30}.  {left} to go";
-            if (left == 0) Note += "\nEvery impostor found";
-        }
-        else
-        {
-            Missed(p.Position, 3, 1.8f);
-            Note = $"{n} is prime:  it belongs on its gold hour ({n % 30})";
-        }
-    }
-
-    int FoundImpostors()
-    {
-        int c = 0;
-        foreach (long n in found) if (!NumberKind.IsPrime(n)) c++;
-        return c;
-    }
+    static string Group(long v) => v.ToString("N0", System.Globalization.CultureInfo.InvariantCulture).Replace(",", " ");
 
     protected override void OnTick(float dt)
     {
-        if (nextAt > 0f && Time.time >= nextAt)
+        if (!shells)
         {
-            nextAt = -1f;
-            StartRound(round + 1);
+            funnel.Tick(dt);
+            funnel.SetDim(funnel.PowersOn ? .3f : .55f);
+            if (Print != null) MovePrint(PrintPlace(funnel.Selected));
         }
 
         cubes.Clear();
-        if (round == 1 && opened > 0) DrawCubes(opened);
+        if (shells && opened > 0) DrawCubes(opened);
         cubes.Draw(Matrix4x4.identity);
-        if (round == 2) DrawClock();
     }
 
     /// <summary>Shell n's divisors as cubes of marbles in a row under it, d × d × d each, in d's own colour.</summary>
@@ -268,44 +203,37 @@ public class E8SpheresGame : GameModel
         }
     }
 
-    void DrawClock()
-    {
-        clock.Clear();
-        for (long n = 1; n <= ClockN; n++)
-        {
-            Color c = NumberKind.ColorOf(n);
-            bool cand = n > 30 && GoldHour(n % 30);
-            // every candidate is silver until picked, primes and impostors alike
-            if (cand && !found.Contains(n)) c = new Color(.82f, .85f, .92f);
-            else if (!cand) c = Color.Lerp(c, new Color(.12f, .13f, .17f), .55f);
-            clock.Add(ClockPos(n), cand ? 1.5f : 1f, c, cand ? 1.2f : 1f);
-        }
-
-        clock.Draw(Matrix4x4.identity);
-    }
-
     public override bool OnKey(Keyboard k)
     {
-        if (k.nKey.wasPressedThisFrame) { StartRound(round + 1); return true; }
-        if (k.backspaceKey.wasPressedThisFrame) { Restart(); return true; }
+        if (!shells)
+        {
+            if (k.leftArrowKey.wasPressedThisFrame) { Go(funnel.Selected - 1); return true; }
+            if (k.rightArrowKey.wasPressedThisFrame) { Go(funnel.Selected + 1); return true; }
+            if (k.downArrowKey.wasPressedThisFrame) { Go(funnel.Selected - 30); return true; }
+            if (k.upArrowKey.wasPressedThisFrame) { Go(funnel.Selected + 30); return true; }
+            if (k.spaceKey.wasPressedThisFrame) { funnel.Replay(); return true; }
+            if (k.kKey.wasPressedThisFrame) { funnel.SetPowers(!funnel.PowersOn); return true; }
+        }
+
+        if (k.vKey.wasPressedThisFrame) { SetShells(!shells); return true; }
         return CommonKey(k);
     }
 
-    // for tests
-    public void GoToRound(int r) => StartRound(r);
-
     public override bool StoryCommand(string verb, string[] a)
     {
-        if (verb == "round" && a.Length > 0 && int.TryParse(a[0], out int r)) { StartRound(r); return true; }
+        switch (verb)
+        {
+            case "shells": SetShells(a.Length == 0 || a[0] != "off"); return true;
+            case "powers": funnel.SetPowers(a.Length == 0 || a[0] != "off"); return true;
+            case "replay": funnel.Replay(); return true;
+        }
+
         return base.StoryCommand(verb, a);
     }
-    public int Shells => field != null ? field.Shells : 0;
 
-    public bool PickValue(long n, string kind)
-    {
-        int i = Picks.FindIndex(x => x.Value == n && x.Kind == kind);
-        if (i < 0) return false;
-        OnPick(i);
-        return true;
-    }
+    // for tests
+    public int Shells => field != null ? field.Shells : 0;
+    public bool ShellsView => shells;
+    public void ShowShells(bool on) => SetShells(on);
+    public FunnelView Funnel => funnel;
 }

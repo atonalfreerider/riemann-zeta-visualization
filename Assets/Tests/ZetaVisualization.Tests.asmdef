@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "ZetaVisualization",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

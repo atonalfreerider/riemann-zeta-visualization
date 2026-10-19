@@ -252,6 +252,8 @@ public class VRWorldGrab : MonoBehaviour
     public bool Holding => left.Active || right.Active;
     public bool TwoHanded => twoHanded;
     public System.Action Grabbed;
+    /// <summary>A pinch that something else takes (a lab model's handle): the grab leaves it.</summary>
+    public System.Func<VRHand, bool> Claims;
 
     public static VRWorldGrab Create(VRRig rig, VRHands hands, VRPoker poker)
     {
@@ -333,7 +335,7 @@ public class VRWorldGrab : MonoBehaviour
             return;
         }
 
-        if (hand.PinchDown && HandRaised(hand, 0f) && !poker.NearPanel(hand.PinchPoint, 0.07f) && !poker.Hovering(hand))
+        if (hand.PinchDown && HandRaised(hand, 0f) && !poker.NearPanel(hand.PinchPoint, 0.07f) && !poker.Hovering(hand) && (Claims == null || !Claims(hand)))
         {
             hold.Active = true;
             hold.Anchor = rig.Offset.TransformPoint(hand.PinchPoint);

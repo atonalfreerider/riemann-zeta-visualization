@@ -1,52 +1,30 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Prime hunt on the Sacks spiral (n ≤ 400 laid flat, n at radius √n and angle τ√n). Every number shows its kind in the
-/// games' colours, dimmed, except this round's candidates: silver mystery marbles with a ring. Point at the ones you
-/// think are prime. A prime turns gold (points, and a streak bonus from three in a row); anything else shows its colour
-/// and its building blocks as a marble fingerprint. Rounds walk through a variety of examples: the first primes, a prime
-/// gap, Euler's prime arm k² + k + 41, the primes among prime-looking impostors (91 = 7 · 13, 119 = 7 · 17, …), twin
-/// primes, and the squares and pronic numbers round 121.
+/// The number spiral, to explore: the Sacks spiral of 1 … 400 (n at radius √n and angle τ√n), every number in its colour
+/// (gold prime, deep red p², blue pronic, grey composite). Touch any number: it lights, and its fingerprint shows what it
+/// is made of; pull the fingerprint apart (drag it to the right, or pinch it in VR and pull) to see the number rebuilt from
+/// its primes, push it back to pack it into its shorthand. Step to the neighbours (n ± 1). "Look at" lights one family at
+/// a time, as places to look rather than answers to find: the primes, the twin primes, Euler's k² + k + 41, the squares
+/// and the pronic numbers (each on a line of its own), or the multiples of the number last touched.
 /// </summary>
 public class PrimeHuntGame : GameModel
 {
     const int N = 400;
-    const float K = 3f, Dot = 1.15f, Candidate = 1.7f;
-
-    static readonly (string title, long[] candidates)[] Rounds =
-    {
-        ("The first primes", Range(2, 12)),
-        ("A prime gap: 89 to 101", Range(88, 101)),
-        ("Euler's arm k² + k + 41, and its neighbours", new long[] { 41, 42, 43, 45, 47, 49, 53, 55, 61, 63, 71, 75, 83, 85, 97, 99, 113, 115 }),
-        ("Primes or impostors", new long[] { 101, 103, 119, 121, 127, 133, 137, 143, 149, 161, 163, 169, 173, 187, 191, 193, 197, 199 }),
-        ("Twin primes near 300", Range(280, 316)),
-        ("Round 121: squares and pronic numbers", Range(108, 133)),
-    };
-
-    static string Primes(int k) => k == 1 ? "1 prime" : $"{k} primes";
-
-    static long[] Range(long a, long b)
-    {
-        long[] r = new long[b - a + 1];
-        for (long i = a; i <= b; i++) r[i - a] = i;
-        return r;
-    }
+    const float K = 3f, Dot = 1.2f, Big = 1.55f;
+    const int Looks = 6;
 
     readonly MarbleBatch dots = new(1);
     readonly Vector3[] pos = new Vector3[N + 1];
-    readonly HashSet<long> revealed = new();
-    readonly List<LineRenderer> rings = new();
-    int round = -1;
-    int primesLeft;
-    float advanceAt = -1f;
+    LineRenderer marker;
+    int look, selected;
     bool dirty = true;
 
     public override string Id => "primehunt";
-    public override string Title => "Prime hunt";
-    public override string Short => "Primes";
-    public override VRIcons.Id Icon => VRIcons.Id.Target;
+    public override string Title => "The number spiral";
+    public override string Short => "Spiral";
+    public override VRIcons.Id Icon => VRIcons.Id.Sacks;
 
     Vector3 Pos(long n)
     {
@@ -56,109 +34,99 @@ public class PrimeHuntGame : GameModel
 
     protected override void OnBuild()
     {
-        for (int n = 1; n <= N; n++) pos[n] = Pos(n);
-        Controls.Add(LabControl.Button("Next round", VRIcons.Id.NextLine, () => StartRound(round + 1), "N"));
-        Controls.Add(LabControl.Button("Restart", VRIcons.Id.Replay, Restart, "Backspace"));
+        for (int n = 1; n <= N; n++)
+        {
+            pos[n] = Pos(n);
+            Picks.Add(new Pickable { Position = pos[n] + Up * .3f, Value = n, Radius = 1.4f, Kind = "number" });
+        }
+
+        marker = LabDraw.Ring(Root, "touched", O, 2.1f, .22f, Color.white, Factory.GlowIntensity, 40);
+        marker.gameObject.SetActive(false);
+        Controls.Add(LabControl.Button("n − 1", VRIcons.Id.PrevLine, () => Step(-1), "←"));
+        Controls.Add(LabControl.Button("n + 1", VRIcons.Id.NextLine, () => Step(1), "→"));
+        Controls.Add(new LabControl
+        {
+            Label = "Look at", Icon = VRIcons.Id.Eye, Clicked = () => SetLook(look + 1), On = () => look != 0,
+            DynamicLabel = () => look switch { 0 => "Look at", 1 => "primes", 2 => "twins", 3 => "k² + k + 41", 4 => "squares", _ => $"× {Mathf.Max(2, selected)}" },
+            Keys = "L",
+        });
         AddCommonControls();
-        Restart();
+        Prompt = "Touch any number to see what it is made of.  Drag its fingerprint apart";
+        Note = Legend;
     }
 
-    // each round frames its own candidates
-    LabView roundView = new() { Focus = Vector3.zero, Distance = 150f, Yaw = -90f, Pitch = 64f, Fov = 50f };
+    // the whole spiral, a little tilted, with room on the left for the fingerprint
+    public override LabView Home => StoryFramed(new LabView { Focus = O + new Vector3(-14f, -4f, 0f), Distance = 178f, Yaw = -90f, Pitch = 66f, Fov = 50f }, 1.2f, .04f);
 
-    public override LabView Home => roundView;
-
-    /// <summary>The fingerprint's place: left of the candidates, across a fifth of the view, marbles sized to the view.</summary>
-    // lower left of the view (−y is down the screen here), so the volume it unpacks into has the left half above it
-    Vector3 PrintSpot => roundView.Focus + Vector3.left * (roundView.Distance * .46f) + Vector3.down * (roundView.Distance * .215f) + Up * (roundView.Distance * .04f);
-    float PrintScale => roundView.Distance * .014f;
+    /// <summary>The fingerprint's place: left of the spiral, low, so its volume has room above it.</summary>
+    Vector3 PrintSpot => O + new Vector3(-104f, -34f, 0f) + Up * 3f;
+    const float PrintScale = 2.2f;
 
     public override void OnEnter() => UpdateStatus();
 
-    void Restart()
+    protected override string LabelFor(Pickable p) => NumberKind.Describe(p.Value);
+
+    public override void OnPick(int i) => Select(Picks[i].Value);
+
+    void Select(long n)
     {
-        Score = Streak = BestStreak = Finds = Misses = 0;
-        StartRound(0);
-    }
-
-    bool InRound(long n) => round >= 0 && round < Rounds.Length && System.Array.IndexOf(Rounds[round].candidates, n) >= 0;
-
-    void StartRound(int r)
-    {
-        round = ((r % Rounds.Length) + Rounds.Length) % Rounds.Length;
-        foreach (long n in Rounds[round].candidates) revealed.Remove(n);
-        primesLeft = 0;
-        foreach (long n in Rounds[round].candidates)
-            if (NumberKind.IsPrime(n)) primesLeft++;
-        advanceAt = -1f;
-        HidePrint();
-        Picks.Clear();
-        foreach (long n in Rounds[round].candidates)
-            Picks.Add(new Pickable { Position = pos[n] + Up * .3f, Value = n, Radius = Candidate, Kind = "number" });
-        foreach (LineRenderer l in rings) if (l != null) Object.Destroy(l.gameObject);
-        rings.Clear();
-        foreach (long n in Rounds[round].candidates)
-            rings.Add(LabDraw.Ring(Root, $"candidate {n}", pos[n], Candidate * .95f, .16f, new Color(.8f, .85f, 1f, .7f), Factory.SoftGlowIntensity, 32));
-        // frame the candidates: their middle, far enough to hold them all with room for the fingerprint on the left
-        Vector3 c = Vector3.zero;
-        foreach (long n in Rounds[round].candidates) c += pos[n];
-        c /= Rounds[round].candidates.Length;
-        float extent = 0f;
-        foreach (long n in Rounds[round].candidates) extent = Mathf.Max(extent, (pos[n] - c).magnitude);
-        roundView = new LabView { Focus = c + Vector3.right * (extent * .35f + 6f), Distance = Mathf.Max(48f, extent * 3.4f + 20f), Yaw = -90f, Pitch = 64f, Fov = 50f };
-        if (Lab != null && Lab.Active == this) Lab.ResetView(false);
-        Prompt = $"Round {round + 1} of {Rounds.Length}:  {Rounds[round].title}.  Point at the primes:  {Primes(primesLeft)} to find";
-        Note = Legend;
-        dirty = true;
-        UpdateStatus();
-    }
-
-    protected override string LabelFor(Pickable p) => revealed.Contains(p.Value) ? NumberKind.Describe(p.Value) : p.Value.ToString();
-
-    public override void OnPick(int i)
-    {
-        Pickable p = Picks[i];
-        long n = p.Value;
-        Vector3 at = pos[n];
+        n = System.Math.Clamp(n, 1L, N);
+        selected = (int)n;
+        Light(pos[n], n, Big);
+        marker.gameObject.SetActive(true);
+        LabDraw.SetRing(marker, pos[n] + Up * .2f, 2.1f, 40);
         ShowPrint(n, PrintSpot, PrintScale);
-        if (revealed.Contains(n))
-        {
-            Note = NumberKind.Describe(n);
-            UpdateStatus();
-            return;
-        }
-
-        revealed.Add(n);
-        dirty = true;
-        if (NumberKind.IsPrime(n))
-        {
-            primesLeft--;
-            Found(at, 10, Candidate);
-            Note = $"{NumberKind.Describe(n)}:  one container of {n} marbles";
-            if (primesLeft == 0)
-            {
-                Note += $"\nRound {round + 1} done:  every prime found";
-                if (AutoAdvance) advanceAt = Time.time + 3f;
-            }
-        }
-        else
-        {
-            Missed(at, 3, Candidate);
-            Note = $"{NumberKind.Describe(n)}:  {NumberKind.NameOf(NumberKind.Classify(n))}.  Unpack it (U)";
-        }
-
-        Prompt = $"Round {round + 1} of {Rounds.Length}:  {Rounds[round].title}.  " + (primesLeft > 0 ? $"{Primes(primesLeft)} to find" : "all found");
+        Note = NumberKind.Describe(n) + (n == 1
+            ? ""
+            : NumberKind.IsPrime(n) ? ":  its only building block is itself" : ".  " + Neighbours(n));
+        if (look == 5) dirty = true;
         UpdateStatus();
+    }
+
+    /// <summary>A line about the neighbours: whether they are prime, so steps along the spiral show the gaps.</summary>
+    static string Neighbours(long n)
+    {
+        string Of(long m) => m < 1 ? "" : m == 1 ? "1" : NumberKind.IsPrime(m) ? $"<color={NumberKind.Hex(m)}>{m}</color> prime" : $"{m} = {NumberKind.Shorthand(m)}";
+        return $"Beside it:  {Of(n - 1)},  {Of(n + 1)}";
+    }
+
+    void Step(int d) => Select(Mathf.Clamp((selected < 1 ? 1 : selected) + d, 1, N));
+
+    void SetLook(int l)
+    {
+        look = ((l % Looks) + Looks) % Looks;
+        if (look == 5 && selected < 2) Select(6);
+        Note = look switch
+        {
+            0 => Legend,
+            1 => "The primes, gold:  they keep to some curves and avoid others",
+            2 => "Twin primes, p and p + 2 both prime",
+            3 => "k² + k + 41 for k = 0, 1, 2 …:  prime for every k up to 39, on one smooth curve",
+            4 => "The squares run out along one straight line (deep red for a prime's square), the pronic numbers k(k + 1) along the opposite one",
+            _ => $"The multiples of {selected}:  every one of them is built on {selected}'s blocks",
+        };
+        dirty = true;
+        UpdateStatus();
+    }
+
+    bool Lit(int n) => look switch
+    {
+        1 => NumberKind.IsPrime(n),
+        2 => NumberKind.IsPrime(n) && (NumberKind.IsPrime(n - 2) || NumberKind.IsPrime(n + 2)),
+        3 => IsEuler(n),
+        4 => NumberKind.ISqrt(n) * NumberKind.ISqrt(n) == n || NumberKind.IsPronic(n),
+        5 => selected >= 2 && n % selected == 0,
+        _ => true,
+    };
+
+    static bool IsEuler(int n)
+    {
+        for (int k = 0; k * k + k + 41 <= n; k++) if (k * k + k + 41 == n) return true;
+        return false;
     }
 
     protected override void OnTick(float dt)
     {
-        if (advanceAt > 0f && Time.time >= advanceAt)
-        {
-            advanceAt = -1f;
-            StartRound(round + 1);
-        }
-
         if (dirty) Refill();
         dots.Draw(Matrix4x4.identity);
     }
@@ -166,19 +134,13 @@ public class PrimeHuntGame : GameModel
     void Refill()
     {
         dots.Clear();
-        Color silver = new(.82f, .85f, .92f);
         for (int n = 1; n <= N; n++)
         {
-            bool cand = InRound(n);
-            if (cand && !revealed.Contains(n))
-            {
-                dots.Add(pos[n], Candidate, silver, 1.1f);
-                continue;
-            }
-
-            Color c = NumberKind.ColorOf(n);
-            if (cand) dots.Add(pos[n], Candidate, c, NumberKind.IsPrime(n) ? 1.35f : 1.05f);
-            else dots.Add(pos[n], Dot, Color.Lerp(c, new Color(.12f, .13f, .17f), .5f), 1f);
+            Color c = n == 1 ? NumberKind.Unit : NumberKind.ColorOf(n);
+            bool lit = Lit(n);
+            if (!lit) c = Color.Lerp(c, new Color(.1f, .11f, .15f), .72f);
+            float size = NumberKind.IsPrime(n) ? Big : Dot;
+            dots.Add(pos[n], lit && look != 0 ? size * 1.15f : size, c, lit ? (NumberKind.IsPrime(n) ? 1.3f : 1.1f) : 1f);
         }
 
         dirty = false;
@@ -186,26 +148,21 @@ public class PrimeHuntGame : GameModel
 
     public override bool OnKey(Keyboard k)
     {
-        if (k.nKey.wasPressedThisFrame) { StartRound(round + 1); return true; }
-        if (k.backspaceKey.wasPressedThisFrame) { Restart(); return true; }
+        if (k.leftArrowKey.wasPressedThisFrame) { Step(-1); return true; }
+        if (k.rightArrowKey.wasPressedThisFrame) { Step(1); return true; }
+        if (k.lKey.wasPressedThisFrame) { SetLook(look + 1); return true; }
         return CommonKey(k);
     }
 
-    // for tests: pick a number of the round by value
-    public bool PickValue(long n)
-    {
-        int i = Picks.FindIndex(p => p.Value == n);
-        if (i < 0) return false;
-        OnPick(i);
-        return true;
-    }
-
-    public int Round => round;
-    public void GoToRound(int r) => StartRound(r);
-
     public override bool StoryCommand(string verb, string[] a)
     {
-        if (verb == "round" && a.Length > 0 && int.TryParse(a[0], out int r)) { StartRound(r); return true; }
+        if (verb == "look" && a.Length > 0 && int.TryParse(a[0], out int l)) { SetLook(l); return true; }
+        if (verb == "step" && a.Length > 0 && int.TryParse(a[0], out int d)) { Step(d); return true; }
         return base.StoryCommand(verb, a);
     }
+
+    // for tests
+    public int Selected => selected;
+    public int Look => look;
+    public void LookAt(int l) => SetLook(l);
 }

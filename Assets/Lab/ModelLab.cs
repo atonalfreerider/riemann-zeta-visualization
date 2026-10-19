@@ -101,6 +101,24 @@ public abstract class LabModel
     public virtual bool OnKey(Keyboard k) => false;
     /// <summary>A game (Assets/Games): listed with the games, apart from the models.</summary>
     public virtual bool IsGame => false;
+
+    /// <summary>
+    /// Desktop and touch: a drag (the left button, or one finger) that the model handles itself, such as t on the zeta
+    /// chain or a fingerprint pulled apart. Asked once the drag starts, with the point where it was pressed; false leaves
+    /// the drag to the lab, which orbits.
+    /// </summary>
+    public virtual bool DragBegin(Vector2 screen) => false;
+    public virtual void DragMove(Vector2 screen, Vector2 delta) { }
+    public virtual void DragEnd() { }
+
+    /// <summary>
+    /// VR: does a pinch closing at this world point take hold of something of the model (a handle such as the t rail)?
+    /// True keeps the world grab off it; the model then follows the pinch until it opens.
+    /// </summary>
+    public virtual bool WantsPinch(Vector3 world) => false;
+    public virtual void PinchBegin(Vector3 world) { }
+    public virtual void PinchMove(Vector3 world) { }
+    public virtual void PinchEnd() { }
 }
 
 /// <summary>
@@ -111,8 +129,11 @@ public abstract class LabModel
 ///   Zeros    where the zeros sit in the funnel: ζ's zeros as coils, their sum as a comb and rings, the eight L-functions of
 ///            Q(ζ30) as fans to the primes on E8's spokes, the lamps on the prime-power columns
 /// Desktop: drag to orbit, wheel to zoom, right drag (or Shift + drag) to move, click a point to pick it; each model has
-/// keys, and a panel on the right lists its controls. VR: the model is placed in front of the user like a tour shot (pinch
-/// moves it), touching a point with a fingertip picks it, and the dock's Models page holds the controls and the readout.
+/// keys, and a panel on the right lists its controls. A touch screen: tap a point to pick it, drag one finger to orbit, two
+/// to pinch the zoom and slide the view. A model may take a drag for itself (LabModel.DragBegin: t on the zeta chain, a
+/// fingerprint pulled apart). VR: the model is placed in front of the user like a tour shot (pinch moves it), touching a
+/// point with a fingertip picks it, a pinch on a model's handle works the handle (LabModel.WantsPinch), and the dock's
+/// Models page holds the controls and the readout.
 /// </summary>
 public class ModelLab : MonoBehaviour
 {
@@ -140,8 +161,15 @@ public class ModelLab : MonoBehaviour
     CameraControl manual;
     bool manualWasEnabled;
     LabView view, viewTarget;
-    bool pressed, dragging, panning;
+    bool pressed, dragging, panning, modelDrag;
     Vector2 pressPos, lastPos;
+    // touch: one finger as the left button, two to zoom and slide; touchPress marks a press a finger made (on a laptop
+    // with a touch screen the mouse's presses are left to the mouse)
+    bool touchPinching, touchPress;
+    float touchSpan;
+    Vector2 touchMid;
+    // VR: a pinch that a model's handle took
+    readonly bool[] pinchHeld = { false, false };
     GameObject hoverDot;
     TextBox hoverLabel;
     int hoverLabelFor = -2;
@@ -229,6 +257,13 @@ public class ModelLab : MonoBehaviour
     /// <summary>Hover point i as the mouse would (its dot and label); −1 clears it. For narrated chapters.</summary>
     public void PointAt(int i) => SetHover(i);
 
+    /// <summary>Label the hovered point afresh: a pick can change what its label should say (or whether it needs one).</summary>
+    public void RefreshHover()
+    {
+        hoverLabelFor = -2;
+        if (Active != null && Hover >= 0 && Hover < Active.PickCount) SetHover(Hover);
+    }
+
     /// <summary>Close the lab and give the stage back (the home view on the desktop, the standing view in VR).</summary>
     public void Exit()
     {
@@ -246,6 +281,16 @@ public class ModelLab : MonoBehaviour
     {
         StoryMode = false;
         if (Active == null) return;
+        // a drag or a pinch in progress ends with the model, so the next one does not inherit it
+        if (modelDrag) Active.DragEnd();
+        for (int h = 0; h < pinchHeld.Length; h++)
+            if (pinchHeld[h])
+            {
+                pinchHeld[h] = false;
+                Active.PinchEnd();
+            }
+
+        pressed = dragging = modelDrag = touchPress = touchPinching = false;
         Leave(Active);
         Active = null;
         SetStatus("");
@@ -336,7 +381,8 @@ public class ModelLab : MonoBehaviour
         StripLit = lit;
         if (!VRMode.Enabled && director.Captions != null)
         {
-            if (n < 2) director.Captions.HideStrip();
+            // a narrated chapter's captions hold the bottom of the picture, where the strip would go
+            if (n < 2 || StoryMode) director.Captions.HideStrip();
             else
             {
                 if (rebuilt) director.Captions.ShowStrip(n);
@@ -380,45 +426,24 @@ public class ModelLab : MonoBehaviour
             Active.OnKey(keys);
         }
 
-        if (mouse == null || cam == null) return;
+        if (cam == null) return;
+        // a touch screen in use: fingers instead of the mouse (a finger also moves the system's pointer on some platforms)
+        if (UpdateTouch()) return;
+        if (mouse == null) return;
         Vector2 pos = mouse.position.ReadValue();
         bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         bool shift = keys != null && (keys.leftShiftKey.isPressed || keys.rightShiftKey.isPressed);
+        bool fine = keys != null && (keys.leftCtrlKey.isPressed || keys.rightCtrlKey.isPressed);
 
         if (!pressed && !overUi && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame || mouse.middleButton.wasPressedThisFrame))
-        {
-            pressed = true;
-            dragging = false;
-            panning = !mouse.leftButton.wasPressedThisFrame || shift;
-            pressPos = lastPos = pos;
-        }
+            Press(pos, !mouse.leftButton.wasPressedThisFrame || shift);
 
         if (pressed)
         {
             bool held = mouse.leftButton.isPressed || mouse.rightButton.isPressed || mouse.middleButton.isPressed;
-            Vector2 d = pos - lastPos;
-            lastPos = pos;
-            if ((pos - pressPos).magnitude > 5f) dragging = true;
-            if (dragging)
-            {
-                if (panning)
-                {
-                    Vector3 right = Vector3.Cross(viewTarget.ScreenUp, (viewTarget.Focus - viewTarget.Eye).normalized).normalized;
-                    float s = viewTarget.Distance * .0016f;
-                    viewTarget.Focus += (-right * d.x - viewTarget.ScreenUp * d.y) * s;
-                }
-                else
-                {
-                    viewTarget.Yaw -= d.x * .25f;
-                    viewTarget.Pitch = Mathf.Clamp(viewTarget.Pitch - d.y * .2f, -75f, 89f);
-                }
-            }
-
-            if (!held)
-            {
-                if (!dragging && !panning && Hover >= 0) Active.OnPick(Hover);
-                pressed = false;
-            }
+            // Ctrl: a model's own drag goes eight times finer
+            Drag(pos, 5f, fine);
+            if (!held) Release(pos);
         }
 
         float scroll = overUi ? 0f : mouse.scroll.ReadValue().y;
@@ -430,8 +455,75 @@ public class ModelLab : MonoBehaviour
             return;
         }
 
+        SetHover(Nearest(pos, 22f));
+    }
+
+    void Press(Vector2 pos, bool pan)
+    {
+        pressed = true;
+        dragging = modelDrag = false;
+        panning = pan;
+        pressPos = lastPos = pos;
+    }
+
+    /// <summary>The pointer moved: past the threshold it is a drag, which the model may take (else the lab orbits or pans).</summary>
+    void Drag(Vector2 pos, float threshold, bool fine)
+    {
+        Vector2 d = pos - lastPos;
+        lastPos = pos;
+        if (!dragging && (pos - pressPos).magnitude > threshold)
+        {
+            dragging = true;
+            modelDrag = !panning && Active.DragBegin(pressPos);
+            // the first stretch of the drag counts too
+            d = pos - pressPos;
+        }
+
+        if (!dragging) return;
+        if (modelDrag)
+        {
+            Active.DragMove(pos, fine ? d * .125f : d);
+            return;
+        }
+
+        if (panning) Pan(d);
+        else
+        {
+            viewTarget.Yaw -= d.x * .25f;
+            viewTarget.Pitch = Mathf.Clamp(viewTarget.Pitch - d.y * .2f, -75f, 89f);
+        }
+    }
+
+    void Release(Vector2 pos)
+    {
+        if (modelDrag) Active.DragEnd();
+        else if (!dragging && !panning)
+        {
+            // a click (or a tap) picks the point under it
+            int i = Hover >= 0 ? Hover : Nearest(pos, 22f);
+            if (i >= 0)
+            {
+                SetHover(i);
+                Active.OnPick(i);
+                RefreshHover();
+            }
+        }
+
+        pressed = dragging = modelDrag = false;
+    }
+
+    void Pan(Vector2 d)
+    {
+        Vector3 right = Vector3.Cross(viewTarget.ScreenUp, (viewTarget.Focus - viewTarget.Eye).normalized).normalized;
+        float s = viewTarget.Distance * .0016f;
+        viewTarget.Focus += (-right * d.x - viewTarget.ScreenUp * d.y) * s;
+    }
+
+    /// <summary>The pick point nearest a screen position, within a radius in pixels (−1: none).</summary>
+    int Nearest(Vector2 pos, float radius)
+    {
         int best = -1;
-        float bestD = 22f;
+        float bestD = radius;
         for (int i = 0; i < Active.PickCount; i++)
         {
             Vector3 sp = cam.WorldToScreenPoint(Active.PickPoint(i));
@@ -444,7 +536,70 @@ public class ModelLab : MonoBehaviour
             }
         }
 
-        SetHover(best);
+        return best;
+    }
+
+    /// <summary>
+    /// A touch screen: one finger is the left button (tap to pick, drag to orbit or to work a model's own drag), two
+    /// fingers pinch the zoom and slide the view. True while fingers are down (the mouse is then left alone).
+    /// </summary>
+    bool UpdateTouch()
+    {
+        Touchscreen ts = Touchscreen.current;
+        if (ts == null) return false;
+        Vector2 a = default, b = default;
+        int down = 0;
+        foreach (UnityEngine.InputSystem.Controls.TouchControl t in ts.touches)
+        {
+            if (!t.isInProgress) continue;
+            if (down == 0) a = t.position.ReadValue();
+            else if (down == 1) b = t.position.ReadValue();
+            down++;
+        }
+
+        if (down == 0)
+        {
+            // the last finger lifted: finish what it was doing
+            if (pressed && touchPress) Release(lastPos);
+            touchPress = touchPinching = false;
+            return false;
+        }
+
+        if (down >= 2)
+        {
+            // two fingers: the span zooms, the middle slides; a one-finger drag in progress ends
+            if (pressed)
+            {
+                if (modelDrag) Active.DragEnd();
+                pressed = dragging = modelDrag = false;
+            }
+
+            float span = Mathf.Max(1f, (a - b).magnitude);
+            Vector2 mid = (a + b) * .5f;
+            if (touchPinching)
+            {
+                viewTarget.Distance = Mathf.Clamp(viewTarget.Distance * touchSpan / span, 5f, 5000f);
+                Pan(mid - touchMid);
+            }
+
+            touchPinching = true;
+            touchSpan = span;
+            touchMid = mid;
+            SetHover(-1);
+            return true;
+        }
+
+        if (touchPinching) return true;    // one finger left after a pinch: wait until it lifts too
+        if (!pressed)
+        {
+            bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            if (overUi) return true;
+            Press(a, false);
+            touchPress = true;
+            SetHover(-1);
+        }
+        else Drag(a, 10f, false);
+        return true;
     }
 
     /// <summary>VR: a fingertip near a point hovers it; pushing into it (about a centimetre) picks it once.</summary>
@@ -452,6 +607,7 @@ public class ModelLab : MonoBehaviour
     {
         VRApp app = VRMode.App;
         if (app == null || !app.Ready) return;
+        UpdatePinches(app);
         int hover = -1;
         float hoverD = float.MaxValue;
         VRHand[] hands = { app.Hands.Left, app.Hands.Right };
@@ -504,11 +660,49 @@ public class ModelLab : MonoBehaviour
             {
                 fingerArmed[h] = false;
                 Active.OnPick(best);
+                hoverLabelFor = -2;
                 VRAudio.Click();
             }
         }
 
         SetHover(hover);
+    }
+
+    /// <summary>VR: does this hand's pinch, closing now, belong to a handle of the model (so the world grab leaves it)?</summary>
+    public bool ClaimsPinch(VRHand hand)
+    {
+        VRApp app = VRMode.App;
+        if (Active == null || app == null || hand == null || !hand.Tracked) return false;
+        return Active.WantsPinch(app.Rig.Offset.TransformPoint(hand.PinchPoint));
+    }
+
+    /// <summary>VR: a pinch that closes on a model's handle works it until the pinch opens.</summary>
+    void UpdatePinches(VRApp app)
+    {
+        VRHand[] hands = { app.Hands.Left, app.Hands.Right };
+        for (int h = 0; h < 2; h++)
+        {
+            VRHand hand = hands[h];
+            Vector3 at = app.Rig.Offset.TransformPoint(hand.PinchPoint);
+            if (pinchHeld[h])
+            {
+                if (hand.Tracked && hand.Pinching) Active.PinchMove(at);
+                else
+                {
+                    pinchHeld[h] = false;
+                    Active.PinchEnd();
+                }
+
+                continue;
+            }
+
+            if (hand.Tracked && hand.PinchDown && !app.Grab.IsHolding(hand) && !app.Poker.NearPanel(hand.PinchPoint, .07f) && Active.WantsPinch(at))
+            {
+                pinchHeld[h] = true;
+                Active.PinchBegin(at);
+                VRAudio.Click();
+            }
+        }
     }
 
     /// <summary>
@@ -549,6 +743,7 @@ public class ModelLab : MonoBehaviour
         {
             rayArmed[h] = false;
             Active.OnPick(best);
+            RefreshHover();
             VRAudio.Click();
         }
 
