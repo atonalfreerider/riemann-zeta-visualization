@@ -24,6 +24,15 @@ public class GamesTest
         if (type == LogType.Error || type == LogType.Exception) errors.Add(message);
     }
 
+    /// <summary>A test that stops early must not leave the next ones in the headset simulation, or listening twice.</summary>
+    [TearDown]
+    public void TearDown()
+    {
+        VRMode.RequestSimulation = false;
+        Application.logMessageReceived -= OnLog;
+        errors.Clear();
+    }
+
     [Test]
     public void Arithmetic()
     {
@@ -308,7 +317,6 @@ public class GamesTest
         yield return Shot("GV4-e8-spheres-in-vr");
         lab.Exit();
         yield return Seconds(.5f);
-        VRMode.RequestSimulation = false;
         Application.logMessageReceived -= OnLog;
         Assert.IsEmpty(errors, "errors were logged:\n" + string.Join("\n", errors));
     }

@@ -24,6 +24,8 @@ public class TourSmokeTest
         Assert.IsNotNull(main, "Main not found in scene");
         TourDirector director = TourDirector.Instance;
         Assert.IsNotNull(director, "TourDirector was not bootstrapped");
+        // after a VR test (ModelLabTest, GamesTest) the scene must be built for the desktop again, not half in VR
+        Assert.AreEqual(VRMode.Wanted(out _), VRMode.Enabled, "VR mode outlived the scene of an earlier VR test");
 
         // exact zeta vs Euler–Maclaurin closure
         foreach (double t in new[] { 0.5, 14.134725, 25.01, 60.0, 100.0 })

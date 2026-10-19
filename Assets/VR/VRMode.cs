@@ -52,4 +52,14 @@ public static class VRMode
         Headset = headset;
         Rig = rig;
     }
+
+    /// <summary>
+    /// The rig went with its scene: back to the desktop. Otherwise the flags outlive it, and the next scene (a test that no
+    /// longer sets <see cref="RequestSimulation"/>) is built half in VR: no side menu or lab panel, captions on a hidden
+    /// headset canvas whose board is never sized.
+    /// </summary>
+    internal static void Unregister(VRRig rig)
+    {
+        if (ReferenceEquals(Rig, rig)) ResetStatics();
+    }
 }
