@@ -64,9 +64,10 @@ shells as spheres of 240 σ₃(n) points, 340 320 of them on the desktop, their 
 clock) and **Vortex hunt** (the vortices of ζ's chain and the counting numbers they belong to). Gold is always prime,
 deep red a prime squared, blue a pronic number k(k + 1), grey any other composite. Every number unpacks as a marble
 fingerprint into its full volume and back (**U**): each prime factor a container of marbles in a symmetric spiral, each
-exponent a shape of that many dimensions (a square, a cube, a tesseract …), the copies of each multiplication winding
-into spiral arms. In 3D (**F**, the default in VR) every group of marbles is a spiral sphere pack. In VR you point with
-your index finger and hold, or touch. See [docs/GAMES.md](docs/GAMES.md).
+exponent more rings round the container, tilted into planes of their own (count the rings), the copies of each
+multiplication winding into spiral arms. In 3D (**F**, the default in VR) every group of marbles is a spiral sphere
+pack. In VR you point with your index finger and hold, or touch. A vertical video walks through the marble language,
+and each game has a narrated tutorial. See [docs/GAMES.md](docs/GAMES.md).
 
 | | |
 |---|---|

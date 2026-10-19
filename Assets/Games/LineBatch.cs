@@ -17,6 +17,8 @@ public class LineBatch
     static readonly int IntensityId = Shader.PropertyToID("_Intensity");
 
     public float Intensity = Factory.SoftGlowIntensity;
+    /// <summary>Every line's alpha is multiplied by this (a whole batch fading).</summary>
+    public float Alpha = 1f;
 
     public void Clear()
     {
@@ -27,6 +29,7 @@ public class LineBatch
 
     public void Add(Vector3 a, Vector3 b, float width, Color c)
     {
+        c.a *= Alpha;
         if (c.a <= .003f) return;
         Vector2 d = new(b.x - a.x, b.y - a.y);
         Vector3 n = d.sqrMagnitude < 1e-10f ? Vector3.right : new Vector3(-d.y, d.x, 0f).normalized;

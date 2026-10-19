@@ -40,6 +40,8 @@ public class BuildingBlocksGame : GameModel
     Vector3 PrintAnchor => Wall(-46f, 31f);
     /// <summary>Play on by itself after a number is done (unpack, pack, next); tests turn it off.</summary>
     public bool AutoPlay = true;
+    /// <summary>How long a split takes (seconds); a narrated tutorial shortens it.</summary>
+    public float SplitSeconds = 1.6f;
     Vector3 TrayAt(int i) => Wall(-50f + i * 9.4f, 1f);
 
     protected override void OnBuild()
@@ -162,7 +164,7 @@ public class BuildingBlocksGame : GameModel
         spin = (spin + 14f * dt) % 360f;
         if (splitT >= 0f)
         {
-            splitT += dt / 1.6f;
+            splitT += dt / Mathf.Max(.2f, SplitSeconds);
             if (splitT >= 1f) splitT = -1f;
         }
 
@@ -263,7 +265,8 @@ public class BuildingBlocksGame : GameModel
         if (restLabel != null)
         {
             restLabel.TextField.text = rest > 1 && splitT < 0f ? $"{rest}" : "";
-            restLabel.transform.position = VolumeCentre + Up * (VolumeRadius(rest) + 4f);
+            // left of the block, at its middle (above it, it ran under the status board)
+            restLabel.transform.position = VolumeCentre + Vector3.left * (VolumeRadius(rest) + 6f);
         }
 
         marbles.Draw(Matrix4x4.identity);
@@ -381,4 +384,36 @@ public class BuildingBlocksGame : GameModel
     }
 
     public void FinishSplit() => splitT = -1f;
+
+    public override bool StoryCommand(string verb, string[] a)
+    {
+        switch (verb)
+        {
+            case "example":
+                if (a.Length > 0 && int.TryParse(a[0], out int e)) StartExample(e);
+                return true;
+            case "prime":
+            {
+                // point at the tray's container, then pick it (a split still running ends first, so no pick is lost)
+                if (splitT >= 0f) FinishSplit();
+                int i = a.Length > 0 && long.TryParse(a[0], out long p) ? Picks.FindIndex(x => x.Kind == "prime" && x.Value == p) : -1;
+                if (i >= 0) { Lab.PointAt(i); OnPick(i); }
+                return true;
+            }
+            case "rest":
+            {
+                if (splitT >= 0f) FinishSplit();
+                int i = Picks.FindIndex(x => x.Kind == "rest");
+                if (i >= 0) { Lab.PointAt(i); OnPick(i); }
+                return true;
+            }
+            case "autoplay": AutoPlay = a.Length == 0 || a[0] != "off"; return true;
+            case "splitspeed":
+                if (a.Length > 0 && float.TryParse(a[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float sec)) SplitSeconds = sec;
+                return true;
+            case "finish": FinishSplit(); return true;
+        }
+
+        return base.StoryCommand(verb, a);
+    }
 }

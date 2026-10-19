@@ -126,6 +126,11 @@ public class ModelLab : MonoBehaviour
     public int StripNumber { get; private set; }
     public int StripLit { get; private set; }
     public int Hover { get; private set; } = -1;
+    /// <summary>
+    /// A narrated chapter is playing the lab (a game tutorial): the tour keeps running, its actions point and pick, and
+    /// the mouse and keys are left alone.
+    /// </summary>
+    public bool StoryMode { get; private set; }
     /// <summary>The status, the strip or the active model changed (the menus refresh).</summary>
     public event Action Changed;
 
@@ -207,6 +212,23 @@ public class ModelLab : MonoBehaviour
         Changed?.Invoke();
     }
 
+    /// <summary>Open a model from a narrated chapter (exp:lab:enter): the chapter keeps playing and drives it.</summary>
+    public void EnterFromStory(string id)
+    {
+        StoryMode = true;
+        Enter(id);
+        HoldCamera();
+    }
+
+    /// <summary>The lab's own view drives the camera: the free camera's mouse control stays off (a chapter's line released the rig).</summary>
+    public void HoldCamera()
+    {
+        if (manual != null && manual.enabled) manual.enabled = false;
+    }
+
+    /// <summary>Hover point i as the mouse would (its dot and label); −1 clears it. For narrated chapters.</summary>
+    public void PointAt(int i) => SetHover(i);
+
     /// <summary>Close the lab and give the stage back (the home view on the desktop, the standing view in VR).</summary>
     public void Exit()
     {
@@ -222,6 +244,7 @@ public class ModelLab : MonoBehaviour
     /// <summary>Hide the model and its readout, leaving the camera alone (a chapter, a module or a view is taking the stage).</summary>
     public void Close()
     {
+        StoryMode = false;
         if (Active == null) return;
         Leave(Active);
         Active = null;
@@ -252,7 +275,7 @@ public class ModelLab : MonoBehaviour
     /// <summary>Stop the story and quieten the stage: the lab is far away, but the tour, the home growth and the dial must stop.</summary>
     void TakeStage()
     {
-        if (director.Running)
+        if (director.Running && !StoryMode)
         {
             if (director.PlayingExperiment) director.LeaveExperiment();
             else director.StopTour();
@@ -330,7 +353,7 @@ public class ModelLab : MonoBehaviour
     {
         if (Active == null) return;
         if (VRMode.Enabled) UpdateFingers();
-        else UpdateDesktop();
+        else if (!StoryMode) UpdateDesktop();
         Active.Tick(Time.deltaTime);
     }
 

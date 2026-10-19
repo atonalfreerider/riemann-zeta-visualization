@@ -138,7 +138,7 @@ public class PrimeHuntGame : GameModel
             if (primesLeft == 0)
             {
                 Note += $"\nRound {round + 1} done:  every prime found";
-                advanceAt = Time.time + 3f;
+                if (AutoAdvance) advanceAt = Time.time + 3f;
             }
         }
         else
@@ -202,4 +202,10 @@ public class PrimeHuntGame : GameModel
 
     public int Round => round;
     public void GoToRound(int r) => StartRound(r);
+
+    public override bool StoryCommand(string verb, string[] a)
+    {
+        if (verb == "round" && a.Length > 0 && int.TryParse(a[0], out int r)) { StartRound(r); return true; }
+        return base.StoryCommand(verb, a);
+    }
 }

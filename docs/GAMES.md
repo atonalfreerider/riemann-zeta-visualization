@@ -53,23 +53,26 @@ A fingerprint reads left to right along a thin string, like a written number:
   six marbles make a ring: a pair, a triangle, a pentagon. Past that, an odd count has one marble in the middle and
   equal arms winding out round it: 7 is one and six round it, 11 one and five arms of two, 13 one and six arms of two,
   97 one and six arms of sixteen.
-* the **exponent** at the container's top right, as a shape with that many **dimensions**: the shadow of a
-  k-dimensional cube, standing on a corner. A square for p², a cube (the hexagon with its three inner edges) for p³, a
-  tesseract (an octagon) for p⁴, a decagon for p⁵, on to a 20-sided shadow for 2¹⁰. Its outline is a regular 2k-gon,
-  and k small pale marbles sit evenly round it, one per dimension. A short stem joins it to its container. 360 = 2³ · 3²
-  · 5 has a cube over the 2 and a square over the 3.
+* the **exponent** in the container itself, not as a superscript: **more rings round the container**, each tilted out of
+  the picture into a plane of its own, one more dimension per ring, their tilts fanned by half a turn, like the rings
+  of an armillary sphere. Flat, each is an ellipse through the container, its near half bright and its far half faint
+  behind the marbles. Count all of a container's rings, its own flat ring included: that is how many times its prime
+  is multiplied in. 360 = 2³ · 3² · 5 has two tilted rings round the 2 and one round the 3; 2¹⁰ is a pair of marbles
+  inside nine. The rings precess slowly, and from the fourth ring on they rock, as a ring turning through a further
+  dimension would look from here.
 
 **Flat or 3D (F).** Flat, every group of marbles is a symmetric spiral. In 3D, every group is a **spiral sphere pack**:
 shells round a centre, filled from the outside in so the outside is always a full round shell. A container's marbles
 lie on a Fibonacci spiral round each shell (2 to 6 marbles as a pair, a triangle, a tetrahedron, a bipyramid, an
-octahedron); the unpacked volume is wound with one coil per copy, pole to pole. The packs turn slowly, and so does
-the exponent's cube, which is a real cube seen down its long diagonal. The desktop starts flat, VR in 3D.
+octahedron); the unpacked volume is wound with one coil per copy, pole to pole. The packs turn slowly round the
+exponent's rings. The desktop starts flat, VR in 3D.
 
 ![360, 49, 128 and 1001 in 3D](games/fingerprints-3d.jpg)
 
 **Unpack (U)** plays the multiplication:
 
-1. each exponent's shape opens into that many copies of its container, each copy growing out of one of its pale marbles;
+1. each container's tilted rings slide out along the string; each settles flat, closes onto the container's size and
+   fills with marbles: that many copies of the container;
 2. the first container pours its marbles into the volume;
 3. every next container, a prime p, sends one marble to each of p spots round a ring, and a copy of the volume so far
    blooms at each spot (so a container's marbles really do count the copies);
@@ -87,7 +90,7 @@ holding marble t of every arm, so p copies merging into p arms is just index t·
 by count). [`MarbleFingerprint.cs`](../Assets/Games/MarbleFingerprint.cs) draws the fingerprint and plays the
 multiplication. The marbles are GPU-instanced spheres with a small lit shader of their own
 ([`Marble.shader`](../Assets/Resources/Shaders/Marble.shader), single-pass stereo for VR), drawn by
-[`MarbleBatch.cs`](../Assets/Games/MarbleBatch.cs); the rings, the string and the cubes are one mesh of thin quads
+[`MarbleBatch.cs`](../Assets/Games/MarbleBatch.cs); the rings and the string are one mesh of thin quads
 ([`LineBatch.cs`](../Assets/Games/LineBatch.cs)).
 
 ### Can the marbles be read without digits? (TypeSafe)
@@ -96,7 +99,8 @@ multiplication. The marbles are GPU-instanced spheres with a small lit shader of
 no digits at all. For each picture Jev gets one Choice question: which product does it show? The options are the true
 factorization and three near misses made in code (an exponent one off, a prime swapped for its neighbour, a factor
 dropped or added), shuffled. Code keeps the score. Rounds 1–3 read the first design (containers as cups, marbles in
-rows, each exponent a short row of small marbles); rounds 4–5 read the symmetric one:
+rows, each exponent a short row of small marbles); rounds 4–5 the symmetric one with hypercube exponents; round 6 the
+exponents as tilted rings:
 
 | round | change | read right | confident reads (≥ 0.6) that were right |
 |---|---|---|---|
@@ -105,10 +109,11 @@ rows, each exponent a short row of small marbles); rounds 4–5 read the symmetr
 | 3 (32 numbers) | primes up to 7 in one row (7 had been read as 5 + 2), exponents joined to their container | 29 (91%) | 26 of 28 |
 | 4 (the same 32) | symmetric spirals in round containers; exponents as k-cube shadows with k pale marbles | 30 (94%) | 27 of 27 |
 | 5 (the same 32) | each exponent moved over its own container's top right, the next container further off | 29 (91%) | 27 of 27 |
+| 6 (the same 32) | the exponent as tilted rings round the container (no superscript) | 31 (97%) | 29 of 30 |
 
-In the symmetric language every miss came with low confidence (0.28 to 0.53), so confidence alone flags them. Most of
-the misses left are exponents on neighbouring containers: 100 = 2² · 5² read as 2 · 5², and 360's square read as a
-cube, in both rounds. Round 5 also read 3⁵ as 3⁴ (five pale marbles round a decagon). Run it with
+With the tilted rings, 100 = 2² · 5² and 3⁵ (which the superscript shapes lost) read right. The one miss left is 360 again,
+its 3² read as 3³, this time with confidence (0.80): the single tilted ring's bright and faint halves may read as two
+curves. With the superscript shapes every miss had come with low confidence (0.28 to 0.53). Run it with
 `TYPESAFE_API_KEY=… python3 Tools/jev_marbles.py DIR` on the pictures `GamesTest.Fingerprints` writes.
 
 ## Prime hunt
@@ -185,6 +190,25 @@ k sits among the primes: on E8's clock (hour k mod 30) and on the Sacks spiral. 
 3. **Land on a zero**: steer t (the slider, or ← →) until the chain's end lands on zero 1000 (|ζ| < 0.02).
 
 ![Vortex 3 joined to vertex 3 at zero 100](games/vortex-join.jpg)
+
+## Videos: the marble language, and a tutorial for each game
+
+Five narrated videos are chapters of the experiments script ([`video_series_spec.py`](../Tools/video_series_spec.py),
+built by [`video_series.py`](../Tools/video_series.py)):
+
+* **`marbles`** (vertical, 9:16): numbers in marbles. 360's fingerprint builds itself (badge, containers, marbles, tilted
+  rings), unpacks step by step into five arms, turns 3D and packs back; then a prime (97) and a prime power (5⁴ = 625).
+  The scene is [`SacksMarbleWorld.cs`](../Assets/Tour/SacksMarbleWorld.cs): fingerprints on the experiments stage, each in
+  a named slot whose reveal, phase, depth and fade are eased parameters (`exp:mwshow:SLOT:N:X,Y`, `mw.SLOT.phase`, …),
+  with callouts to a container, its rings or the volume (`exp:callmw:SLOT/cup/G`).
+* **`tutprime`, `tutblocks`, `tute8`, `tutvortex`** (16:9, as the games are played on the desktop): each opens its game
+  in the model lab and plays it as the narrator explains, with the game's own views and status board. The chapter opens
+  the lab in story mode (`exp:lab:enter:ID`: the tour keeps running, the mouse is left alone, rounds do not move on by
+  themselves) and drives it with `exp:lab:point`, `pick`, `unpack`, `deep`, `round`, `example`, `prime`, `rest` and
+  `steer` (`GameModel.StoryCommand`); its lines' camera `lab` leaves the camera to the game.
+
+Render them with `Tools/render_chapters.py --script experiments --chapters marbles --shapes vertical` (and
+`--chapters tutprime,tutblocks,tute8,tutvortex --shapes horizontal`).
 
 ## VR
 

@@ -603,6 +603,7 @@ public partial class TourDirector
             case "callbar":
             case "callwheel":
             case "callvertex":
+            case "callmw":
             {
                 string[] o = A(3).Split(',');
                 float Of(int i, float d) => o.Length > i && float.TryParse(o[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float v) ? v : d;
@@ -639,6 +640,7 @@ public partial class TourDirector
                     "callbar" => sacks.CoxeterBarTop((int)num),
                     "callwheel" => sacks.CoxeterWheelTrace((int)num),
                     "callvertex" => sacks.LiveChainVertex((int)num),
+                    "callmw" => sacks.MarbleWorldPoint(A(2)),
                     _ => c + ParseVector(A(2)),
                 };
                 sacks.ExpCallout(target, dir, text, col, Of(2, .12f));
@@ -702,6 +704,35 @@ public partial class TourDirector
             case "sqinit": sacks.ExpSquareWorld(); break;
             // the coil assembled from the path's arrows over the zeros module's funnel (SacksFunnelWorld.cs)
             case "fwinit": sacks.ExpFunnelWorld(); break;
+            // the games' marble language (SacksMarbleWorld.cs): exp:mwinit · exp:mwshow:SLOT:N:X,Y[,Z][:SCALE][:nodigits][:beside]
+            // · exp:mwhide:SLOT; each slot's mw.SLOT.reveal, .phase, .depth and .fade eased with exp:tw
+            case "mwinit": sacks.ExpMarbleWorld(); break;
+            case "mwshow":
+                sacks.ExpMarbleShow(A(2), long.TryParse(A(3), out long mwn) ? mwn : 360, A(4).Contains(",") ? ParseVector(A(4)) : Vector3.zero,
+                    F(5, 1f), !Has("nodigits"), Has("beside"));
+                break;
+            case "mwhide": sacks.ExpMarbleHide(A(2)); break;
+            // the games, played by a narrated chapter (a tutorial; its lines' camera "lab" leaves the camera to the game):
+            // exp:lab:enter:ID · exp:lab:exit · exp:lab:VERB[:ARGS] (GameModel.StoryCommand: point, pick, unpack, deep,
+            // round, example, prime, rest, steer …)
+            case "lab":
+            {
+                ModelLab lab = ModelLab.Instance;
+                if (lab == null) break;
+                string sub = A(2).ToLowerInvariant();
+                if (sub == "enter") lab.EnterFromStory(A(3));
+                else if (sub == "exit") lab.Close();
+                else if (lab.Active is GameModel game)
+                {
+                    // a new round or number starts with nothing pointed at (its picks are new)
+                    if (sub == "round" || sub == "example") lab.PointAt(-1);
+                    string[] args = new string[Mathf.Max(0, p.Length - 3)];
+                    for (int i = 0; i < args.Length; i++) args[i] = p[i + 3].Trim();
+                    game.StoryCommand(sub, args);
+                }
+
+                break;
+            }
             // chart transforms (ExperimentMorphs.cs): exp:twgroup:GROUP:DX,DY,DZ:SCALE:SECONDS · exp:racemorph:SECONDS ·
             // exp:familymorph:SECONDS · exp:stripsmorph:SX,SY,SZ:CX,CY,CZ:SECONDS
             case "twgroup": sacks.ExpGroupMove(A(2), ParseVector(A(3)), F(4, 1f), Seconds(A(5), 2f)); break;

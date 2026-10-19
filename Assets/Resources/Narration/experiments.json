@@ -5003,6 +5003,494 @@
           "pause": 1.4
         }
       ]
+    },
+    {
+      "id": "marbles",
+      "title": "Numbers in marbles",
+      "subtitle": "the games' counting language, unpacked",
+      "setup": [
+        "exp:stage",
+        "exp:backdrop:off",
+        "exp:mwinit",
+        "exp:mwshow:a:360:0,0,0:1",
+        "exp:tw:mw.a.reveal:0:0",
+        "exp:tw:mw.a.phase:0:0",
+        "exp:tw:mw.a.depth:0:0"
+      ],
+      "lines": [
+        {
+          "id": "marbles_01",
+          "text": "Claude, an AI math research assistant, and I wrote numbers without digits, in marbles. This is three hundred sixty.",
+          "camera": "orbit:on=centre;at=128007.8,0.0,0;fit=24.7,13.9^19.0,33.7;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:snap",
+            "exp:say:numbers in marbles|no digits:  a number written as its own count",
+            "delay:2.86:exp:tw:mw.a.reveal:1:4.99"
+          ],
+          "pause": 0.8,
+          "caption": "Claude, an AI math research assistant, and I wrote numbers without digits, in marbles. This is {360|three hundred sixty}."
+        },
+        {
+          "id": "marbles_02",
+          "text": "The grey marble says it is a composite. Each gold ring is a container, holding a prime number of marbles in a symmetric spiral: two, three and five.",
+          "camera": "orbit:on=centre;at=128007.8,0.0,0;fit=24.7,13.9^19.0,33.7;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:0.02:exp:callmw:a/badge:-0.2,1^0.2,1:grey:  a composite",
+            "delay:7.09:exp:uncall",
+            "delay:7.19:exp:callmw:a/cup/0:0,1:2",
+            "delay:7.74:exp:callmw:a/cup/1:0,1:3",
+            "delay:8.50:exp:callmw:a/cup/2:0,1:5",
+            "exp:say:prime containers|each gold ring holds a prime number of marbles"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_03",
+          "text": "The tilted rings are the exponents, one more dimension each. Two wears two of them, so it counts three times: two cubed. Three wears one: three squared.",
+          "camera": "orbit:on=centre;at=128007.8,0.0,0;fit=24.7,13.9^19.0,33.7;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:uncall",
+            "delay:3.91:exp:callmw:a/ring/0:-0.3,1^-0.45,1:2 · 2 · 2 = 2³",
+            "delay:6.71:exp:callmw:a/ring/1:0.6,0.9^0.75,0.9:3 · 3 = 3²",
+            "exp:say:exponents as tilted rings|a container's rings, its own included:  how often its prime counts"
+          ],
+          "pause": 0.8,
+          "caption": "The tilted rings are the exponents, one more dimension each. Two wears two of them, so it counts three times: {2³|two cubed}. Three wears one: {3²|three squared}."
+        },
+        {
+          "id": "marbles_04",
+          "text": "Now unpack it. The rings slide out along the string, and each one closes into a copy of its container: two, two, two, three, three, five.",
+          "camera": "orbit:on=centre;at=128007.8,0.0,0>128012.8,0.0,0;fit=24.7,13.9>28.6,16.1^19.0,33.7>29.2,52.0;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=4",
+          "actions": [
+            "exp:uncall",
+            "delay:1.58:exp:tw:mw.a.phase:1:4.27",
+            "exp:say:unpacking 360|each ring becomes a copy of its container"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_05",
+          "text": "The first container pours its two marbles into the middle.",
+          "camera": "orbit:on=centre;at=128012.8,0.0,0>128012.7,12.5,0;fit=28.6,16.1>26.5,14.9^29.2,52.0>9.4,16.6;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=1.6;hold=0.98",
+          "actions": [
+            "delay:0.98:exp:tw:mw.a.phase:2:2.84",
+            "exp:say:2|the first container, poured out"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_06",
+          "text": "The next sends one marble to each of two spots. A copy of the pair blooms at each, and the two copies wind together into two spiral arms: four.",
+          "camera": "orbit:on=centre;at=128012.7,12.5,0;fit=26.5,14.9^9.4,16.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:0.65:exp:tw:mw.a.phase:3:8.14",
+            "exp:say:2 × 2 = 4|two copies wind into two arms"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_07",
+          "text": "Times two again makes eight. Then three copies wind into three arms: twenty-four. And three again: seventy-two.",
+          "camera": "orbit:on=centre;at=128012.7,12.5,0>128012.8,10.0,0;fit=26.5,14.9>85.3,48.0^9.4,16.6>30.2,53.6;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=2.2;hold=3.88",
+          "actions": [
+            "delay:0.00:exp:tw:mw.a.phase:4:1.21",
+            "delay:1.84:exp:tw:mw.a.phase:5:2.04",
+            "delay:5.36:exp:tw:mw.a.phase:6:2.16",
+            "exp:say:8,  24,  72|p copies, p arms"
+          ],
+          "pause": 0.8,
+          "caption": "Times two again makes eight. Then three copies wind into three arms: {24|twenty-four}. And {3|three} again: {72|seventy-two}."
+        },
+        {
+          "id": "marbles_08",
+          "text": "Last, the five: five copies of seventy-two wind into five arms. Three hundred sixty marbles, in their own colour, grey.",
+          "camera": "orbit:on=centre;at=128012.8,10.0,0;fit=85.3,48.0^30.2,53.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:1.43:exp:tw:mw.a.phase:7:2.70",
+            "exp:say:72 × 5 = 360|five arms of 72:  the full volume, in the number's own colour"
+          ],
+          "pause": 0.8,
+          "caption": "Last, the five: five copies of {72|seventy-two} wind into five arms. {360|Three hundred sixty} marbles, in their own colour, grey."
+        },
+        {
+          "id": "marbles_09",
+          "text": "In three dimensions, every group of marbles packs into a spiral sphere, and the rings turn in planes of their own.",
+          "camera": "orbit:on=centre;at=128012.8,10.0,0;fit=85.3,48.0^30.2,53.6;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:uncall",
+            "delay:0.08:exp:tw:mw.a.depth:1:3.25",
+            "exp:say:in 3D|every group of marbles a spiral sphere pack"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_10",
+          "text": "And it packs back down into its shorthand.",
+          "camera": "orbit:on=centre;at=128012.8,10.0,0>128007.8,0.0,0;fit=85.3,48.0>24.7,13.9^30.2,53.6>19.0,33.7;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=2;hold=3.6",
+          "actions": [
+            "delay:0.13:exp:tw:mw.a.phase:0:5",
+            "delay:0.13:exp:tw:mw.a.depth:0:5",
+            "exp:say:packed|360 = 2³ · 3² · 5"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_11",
+          "text": "A prime is one container and nothing more: ninety-seven, a marble in the middle and six arms of sixteen.",
+          "camera": "orbit:on=centre;at=128007.8,0.0,0>128006.8,1.8,0;fit=24.7,13.9>60.3,33.9^19.0,33.7>21.3,37.9;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=3",
+          "actions": [
+            "exp:tw:mw.a.fade:0:1",
+            "delay:0.65:exp:mwshow:b:97:0,0,0:1",
+            "delay:0.65:exp:tw:mw.b.reveal:0:0",
+            "delay:0.75:exp:tw:mw.b.reveal:1:2.39",
+            "exp:say:a prime|97 = 1 + 6 × 16:  one container, no rings"
+          ],
+          "pause": 0.8,
+          "caption": "A prime is one container and nothing more: {97|ninety-seven}, a marble in the middle and six arms of {16|sixteen}."
+        },
+        {
+          "id": "marbles_12",
+          "text": "A prime power wears more rings: five to the fourth is a ring of five marbles inside three tilted rings.",
+          "camera": "orbit:on=centre;at=128006.8,1.8,0;fit=60.3,33.9^21.3,37.9;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "exp:uncall",
+            "exp:tw:mw.b.fade:0:1",
+            "delay:0.33:exp:mwshow:c:625:0,0,0:1",
+            "delay:0.33:exp:tw:mw.c.reveal:0:0",
+            "delay:0.43:exp:tw:mw.c.reveal:1:1.85",
+            "delay:4.62:exp:callmw:c/ring/0:0.4,1^0.3,1:four rings:  5⁴",
+            "exp:say:a prime power|5⁴:  four rings, one flat and three tilted"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "marbles_13",
+          "text": "It unpacks into six hundred twenty-five marbles: five copies, of five copies, of five copies of five, wound into five arms.",
+          "camera": "orbit:on=centre;at=128006.8,1.8,0>128008.8,8.8,0;fit=60.3,33.9>78.0,43.9^21.3,37.9>27.6,49.0;el=89.5;az=-90;spin=0;raise=0.035^0.045;span=3",
+          "actions": [
+            "exp:uncall",
+            "delay:0.05:exp:tw:mw.c.phase:5:7.20",
+            "exp:say:5 × 5 × 5 × 5 = 625|four fives, wound into five arms"
+          ],
+          "pause": 0.8,
+          "caption": "It unpacks into {625|six hundred twenty-five} marbles: five copies, of five copies, of five copies of five, wound into five arms."
+        },
+        {
+          "id": "marbles_14",
+          "text": "No digits needed: every number is written in its own building blocks.",
+          "camera": "orbit:on=centre;at=128008.8,8.8,0;fit=78.0,43.9^27.6,49.0;el=89.5;az=-90;spin=0;raise=0.035^0.045",
+          "actions": [
+            "delay:0.49:exp:tw:mw.c.depth:1:3",
+            "exp:say:numbers in marbles|every number, its own building blocks"
+          ],
+          "pause": 1.4
+        }
+      ]
+    },
+    {
+      "id": "tutprime",
+      "title": "Prime hunt",
+      "subtitle": "a game tutorial",
+      "setup": [
+        "exp:lab:enter:primehunt",
+        "exp:lab:round:0"
+      ],
+      "lines": [
+        {
+          "id": "tutprime_01",
+          "text": "This is Prime hunt. The numbers up to four hundred lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites.",
+          "camera": "lab",
+          "actions": [],
+          "pause": 0.8,
+          "caption": "This is Prime hunt. The numbers up to {400|four hundred} lie on the Sacks spiral, in their colours: gold primes, deep red squares of primes, blue pronic numbers, and grey composites."
+        },
+        {
+          "id": "tutprime_02",
+          "text": "Each round puts silver marbles on a few numbers. Point at the ones you think are prime.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.64:exp:lab:point:4",
+            "delay:3.45:exp:lab:unpoint"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutprime_03",
+          "text": "Two turns gold: a prime. Three is gold too.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:pick:2",
+            "delay:1.60:exp:lab:pick:3"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutprime_04",
+          "text": "Nine is not a prime. It shows its building blocks: a container of three marbles, wearing one tilted ring. Three squared.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:pick:9"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutprime_05",
+          "text": "Five and seven make three finds in a row, and a streak earns bonus points.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:pick:5",
+            "delay:0.34:exp:lab:pick:7"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutprime_06",
+          "text": "Round four is primes or impostors. One hundred forty-three looks prime, but it is eleven times thirteen.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:round:3",
+            "delay:4.32:exp:lab:pick:143"
+          ],
+          "pause": 0.8,
+          "caption": "Round four is primes or impostors. {143|One hundred forty-three} looks prime, but it is {11|eleven} times {13|thirteen}."
+        },
+        {
+          "id": "tutprime_07",
+          "text": "Unpack it. Thirteen copies of its eleven-marble container wind into thirteen arms: one hundred forty-three marbles.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:unpack"
+          ],
+          "pause": 1.0,
+          "caption": "Unpack it. {13|Thirteen} copies of its eleven-marble container wind into {13|thirteen} arms: {143|one hundred forty-three} marbles."
+        },
+        {
+          "id": "tutprime_08",
+          "text": "Press F for three dimensions, and the marbles pack into spheres.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:deep"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutprime_09",
+          "text": "Find every prime in a round, and the next round begins.",
+          "camera": "lab",
+          "actions": [
+            "delay:1.81:exp:lab:flat"
+          ],
+          "pause": 1.2
+        }
+      ]
+    },
+    {
+      "id": "tutblocks",
+      "title": "Building blocks",
+      "subtitle": "a game tutorial",
+      "setup": [
+        "exp:lab:enter:blocks",
+        "exp:lab:autoplay:off",
+        "exp:lab:splitspeed:1.05",
+        "exp:lab:example:5"
+      ],
+      "lines": [
+        {
+          "id": "tutblocks_01",
+          "text": "This is Building blocks. A number stands as its raw volume: three hundred sixty grey marbles in a symmetric spiral. Below it is a tray of prime containers.",
+          "camera": "lab",
+          "actions": [
+            "delay:7.91:exp:lab:point:7:prime"
+          ],
+          "pause": 0.8,
+          "caption": "This is Building blocks. A number stands as its raw volume: {360|three hundred sixty} grey marbles in a symmetric spiral. Below it is a tray of prime containers."
+        },
+        {
+          "id": "tutblocks_02",
+          "text": "Point at seven. Seven does not divide three hundred sixty: seven equal groups leave three marbles over, shining red.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:prime:7"
+          ],
+          "pause": 0.8,
+          "caption": "Point at seven. Seven does not divide {360|three hundred sixty}: seven equal groups leave three marbles over, shining red."
+        },
+        {
+          "id": "tutblocks_03",
+          "text": "Point at two. Two equal groups: one stays, and the other flies to the fingerprint on the left.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:finish",
+            "delay:0.10:exp:lab:prime:2"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutblocks_04",
+          "text": "Keep splitting: by two, then by two again, then by three, by three again, and finally by five.",
+          "camera": "lab",
+          "actions": [
+            "delay:1.02:exp:lab:prime:2",
+            "delay:2.33:exp:lab:prime:2",
+            "delay:3.85:exp:lab:prime:3",
+            "delay:4.66:exp:lab:prime:3",
+            "delay:6.47:exp:lab:prime:5"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutblocks_05",
+          "text": "Nothing is left, so the fingerprint is the whole number: two cubed, three squared, and five. Unpack it, and it builds the volume back, beside its string.",
+          "camera": "lab",
+          "actions": [
+            "delay:5.79:exp:lab:unpack:0.7"
+          ],
+          "pause": 6,
+          "caption": "Nothing is left, so the fingerprint is the whole number: {2³|two cubed}, {3²|three squared}, and five. Unpack it, and it builds the volume back, beside its string."
+        },
+        {
+          "id": "tutblocks_06",
+          "text": "When what is left is a prime past the tray, point at the block itself. Two hundred forty-six splits by two, then by three, and the forty-one left over is prime.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:example:15",
+            "delay:5.45:exp:lab:prime:2",
+            "delay:7.11:exp:lab:prime:3",
+            "delay:9.24:exp:lab:rest"
+          ],
+          "pause": 1.2,
+          "caption": "When what is left is a prime past the tray, point at the block itself. {246|Two hundred forty-six} splits by two, then by three, and the {41|forty-one} left over is prime."
+        }
+      ]
+    },
+    {
+      "id": "tute8",
+      "title": "E8 spheres",
+      "subtitle": "a game tutorial",
+      "setup": [
+        "exp:lab:enter:e8spheres",
+        "exp:lab:round:0"
+      ],
+      "lines": [
+        {
+          "id": "tute8_01",
+          "text": "E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of two hundred forty times sigma three of n points.",
+          "camera": "lab",
+          "actions": [],
+          "pause": 0.8,
+          "caption": "E8 spheres shows the lattice E8 shell by shell. Shell n is a sphere of {240|two hundred forty} times sigma three of n points."
+        },
+        {
+          "id": "tute8_02",
+          "text": "Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, two squared.",
+          "camera": "lab",
+          "actions": [
+            "delay:2.81:exp:lab:pick:2:shell",
+            "delay:3.11:exp:lab:pick:3:shell",
+            "delay:5.24:exp:lab:pick:4:shell"
+          ],
+          "pause": 0.8,
+          "caption": "Round one: which shells are prime? Point at two and three: gold, primes. Point at four: deep red, {2²|two squared}."
+        },
+        {
+          "id": "tute8_03",
+          "text": "Five and seven are gold too. A prime shell holds just two cubes' worth: one, and p cubed.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:pick:5:shell",
+            "delay:0.27:exp:lab:pick:7:shell"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tute8_04",
+          "text": "Round two shows the building blocks of each shell. Shell six stands on its divisor cubes: one, eight, twenty-seven and two hundred sixteen marbles.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:round:1",
+            "delay:2.93:exp:lab:pick:6:shell"
+          ],
+          "pause": 0.6,
+          "caption": "Round two shows the building blocks of each shell. Shell {6|six} stands on its divisor cubes: {1|one}, {8|eight}, {27|twenty-seven} and {216|two hundred sixteen} marbles."
+        },
+        {
+          "id": "tute8_05",
+          "text": "Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: ninety-one, and one hundred twenty-one.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:round:2",
+            "delay:8.13:exp:lab:pick:91:number",
+            "delay:9.47:exp:lab:pick:121:number"
+          ],
+          "pause": 1.2,
+          "caption": "Round three is E8's clock. Every prime past five sits on one of eight gold hours. Find the composites hiding there: {91|ninety-one}, and {121|one hundred twenty-one}."
+        }
+      ]
+    },
+    {
+      "id": "tutvortex",
+      "title": "Vortex hunt",
+      "subtitle": "a game tutorial",
+      "setup": [
+        "exp:lab:enter:vortex",
+        "exp:lab:round:0"
+      ],
+      "lines": [
+        {
+          "id": "tutvortex_01",
+          "text": "Vortex hunt is played on zeta's chain at its three hundredth zero. The chain curls into vortices, and vortex k belongs to the counting number k.",
+          "camera": "lab",
+          "actions": [],
+          "pause": 0.8,
+          "caption": "Vortex hunt is played on zeta's chain at its {300th|three hundredth} zero. The chain curls into vortices, and vortex k belongs to the counting number k."
+        },
+        {
+          "id": "tutvortex_02",
+          "text": "Point at the vortices in order. One. Two. Three.",
+          "camera": "lab",
+          "actions": [
+            "delay:1.73:exp:lab:pick:1:vortex",
+            "delay:2.16:exp:lab:pick:2:vortex",
+            "delay:2.72:exp:lab:pick:3:vortex"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutvortex_03",
+          "text": "Each vortex found lights in its number's colour, with its place on E8's clock and on the Sacks spiral.",
+          "camera": "lab",
+          "actions": [],
+          "pause": 0.8
+        },
+        {
+          "id": "tutvortex_04",
+          "text": "Round two joins each vortex to the vertex of the chain it mirrors: vortex three, and vertex three.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:round:1",
+            "delay:3.95:exp:lab:pick:3:vortex",
+            "delay:5.41:exp:lab:pick:3:vertex"
+          ],
+          "pause": 0.8
+        },
+        {
+          "id": "tutvortex_05",
+          "text": "Round three: steer t until the chain's end lands on the zero.",
+          "camera": "lab",
+          "actions": [
+            "delay:0.00:exp:lab:round:2",
+            "delay:1.06:exp:lab:steer:0:4"
+          ],
+          "pause": 1.5
+        },
+        {
+          "id": "tutvortex_06",
+          "text": "Landed. Zeta is zero here, and the chain ends where it began.",
+          "camera": "lab",
+          "actions": [],
+          "pause": 1.2
+        }
+      ]
     }
   ]
 }
