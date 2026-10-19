@@ -279,6 +279,9 @@ public class CaptionDisplay : MonoBehaviour
     /// <summary>Top-centre board: the multiplication being built on the spiral, the skipped spot, the primes so far.</summary>
     public void ShowBoard(string richText)
     {
+        // a headset shows no captions, and the panels are never sized for it: at their default 100 units TMP breaks the
+        // staircase's formula letter by letter and throws on its </sup>
+        if (VRMode.Enabled) return;
         boardText.text = richText;
         board.gameObject.SetActive(true);
     }
@@ -299,6 +302,8 @@ public class CaptionDisplay : MonoBehaviour
             legend.gameObject.SetActive(false);
             return;
         }
+
+        if (VRMode.Enabled) return; // hidden in VR, like the board
 
         string Row(string id, Color c, string equation, string numbers, string note)
         {

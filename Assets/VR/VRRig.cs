@@ -118,6 +118,8 @@ public class VRRig : MonoBehaviour
         return rig;
     }
 
+    void OnDestroy() => VRMode.Unregister(this);
+
     // ---- view frame ---------------------------------------------------------------------------
 
     /// <summary>Remember where the user is standing and facing; the model is placed relative to this.</summary>
