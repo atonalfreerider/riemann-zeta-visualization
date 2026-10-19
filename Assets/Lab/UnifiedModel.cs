@@ -13,7 +13,8 @@ using UnityEngine.InputSystem;
 ///                     S_h = Σ_{n ≡ h (30)} n^(−s) chained head to tail end at ζ(½ + it). Ordered by gcd(h, 30) the chain comes
 ///                     back to the axis after every class at a zero: each class sums to d^(−s) Π_{p | 30/d} (1 − p^(−s)) ζ(s)
 ///   the phase path    n^(−s) for the picked n and each number on its path back: each drop by p turns by t·log p and
-///                     stretches by √p (n ↦ n^(−s) turns multiplication into spiral similarities)
+///                     stretches by √p (n ↦ n^(−s) turns multiplication into spiral similarities); the drops gold like the
+///                     funnel's pieces, each number a bead in the colour of its column's top
 ///   the Sacks layout  the same columns at angle 2π√n instead of the hour, with Euler's k² + k + 41 on one smooth curve
 ///                     (prime for k ≤ 39 because Q(√−163) has class number 1; j = E4³/Δ, E4 the theta series of E8, is
 ///                     −640320³ at (1 + √−163)/2)
@@ -25,7 +26,7 @@ public class UnifiedModel : LabModel
     FunnelView funnel;
     Vector3 tower;
     SegmentMesh chain, phase, plateSpokes;
-    PointMesh plate, returns;
+    PointMesh plate, returns, stations;
     LineRenderer trail, trailWindow;
     GameObject trailDot;
     readonly List<GameObject> towerLabels = new();
@@ -81,6 +82,7 @@ public class UnifiedModel : LabModel
         BuildTower();
         chain = new SegmentMesh(Root, "hour chain", Factory.GlowIntensity);
         phase = new SegmentMesh(Root, "phase path", Factory.GlowIntensity);
+        stations = new PointMesh(Root, "phase path numbers", Factory.GlowIntensity);
         returns = new PointMesh(Root, "class returns", Factory.GlowIntensity);
 
         Controls.Add(LabControl.Button("Prev zero", VRIcons.Id.PrevChapter, () => JumpZero(-1), ","));
@@ -472,22 +474,34 @@ public class UnifiedModel : LabModel
         if (ends.Count > 0) returns.Set(ends, endCols, endSizes);
         returns.Visible = grouped && chi == 0;
 
+        // the phase path: one gold step per drop by a prime (the funnel's piece; its prime shows in its turn t·log p and its
+        // stretch √p), thinner than the hour arrows, and a bead at each number in the colour of its column's top
         List<(Vector3, Vector3, Color, float)> ps = new();
+        List<Vector3> beads = new();
+        List<Color> beadColors = new();
+        List<float> beadSizes = new();
         if (phaseOn && selected >= 2)
         {
             int n = selected;
             Vector3 p0 = InPlane(level, LabMath.Term(n, t));
+            beads.Add(p0);
+            beadColors.Add(FunnelView.TopColor(n));
+            beadSizes.Add(.4f);
             while (n > 1)
             {
                 int p = LabMath.Spf(n), m = n / p;
                 Vector3 p1 = InPlane(level, LabMath.Term(m, t));
-                ps.Add((p0, p1, LabMath.PrimeColor(p), .42f));
+                ps.Add((p0, p1, NumberKind.Gold, .3f));
+                beads.Add(p1);
+                beadColors.Add(FunnelView.TopColor(m));
+                beadSizes.Add(.4f);
                 p0 = p1;
                 n = m;
             }
         }
 
         phase.Set(ps);
+        stations.Set(beads, beadColors, beadSizes);
     }
 
     static void Arrow(List<(Vector3, Vector3, Color, float)> segs, Vector3 a, Vector3 b, Color c, float w)

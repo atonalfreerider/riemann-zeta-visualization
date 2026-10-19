@@ -80,6 +80,9 @@ The **Models** tab opens the model lab ([`Assets/Lab`](../Assets/Lab)). These ar
 experiment videos show, and they stand in front of you like a tour shot. There are four models:
 
 * **Paths.** Touch a column's top to watch its path back, with the factorization laid out as a strip on the page.
+  * The colours are the games' ([GAMES.md](GAMES.md)): every piece is gold, because each piece is a prime, and the top
+    is gold for a prime, deep red for p², blue for a pronic number, grey for any other composite. A piece's length,
+    log p, tells which prime it is, and the strip writes the prime inside each piece.
   * n ± 1 and n ± 30 step to a neighbour or along the spoke.
   * **Tree** shows every number's first step, or only the drops by 2, 3, 5, 7, 11 or 13.
   * **Powers** draws the spirals of p^k, and **Sacks spiral** morphs the layout.

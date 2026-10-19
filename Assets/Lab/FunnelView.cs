@@ -6,12 +6,17 @@ using UnityEngine;
 /// <summary>
 /// The factor funnel of "The paths back", interactive: every n ≤ N on E8's wheel (hour n mod 30, radius s√n), its column
 /// rising to h·log n (toward −Z) cut into one piece per prime factor, largest at the floor and smallest at the top, each as
-/// tall as log p in the prime's colour. A picked n shows its path back: down the top piece (÷ its smallest prime p), across
-/// at that height to the top of n/p's column, and so on to 1, one step at a time. The tree draws every number's first step at
-/// once (all primes, or one prime: the hops of a prime p ≥ 7 multiply the hour by p⁻¹ mod 30, the same permutation of E8's
-/// exponent spokes for every prime of p's class). The powers p^k show where runs of one prime go: a discrete spiral that
-/// climbs log p per step and turns with the order of p mod 30. The layout morphs from the wheel's hours (angle 12° per n)
-/// to the Sacks spiral (angle 2π√n) without moving any column off its radius.
+/// tall as log p. The colours are the games' (NumberKind): every piece is gold, because the pieces are primes and gold always
+/// means prime, so a prime's column is one gold piece and a composite's a stack of them; the top says what n is (gold prime,
+/// deep red p², blue pronic, grey any other composite). Which prime a piece is shows in its length, log p (the picked column
+/// is banded white at each joint), and in labels: ÷p at each drop of a path, p^k on the powers, ÷p beside the tree of one
+/// prime, the prime inside each piece of the strip.
+/// A picked n shows its path back: down the top piece (÷ its smallest prime p), across at that height to the top of n/p's
+/// column, and so on to 1, one step at a time. The tree draws every number's first step at once (all primes, or one prime:
+/// the hops of a prime p ≥ 7 multiply the hour by p⁻¹ mod 30, the same permutation of E8's exponent spokes for every prime
+/// of p's class). The powers p^k show where runs of one prime go: a discrete spiral that climbs log p per step and turns
+/// with the order of p mod 30. The layout morphs from the wheel's hours (angle 12° per n) to the Sacks spiral (angle τ√n,
+/// τ = 2π one turn) without moving any column off its radius.
 /// </summary>
 public class FunnelView
 {
@@ -24,6 +29,7 @@ public class FunnelView
     readonly PointMesh primeTops, compositeTops;
     readonly List<TextBox> hourLabels = new();
     readonly List<TextBox> powerLabels = new();
+    TextBox treeLabel;
     Transform pathRoot;
     readonly List<GameObject> pathSteps = new();
     float stepClock;
@@ -76,7 +82,7 @@ public class FunnelView
 
     // ---- layout ------------------------------------------------------------------------------------------
 
-    /// <summary>The angle of n (radians): the wheel's hour, unwrapped (−12° per n), blended toward the Sacks angle −2π√n.</summary>
+    /// <summary>The angle of n (radians): the wheel's hour, unwrapped (−12° per n), blended toward the Sacks angle −τ√n.</summary>
     public float Angle(float n)
     {
         float hour = (90f - 12f * n) * Mathf.Deg2Rad;
@@ -89,6 +95,16 @@ public class FunnelView
         float a = Angle(n), r = S * Mathf.Sqrt(n);
         return o + new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f);
     }
+
+    /// <summary>The colour of n's top, the games' colours: gold prime, deep red p², blue pronic, a light grey for any other composite, white 1.</summary>
+    public static Color TopColor(int n) => NumberKind.Classify(n) switch
+    {
+        NumberClass.Prime => LabMath.Gold,
+        NumberClass.PrimeSquare => NumberKind.DeepRed * 1.25f,
+        NumberClass.Pronic => NumberKind.Pronic,
+        NumberClass.Composite => new Color(.8f, .82f, .92f),
+        _ => Color.white,
+    };
 
     public Vector3 Up(float h) => Vector3.back * (H * h);
     public Vector3 Top(int n) => Base(n) + Up(Mathf.Log(n));
@@ -158,7 +174,8 @@ public class FunnelView
             hourLabels[hr].transform.position = o + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * Rim * 1.12f;
         }
 
-        // columns
+        // columns: every piece in the games' gold (a prime); a prime's own column one solid piece, brighter and wider than a
+        // composite's stack, whose wider gaps show where one prime's piece ends and the next begins
         List<(Vector3, Vector3, Color, float)> ps = new(), cs = new();
         List<Vector3> pt = new(), ct = new();
         List<Color> pc = new(), cc = new();
@@ -171,8 +188,8 @@ public class FunnelView
             float h = 0f;
             for (int i = f.Count - 1; i >= 0; i--)
             {
-                float seg = Mathf.Log(f[i]), cut = seg * .05f;
-                (prime ? ps : cs).Add((b + Up(h + cut), b + Up(h + seg - cut), LabMath.PrimeColor(f[i]) * ((prime ? 1f : .85f) * dim), prime ? .42f : .3f));
+                float seg = Mathf.Log(f[i]), cut = seg * (prime ? .05f : .09f);
+                (prime ? ps : cs).Add((b + Up(h + cut), b + Up(h + seg - cut), NumberKind.Gold * ((prime ? 1f : .6f) * dim), prime ? .42f : .3f));
                 h += seg;
             }
 
@@ -184,12 +201,9 @@ public class FunnelView
             }
             else
             {
-                // the games' colours: a prime's square deep red, pronic numbers blue, other composites a light grey
-                NumberClass k = NumberKind.Classify(n);
-                Color top = k == NumberClass.PrimeSquare ? NumberKind.DeepRed * 1.25f : k == NumberClass.Pronic ? NumberKind.Pronic : new Color(.8f, .82f, .92f);
                 ct.Add(Top(n));
-                cc.Add(top * Mathf.Lerp(.45f, 1f, dim));
-                csz.Add(k == NumberClass.Composite ? .32f : .42f);
+                cc.Add(TopColor(n) * Mathf.Lerp(.45f, 1f, dim));
+                csz.Add(NumberKind.Classify(n) == NumberClass.Composite ? .32f : .42f);
             }
         }
 
@@ -246,12 +260,15 @@ public class FunnelView
 
     void BuildTree()
     {
+        if (treeLabel != null) UnityEngine.Object.Destroy(treeLabel.gameObject);
+        treeLabel = null;
         if (TreeMode == 0)
         {
             tree.Clear();
             return;
         }
 
+        // every drop is a prime piece, so gold: the prime shows in the drop's length, and a tree of one prime is named outside the rim
         List<(Vector3, Vector3, Color, float)> segs = new();
         for (int n = 2; n <= N; n++)
         {
@@ -260,12 +277,12 @@ public class FunnelView
             if (PrimesOnly && !LabMath.IsPrime(n)) continue;
             int m = n / p;
             float h1 = Mathf.Log(m);
-            Color c = LabMath.PrimeColor(p);
-            segs.Add((Base(n) + Up(Mathf.Log(n)), Base(n) + Up(h1), c, .3f));
-            if (m > 1) Arc(segs, n, m, h1, c * .8f, .16f, 8);
+            segs.Add((Base(n) + Up(Mathf.Log(n)), Base(n) + Up(h1), NumberKind.Gold, .3f));
+            if (m > 1) Arc(segs, n, m, h1, NumberKind.Gold * .6f, .16f, 8);
         }
 
         tree.Set(segs);
+        if (TreeMode != 1) treeLabel = LabDraw.Label(root, $"first steps ÷{TreeMode}", o + new Vector3(-Rim * 1.32f, 0f, 0f) + Up(.5f), 40f, NumberKind.Gold);
     }
 
     public void SetPowers(bool on)
@@ -285,6 +302,7 @@ public class FunnelView
             return;
         }
 
+        // each spiral is a run of one prime, so gold; its label p^k at the top names it, and its steps climb log p
         List<(Vector3, Vector3, Color, float)> segs = new();
         foreach (int p in PowerPrimes)
         {
@@ -295,7 +313,7 @@ public class FunnelView
                 k++;
             }
 
-            Color c = LabMath.PrimeColor(p);
+            Color c = NumberKind.Gold;
             for (int n = top; n > 1; n /= p)
             {
                 int m = n / p;
@@ -332,7 +350,7 @@ public class FunnelView
         Vector3 prev = Top(41) + Up(.15f);
         if (sacks > .98f)
         {
-            // Sacks's curve: the angle 2π(√n − k) with the whole turns taken out, through every Euler prime and never coiling
+            // Sacks's curve: the angle τ(√n − k) with the whole turns taken out, through every Euler prime and never coiling
             for (int i = 0; i <= 600; i++)
             {
                 float k = kMax * i / 600f, n = k * k + k + 41f;
@@ -392,7 +410,7 @@ public class FunnelView
         pathRoot = new GameObject($"path {n0}").transform;
         pathRoot.SetParent(root, false);
 
-        // step 0: the column itself, bright, with a ring and its number
+        // step 0: the column itself, bright, with a ring and its number, and a white band at each joint between two pieces
         GameObject s0 = new("start");
         s0.transform.SetParent(pathRoot, false);
         List<(Vector3, Vector3, Color, float)> col = new();
@@ -402,8 +420,9 @@ public class FunnelView
         for (int i = f.Count - 1; i >= 0; i--)
         {
             float seg = Mathf.Log(f[i]), cut = seg * .05f;
-            col.Add((b0 + Up(hh + cut), b0 + Up(hh + seg - cut), LabMath.PrimeColor(f[i]), .9f));
+            col.Add((b0 + Up(hh + cut), b0 + Up(hh + seg - cut), NumberKind.Gold, .9f));
             hh += seg;
+            if (i > 0) LabDraw.Ring(s0.transform, "joint", b0 + Up(hh), .8f, .16f, Color.white, Factory.GlowIntensity, 24);
         }
 
         new SegmentMesh(s0.transform, "column", Factory.GlowIntensity).Set(col);
@@ -419,7 +438,7 @@ public class FunnelView
             float h1 = h - Mathf.Log(p);
             GameObject st = new($"÷{p} → {m}");
             st.transform.SetParent(pathRoot, false);
-            List<(Vector3, Vector3, Color, float)> segs = new() { (Base(n) + Up(h), Base(n) + Up(h1), LabMath.PrimeColor(p), 1.4f) };
+            List<(Vector3, Vector3, Color, float)> segs = new() { (Base(n) + Up(h), Base(n) + Up(h1), NumberKind.Gold, 1.4f) };
             if (m > 1) Arc(segs, n, m, h1, Color.white, .7f, 16);
             new SegmentMesh(st.transform, "step", 2.2f).Set(segs);
             Vector3 land = m > 1 ? Top(m) : Base(1);
@@ -429,7 +448,7 @@ public class FunnelView
             nudge.Anchor = land + Up(.6f);
             nudge.Offset = new Vector2(.052f * 34f * m.ToString().Length * .5f + 1f, .6f);
             Vector3 mid = Base(n) + Up((h + h1) * .5f);
-            ScreenNudge dn = LabDraw.Label(st.transform, $"÷{p}", mid, 30f, LabMath.PrimeColor(p)).gameObject.AddComponent<ScreenNudge>();
+            ScreenNudge dn = LabDraw.Label(st.transform, $"÷{p}", mid, 30f, NumberKind.Gold).gameObject.AddComponent<ScreenNudge>();
             dn.Anchor = mid;
             dn.Offset = new Vector2(-2.4f, 0f);
             pathSteps.Add(st);

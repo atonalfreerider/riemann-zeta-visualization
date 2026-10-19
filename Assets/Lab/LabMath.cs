@@ -63,6 +63,10 @@ public static class LabMath
         48.005151, 49.773832, 52.970321, 56.446248, 59.347044, 60.831779, 65.112544
     };
 
+    /// <summary>
+    /// The lab's gold, for E8's exponent hours (the hours prime to 30) and the primes' tops and labels. The pieces of the
+    /// factor columns, which are all primes, use the games' gold (NumberKind.Gold), which stays gold when dimmed.
+    /// </summary>
     public static readonly Color Gold = new(1f, .8f, .32f);
 
     /// <summary>
@@ -105,18 +109,6 @@ public static class LabMath
     };
 
     public static double[] ZerosOf(int character) => character == 0 ? ZetaZeros : CharacterZeros[character - 1];
-
-    /// <summary>The colour of a prime's piece, as in the experiment modules: 2 red, 3 green, 5 blue, 7 orange, 11 violet, 13 cyan, then gold.</summary>
-    public static Color PrimeColor(long p) => p switch
-    {
-        2 => new Color(1f, .36f, .32f),
-        3 => new Color(.38f, 1f, .5f),
-        5 => new Color(.45f, .66f, 1f),
-        7 => new Color(1f, .68f, .25f),
-        11 => new Color(.78f, .5f, 1f),
-        13 => new Color(.3f, .95f, .95f),
-        _ => Gold,
-    };
 
     public static void EnsureSieve(int n)
     {

@@ -10,7 +10,7 @@ Open them from the desktop side menu (**M**, row **GAMES**) or the lab panel's s
 
 ## The colour language
 
-The same colours are used in every game, on the main Sacks spiral and on the lab funnels' column tops:
+The same colours are used in every game, on the main Sacks spiral and in the lab's factor funnels (Paths, Unified, Zeros):
 
 | colour | means | examples |
 |---|---|---|
@@ -22,6 +22,11 @@ The same colours are used in every game, on the main Sacks spiral and on the lab
 
 Gold wins over pronic, so 2 = 1 · 2 stays gold. `NumberKind` ([`NumberKind.cs`](../Assets/Games/NumberKind.cs)) does the
 classifying, the factoring, the divisors and σ₃, and the shorthand (2³ · 3² · 5).
+
+In the funnels every piece of a column is gold too, because each piece is a prime. A prime's column is one gold piece; a
+composite's column is a stack of gold pieces under a top in the number's own colour. Which prime a piece is shows in its
+length, log p, and in the labels: ÷p at each drop of a path back, p^k on the power spirals, and the prime written inside
+each piece of the strip.
 
 ## Pointing
 

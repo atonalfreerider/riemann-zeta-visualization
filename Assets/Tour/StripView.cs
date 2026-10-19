@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// A number's column laid on its side: a bar cut into one piece per prime factor (as wide as log p, in the prime's colour,
+/// A number's column laid on its side: a bar cut into one piece per prime factor (as wide as log p, in the piece's colour,
 /// the prime written inside), the values at the cuts above it, and under each run of equal pieces a bracket with the prime
 /// and its exponent. Pieces light one at a time as the path back drops them. Built into any UI parent: the caption overlay
 /// (sizes in pixels, scale 1) or a VR panel (sizes in millimetres).
@@ -30,7 +30,10 @@ public class StripView
         this.makeText = makeText;
     }
 
-    /// <summary>The strip data of n: pieces (smallest prime first), cut values n, n/p₁, … 1, and the runs with their exponents.</summary>
+    /// <summary>
+    /// The strip data of n, as the model lab's funnel draws its column: pieces (smallest prime first, all gold, since every
+    /// piece is a prime; the prime written inside), cut values n, n/p₁, … 1, and the runs with their exponents.
+    /// </summary>
     public static (float[] weights, Color[] colors, string[] inner, string[] marks, (int first, int last, string label, Color color)[] runs) ForNumber(int n)
     {
         List<int> f = LabMath.Factorize(Mathf.Max(2, n));
@@ -43,7 +46,7 @@ public class StripView
         for (int i = 0; i < f.Count; i++)
         {
             w[i] = Mathf.Log(f[i]);
-            c[i] = LabMath.PrimeColor(f[i]);
+            c[i] = NumberKind.Gold;
             inside[i] = f[i].ToString();
             rest /= f[i];
             cuts[i + 1] = rest.ToString();
