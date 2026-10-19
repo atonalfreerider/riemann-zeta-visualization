@@ -326,13 +326,14 @@ public class ZerosModel : LabModel
             profile = LabDraw.Line(combRoot, "funnel profile", .08f, new Color(.5f, .55f, .75f) * .7f, Factory.NoGlow, pr);
         }
 
-        // rings: each prime power's tooth spun round the axis; lamps: the sum at every column, lit as its top piece
+        // rings: each prime power's tooth spun round the axis; lamps: the sum at every column, lit as its top piece. A tooth is
+        // log p, a piece of the prime p, so both are gold (a ring of p^j, j ≥ 2, dimmer); a lamp off the prime powers is white
         List<(Vector3, Vector3, Color, float)> ringSegs = new(), lampSegs = new();
         for (int m = 2; m <= Count; m++)
         {
             double z = Math.Log(m), w = d.Lamp[m];
-            bool pp = ZeroSums.PrimePower(m, out long p, out int j);
-            Color col = LabMath.PrimeColor(p);
+            bool pp = ZeroSums.PrimePower(m, out _, out int j);
+            Color col = NumberKind.Gold;
             if (pp)
             {
                 float rr = Reach(z, w);
